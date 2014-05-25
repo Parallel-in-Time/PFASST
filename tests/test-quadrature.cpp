@@ -125,6 +125,22 @@ TEST(NodesTest, GaussLobattoNodes) {
   EXPECT_THAT(l9, testing::Pointwise(DoubleNear(), l9e));
 }
 
+TEST(QuadratureTest, GaussLobattoNodes) {
+  auto l3 = pfasst::compute_nodes<long double>(3, "gauss-lobatto");
+
+  auto s3 = pfasst::compute_quadrature(l3, l3, 's');
+  const long double s3e[6] = { 0.20833333333333333,
+			       0.33333333333333333,
+			      -0.04166666666666666,
+			      -0.04166666666666666,
+			       0.33333333333333333,
+			       0.20833333333333333 };
+
+  EXPECT_THAT(s3, testing::Pointwise(DoubleNear(), s3e));
+
+  // XXX: need more tests here
+}
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
