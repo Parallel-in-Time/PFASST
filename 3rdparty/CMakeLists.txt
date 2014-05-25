@@ -18,13 +18,9 @@ if(pfasst_BUILD_TESTS)
       CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release
       -Dgtest_force_shared_crt=ON
       -DCMAKE_VERBOSE_MAKEFILE=ON
-      -Dgmock_build_tests=ON
+      -Dgmock_build_tests=${gtest_BUILD_TESTS}
       # Disable install step
       INSTALL_COMMAND ""
-      # Run tests
-      TEST_BEFORE_INSTALL ON
-      TEST_AFTER_INSTALL ON
-      TEST_COMMAND make test
       # Wrap download, configure and build steps in a script to log output
       LOG_DOWNLOAD ON
       LOG_CONFIGURE ON
