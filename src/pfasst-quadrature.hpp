@@ -1,4 +1,7 @@
 
+#ifndef _PFASST_QUADRATURE_HPP_
+#define _PFASST_QUADRATURE_HPP_
+
 #include <algorithm>
 #include <cmath>
 #include <complex>
@@ -6,13 +9,31 @@
 
 using namespace std;
 
-typedef unsigned int uint;
-
 namespace pfasst {
 
-  template<typename ptype>
+  typedef unsigned int uint;
+
+  template<typename T>
+  class matrix : public vector<T> {
+  public:
+    unsigned int n, m;
+    matrix() { }
+    matrix(unsigned int n, unsigned int m) {
+      zeros(n, m);
+    }
+    void zeros(unsigned int n, unsigned int m) {
+      this->n = n; this->m = m;
+      this->resize(n*m);
+      fill(this->begin(), this->end(), 0.0);
+    }
+    T& operator()(unsigned int i, unsigned int j) {
+      return (*this)[i*m+j];
+    }
+  };
+
+  template<typename coeffT>
   class polynomial {
-    vector<ptype> c;
+    vector<coeffT> c;
 
   public:
 
@@ -24,17 +45,17 @@ namespace pfasst {
       return c.size()-1;
     }
 
-    ptype& operator[](const unsigned int i) { return c.at(i); }
+    coeffT& operator[](const unsigned int i) { return c.at(i); }
 
-    polynomial<ptype> differentiate() const {
-      polynomial<ptype> p(c.size()-1);
+    polynomial<coeffT> differentiate() const {
+      polynomial<coeffT> p(c.size()-1);
       for (int j=1; j<c.size(); j++)
 	p[j-1] = j * c[j];
       return p;
     }
 
-    polynomial<ptype> integrate() const {
-      polynomial<ptype> p(c.size()+1);
+    polynomial<coeffT> integrate() const {
+      polynomial<coeffT> p(c.size()+1);
       for (int j=0; j<c.size(); j++)
     	p[j+1] = c[j] / (j+1);
       return p;
@@ -49,27 +70,27 @@ namespace pfasst {
       return v;
     }
 
-    polynomial<ptype> normalize() const {
-      polynomial<ptype> p(c.size());
+    polynomial<coeffT> normalize() const {
+      polynomial<coeffT> p(c.size());
       for (int j=0; j<c.size(); j++)
 	p[j] = c[j] / c[c.size()-1];
       return p;
     }
 
-    vector<ptype> roots() const {
+    vector<coeffT> roots() const {
       uint n = c.size()-1;
 
       // initial guess
-      polynomial<complex<ptype>> z0(n), z1(n);
+      polynomial<complex<coeffT>> z0(n), z1(n);
       for (int j=0; j<n; j++) {
-    	z0[j] = pow((0.4, 0.9), j);
+    	z0[j] = pow(complex<double>(0.4, 0.9), j);
     	z1[j] = z0[j];
       }
 
       // durand-kerner-weierstrass iterations
-      polynomial<ptype> p = normalize();
+      polynomial<coeffT> p = normalize();
       for (int k=0; k<100; k++) {
-	complex<ptype> num, den;
+	complex<coeffT> num, den;
     	for (int i=0; i<n; i++) {
     	  num = p.evaluate(z0[i]);
     	  den = 1.0;
@@ -81,7 +102,7 @@ namespace pfasst {
     	}
 
     	// converged?
-    	ptype acc = 0.0;
+    	coeffT acc = 0.0;
     	for (int j=0; j<n; j++)
     	  acc += abs(z0[j] - z1[j]);
     	if (acc < 1e-24)
@@ -90,7 +111,7 @@ namespace pfasst {
 	z1 = z0;
       }
 
-      vector<ptype> roots(n);
+      vector<coeffT> roots(n);
       for (int j=0; j<n; j++)
     	roots[j] = abs(z0[j]) < 1e-12 ? 0.0 : real(z0[j]);
 
@@ -98,22 +119,22 @@ namespace pfasst {
       return roots;
     }
 
-    static polynomial<ptype> legendre(const uint order)
+    static polynomial<coeffT> legendre(const uint order)
     {
       if (order == 0) {
-	polynomial<ptype> p(1);
+	polynomial<coeffT> p(1);
         p[0] = 1.0;
         return p;
       }
 
       if (order == 1) {
-	polynomial<ptype> p(2);
+	polynomial<coeffT> p(2);
         p[0] = 0.0;
         p[1] = 1.0;
         return p;
       }
 
-      polynomial<ptype> p0(order+1), p1(order+1), p2(order+1);
+      polynomial<coeffT> p0(order+1), p1(order+1), p2(order+1);
       p0[0] = 1.0; p1[1] = 1.0;
 
       // (n + 1) P_{n+1} = (2n + 1) x P_{n} - n P_{n-1}
@@ -134,59 +155,79 @@ namespace pfasst {
 
   //#define pi 3.1415926535897932384626433832795028841971693993751
 
-  template<typename ntype>
-  vector<ntype> compute_nodes(int nnodes, string qtype)
+  template<typename nodeT>
+  vector<nodeT> compute_nodes(int nnodes, string qtype)
   {
-    vector<ntype> nodes(nnodes);
+    vector<nodeT> nodes(nnodes);
 
     if (qtype == "gauss-legendre") {
-      auto roots = polynomial<ntype>::legendre(nnodes).roots();
+      auto roots = polynomial<nodeT>::legendre(nnodes).roots();
       for (int j=0; j<nnodes; j++)
       	nodes[j] = 0.5 * (1.0 + roots[j]);
     } else if (qtype == "gauss-lobatto") {
-      auto roots = polynomial<ntype>::legendre(nnodes-1).differentiate().roots();
+      auto roots = polynomial<nodeT>::legendre(nnodes-1).differentiate().roots();
       for (int j=0; j<nnodes-2; j++)
 	nodes[j+1] = 0.5 * (1.0 + roots[j]);
       nodes[0] = 0.0; nodes[nnodes-1] = 1.0;
+    } else if (qtype == "gauss-radau") {
+      auto l   = polynomial<nodeT>::legendre(nnodes);
+      auto lm1 = polynomial<nodeT>::legendre(nnodes-1);
+      for (int i=0; i<nnodes; i++)
+	l[i] += lm1[i];
+      auto roots = l.roots();
+      for (int j=1; j<nnodes; j++)
+	nodes[j-1] = 0.5 * (1.0 - roots[nnodes-j]);
+      nodes[nnodes-1] = 1.0;
     }
 
     return nodes;
   }
 
+  template<typename nodeT>
+  matrix<nodeT> compute_quadrature(vector<nodeT> dst, vector<nodeT> src, char type)
+  {
+    const int ndst = dst.size();
+    const int nsrc = src.size();
 
-// void sdc_smat(sdc_mat *smat,
-// 	      const int n, const int m, const int sign,
-// 	      const sdc_dtype *dst, const sdc_dtype *src,
-// 	      const int *flags, int ndst, int nsrc)
-// {
-//   /* for (int n=0; n<(ndst-1)*nsrc; n++) */
-//   /*   smat[n] = 0.0; */
+    matrix<nodeT> mat(ndst-1, nsrc);
 
-//   sdc_dtype p[nsrc+1], p1[nsrc+1];
-//   for (int i=0; i<nsrc; i++) {
-//     if ((flags[i] & SDC_NODE_PROPER) == 0) continue;
+    //   /* for (int n=0; n<(ndst-1)*nsrc; n++) */
+    //   /*   smat[n] = 0.0; */
 
-//     // construct interpolating polynomial coefficients
-//     p[0] = 1.0; for (int j=1; j<nsrc+1; j++) p[j] = 0.0;
-//     for (int m=0; m<nsrc; m++) {
-//       if (((flags[m] & SDC_NODE_PROPER) == 0) || (m == i)) continue;
-//       // p_{m+1}(x) = (x - x_j) * p_m(x)
-//       p1[0] = 0.0;
-//       for (int j=0; j<nsrc;   j++) p1[j+1]  = p[j];
-//       for (int j=0; j<nsrc+1; j++) p1[j]   -= p[j] * src[m];
-//       for (int j=0; j<nsrc+1; j++) p[j] = p1[j];
-//     }
+    polynomial<nodeT> p(nsrc+1), p1(nsrc+1);
 
-//     // evaluate integrals
-//     sdc_dtype den = poly_eval(p, nsrc, src[i]);
-//     poly_int(p, nsrc+1);
-//     for (int j=1; j<ndst; j++) {
-//       sdc_dtype s = poly_eval(p, nsrc, dst[j]) - poly_eval(p, nsrc, dst[j-1]);
-//       sdc_mat_setvalue(smat, n+j-1, m+i, s / den, sign);
-//     }
-//   }
-// }
+    for (int i=0; i<nsrc; i++) {
+      //      if ((flags[i] & SDC_NODE_PROPER) == 0) continue;
 
+      // construct interpolating polynomial coefficients
+      p[0] = 1.0; for (int j=1; j<nsrc+1; j++) p[j] = 0.0;
+      for (int m=0; m<nsrc; m++) {
+	//if (((flags[m] & SDC_NODE_PROPER) == 0) || (m == i)) continue;
+	if (m == i) continue;
+	// p_{m+1}(x) = (x - x_j) * p_m(x)
+	p1[0] = 0.0;
+	for (int j=0; j<nsrc;   j++) p1[j+1]  = p[j];
+	for (int j=0; j<nsrc+1; j++) p1[j]   -= p[j] * src[m];
+	for (int j=0; j<nsrc+1; j++) p[j] = p1[j];
+      }
 
+      // evaluate integrals
+      auto den = p.evaluate(src[i]);
+      auto P = p.integrate();
+      for (int j=1; j<ndst; j++) {
+	nodeT q = 0.0;
+	if (type == 's')
+	  q = P.evaluate(dst[j]) - P.evaluate(dst[j-1]);
+	else
+	  q = P.evaluate(dst[j]) - P.evaluate(0.0);
+
+	mat(j-1, i) = q / den;
+      }
+    }
+
+    return mat;
+  }
 
 }
+
+#endif

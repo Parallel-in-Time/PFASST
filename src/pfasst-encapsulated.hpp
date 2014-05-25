@@ -7,91 +7,69 @@
 
 #include <vector>
 
-#include "pfasst.hpp"
+#include "pfasst-interfaces.hpp"
+#include "pfasst-quadrature.hpp"
 
 using namespace std;
 
 namespace pfasst {
 
-  template<typename T>
-  vector<T> compute_nodes(unsigned int nnodes, string qtype) {
-    vector<T> nodes(nnodes);
-
-    // ...
-
-    return nodes;
-  }
-
-  typedef enum encaptype { solution, function } encaptype;
-
-  template<typename T>
-  class matrix : public vector<T> {
-
-  public:
-    unsigned int n, m;
-    matrix() { }
-    matrix(unsigned int n, unsigned int m) {
-      zeros(n, m);
-    }
-    void zeros(unsigned int n, unsigned int m) {
-      this->n = n; this->m = m;
-      this->resize(n*m);
-      // ...
-    }
-    T& operator()(unsigned int i, unsigned int j) {
-      return (*this)[i*m+j];
-    }
-  };
+  typedef enum EncapType { solution, function } EncapType;
 
   //
   // encapsulation
   //
 
-  struct encapsulation {
-    virtual ~encapsulation() { }
+  class Encapsulation {
+  public:
+    virtual ~Encapsulation() { }
+
+    // required for interp/restrict helpers
+    virtual void interpolate(const Encapsulation *) { }
+    virtual void restrict(const Encapsulation *) { }
 
     // required for time-parallel communications
-    virtual unsigned int nbytes() { }
+    virtual unsigned int nbytes() { return -1; }
     virtual void pack(char *buf) { }
     virtual void unpack(char *buf) { }
 
-    // required for interp/restrict helpers
-    virtual void interpolate(const encapsulation *) { }
-    virtual void restrict(const encapsulation *) { }
-
     // required for host based encap helpers
     virtual void setval(double) { }
-    virtual void copy(const encapsulation *) { }
-    virtual void mat_apply(encapsulation dst[], double a, matrix m, const encapsulation src[]) { }
+    virtual void copy(const Encapsulation *) { }
+    virtual void saxpy(double a, const Encapsulation *) { }
+    //    virtual void mat_apply(encapsulation dst[], double a, matrix m, const encapsulation src[]) { }
   };
 
-  struct encapsulation_factory {
-    virtual encapsulation* create(const encaptype) = 0;
+  class EncapsulationFactory {
+  public:
+    virtual Encapsulation* create(const EncapType) = 0;
   };
-
 
   template<typename T>
-  class encapsulated_sweeper_mixin : public isweeper {
-    shared_ptr<vector<T>>             nodes;
-    shared_ptr<encapsulation_factory> encap;
+  class EncapsulatedSweeperMixin : public ISweeper {
+    vector<T>                        nodes;
+    shared_ptr<EncapsulationFactory> factory;
 
   public:
-    vector<encapsulation*> q;
-    vector<T>* get_nodes() { return nodes.get(); }
+    void set_nodes(vector<T> nodes) { this->nodes = nodes; }
+    const vector<T> get_nodes() const { return nodes; }
 
-    virtual void set_q0(const encapsulation* q0) { }
-    virtual encapsulation* get_qend() { }
+    void set_factory(EncapsulationFactory* factory) { this->factory = shared_ptr<EncapsulationFactory>(factory); }
+    EncapsulationFactory* get_factory() const { return factory.get(); }
+
+    virtual void set_q0(const Encapsulation* q0) { throw NotImplementedYet("sweeper"); }
+    virtual Encapsulation* get_qend() { throw NotImplementedYet("sweeper"); return NULL; }
   };
 
   template<class T>
-  class poly_interp_mixin : public T {
-    virtual void interpolate(const isweeper*) { }
-    virtual void restrict(const isweeper*) { }
+  class PolyInterpMixin : public T {
+    virtual void interpolate(const ISweeper*) { }
+    virtual void restrict(const ISweeper*) { }
   };
 
   template<typename T>
-  struct vector_encapsulation : public vector<T>, public encapsulation {
-    vector_encapsulation(int size) : vector<T>(size) { }
+  struct VectorEncapsulation : public vector<T>, public Encapsulation {
+    VectorEncapsulation(int size) : vector<T>(size) { }
     virtual unsigned int nbytes() const {
       return sizeof(T) * this->size();
     }
@@ -103,12 +81,13 @@ namespace pfasst {
   };
 
   template<typename T>
-  class vector_factory : public pfasst::encapsulation_factory {
+  class VectorFactory : public EncapsulationFactory {
     int size;
   public:
-    vector_factory(const int size) : size(size) { }
-    encapsulation* create(const pfasst::encap_type) {
-      return new vector_encapsulation<T>(size);
+    int dofs() { return size; }
+    VectorFactory(const int size) : size(size) { }
+    Encapsulation* create(const EncapType) {
+      return new VectorEncapsulation<T>(size);
     }
   };
 
