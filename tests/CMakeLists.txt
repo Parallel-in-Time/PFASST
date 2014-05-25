@@ -17,6 +17,6 @@ foreach(test ${TESTS})
     )
     set_target_properties(${test} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${pfasst_BINARY_DIR}/tests)
     add_test(NAME ${test}
-        COMMAND ${CMAKE_BINARY_DIR}/tests/${test}
+        COMMAND ${CMAKE_BINARY_DIR}/tests/${test} --gtest_output=xml:${test}_out.xml
     )
 endforeach(test)
