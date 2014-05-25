@@ -10,6 +10,7 @@ include(ExternalProject)
 # Set default ExternalProject root directory
 set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/3rdparty)
 
+option(pfasst_DISABLE_LIBCXX "Disable use of LLVM's libstdc++ when compiling with Clang." ON)
 option(pfasst_BUILD_TESTS "Build test suite for PFASST." ON)
 
 # check for C++11 support

@@ -1,0 +1,32 @@
+language:
+  - cpp
+
+compiler:
+  - gcc
+  - clang
+
+env:
+  - CMAKE_BUILD_TYPE="Release"
+  - CMAKE_BUILD_TYPE="Debug"
+
+before_install:
+  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test --yes # libstdc++-4.8
+  - if [ "${CXX}" == "clang++" ]; then sudo add-apt-repository --yes ppa:h-rayflood/llvm; fi # clang++-3.2
+  - sudo apt-get update
+
+install:
+  - if [ "${CXX}" == "clang++" ]; then sudo apt-get -qq install clang-3.2; fi
+  - sudo apt-get install g++-4.8; # clang need it for libstdc++ update
+
+before_script:
+  # update compilers
+  - if [ "${CXX}" == "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
+  - if [ "${CXX}" == "clang++" ]; then export CXX="clang++-3.2" CC="clang-3.2"; fi
+
+script:
+  - mkdir build
+  - cd build
+  - cmake -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -Dpfasst_DISABLE_LIBCXX=ON -Dpfasst_BUILD_TESTS=ON ..
+  - make
+  - make test
+
