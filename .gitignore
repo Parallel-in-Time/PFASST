@@ -1,5 +1,6 @@
 # other stuff
-doc/build
+/doc/build
+/build*
 
 # Created by http://www.gitignore.io
 

@@ -1,0 +1,21 @@
+function(add_to_string_list in_string out_string)
+#   message(STATUS "Adding '${ARGN}' to '${in_string}'")
+    foreach(element ${ARGN})
+#       message(STATUS "  processing: '${element}'")
+        if(NOT "${element}" STREQUAL "")
+            # escape regex commands in new element
+            string(REPLACE "\\" "\\\\" elem_escaped "${element}")
+            string(REGEX REPLACE "([][.?*+|()$^-])" "\\\\\\1" elem_escaped "${elem_escaped}")
+
+            # only append if not already in string
+            if("${in_string}" MATCHES "${elem_escaped}")
+#               message(STATUS "    '${element}' found as '${elem_escaped}'")
+            else()
+                set(in_string "${in_string} ${element}")
+#               message(STATUS "    '${element}' appended")
+            endif()
+        endif()
+    endforeach(element)
+#   message(STATUS "Full string is now: '${in_string}'")
+    set(${out_string} ${in_string} PARENT_SCOPE)
+endfunction(add_to_string_list)
