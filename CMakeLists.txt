@@ -11,10 +11,10 @@ include(ExternalProject)
 set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/3rdparty)
 
 option(pfasst_DISABLE_LIBCXX "Disable use of LLVM's libstdc++ when compiling with Clang." ON)
+option(pfasst_BUILD_EXAMPLES "Build example programs." ON)
 option(pfasst_BUILD_TESTS "Build test suite for PFASST." ON)
 
 # check for C++11 support
-message(STATUS "Testing Compiler for C++11 Support ...")
 if(${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
     check_cxx_compiler_flag(-std=c++11 HAVE_STD11)
     if(HAVE_STD11)
@@ -55,11 +55,20 @@ endif(pfasst_BUILD_TESTS)
 # adding / including 3rd-party libraries
 message(STATUS "********************************************************************************")
 message(STATUS "Configuring 3rd party libraries")
+# makes available:
+#  - fftw3_INCLUDES  (if pfasst_BUILD_EXAMPLES)
+#  - fftw3_LIBS      (if pfasst_BUILD_EXAMPLES)
 add_subdirectory(3rdparty)
 
 message(STATUS "********************************************************************************")
 message(STATUS "Configuring sources")
 add_subdirectory(src)
+
+if(pfasst_BUILD_EXAMPLES)
+    message(STATUS "********************************************************************************")
+    message(STATUS "Configuring examples")
+    add_subdirectory(examples)
+endif()
 
 if(pfasst_BUILD_TESTS)
     message(STATUS "********************************************************************************")
@@ -71,5 +80,3 @@ message(STATUS "****************************************************************
 message(STATUS "C++ Compiler ID: ${CMAKE_CXX_COMPILER_ID}")
 message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS}")
 message(STATUS "C++ link flags: ${CMAKE_CXX_LINK_FLAGS}")
-
-set(CMAKE_VERBOSE_MAKEFILE ON)
