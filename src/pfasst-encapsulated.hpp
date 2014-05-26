@@ -13,7 +13,7 @@
 
 using namespace std;
 
-namespace pfasst {
+namespace pfasst { namespace encap {
 
   typedef enum EncapType { solution, function } EncapType;
 
@@ -26,19 +26,38 @@ namespace pfasst {
     virtual ~Encapsulation() { }
 
     // required for interp/restrict helpers
-    virtual void interpolate(const Encapsulation *) { }
-    virtual void restrict(const Encapsulation *) { }
+    virtual void interpolate(const Encapsulation *) {
+      throw NotImplementedYet("mlsdc/pfasst");
+    }
+    virtual void restrict(const Encapsulation *) {
+      throw NotImplementedYet("mlsdc/pfasst");
+    }
 
     // required for time-parallel communications
-    virtual unsigned int nbytes() { return -1; }
-    virtual void pack(char *buf) { }
-    virtual void unpack(char *buf) { }
+    virtual unsigned int nbytes() {
+      throw NotImplementedYet("pfasst");
+    }
+    virtual void send() {
+      throw NotImplementedYet("pfasst");
+    }
+    virtual void recv() {
+      throw NotImplementedYet("pfasst");
+    }
 
     // required for host based encap helpers
-    virtual void setval(double) { throw NotImplementedYet("encap setval"); }
-    virtual void copy(const Encapsulation *) { throw NotImplementedYet("encap copy"); }
-    virtual void saxpy(double a, const Encapsulation *) { throw NotImplementedYet("encap saxpy"); }
-    //    virtual void mat_apply(encapsulation dst[], double a, matrix m, const encapsulation src[]) { }
+    virtual void setval(double) {
+      throw NotImplementedYet("encap");
+    }
+    virtual void copy(const Encapsulation *) {
+      throw NotImplementedYet("encap");
+    }
+    virtual void saxpy(double a, const Encapsulation *) {
+      throw NotImplementedYet("encap");
+    }
+    // virtual void mat_apply(Encapsulation dst[], double a, matrix m,
+    // 			   const Encapsulation src[]) {
+    //   throw NotImplementedYet("encap");
+    // }
   };
 
   class EncapsulationFactory {
@@ -52,17 +71,31 @@ namespace pfasst {
     shared_ptr<EncapsulationFactory> factory;
 
   public:
-    void set_nodes(vector<T> nodes) { this->nodes = nodes; }
-    const vector<T> get_nodes() const { return nodes; }
+    void set_nodes(vector<T> nodes) {
+      this->nodes = nodes;
+    }
+    const vector<T> get_nodes() const {
+      return nodes;
+    }
 
-    void set_factory(EncapsulationFactory* factory) { this->factory = shared_ptr<EncapsulationFactory>(factory); }
-    EncapsulationFactory* get_factory() const { return factory.get(); }
+    void set_factory(EncapsulationFactory* factory) {
+      this->factory = shared_ptr<EncapsulationFactory>(factory);
+    }
+    EncapsulationFactory* get_factory() const {
+      return factory.get();
+    }
 
-    virtual void set_q0(const Encapsulation* q0) { throw NotImplementedYet("sweeper"); }
-    virtual Encapsulation* get_qend() { throw NotImplementedYet("sweeper"); return NULL; }
+    virtual void set_q0(const Encapsulation* q0) {
+      throw NotImplementedYet("sweeper");
+    }
+    virtual Encapsulation* get_qend() {
+      throw NotImplementedYet("sweeper");
+      return NULL;
+    }
 
-    virtual void advance() { }
-
+    virtual void advance() {
+      throw NotImplementedYet("sweeper");
+    }
   };
 
   template<class T>
@@ -104,6 +137,6 @@ namespace pfasst {
     }
   };
 
-}
+  } }
 
 #endif

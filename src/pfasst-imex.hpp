@@ -10,140 +10,145 @@
 using namespace std;
 
 namespace pfasst {
+  namespace imex {
 
-  template<typename timeT>
-  class IMEX : public EncapsulatedSweeperMixin<timeT> {
-    vector<Encapsulation*> Q, S, Fe, Fi;
-    matrix<timeT> Smat, SEmat, SImat;
+    using pfasst::encap::Encapsulation;
 
-  public:
+    template<typename time>
+    class IMEX : public pfasst::encap::EncapsulatedSweeperMixin<time> {
+      vector<Encapsulation*> Q, S, Fe, Fi;
+      matrix<time> Smat, SEmat, SImat;
 
-    ~IMEX() {
-      for (int m=0; m<Q.size(); m++) delete Q[m];
-      for (int m=0; m<S.size(); m++) delete S[m];
-      for (int m=0; m<Fe.size(); m++) delete Fe[m];
-      for (int m=0; m<Fi.size(); m++) delete Fi[m];
-    }
+    public:
 
-    void set_q0(Encapsulation *q0)
-    {
-      Q[0]->copy(q0);
-    }
-
-    Encapsulation* get_qend() {
-      return Q[Q.size()-1];
-    }
-
-    void advance() {
-      set_q0(get_qend());
-    }
-
-
-    void setup() {
-      auto nodes = this->get_nodes();
-
-      Smat = compute_quadrature(nodes, nodes, 's');
-
-      SEmat = Smat; SImat = Smat;
-      for (int m=0; m<nodes.size()-1; m++) {
-	timeT dt = nodes[m+1] - nodes[m];
-	SEmat(m, m)   -= dt;
-	SImat(m, m+1) -= dt;
+      ~IMEX() {
+	for (int m=0; m<Q.size(); m++) delete Q[m];
+	for (int m=0; m<S.size(); m++) delete S[m];
+	for (int m=0; m<Fe.size(); m++) delete Fe[m];
+	for (int m=0; m<Fi.size(); m++) delete Fi[m];
       }
 
-      for (int m=0; m<nodes.size(); m++) {
-      	this->Q.push_back(this->get_factory()->create(solution));
-      	this->Fe.push_back(this->get_factory()->create(function));
-      	this->Fi.push_back(this->get_factory()->create(function));
+      void set_q0(Encapsulation *q0)
+      {
+	Q[0]->copy(q0);
       }
 
-      for (int m=0; m<nodes.size()-1; m++) {
-      	S.push_back(this->get_factory()->create(solution));
+      Encapsulation* get_qend() {
+	return Q[Q.size()-1];
       }
-    }
 
-    virtual void integrate(timeT t0, timeT dt0)
-    {
-      throw NotImplementedYet("imex integrate");
-    }
-    virtual void residual(timeT t0, timeT dt0)
-    {
-      throw NotImplementedYet("imex residual");
-    }
+      void advance() {
+	set_q0(get_qend());
+      }
 
-    virtual void sweep(timeT t0, timeT dt0)
-    {
-      const auto nodes  = this->get_nodes();
-      const int  nnodes = nodes.size();
+      void setup() {
+	auto nodes = this->get_nodes();
 
-      // integrate
-      for (int n=0; n<nnodes-1; n++) {
-	this->S[n]->setval(0.0);
-	for (int m=0; m<nnodes; m++) {
-	  this->S[n]->saxpy(dt0 * this->SEmat(n,m), this->Fe[m]);
-	  this->S[n]->saxpy(dt0 * this->SImat(n,m), this->Fi[m]);
+	Smat = compute_quadrature(nodes, nodes, 's');
+
+	SEmat = Smat;
+	SImat = Smat;
+	for (int m=0; m<nodes.size()-1; m++) {
+	  time ds = nodes[m+1] - nodes[m];
+	  SEmat(m, m)   -= ds;
+	  SImat(m, m+1) -= ds;
+	}
+
+	for (int m=0; m<nodes.size(); m++) {
+	  Q.push_back(this->get_factory()->create(pfasst::encap::solution));
+	  Fe.push_back(this->get_factory()->create(pfasst::encap::function));
+	  Fi.push_back(this->get_factory()->create(pfasst::encap::function));
+	}
+
+	for (int m=0; m<nodes.size()-1; m++) {
+	  S.push_back(this->get_factory()->create(pfasst::encap::solution));
 	}
       }
 
-      // sweep
-      Encapsulation *rhs = this->get_factory()->create(solution);
-
-      timeT t = t0;
-      for (int m=0; m<nnodes-1; m++) {
-	timeT dt = dt0 * ( nodes[m+1] - nodes[m] );
-
-      	rhs->copy(this->Q[m]);
-      	rhs->saxpy(dt, this->Fe[m]);
-      	rhs->saxpy(1.0, this->S[m]);
-      	this->f2comp(this->Fi[m+1], this->Q[m+1], t, dt, rhs);
-      	this->f1eval(this->Fe[m+1], this->Q[m+1], t+dt);
-
-	t += dt;
+      virtual void integrate(time t0, time dt)
+      {
+	throw NotImplementedYet("imex integrate");
       }
 
-      delete rhs;
-    }
-
-    virtual void predict(timeT t0, timeT dt0) {
-      const auto nodes  = this->get_nodes();
-      const int  nnodes = nodes.size();
-
-      this->f1eval(this->Fe[0], this->Q[0], t0);
-      this->f2eval(this->Fi[0], this->Q[0], t0);
-
-      Encapsulation *rhs = this->get_factory()->create(solution);
-
-      timeT t = t0;
-      for (int m=0; m<nnodes-1; m++) {
-	timeT dt = dt0 * ( nodes[m+1] - nodes[m] );
-	rhs->copy(this->Q[m]);
-	rhs->saxpy(dt, this->Fe[m]);
-	this->f2comp(this->Fi[m+1], this->Q[m+1], t, dt, rhs);
-	this->f1eval(this->Fe[m+1], this->Q[m+1], t+dt);
-
-	t += dt;
+      virtual void residual(time t0, time dt)
+      {
+	throw NotImplementedYet("imex residual");
       }
 
-      delete rhs;
-    }
+      virtual void sweep(time t0, time dt)
+      {
+	const auto nodes  = this->get_nodes();
+	const int  nnodes = nodes.size();
 
-    virtual void f1eval(Encapsulation *F, Encapsulation *Q, timeT t)
-    {
-      throw NotImplementedYet("imex (f1eval)");
-    }
+	// integrate
+	for (int n=0; n<nnodes-1; n++) {
+	  S[n]->setval(0.0);
+	  for (int m=0; m<nnodes; m++) {
+	    S[n]->saxpy(dt * SEmat(n,m), Fe[m]);
+	    S[n]->saxpy(dt * SImat(n,m), Fi[m]);
+	  }
+	}
 
-    virtual void f2eval(Encapsulation *F, Encapsulation *Q, timeT t)
-    {
-      throw NotImplementedYet("imex (f2eval)");
-    }
+	// sweep
+	Encapsulation *rhs = this->get_factory()->create(pfasst::encap::solution);
 
-    virtual void f2comp(Encapsulation *F, Encapsulation *Q, timeT t, timeT dt, Encapsulation* rhs)
-    {
-      throw NotImplementedYet("imex (f2comp)");
-    }
+	time t = t0;
+	for (int m=0; m<nnodes-1; m++) {
+	  time ds = dt * ( nodes[m+1] - nodes[m] );
 
-  };
+	  rhs->copy(Q[m]);
+	  rhs->saxpy(ds, Fe[m]);
+	  rhs->saxpy(1.0, S[m]);
+	  f2comp(Fi[m+1], Q[m+1], t, ds, rhs);
+	  f1eval(Fe[m+1], Q[m+1], t + ds);
 
+	  t += ds;
+	}
+
+	delete rhs;
+      }
+
+      virtual void predict(time t0, time dt) {
+	const auto nodes  = this->get_nodes();
+	const int  nnodes = nodes.size();
+
+	f1eval(Fe[0], Q[0], t0);
+	f2eval(Fi[0], Q[0], t0);
+
+	Encapsulation *rhs = this->get_factory()->create(pfasst::encap::solution);
+
+	time t = t0;
+	for (int m=0; m<nnodes-1; m++) {
+	  time ds = dt * ( nodes[m+1] - nodes[m] );
+	  rhs->copy(Q[m]);
+	  rhs->saxpy(ds, Fe[m]);
+	  f2comp(Fi[m+1], Q[m+1], t, ds, rhs);
+	  f1eval(Fe[m+1], Q[m+1], t + ds);
+
+	  t += ds;
+	}
+
+	delete rhs;
+      }
+
+      virtual void f1eval(Encapsulation *F, Encapsulation *Q, time t)
+      {
+	throw NotImplementedYet("imex (f1eval)");
+      }
+
+      virtual void f2eval(Encapsulation *F, Encapsulation *Q, time t)
+      {
+	throw NotImplementedYet("imex (f2eval)");
+      }
+
+      virtual void f2comp(Encapsulation *F, Encapsulation *Q, time t, time dt, Encapsulation* rhs)
+      {
+	throw NotImplementedYet("imex (f2comp)");
+      }
+
+    };
+
+  }
 }
 
 #endif
