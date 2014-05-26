@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include <complex>
+#include <limits>
 #include <vector>
 
 using namespace std;
@@ -105,7 +106,7 @@ namespace pfasst {
     	coeffT acc = 0.0;
     	for (int j=0; j<n; j++)
     	  acc += abs(z0[j] - z1[j]);
-    	if (acc < 1e-24)
+    	if (acc < 2*numeric_limits<coeffT>::epsilon())
 	  break;
 
 	z1 = z0;
@@ -113,7 +114,7 @@ namespace pfasst {
 
       vector<coeffT> roots(n);
       for (int j=0; j<n; j++)
-    	roots[j] = abs(z0[j]) < 1e-12 ? 0.0 : real(z0[j]);
+    	roots[j] = abs(z0[j]) < 4*numeric_limits<coeffT>::epsilon() ? 0.0 : real(z0[j]);
 
       sort(roots.begin(), roots.end());
       return roots;
