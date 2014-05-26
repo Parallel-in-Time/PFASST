@@ -8,6 +8,7 @@
 
 #include <pfasst.hpp>
 #include <pfasst-imex.hpp>
+#include <pfasst-vector.hpp>
 
 #include <fftw3.h>
 
