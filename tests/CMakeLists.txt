@@ -9,6 +9,7 @@ set(TESTS
 )
 
 foreach(test ${TESTS})
+    message(STATUS "  ${test}")
     add_executable(${test} ${test}.cpp)
     add_dependencies(${test} googlemock)
     target_link_libraries(${test}
