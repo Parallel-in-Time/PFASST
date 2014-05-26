@@ -17,7 +17,7 @@ if(pfasst_BUILD_EXAMPLES)
         UPDATE_COMMAND ""
         PATCH_COMMAND ""
         BUILD_IN_SOURCE ON
-        CONFIGURE_COMMAND ${fftw3_SOURCE_DIR}/configure CC=${CMAKE_C_COMPILER} --prefix=${fftw3_INSTALL_DIR} CXX=${CMAKE_CXX_COMPILER}
+        CONFIGURE_COMMAND ${fftw3_SOURCE_DIR}/configure CC=${CMAKE_C_COMPILER} --prefix=${fftw3_INSTALL_DIR} --libdir=${fftw3_INSTALL_DIR}/lib CXX=${CMAKE_CXX_COMPILER}
         BUILD_COMMAND make
         TEST_COMMAND ""
         INSTALL_DIR ${fftw3_SOURCE_DIR}-install
@@ -28,7 +28,7 @@ if(pfasst_BUILD_EXAMPLES)
     )
     # Specify include dir
     set(fftw3_INCLUDES ${fftw3_INSTALL_DIR}/include PARENT_SCOPE)
-    set(fftw3_LIBS ${fftw3_INSTALL_DIR}/lib64/libfftw3.a PARENT_SCOPE)
+    set(fftw3_LIBS ${fftw3_INSTALL_DIR}/lib/libfftw3.a PARENT_SCOPE)
 
     if(pfasst_BUILD_TESTS)
         message(STATUS "--------------------------------------------------------------------------------")
@@ -49,7 +49,6 @@ if(pfasst_BUILD_TESTS)
       PATCH_COMMAND ""
       CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release
       -Dgtest_force_shared_crt=ON
-      -DCMAKE_VERBOSE_MAKEFILE=ON
       -Dgmock_build_tests=${gtest_BUILD_TESTS}
       # Disable install step
       INSTALL_COMMAND ""
