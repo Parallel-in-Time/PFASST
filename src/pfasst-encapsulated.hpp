@@ -5,6 +5,7 @@
 #ifndef _PFASST_ENCAPSULATED_HPP_
 #define _PFASST_ENCAPSULATED_HPP_
 
+#include <algorithm>
 #include <vector>
 
 #include "pfasst-interfaces.hpp"
@@ -34,9 +35,9 @@ namespace pfasst {
     virtual void unpack(char *buf) { }
 
     // required for host based encap helpers
-    virtual void setval(double) { }
-    virtual void copy(const Encapsulation *) { }
-    virtual void saxpy(double a, const Encapsulation *) { }
+    virtual void setval(double) { throw NotImplementedYet("encap setval"); }
+    virtual void copy(const Encapsulation *) { throw NotImplementedYet("encap copy"); }
+    virtual void saxpy(double a, const Encapsulation *) { throw NotImplementedYet("encap saxpy"); }
     //    virtual void mat_apply(encapsulation dst[], double a, matrix m, const encapsulation src[]) { }
   };
 
@@ -59,6 +60,9 @@ namespace pfasst {
 
     virtual void set_q0(const Encapsulation* q0) { throw NotImplementedYet("sweeper"); }
     virtual Encapsulation* get_qend() { throw NotImplementedYet("sweeper"); return NULL; }
+
+    virtual void advance() { }
+
   };
 
   template<class T>
@@ -67,17 +71,26 @@ namespace pfasst {
     virtual void restrict(const ISweeper*) { }
   };
 
-  template<typename T>
-  struct VectorEncapsulation : public vector<T>, public Encapsulation {
-    VectorEncapsulation(int size) : vector<T>(size) { }
+  template<typename scalar>
+  struct VectorEncapsulation : public vector<scalar>, public Encapsulation {
+    VectorEncapsulation(int size) : vector<scalar>(size) { }
     virtual unsigned int nbytes() const {
-      return sizeof(T) * this->size();
+      return sizeof(scalar) * this->size();
     }
-    void setval(double v) {
+    void setval(scalar v) {
       for (int i=0; i<this->size(); i++)
-	this->data()[i] = v;
+	(*this)[i] = v;
     }
-    // ...
+    void copy(const Encapsulation* X) {
+      const auto* x = dynamic_cast<const VectorEncapsulation*>(X);
+      for (int i=0; i<this->size(); i++)
+	(*this)[i] = (*x)[i];
+    }
+    void saxpy(double a, const Encapsulation *X) {
+      const auto* x = dynamic_cast<const VectorEncapsulation*>(X);
+      for (int i=0; i<this->size(); i++)
+	(*this)[i] += a * (*x)[i];
+    }
   };
 
   template<typename T>

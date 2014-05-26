@@ -34,6 +34,7 @@ namespace pfasst {
     virtual void predict(double t, double dt) = 0;
     virtual void integrate(double t, double dt) = 0;
     virtual void residual(double t, double dt) = 0;
+    virtual void advance() = 0;
   };
 
   class ITransfer {

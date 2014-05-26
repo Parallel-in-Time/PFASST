@@ -30,6 +30,15 @@ namespace pfasst {
       Q[0]->copy(q0);
     }
 
+    Encapsulation* get_qend() {
+      return Q[Q.size()-1];
+    }
+
+    void advance() {
+      set_q0(get_qend());
+    }
+
+
     void setup() {
       auto nodes = this->get_nodes();
 

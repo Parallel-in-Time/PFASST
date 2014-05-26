@@ -15,9 +15,12 @@ namespace pfasst {
     void run() {
       ISweeper& swp = *this->get_level(0);
       for (int nstep=0; nstep<this->nsteps; nstep++) {
+	timeT t = nstep * this->dt;
+	swp.predict(t, this->dt);
 	for (int niter=0; niter<this->niters; niter++) {
-	  swp.sweep(0.0, this->dt);
+	  swp.sweep(t, this->dt);
 	}
+	swp.advance();
       }
     }
   };
