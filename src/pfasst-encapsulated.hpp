@@ -34,9 +34,6 @@ namespace pfasst {
       }
 
       // required for time-parallel communications
-      virtual unsigned int nbytes() {
-	throw NotImplementedYet("pfasst");
-      }
       virtual void send() {
 	throw NotImplementedYet("pfasst");
       }

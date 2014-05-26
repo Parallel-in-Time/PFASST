@@ -18,22 +18,18 @@ namespace pfasst {
     template<typename scalar>
     struct VectorEncapsulation : public vector<scalar>, public Encapsulation {
       VectorEncapsulation(int size) : vector<scalar>(size) { }
-      virtual unsigned int nbytes() const {
-	return sizeof(scalar) * this->size();
-      }
       void setval(scalar v) {
-	for (int i=0; i<this->size(); i++)
-	  (*this)[i] = v;
+	std::fill(this->begin(), this->end(), v);
       }
       void copy(const Encapsulation* X) {
 	const auto* x = dynamic_cast<const VectorEncapsulation*>(X);
-	for (int i=0; i<this->size(); i++)
-	  (*this)[i] = (*x)[i];
+	std::copy(x->begin(), x->end(), this->begin());
       }
       void saxpy(double a, const Encapsulation *X) {
-	const auto* x = dynamic_cast<const VectorEncapsulation*>(X);
-	for (int i=0; i<this->size(); i++)
-	  (*this)[i] += a * (*x)[i];
+	const auto& x = *dynamic_cast<const VectorEncapsulation*>(X);
+	auto&       y = *this;
+	for (int i=0; i<y.size(); i++)
+	  y[i] += a * x[i];
       }
     };
 

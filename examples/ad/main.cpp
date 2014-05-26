@@ -56,13 +56,8 @@ class ADIMEX : public pfasst::imex::IMEX<time> {
 
 public:
 
-  ADIMEX(vector<time> nodes, pfasst::encap::VectorFactory<time> *factory)
+  ADIMEX(int nvars)
   {
-    this->set_nodes(nodes);
-    this->set_factory(factory);
-
-    int nvars = factory->dofs();
-
     // XXX: this fft stuff almost certainly DOES NOT work when 'scalar' is not 'double'
     wk   = fftw_alloc_complex(nvars);
     ffft = fftw_plan_dft_1d(nvars, wk, wk, FFTW_FORWARD, FFTW_ESTIMATE);
@@ -115,7 +110,7 @@ public:
       if (d > max)
 	max = d;
     }
-    cout << "err: " << max << endl;
+    cout << "err: " << scientific << max << endl;
   }
 
   void f1eval(Encapsulation *F, Encapsulation *Q, time t)
@@ -192,7 +187,10 @@ int main(int argc, char **argv)
 
     auto  nodes   = pfasst::compute_nodes<scalar>(nnodes, "gauss-lobatto");
     auto* factory = new pfasst::encap::VectorFactory<scalar>(ndofs);
-    auto* sweeper = new ADIMEX<scalar>(nodes, factory);
+    auto* sweeper = new ADIMEX<scalar>(ndofs);
+
+    sweeper->set_nodes(nodes);
+    sweeper->set_factory(factory);
 
     sdc.add_level(sweeper);
     sdc.set_duration(dt, nsteps, 4);
