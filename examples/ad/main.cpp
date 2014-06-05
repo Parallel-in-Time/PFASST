@@ -2,9 +2,12 @@
  * Advection/diffusion example using the encapsulated IMEX sweeper.
  */
 
+#define PFASST_ENABLE_GNUPLOT
+
 #include <algorithm>
 #include <cmath>
 #include <complex>
+#include <map>
 
 #include <pfasst.hpp>
 #include <pfasst-imex.hpp>
@@ -21,20 +24,72 @@ using namespace std;
 // config
 //
 
-const int nlevs = 1;
-const int ndofs = 512;
-const int nnodes = 5;
+const int nlevs = 2;
 const int xrat = 2;
 const int trat = 2;
 
-const int    nsteps = 32;
+const int    nsteps = 1;
 const double dt = 0.01;
 
 typedef double scalar;
 
 using namespace std;
 using pfasst::encap::Encapsulation;
-using dvector = pfasst::encap::VectorEncapsulation<scalar>;
+using dvector = pfasst::encap::VectorEncapsulation<double,double>;
+
+//
+// fft helper
+//
+class FFT {
+
+  struct workspace {
+    fftw_plan        ffft;
+    fftw_plan        ifft;
+    fftw_complex*    wk;
+    complex<scalar>* z;
+  };
+
+  map<int,workspace*> workspaces;
+
+public:
+
+  ~FFT()
+  {
+    // XXX
+  }
+
+  workspace* get_workspace(int ndofs)
+  {
+    if (workspaces.find(ndofs) == workspaces.end()) {
+      workspace* wk = new workspace;
+      wk->wk = fftw_alloc_complex(ndofs);
+      wk->ffft = fftw_plan_dft_1d(ndofs, wk->wk, wk->wk, FFTW_FORWARD, FFTW_ESTIMATE);
+      wk->ifft = fftw_plan_dft_1d(ndofs, wk->wk, wk->wk, FFTW_BACKWARD, FFTW_ESTIMATE);
+      wk->z = reinterpret_cast<complex<scalar>*>(wk->wk);
+      workspaces.insert(pair<int,workspace*>(ndofs, wk));
+    }
+
+    return workspaces[ndofs];
+  }
+
+  complex<double>* forward(const dvector& x)
+  {
+    workspace *wk = get_workspace(x.size());
+    for (int i=0; i<x.size(); i++)
+      wk->z[i] = x[i];
+    fftw_execute_dft(wk->ffft, wk->wk, wk->wk);
+    return wk->z;
+  }
+
+  void backward(dvector &x)
+  {
+    workspace *wk = get_workspace(x.size());
+    fftw_execute_dft(wk->ifft, wk->wk, wk->wk);
+    for (int i=0; i<x.size(); i++)
+      x[i] = real(wk->z[i]);
+  }
+
+} fft;
 
 
 //
@@ -43,10 +98,6 @@ using dvector = pfasst::encap::VectorEncapsulation<scalar>;
 
 template<typename time>
 class ADIMEX : public pfasst::imex::IMEX<time> {
-
-  fftw_plan     ffft;
-  fftw_plan     ifft;
-  fftw_complex* wk;
 
   vector<complex<scalar>> ddx, lap;
 
@@ -58,11 +109,6 @@ public:
 
   ADIMEX(int nvars)
   {
-    // XXX: this fft stuff almost certainly DOES NOT work when 'scalar' is not 'double'
-    wk   = fftw_alloc_complex(nvars);
-    ffft = fftw_plan_dft_1d(nvars, wk, wk, FFTW_FORWARD, FFTW_ESTIMATE);
-    ifft = fftw_plan_dft_1d(nvars, wk, wk, FFTW_BACKWARD, FFTW_ESTIMATE);
-
     ddx.resize(nvars);
     lap.resize(nvars);
     for (int i=0; i<nvars; i++) {
@@ -71,12 +117,6 @@ public:
       lap[i] = (kx*kx < 1e-13) ? 0.0 : -kx*kx;
     }
 
-  }
-
-  ~ADIMEX() {
-    fftw_destroy_plan(ffft);
-    fftw_destroy_plan(ifft);
-    fftw_free(wk);
   }
 
   void exact(dvector& q, scalar t)
@@ -95,14 +135,12 @@ public:
     }
   }
 
-  void sweep(time t, time dt)
+  void echo_error(time t)
   {
-    pfasst::imex::IMEX<time>::sweep(t, dt);
-
-    auto& qend = *dynamic_cast<dvector*>(this->get_qend());
+    auto& qend = *dynamic_cast<dvector*>(this->get_q(this->get_nodes().size()-1));
     auto  qex  = dvector(qend.size());
 
-    exact(qex, t+dt);
+    exact(qex, t);
 
     scalar max = 0.0;
     for (int i=0; i<qend.size(); i++) {
@@ -110,64 +148,99 @@ public:
       if (d > max)
 	max = d;
     }
-    cout << "err: " << scientific << max << endl;
+    cout << "err: " << scientific << max << " (" << qend.size() << ")" << endl;
   }
 
-  void f1eval(Encapsulation *F, Encapsulation *Q, time t)
+  void predict(time t, time dt)
+  {
+    // cout << "PREDICTOR" << endl;
+    pfasst::imex::IMEX<time>::predict(t, dt);
+    echo_error(t+dt);
+  }
+
+  void sweep(time t, time dt)
+  {
+    // cout << "SWEEPING" << endl;
+    pfasst::imex::IMEX<time>::sweep(t, dt);
+    echo_error(t+dt);
+  }
+
+  void f1eval(Encapsulation<scalar> *F, Encapsulation<scalar> *Q, time t)
   {
     auto& f = *dynamic_cast<dvector*>(F);
     auto& q = *dynamic_cast<dvector*>(Q);
 
-    complex<scalar>* z = reinterpret_cast<complex<scalar>*>(wk);
     scalar c = -v / scalar(q.size());
 
-    copy(q.begin(), q.end(), z);
-    fftw_execute_dft(ffft, wk, wk);
+    auto* z = fft.forward(q);
     for (int i=0; i<q.size(); i++)
       z[i] *= c * ddx[i];
-    fftw_execute_dft(ifft, wk, wk);
-
-    for (int i=0; i<q.size(); i++)
-      f[i] = real(z[i]);
+    fft.backward(f);
   }
 
-  void f2eval(Encapsulation *F, Encapsulation *Q, time t)
+  void f2eval(Encapsulation<scalar> *F, Encapsulation<scalar> *Q, time t)
   {
     auto& f = *dynamic_cast<dvector*>(F);
     auto& q = *dynamic_cast<dvector*>(Q);
 
-    complex<scalar>* z = reinterpret_cast<complex<scalar>*>(wk);
     scalar c = nu / scalar(q.size());
 
-    copy(q.begin(), q.end(), z);
-    fftw_execute_dft(ffft, wk, wk);
+    auto* z = fft.forward(q);
     for (int i=0; i<q.size(); i++)
       z[i] *= c * lap[i];
-    fftw_execute_dft(ifft, wk, wk);
-
-    for (int i=0; i<q.size(); i++)
-      f[i] = real(z[i]);
+    fft.backward(f);
   }
 
-  void f2comp(Encapsulation *F, Encapsulation *Q, time t, time dt, Encapsulation *RHS)
+  void f2comp(Encapsulation<scalar> *F, Encapsulation<scalar> *Q, scalar t, scalar dt, Encapsulation<scalar> *RHS)
   {
     auto& f   = *dynamic_cast<dvector*>(F);
     auto& q   = *dynamic_cast<dvector*>(Q);
     auto& rhs = *dynamic_cast<dvector*>(RHS);
 
-    complex<scalar>* z = reinterpret_cast<complex<scalar>*>(wk);
-
-    copy(rhs.begin(), rhs.end(), z);
-    fftw_execute_dft(ffft, wk, wk);
+    auto* z = fft.forward(rhs);
     for (int i=0; i<q.size(); i++)
       z[i] /= (1.0 - nu * dt * lap[i]) * scalar(q.size());
-    fftw_execute_dft(ifft, wk, wk);
+    fft.backward(q);
 
-    for (int i=0; i<q.size(); i++) {
-      q[i] = real(z[i]);
+    for (int i=0; i<q.size(); i++)
       f[i] = (q[i] - rhs[i]) / dt;
-    }
+  }
 
+};
+
+template<typename scalar>
+class ADTRANS : public pfasst::encap::PolyInterpMixin<scalar> {
+public:
+
+  void interpolate(Encapsulation<scalar> *dst, const Encapsulation<scalar> *src) {
+    auto& crse = *dynamic_cast<const dvector*>(src);
+    auto& fine = *dynamic_cast<dvector*>(dst);
+
+    auto* crse_z = fft.forward(crse);
+    auto* fine_z = fft.get_workspace(fine.size())->z;
+
+    for (int i=0; i<fine.size(); i++)
+      fine_z[i] = 0.0;
+
+    double c = 1.0 / crse.size();
+
+    for (int i=0; i<crse.size()/2; i++)
+      fine_z[i] = c * crse_z[i];
+
+    for (int i=1; i<crse.size()/2; i++)
+      fine_z[fine.size()-crse.size()/2+i] = c * crse_z[crse.size()/2+i];
+
+    fft.backward(fine);
+  }
+
+  void restrict(Encapsulation<scalar> *dst, const Encapsulation<scalar> *src) {
+    auto& crse = *dynamic_cast<dvector*>(dst);
+    auto& fine = *dynamic_cast<const dvector*>(src);
+
+    int xrat = fine.size() / crse.size();
+
+    for (int i=0; i<crse.size(); i++)
+      crse[i] = fine[xrat*i];
   }
 
 };
@@ -179,14 +252,14 @@ public:
 
 int main(int argc, char **argv)
 {
-  int ndofs  = 512;
+  int ndofs  = 256;
   int nnodes = 5;
 
   if (nlevs == 1) {
     pfasst::SDC<scalar> sdc;
 
     auto  nodes   = pfasst::compute_nodes<scalar>(nnodes, "gauss-lobatto");
-    auto* factory = new pfasst::encap::VectorFactory<scalar>(ndofs);
+    auto* factory = new pfasst::encap::VectorFactory<scalar,double>(ndofs);
     auto* sweeper = new ADIMEX<scalar>(ndofs);
 
     sweeper->set_nodes(nodes);
@@ -198,11 +271,37 @@ int main(int argc, char **argv)
 
     dvector q0(ndofs);
     sweeper->exact(q0, 0.0);
-    sweeper->set_q0(&q0);
+    sweeper->set_q(&q0, 0);
 
     sdc.run();
   } else {
-    // ...
+    pfasst::MLSDC<scalar> mlsdc;
+
+    for (int l=0; l<nlevs; l++) {
+      auto  nodes    = pfasst::compute_nodes<scalar>(nnodes, "gauss-lobatto");
+      auto* factory  = new pfasst::encap::VectorFactory<scalar,double>(ndofs);
+      auto* sweeper  = new ADIMEX<scalar>(ndofs);
+      auto* transfer = new ADTRANS<scalar>();
+
+      sweeper->set_nodes(nodes);
+      sweeper->set_factory(factory);
+
+      ndofs  = ndofs / 2;
+      nnodes = (nnodes-1)/2 + 1;
+
+      mlsdc.add_level(sweeper, transfer);
+    }
+
+    mlsdc.set_duration(dt, nsteps, 4);
+    mlsdc.setup();
+
+    for (int l=0; l<nlevs; l++) {
+      auto* sweeper = mlsdc.get_level<ADIMEX<scalar>>(l);
+      dvector& q0 = *dynamic_cast<dvector*>(sweeper->get_q(0));
+      sweeper->exact(q0, 0.0);
+    }
+
+    mlsdc.run();
   }
 
   return 0;

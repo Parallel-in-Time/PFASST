@@ -229,6 +229,33 @@ namespace pfasst {
     return mat;
   }
 
+  template<typename time>
+  matrix<time> compute_interp(vector<time> dst, vector<time> src)
+  {
+    const int ndst = dst.size();
+    const int nsrc = src.size();
+
+    matrix<time> mat(ndst, nsrc);
+
+    for (int i=0; i<ndst; i++) {
+      for (int j=0; j<nsrc; j++) {
+	time den = 1.0;
+	time num = 1.0;
+
+	for (int k=0; k<nsrc; k++) {
+	  if (k == j) continue;
+	  den *= src[j] - src[k];
+	  num *= dst[i] - src[k];
+	}
+
+	if (abs(num) > 1e-32)
+	  mat(i, j) = num / den;
+      }
+    }
+
+    return mat;
+  }
+
 }
 
 #endif

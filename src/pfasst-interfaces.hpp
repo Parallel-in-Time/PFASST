@@ -35,12 +35,13 @@ namespace pfasst {
     virtual void integrate(double t, double dt) = 0;
     virtual void residual(double t, double dt) = 0;
     virtual void advance() = 0;
+    virtual void save() { NotImplementedYet("mlsdc/pfasst"); }
   };
 
   class ITransfer {
   public:
     // XXX: pass level iterator to these routines as well
-    virtual void interpolate(ISweeper *dst, const ISweeper *src) = 0;
+    virtual void interpolate(ISweeper *dst, const ISweeper *src, bool initial) = 0;
     virtual void restrict(ISweeper *dst, const ISweeper *src) = 0;
   };
 
