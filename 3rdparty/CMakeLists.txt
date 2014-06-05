@@ -7,13 +7,13 @@ if(pfasst_BUILD_EXAMPLES)
     message(STATUS "FFTW3")
     set(fftw3_SOURCE_DIR "${pfasst_BINARY_DIR}/3rdparty/src/fftw3")
     set(fftw3_INSTALL_DIR "${pfasst_BINARY_DIR}/3rdparty/src/fftw3-install")
-    
+
     ExternalProject_Add(
         fftw3
         LIST_SEPARATOR " "
         URL http://fftw.org/fftw-3.3.4.tar.gz
         URL_MD5 2edab8c06b24feeb3b82bbb3ebf3e7b3
-        TIMEOUT 10
+        TIMEOUT 30
         UPDATE_COMMAND ""
         PATCH_COMMAND ""
         BUILD_IN_SOURCE ON
