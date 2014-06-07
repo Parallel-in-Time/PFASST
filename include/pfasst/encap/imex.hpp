@@ -4,8 +4,7 @@
 
 #include <iostream>
 
-#include "pfasst-encapsulated.hpp"
-#include "pfasst-quadrature.hpp"
+#include "encapsulation.hpp"
 
 using namespace std;
 

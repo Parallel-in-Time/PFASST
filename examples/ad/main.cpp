@@ -11,8 +11,8 @@
 #include <tuple>
 
 #include <pfasst.hpp>
-#include <pfasst-imex.hpp>
-#include <pfasst-vector.hpp>
+#include <pfasst/encap/imex.hpp>
+#include <pfasst/encap/vector.hpp>
 
 #include <fftw3.h>
 

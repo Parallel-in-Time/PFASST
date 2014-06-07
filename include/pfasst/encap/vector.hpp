@@ -15,7 +15,7 @@
 
 #define GPCHKERR(err, msg) if ((err) == -1) { perror(msg); return; }
 
-#include "pfasst-encapsulated.hpp"
+#include "encapsulation.hpp"
 
 using namespace std;
 
@@ -25,10 +25,8 @@ namespace pfasst {
     template<typename scalar, typename time>
     class VectorEncapsulation : public vector<scalar>, public Encapsulation<scalar> {
 
-      FILE *gp_to, *gp_fr;
-
     public:
-      VectorEncapsulation(int size) : vector<scalar>(size) { gp_to = NULL; }
+      VectorEncapsulation(int size) : vector<scalar>(size) { }
 
       void setval(scalar v) {
 	std::fill(this->begin(), this->end(), v);

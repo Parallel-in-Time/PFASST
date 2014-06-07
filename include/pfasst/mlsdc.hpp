@@ -9,7 +9,7 @@
 #include <iostream>
 #include <vector>
 
-#include "pfasst-controller.hpp"
+#include "controller.hpp"
 
 using namespace std;
 

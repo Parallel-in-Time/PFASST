@@ -5,7 +5,7 @@
 #ifndef _PFASST_SDC_HPP_
 #define _PFASST_SDC_HPP_
 
-#include "pfasst-controller.hpp"
+#include "controller.hpp"
 
 namespace pfasst {
 

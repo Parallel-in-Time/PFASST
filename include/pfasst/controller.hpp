@@ -5,7 +5,7 @@
 #ifndef _PFASST_CONTROLLER_HPP_
 #define _PFASST_CONTROLLER_HPP_
 
-#include "pfasst-interfaces.hpp"
+#include "interfaces.hpp"
 
 namespace pfasst {
 

@@ -7,8 +7,8 @@
 
 #include <vector>
 
-#include "pfasst-interfaces.hpp"
-#include "pfasst-quadrature.hpp"
+#include "../interfaces.hpp"
+#include "../quadrature.hpp"
 
 using namespace std;
 
