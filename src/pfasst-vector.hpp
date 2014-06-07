@@ -81,63 +81,6 @@ namespace pfasst {
 	return max;
       }
 
-#ifdef PFASST_ENABLE_GNUPLOT
-      void plot(int window, bool wait)
-      {
-	if (gp_to == NULL) {
-
-	  /*
-	   * Fork a new gnuplot process and connect pipes.
-	   */
-
-	  int err, pid, to[2], fr[2];
-
-	  err = pipe(to); GPCHKERR(err, "Unable to create pipe.");
-	  err = pipe(fr); GPCHKERR(err, "Unable to create pipe.");
-	  pid = fork();   GPCHKERR(pid, "Unable to fork gnuplot.");
-
-	  if (pid) {
-	    close(to[0]); close(fr[1]);
-	  } else {
-	    close(to[1]); close(fr[0]);
-	    dup2(to[0], 0); close(to[0]);
-	    dup2(fr[1], 1); close(fr[1]);
-	    execl("/usr/bin/gnuplot", "gnuplot", NULL);
-	  }
-
-	  gp_to = fdopen(to[1], "w");
-	  gp_fr = fdopen(fr[0], "r");
-
-	}
-
-	/*
-	 * Send vector to gnuplot window.
-	 */
-
-	fprintf(gp_to, "set term wxt %d\n", window);
-	fprintf(gp_to, "plot '-'\n");
-	for (int i=0; i<this->size(); i++)
-	  fprintf(gp_to, "%lg\n", (*this)[i]);
-	fprintf(gp_to, "e\n");
-
-	if (wait) {
-	  fprintf(gp_to, "set print\n");
-	  fprintf(gp_to, "pause mouse button2 \"===> paused - button 2 in window %d to release\"\n", window);
-	  fprintf(gp_to, "print ''\n");
-	  fprintf(gp_to, "set print '-'\n");
-	  fprintf(gp_to, "print 'hoser!'\n");
-	}
-	fflush(gp_to);
-
-	if (wait) {
-	  char buf[8];
-	  char *s = fgets(buf, 8, gp_fr);
-	}
-      }
-#else
-      void plot(int, bool) const { }
-#endif
-
     };
 
     template<typename scalar, typename time>

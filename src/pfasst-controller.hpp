@@ -11,14 +11,14 @@ namespace pfasst {
 
   // class LevelIter;
 
-  template<typename timeT>
+  template<typename time>
   class Controller {
   protected:
     deque<shared_ptr<ISweeper>>  levels;
     deque<shared_ptr<ITransfer>> transfer;
 
     int    nsteps, niters;
-    timeT  dt;
+    time  dt;
 
   public:
 
@@ -28,7 +28,7 @@ namespace pfasst {
       }
     }
 
-    void set_duration(timeT dt, int nsteps, int niters) {
+    void set_duration(time dt, int nsteps, int niters) {
       this->dt = dt; this->nsteps = nsteps; this->niters = niters;
     }
 
