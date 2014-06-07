@@ -5,9 +5,10 @@
 #define PFASST_ENABLE_GNUPLOT
 
 #include <algorithm>
-#include <cmath>
 #include <complex>
+#include <cmath>
 #include <map>
+#include <tuple>
 
 #include <pfasst.hpp>
 #include <pfasst-imex.hpp>
@@ -35,7 +36,7 @@ typedef double scalar;
 
 using namespace std;
 using pfasst::encap::Encapsulation;
-using dvector = pfasst::encap::VectorEncapsulation<double,double>;
+using dvector = pfasst::encap::VectorEncapsulation<scalar,double>;
 
 //
 // fft helper
@@ -102,7 +103,7 @@ class ADIMEX : public pfasst::imex::IMEX<time> {
   vector<complex<scalar>> ddx, lap;
 
   scalar v  = 1.0;
-  scalar t0 = 1.0;
+  time   t0 = 1.0;
   scalar nu = 0.02;
 
 public:
@@ -191,7 +192,7 @@ public:
     fft.backward(f);
   }
 
-  void f2comp(Encapsulation<scalar> *F, Encapsulation<scalar> *Q, scalar t, scalar dt, Encapsulation<scalar> *RHS)
+  void f2comp(Encapsulation<scalar> *F, Encapsulation<scalar> *Q, time t, time dt, Encapsulation<scalar> *RHS)
   {
     auto& f   = *dynamic_cast<dvector*>(F);
     auto& q   = *dynamic_cast<dvector*>(Q);
@@ -208,8 +209,8 @@ public:
 
 };
 
-template<typename scalar>
-class ADTRANS : public pfasst::encap::PolyInterpMixin<scalar> {
+template<typename scalar, typename time>
+class ADTRANS : public pfasst::encap::PolyInterpMixin<time> {
 public:
 
   void interpolate(Encapsulation<scalar> *dst, const Encapsulation<scalar> *src) {
@@ -250,15 +251,23 @@ public:
 // main
 //
 
+template<typename scalar, typename argsT, typename controllerT, typename buildT>
+void auto_add(controllerT c, vector<pair<int,string>> nodes, vector<argsT> args, buildT build) {
+  for (int l=0; l<nodes.size(); l++) {
+    auto  nds = pfasst::compute_nodes<double>(get<0>(nodes[l]), get<1>(nodes[l]));
+    tuple<pfasst::ISweeper*,pfasst::ITransfer*,pfasst::encap::EncapsulationFactory<scalar>*> t = build(args[l]);
+  }
+}
+
 int main(int argc, char **argv)
 {
   int ndofs  = 256;
   int nnodes = 5;
 
   if (nlevs == 1) {
-    pfasst::SDC<scalar> sdc;
+    pfasst::SDC<double> sdc;
 
-    auto  nodes   = pfasst::compute_nodes<scalar>(nnodes, "gauss-lobatto");
+    auto  nodes   = pfasst::compute_nodes<double>(nnodes, "gauss-lobatto");
     auto* factory = new pfasst::encap::VectorFactory<scalar,double>(ndofs);
     auto* sweeper = new ADIMEX<scalar>(ndofs);
 
@@ -275,13 +284,25 @@ int main(int argc, char **argv)
 
     sdc.run();
   } else {
-    pfasst::MLSDC<scalar> mlsdc;
+    pfasst::MLSDC<double> mlsdc;
+
+    // vector<pair<int,string>> nodes = { { 3, "gauss-lobatto" }, { 5, "gauss-lobatto" } };
+    // vector<int>              ndofs = { 256, 512 };
+
+    auto builder = [] (int nx) {
+	auto* factory  = new pfasst::encap::VectorFactory<scalar,double>(nx);
+	auto* sweeper  = new ADIMEX<scalar>(nx);
+	auto* transfer = new ADTRANS<scalar,double>();
+	return make_tuple(sweeper, transfer, factory);
+    };
+
+    // auto_add<scalar>(mlsdc, nodes, ndofs, builder);
 
     for (int l=0; l<nlevs; l++) {
-      auto  nodes    = pfasst::compute_nodes<scalar>(nnodes, "gauss-lobatto");
+      auto  nodes    = pfasst::compute_nodes<double>(nnodes, "gauss-lobatto");
       auto* factory  = new pfasst::encap::VectorFactory<scalar,double>(ndofs);
       auto* sweeper  = new ADIMEX<scalar>(ndofs);
-      auto* transfer = new ADTRANS<scalar>();
+      auto* transfer = new ADTRANS<scalar,double>();
 
       sweeper->set_nodes(nodes);
       sweeper->set_factory(factory);
