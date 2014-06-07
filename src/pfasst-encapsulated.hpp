@@ -114,7 +114,7 @@ namespace pfasst {
 	auto* dst = dynamic_cast<EncapsulatedSweeperMixin<scalar>*>(DST);
 	auto* src = dynamic_cast<const EncapsulatedSweeperMixin<scalar>*>(SRC);
 
-	if (tmat.size() == 0)
+	if (tmat.size1() == 0)
 	  tmat = pfasst::compute_interp<scalar>(dst->get_nodes(), src->get_nodes());
 
 	int ndst = dst->get_nodes().size();

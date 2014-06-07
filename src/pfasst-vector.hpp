@@ -50,19 +50,23 @@ namespace pfasst {
       void mat_apply(vector<Encapsulation<scalar>*> DST, time a, matrix<time> mat,
 		     vector<Encapsulation<scalar>*> SRC, bool zero=true) {
 
-	vector<VectorEncapsulation<scalar,time>*> dst(mat.n), src(mat.m);
-	for (int n=0; n<mat.n; n++)
+	int ndst = DST.size();
+	int nsrc = SRC.size();
+
+	vector<VectorEncapsulation<scalar,time>*> dst(ndst), src(nsrc);
+	for (int n=0; n<ndst; n++)
 	  dst[n] = dynamic_cast<VectorEncapsulation*>(DST[n]);
-	for (int m=0; m<mat.m; m++)
+	for (int m=0; m<nsrc; m++)
 	  src[m] = dynamic_cast<VectorEncapsulation*>(SRC[m]);
 
 	if (zero)
-	  for (int n=0; n<mat.n; n++)
+	  for (int n=0; n<ndst; n++)
 	    dst[n]->setval(0.0);
 
-	for (int i=0; i<(*dst[0]).size(); i++)
-	  for (int n=0; n<mat.n; n++)
-	    for (int m=0; m<mat.m; m++)
+	int ndofs = (*dst[0]).size();
+	for (int i=0; i<ndofs; i++)
+	  for (int n=0; n<ndst; n++)
+	    for (int m=0; m<nsrc; m++)
 	      (*dst[n])[i] += a * mat(n,m) * (*src[m])[i];
       }
 
