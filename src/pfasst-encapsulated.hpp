@@ -123,10 +123,10 @@ namespace pfasst {
 	auto* crse_factory = src->get_factory();
 	auto* fine_factory = dst->get_factory();
 
-	vector<Encapsulation<scalar>*> fine_q(ndst), fine_tmp(ndst);
+	vector<Encapsulation<scalar>*> fine_q(ndst), fine_tmp(nsrc);
 
 	for (int m=0; m<ndst; m++) fine_q[m]   = dst->get_q(m);
-	for (int m=0; m<ndst; m++) fine_tmp[m] = fine_factory->create(solution);
+	for (int m=0; m<nsrc; m++) fine_tmp[m] = fine_factory->create(solution);
 
 	if (initial)
 	  for (int m=1; m<ndst; m++)
@@ -145,7 +145,7 @@ namespace pfasst {
 
 	dst->get_q(0)->mat_apply(fine_q, 1.0, tmat, fine_tmp, false);
 
-	for (int m=0; m<ndst; m++) delete fine_tmp[m];
+	for (int m=0; m<nsrc; m++) delete fine_tmp[m];
 	for (int m=0; m<ndst; m++) dst->evaluate(m);
 
 
