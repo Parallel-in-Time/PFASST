@@ -10,8 +10,11 @@
 
 #include <boost/numeric/ublas/matrix.hpp>
 
-using boost::numeric::ublas::matrix;
+using std::complex;
+using std::string;
 using std::vector;
+
+using boost::numeric::ublas::matrix;
 
 namespace pfasst {
 
@@ -91,7 +94,7 @@ namespace pfasst {
     	coeffT acc = 0.0;
     	for (int j=0; j<n; j++)
     	  acc += abs(z0[j] - z1[j]);
-    	if (acc < 2*numeric_limits<coeffT>::epsilon())
+    	if (acc < 2*std::numeric_limits<coeffT>::epsilon())
 	  break;
 
 	z1 = z0;
@@ -99,7 +102,7 @@ namespace pfasst {
 
       vector<coeffT> roots(n);
       for (int j=0; j<n; j++)
-    	roots[j] = abs(z0[j]) < 4*numeric_limits<coeffT>::epsilon() ? 0.0 : real(z0[j]);
+    	roots[j] = abs(z0[j]) < 4*std::numeric_limits<coeffT>::epsilon() ? 0.0 : real(z0[j]);
 
       sort(roots.begin(), roots.end());
       return roots;

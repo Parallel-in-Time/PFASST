@@ -8,7 +8,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include <pfasst-quadrature.hpp>
+#include <pfasst/quadrature.hpp>
 
 using namespace std;
 
@@ -136,7 +136,7 @@ TEST(QuadratureTest, GaussLobattoNodes) {
 			       0.33333333333333333,
 			       0.20833333333333333 };
 
-  EXPECT_THAT(s3, testing::Pointwise(DoubleNear(), s3e));
+  EXPECT_THAT(s3.data(), testing::Pointwise(DoubleNear(), s3e));
 
   // XXX: need more tests here
 }

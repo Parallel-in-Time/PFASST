@@ -70,7 +70,7 @@ add_subdirectory(3rdparty)
 
 message(STATUS "********************************************************************************")
 message(STATUS "Configuring sources")
-add_subdirectory(src)
+add_subdirectory(include)
 
 if(pfasst_BUILD_EXAMPLES)
     message(STATUS "********************************************************************************")

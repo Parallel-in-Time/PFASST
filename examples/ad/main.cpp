@@ -76,7 +76,7 @@ public:
   complex<double>* forward(const dvector& x)
   {
     workspace *wk = get_workspace(x.size());
-    for (int i=0; i<x.size(); i++)
+    for (unsigned int i=0; i<x.size(); i++)
       wk->z[i] = x[i];
     fftw_execute_dft(wk->ffft, wk->wk, wk->wk);
     return wk->z;
@@ -86,7 +86,7 @@ public:
   {
     workspace *wk = get_workspace(x.size());
     fftw_execute_dft(wk->ifft, wk->wk, wk->wk);
-    for (int i=0; i<x.size(); i++)
+    for (unsigned int i=0; i<x.size(); i++)
       x[i] = real(wk->z[i]);
   }
 
