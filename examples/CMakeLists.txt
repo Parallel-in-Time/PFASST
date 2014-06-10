@@ -1,1 +1,1 @@
-add_subdirectory(ad)
+add_subdirectory(advection_diffusion)
