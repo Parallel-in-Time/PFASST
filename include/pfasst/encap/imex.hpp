@@ -20,7 +20,8 @@ namespace pfasst {
 
     public:
 
-      ~IMEX() {
+      ~IMEX()
+      {
 	for (int m=0; m<Q.size(); m++) delete Q[m];
 	for (int m=0; m<pQ.size(); m++) delete pQ[m];
 	for (int m=0; m<S.size(); m++) delete S[m];
@@ -28,7 +29,7 @@ namespace pfasst {
 	for (int m=0; m<Fi.size(); m++) delete Fi[m];
       }
 
-      void set_q(const Encapsulation<scalar,time> *q0, unsigned int m)
+      void set_state(const Encapsulation<scalar,time> *q0, unsigned int m)
       {
 	Q[m]->copy(q0);
       }
@@ -43,16 +44,13 @@ namespace pfasst {
 	return T[m];
       }
 
-      Encapsulation<scalar,time>* get_pq(unsigned int m) const
+      Encapsulation<scalar,time>* get_saved_state(unsigned int m) const
       {
 	return pQ[m];
       }
 
-      void advance() const {
-	set_q(get_state(Q.size()-1), 0);
-      }
-
-      void setup(bool coarse) {
+      void setup(bool coarse)
+      {
 	auto nodes = this->get_nodes();
 
 	Smat = compute_quadrature(nodes, nodes, 's');
@@ -115,7 +113,8 @@ namespace pfasst {
 	delete rhs;
       }
 
-      virtual void predict(time t0, time dt) {
+      virtual void predict(time t0, time dt)
+      {
 	const auto nodes  = this->get_nodes();
 	const int  nnodes = nodes.size();
 

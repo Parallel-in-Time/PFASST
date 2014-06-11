@@ -61,51 +61,63 @@ namespace pfasst {
       shared_ptr<EncapsulationFactory<scalar,time>> factory;
 
     public:
-      void set_nodes(vector<time> nodes) {
+
+      void set_nodes(vector<time> nodes)
+      {
 	this->nodes = nodes;
       }
 
-      const vector<time> get_nodes() const {
+      const vector<time> get_nodes() const
+      {
 	return nodes;
       }
 
-      void set_factory(EncapsulationFactory<scalar,time>* factory) {
+      void set_factory(EncapsulationFactory<scalar,time>* factory)
+      {
 	this->factory = shared_ptr<EncapsulationFactory<scalar,time>>(factory);
       }
 
-      EncapsulationFactory<scalar,time>* get_factory() const {
+      EncapsulationFactory<scalar,time>* get_factory() const
+      {
 	return factory.get();
       }
 
-      virtual void set_q(const Encapsulation<scalar,time>* q0, unsigned int m) {
-	throw NotImplementedYet("sweeper");
+      virtual void set_state(const Encapsulation<scalar,time>* q0, unsigned int m)
+      {
+      	throw NotImplementedYet("sweeper");
       }
 
-      virtual Encapsulation<scalar,time>* get_state(unsigned int m) const {
-	throw NotImplementedYet("sweeper");
-	return NULL;
-      }
-
-      virtual Encapsulation<scalar,time>* get_tau(unsigned int m) const {
+      virtual Encapsulation<scalar,time>* get_state(unsigned int m) const
+      {
 	throw NotImplementedYet("sweeper");
 	return NULL;
       }
 
-      virtual Encapsulation<scalar,time>* get_pq(unsigned int m) const {
+      virtual Encapsulation<scalar,time>* get_tau(unsigned int m) const
+      {
 	throw NotImplementedYet("sweeper");
 	return NULL;
       }
 
-      virtual Encapsulation<scalar,time>* get_qend() {
+      virtual Encapsulation<scalar,time>* get_saved_state(unsigned int m) const
+      {
+	throw NotImplementedYet("sweeper");
+	return NULL;
+      }
+
+      virtual Encapsulation<scalar,time>* get_end_state()
+      {
 	return this->get_state(this->get_nodes().size()-1);
       }
 
-      virtual void evaluate(int m) {
+      virtual void evaluate(int m)
+      {
 	throw NotImplementedYet("sweeper");
       }
 
-      virtual void advance() {
-	this->set_q(this->get_qend(), 0);
+      virtual void advance()
+      {
+	this->set_state(this->get_end_state(), 0);
       }
 
       virtual void integrate(Encapsulation<scalar,time>* dst, time dt) {
@@ -147,7 +159,7 @@ namespace pfasst {
 	  if (initial)
 	    crse_tmp->saxpy(-1.0, src->get_state(0));
 	  else
-	    crse_tmp->saxpy(-1.0, src->get_pq(m));
+	    crse_tmp->saxpy(-1.0, src->get_saved_state(m));
 	  interpolate(fine_tmp[m], crse_tmp);
 	}
 	delete crse_tmp;
