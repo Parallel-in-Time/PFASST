@@ -1,5 +1,6 @@
 message(STATUS "  advection_diffusion")
 include_directories(
+    ${3rdparty_INCLUDES}
     ${fftw3_INCLUDES}
     ${pfasst_INCLUDES}
 )

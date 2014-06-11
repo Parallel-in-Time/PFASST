@@ -66,6 +66,7 @@ message(STATUS "Configuring 3rd party libraries")
 # makes available:
 #  - fftw3_INCLUDES  (if pfasst_BUILD_EXAMPLES)
 #  - fftw3_LIBS      (if pfasst_BUILD_EXAMPLES)
+# and Boost headers in 3rdparty_INCLUDES
 add_subdirectory(3rdparty)
 
 message(STATUS "********************************************************************************")

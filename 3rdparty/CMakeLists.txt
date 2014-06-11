@@ -3,6 +3,23 @@ set(3rdparty_INCLUDES ${3rdparty_INCLUDES})
 set(3rdparty_DEPENDEND_LIBS ${3rdparty_DEPENDEND_LIBS})
 message(STATUS "--------------------------------------------------------------------------------")
 
+message(STATUS "Boost")
+
+if(pfasst_BUILD_SHARED_LIBS OR BUILD_SHARED_LIBS)
+    set(Boost_USE_STATIC_LIBS OFF)
+    set(pfasst_BUILD_SHARED_LIBS ON)
+    set(BUILD_SHARED_LIBS ON)
+else()
+    set(Boost_USE_STATIC_LIBS ON)
+    set(pfasst_BUILD_SHARED_LIBS OFF)
+    set(BUILD_SHARED_LIBS OFF)
+endif()
+set(Boost_USE_MULTITHREADED ON)
+
+find_package(Boost REQUIRED)
+list(APPEND 3rdparty_INCLUDES ${Boost_INCLUDE_DIRS})
+
+
 if(pfasst_BUILD_EXAMPLES)
     message(STATUS "FFTW3")
     set(fftw3_SOURCE_DIR "${pfasst_BINARY_DIR}/3rdparty/src/fftw3")
