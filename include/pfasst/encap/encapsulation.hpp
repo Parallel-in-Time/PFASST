@@ -20,7 +20,7 @@ namespace pfasst {
     //
     // encapsulation
     //
-    template<typename scalar>
+    template<typename scalar, typename time>
     class Encapsulation {
     public:
       virtual ~Encapsulation() { }
@@ -37,61 +37,66 @@ namespace pfasst {
       virtual void setval(scalar) {
 	throw NotImplementedYet("encap");
       }
-      virtual void copy(const Encapsulation<scalar> *) {
+      virtual void copy(const Encapsulation<scalar,time> *) {
 	throw NotImplementedYet("encap");
       }
-      virtual void saxpy(scalar a, const Encapsulation<scalar> *) {
+      virtual void saxpy(time a, const Encapsulation<scalar,time> *) {
 	throw NotImplementedYet("encap");
       }
-      virtual void mat_apply(vector<Encapsulation<scalar>*> dst, scalar a, matrix<scalar> m,
-			     vector<Encapsulation<scalar>*> src, bool zero=true) {
+      virtual void mat_apply(vector<Encapsulation<scalar,time>*> dst, time a, matrix<time> m,
+			     vector<Encapsulation<scalar,time>*> src, bool zero=true) {
         throw NotImplementedYet("encap");
       }
     };
 
-    template<typename scalar>
+    template<typename scalar, typename time>
     class EncapsulationFactory {
     public:
-      virtual Encapsulation<scalar>* create(const EncapType) = 0;
+      virtual Encapsulation<scalar,time>* create(const EncapType) = 0;
     };
 
-    template<typename scalar>
+    template<typename scalar, typename time>
     class EncapsulatedSweeperMixin : public ISweeper {
       vector<scalar> nodes;
-      shared_ptr<EncapsulationFactory<scalar>> factory;
+      shared_ptr<EncapsulationFactory<scalar,time>> factory;
 
     public:
-      void set_nodes(vector<scalar> nodes) {
-	this->nodes = nodes;      //
+      void set_nodes(vector<time> nodes) {
+	this->nodes = nodes;
       }
 
-      const vector<scalar> get_nodes() const {
+      const vector<time> get_nodes() const {
 	return nodes;
       }
 
-      void set_factory(EncapsulationFactory<scalar>* factory) {
-	this->factory = shared_ptr<EncapsulationFactory<scalar>>(factory);
+      void set_factory(EncapsulationFactory<scalar,time>* factory) {
+	this->factory = shared_ptr<EncapsulationFactory<scalar,time>>(factory);
       }
 
-      EncapsulationFactory<scalar>* get_factory() const {
+      EncapsulationFactory<scalar,time>* get_factory() const {
 	return factory.get();
       }
 
-      virtual void set_q(const Encapsulation<scalar>* q0, unsigned int m) {
+      virtual void set_q(const Encapsulation<scalar,time>* q0, unsigned int m) {
 	throw NotImplementedYet("sweeper");
       }
 
-      virtual Encapsulation<scalar>* get_q(unsigned int m) const {
-	throw NotImplementedYet("sweeper");
-	return NULL;
-      }
-
-      virtual Encapsulation<scalar>* get_pq(unsigned int m) const {
+      virtual Encapsulation<scalar,time>* get_q(unsigned int m) const {
 	throw NotImplementedYet("sweeper");
 	return NULL;
       }
 
-      virtual Encapsulation<scalar>* get_qend() {
+      virtual Encapsulation<scalar,time>* get_tau(unsigned int m) const {
+	throw NotImplementedYet("sweeper");
+	return NULL;
+      }
+
+      virtual Encapsulation<scalar,time>* get_pq(unsigned int m) const {
+	throw NotImplementedYet("sweeper");
+	return NULL;
+      }
+
+      virtual Encapsulation<scalar,time>* get_qend() {
 	return this->get_q(this->get_nodes().size()-1);
       }
 
@@ -99,23 +104,27 @@ namespace pfasst {
 	throw NotImplementedYet("sweeper");
       }
 
-
       virtual void advance() {
 	this->set_q(this->get_qend(), 0);
       }
+
+      virtual void integrate(Encapsulation<scalar,time>* dst, time dt) {
+	throw NotImplementedYet("sweeper");
+      }
     };
 
-    template<typename scalar>
+    template<typename scalar, typename time>
     class PolyInterpMixin : public pfasst::ITransfer {
-      matrix<scalar> tmat;
+      matrix<time> tmat;
     public:
 
-      virtual void interpolate(ISweeper *DST, const ISweeper *SRC, bool initial) {
-	auto* dst = dynamic_cast<EncapsulatedSweeperMixin<scalar>*>(DST);
-	auto* src = dynamic_cast<const EncapsulatedSweeperMixin<scalar>*>(SRC);
+      virtual void interpolate(ISweeper *DST, const ISweeper *SRC, bool initial)
+      {
+	auto* dst = dynamic_cast<EncapsulatedSweeperMixin<scalar,time>*>(DST);
+	auto* src = dynamic_cast<const EncapsulatedSweeperMixin<scalar,time>*>(SRC);
 
 	if (tmat.size1() == 0)
-	  tmat = pfasst::compute_interp<scalar>(dst->get_nodes(), src->get_nodes());
+	  tmat = pfasst::compute_interp<time>(dst->get_nodes(), src->get_nodes());
 
 	int ndst = dst->get_nodes().size();
 	int nsrc = src->get_nodes().size();
@@ -123,7 +132,7 @@ namespace pfasst {
 	auto* crse_factory = src->get_factory();
 	auto* fine_factory = dst->get_factory();
 
-	vector<Encapsulation<scalar>*> fine_q(ndst), fine_tmp(nsrc);
+	vector<Encapsulation<scalar,time>*> fine_q(ndst), fine_tmp(nsrc);
 
 	for (int m=0; m<ndst; m++) fine_q[m]   = dst->get_q(m);
 	for (int m=0; m<nsrc; m++) fine_tmp[m] = fine_factory->create(solution);
@@ -147,13 +156,12 @@ namespace pfasst {
 
 	for (int m=0; m<nsrc; m++) delete fine_tmp[m];
 	for (int m=0; m<ndst; m++) dst->evaluate(m);
-
-
       }
 
-      virtual void restrict(ISweeper *DST, const ISweeper *SRC) {
-	auto* dst = dynamic_cast<EncapsulatedSweeperMixin<scalar>*>(DST);
-	auto* src = dynamic_cast<const EncapsulatedSweeperMixin<scalar>*>(SRC);
+      virtual void restrict(ISweeper *DST, const ISweeper *SRC)
+      {
+	auto* dst = dynamic_cast<EncapsulatedSweeperMixin<scalar,time>*>(DST);
+	auto* src = dynamic_cast<const EncapsulatedSweeperMixin<scalar,time>*>(SRC);
 
 	auto dnodes = dst->get_nodes();
 	auto snodes = src->get_nodes();
@@ -172,12 +180,30 @@ namespace pfasst {
 	for (int m=0; m<ndst; m++) dst->evaluate(m);
       }
 
+      virtual void fas(ISweeper *DST, const ISweeper *SRC)
+      {
+	auto* dst = dynamic_cast<EncapsulatedSweeperMixin<scalar,time>*>(DST);
+	auto* src = dynamic_cast<const EncapsulatedSweeperMixin<scalar,time>*>(SRC);
+
+	int ndst = dst->get_nodes().size();
+	int nsrc = src->get_nodes().size();
+
+	auto* crse_factory = src->get_factory();
+	auto* fine_factory = dst->get_factory();
+
+	vector<Encapsulation<scalar,time>*> fine_q(ndst), fine_tmp(nsrc);
+
+	for (int m=0; m<ndst; m++) fine_q[m]   = dst->get_q(m);
+	for (int m=0; m<nsrc; m++) fine_tmp[m] = fine_factory->create(solution);
+
+      }
+
       // required for interp/restrict helpers
-      virtual void interpolate(Encapsulation<scalar> *dst, const Encapsulation<scalar> *src) {
+      virtual void interpolate(Encapsulation<scalar,time> *dst, const Encapsulation<scalar,time> *src) {
 	throw NotImplementedYet("mlsdc/pfasst");
       }
 
-      virtual void restrict(Encapsulation<scalar> *dst, const Encapsulation<scalar> *src) {
+      virtual void restrict(Encapsulation<scalar,time> *dst, const Encapsulation<scalar,time> *src) {
 	throw NotImplementedYet("mlsdc/pfasst");
       }
 

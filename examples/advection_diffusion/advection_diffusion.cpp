@@ -98,7 +98,7 @@ public:
 //
 
 template<typename time>
-class ADIMEX : public pfasst::imex::IMEX<time> {
+class ADIMEX : public pfasst::imex::IMEX<scalar,time> {
 
   vector<complex<scalar>> ddx, lap;
 
@@ -155,18 +155,18 @@ public:
   void predict(time t, time dt)
   {
     // cout << "PREDICTOR" << endl;
-    pfasst::imex::IMEX<time>::predict(t, dt);
+    pfasst::imex::IMEX<scalar,time>::predict(t, dt);
     echo_error(t+dt);
   }
 
   void sweep(time t, time dt)
   {
     // cout << "SWEEPING" << endl;
-    pfasst::imex::IMEX<time>::sweep(t, dt);
+    pfasst::imex::IMEX<scalar,time>::sweep(t, dt);
     echo_error(t+dt);
   }
 
-  void f1eval(Encapsulation<scalar> *F, Encapsulation<scalar> *Q, time t)
+  void f1eval(Encapsulation<scalar,time> *F, Encapsulation<scalar,time> *Q, time t)
   {
     auto& f = *dynamic_cast<dvector*>(F);
     auto& q = *dynamic_cast<dvector*>(Q);
@@ -179,7 +179,7 @@ public:
     fft.backward(f);
   }
 
-  void f2eval(Encapsulation<scalar> *F, Encapsulation<scalar> *Q, time t)
+  void f2eval(Encapsulation<scalar,time> *F, Encapsulation<scalar,time> *Q, time t)
   {
     auto& f = *dynamic_cast<dvector*>(F);
     auto& q = *dynamic_cast<dvector*>(Q);
@@ -192,7 +192,7 @@ public:
     fft.backward(f);
   }
 
-  void f2comp(Encapsulation<scalar> *F, Encapsulation<scalar> *Q, time t, time dt, Encapsulation<scalar> *RHS)
+  void f2comp(Encapsulation<scalar,time> *F, Encapsulation<scalar,time> *Q, time t, time dt, Encapsulation<scalar,time> *RHS)
   {
     auto& f   = *dynamic_cast<dvector*>(F);
     auto& q   = *dynamic_cast<dvector*>(Q);
@@ -210,10 +210,10 @@ public:
 };
 
 template<typename scalar, typename time>
-class ADTRANS : public pfasst::encap::PolyInterpMixin<time> {
+class ADTRANS : public pfasst::encap::PolyInterpMixin<scalar,time> {
 public:
 
-  void interpolate(Encapsulation<scalar> *dst, const Encapsulation<scalar> *src) {
+  void interpolate(Encapsulation<scalar,time> *dst, const Encapsulation<scalar,time> *src) {
     auto& crse = *dynamic_cast<const dvector*>(src);
     auto& fine = *dynamic_cast<dvector*>(dst);
 
@@ -234,7 +234,7 @@ public:
     fft.backward(fine);
   }
 
-  void restrict(Encapsulation<scalar> *dst, const Encapsulation<scalar> *src) {
+  void restrict(Encapsulation<scalar,time> *dst, const Encapsulation<scalar,time> *src) {
     auto& crse = *dynamic_cast<dvector*>(dst);
     auto& fine = *dynamic_cast<const dvector*>(src);
 
@@ -255,7 +255,7 @@ template<typename scalar, typename argsT, typename controllerT, typename buildT>
 void auto_add(controllerT c, vector<pair<int,string>> nodes, vector<argsT> args, buildT build) {
   for (int l=0; l<nodes.size(); l++) {
     auto  nds = pfasst::compute_nodes<double>(get<0>(nodes[l]), get<1>(nodes[l]));
-    tuple<pfasst::ISweeper*,pfasst::ITransfer*,pfasst::encap::EncapsulationFactory<scalar>*> t = build(args[l]);
+    tuple<pfasst::ISweeper*,pfasst::ITransfer*,pfasst::encap::EncapsulationFactory<scalar,double>*> t = build(args[l]);
   }
 }
 
@@ -269,7 +269,7 @@ int main(int argc, char **argv)
 
     auto  nodes   = pfasst::compute_nodes<double>(nnodes, "gauss-lobatto");
     auto* factory = new pfasst::encap::VectorFactory<scalar,double>(ndofs);
-    auto* sweeper = new ADIMEX<scalar>(ndofs);
+    auto* sweeper = new ADIMEX<double>(ndofs);
 
     sweeper->set_nodes(nodes);
     sweeper->set_factory(factory);
@@ -291,7 +291,7 @@ int main(int argc, char **argv)
 
     auto builder = [] (int nx) {
 	auto* factory  = new pfasst::encap::VectorFactory<scalar,double>(nx);
-	auto* sweeper  = new ADIMEX<scalar>(nx);
+	auto* sweeper  = new ADIMEX<double>(nx);
 	auto* transfer = new ADTRANS<scalar,double>();
 	return make_tuple(sweeper, transfer, factory);
     };
