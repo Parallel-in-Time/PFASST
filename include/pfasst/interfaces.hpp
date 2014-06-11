@@ -27,13 +27,11 @@ namespace pfasst {
 
   class ISweeper {
   public:
-    virtual void setup() { }
+    virtual void setup(bool coarse=false) { }
     virtual ~ISweeper() { }
 
     virtual void sweep(double t, double dt) = 0;
     virtual void predict(double t, double dt) = 0;
-    virtual void integrate(double t, double dt) = 0;
-    virtual void residual(double t, double dt) = 0;
     virtual void advance() = 0;
     virtual void save() { NotImplementedYet("mlsdc/pfasst"); }
   };
@@ -43,6 +41,7 @@ namespace pfasst {
     // XXX: pass level iterator to these routines as well
     virtual void interpolate(ISweeper *dst, const ISweeper *src, bool initial) = 0;
     virtual void restrict(ISweeper *dst, const ISweeper *src) = 0;
+    virtual void fas(ISweeper *dst, const ISweeper *src) = 0;
   };
 
   class ICommunicator {
