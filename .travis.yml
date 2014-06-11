@@ -10,13 +10,15 @@ env:
   - CMAKE_BUILD_TYPE="Debug"
 
 before_install:
+  - sudo add-apt-repository ppa:apokluda/boost1.53 --yes
   - sudo add-apt-repository ppa:ubuntu-toolchain-r/test --yes # libstdc++-4.8
   - if [ "${CXX}" == "clang++" ]; then sudo add-apt-repository --yes ppa:h-rayflood/llvm; fi # clang++-3.2
   - sudo apt-get update
 
 install:
   - if [ "${CXX}" == "clang++" ]; then sudo apt-get -qq install clang-3.2; fi
-  - sudo apt-get install g++-4.8; # clang need it for libstdc++ update
+  - sudo apt-get install g++-4.8 # clang need it for libstdc++ update
+  - sudo apt-get install libboost1.53-all-dev
 
 before_script:
   # update compilers
