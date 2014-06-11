@@ -33,7 +33,7 @@ namespace pfasst {
 	Q[m]->copy(q0);
       }
 
-      Encapsulation<scalar,time>* get_q(unsigned int m) const
+      Encapsulation<scalar,time>* get_state(unsigned int m) const
       {
 	return Q[m];
       }
@@ -49,7 +49,7 @@ namespace pfasst {
       }
 
       void advance() const {
-	set_q(get_q(Q.size()-1), 0);
+	set_q(get_state(Q.size()-1), 0);
       }
 
       void setup(bool coarse) {

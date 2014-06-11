@@ -81,7 +81,7 @@ namespace pfasst {
 	throw NotImplementedYet("sweeper");
       }
 
-      virtual Encapsulation<scalar,time>* get_q(unsigned int m) const {
+      virtual Encapsulation<scalar,time>* get_state(unsigned int m) const {
 	throw NotImplementedYet("sweeper");
 	return NULL;
       }
@@ -97,7 +97,7 @@ namespace pfasst {
       }
 
       virtual Encapsulation<scalar,time>* get_qend() {
-	return this->get_q(this->get_nodes().size()-1);
+	return this->get_state(this->get_nodes().size()-1);
       }
 
       virtual void evaluate(int m) {
@@ -134,7 +134,7 @@ namespace pfasst {
 
 	vector<Encapsulation<scalar,time>*> fine_q(ndst), fine_tmp(nsrc);
 
-	for (int m=0; m<ndst; m++) fine_q[m]   = dst->get_q(m);
+	for (int m=0; m<ndst; m++) fine_q[m]   = dst->get_state(m);
 	for (int m=0; m<nsrc; m++) fine_tmp[m] = fine_factory->create(solution);
 
 	if (initial)
@@ -143,16 +143,16 @@ namespace pfasst {
 
 	auto* crse_tmp = crse_factory->create(solution);
 	for (int m=0; m<nsrc; m++) {
-	  crse_tmp->copy(src->get_q(m));
+	  crse_tmp->copy(src->get_state(m));
 	  if (initial)
-	    crse_tmp->saxpy(-1.0, src->get_q(0));
+	    crse_tmp->saxpy(-1.0, src->get_state(0));
 	  else
 	    crse_tmp->saxpy(-1.0, src->get_pq(m));
 	  interpolate(fine_tmp[m], crse_tmp);
 	}
 	delete crse_tmp;
 
-	dst->get_q(0)->mat_apply(fine_q, 1.0, tmat, fine_tmp, false);
+	dst->get_state(0)->mat_apply(fine_q, 1.0, tmat, fine_tmp, false);
 
 	for (int m=0; m<nsrc; m++) delete fine_tmp[m];
 	for (int m=0; m<ndst; m++) dst->evaluate(m);
@@ -174,7 +174,7 @@ namespace pfasst {
 	for (int m=0; m<ndst; m++) {
 	  if (dnodes[m] != snodes[m*trat])
 	    throw NotImplementedYet("coarse nodes must be nested");
-	  this->restrict(dst->get_q(m), src->get_q(m*trat));
+	  this->restrict(dst->get_state(m), src->get_state(m*trat));
 	}
 
 	for (int m=0; m<ndst; m++) dst->evaluate(m);
@@ -193,7 +193,7 @@ namespace pfasst {
 
 	vector<Encapsulation<scalar,time>*> fine_q(ndst), fine_tmp(nsrc);
 
-	for (int m=0; m<ndst; m++) fine_q[m]   = dst->get_q(m);
+	for (int m=0; m<ndst; m++) fine_q[m]   = dst->get_state(m);
 	for (int m=0; m<nsrc; m++) fine_tmp[m] = fine_factory->create(solution);
 
       }
