@@ -22,9 +22,10 @@ namespace pfasst {
 
       ~IMEX()
       {
-	for (int m=0; m<Q.size(); m++) delete Q[m];
+	for (int m=0; m<Q.size(); m++)  delete Q[m];
+	for (int m=0; m<S.size(); m++)  delete S[m];
+	for (int m=0; m<T.size(); m++)  delete T[m];
 	for (int m=0; m<pQ.size(); m++) delete pQ[m];
-	for (int m=0; m<S.size(); m++) delete S[m];
 	for (int m=0; m<Fe.size(); m++) delete Fe[m];
 	for (int m=0; m<Fi.size(); m++) delete Fi[m];
       }

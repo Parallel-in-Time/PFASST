@@ -31,7 +31,16 @@ public:
 
   ~FFT()
   {
-    // XXX
+    for (auto& x: workspaces) {
+      auto* wk = std::get<1>(x);
+      fftw_destroy_plan(wk->ffft);
+      fftw_destroy_plan(wk->ifft);
+      fftw_free(wk->wk);
+      delete wk;
+      //      workspaces.erase(std::get<0>(x));
+    }
+    workspaces.clear();
+    // workspaces.clear();
   }
 
   workspace* get_workspace(int ndofs)

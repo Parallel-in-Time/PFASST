@@ -10,9 +10,12 @@
 #include "advection_diffusion_sweeper.hpp"
 #include "spectral_transfer_1d.hpp"
 
+using namespace pfasst;
+using namespace pfasst::encap;
+
 int main(int argc, char **argv)
 {
-  pfasst::MLSDC<double> mlsdc;
+  MLSDC<double> mlsdc;
 
   const int    nlevs  = 2;
   const int    nsteps = 4;
@@ -31,8 +34,8 @@ int main(int argc, char **argv)
    * (according to 'xrat').
    */
   for (int l=0; l<nlevs; l++) {
-    auto  nodes    = pfasst::compute_nodes<double>(nnodes, "gauss-lobatto");
-    auto* factory  = new pfasst::encap::VectorFactory<double,double>(ndofs);
+    auto  nodes    = compute_nodes<double>(nnodes, "gauss-lobatto");
+    auto* factory  = new VectorFactory<double,double>(ndofs);
     auto* sweeper  = new AdvectionDiffusionSweeper<double,double>(ndofs);
     auto* transfer = new SpectralTransfer1D<double,double>();
 
