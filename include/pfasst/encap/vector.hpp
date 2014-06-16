@@ -92,7 +92,7 @@ namespace pfasst {
     };
 
     template<typename scalar, typename time>
-    class VectorFactory : public EncapsulationFactory<scalar,time> {
+    class VectorFactory : public EncapFactory<scalar,time> {
       int size;
     public:
       int dofs() { return size; }

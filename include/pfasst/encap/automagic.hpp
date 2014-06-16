@@ -13,9 +13,9 @@ namespace pfasst {
   namespace encap {
 
     template<typename scalar, typename time>
-    using auto_build_tuple = tuple<pfasst::encap::EncapsulatedSweeperMixin<scalar,time>*,
+    using auto_build_tuple = tuple<pfasst::encap::EncapSweeper<scalar,time>*,
 				   pfasst::ITransfer*,
-				   pfasst::encap::EncapsulationFactory<scalar,time>*>;
+				   pfasst::encap::EncapFactory<scalar,time>*>;
 
     template<typename scalar, typename time, typename controllerT, typename buildT>
     void auto_build(controllerT& c, vector<pair<int,string>> nodes, buildT build) {
@@ -35,12 +35,10 @@ namespace pfasst {
     void auto_setup(controllerT& c, initialT initial) {
       c.setup();
       for (int l=0; l<c.nlevels(); l++) {
-	//	auto* sweeper = c.get_level<pfasst::encap::EncapsulatedSweeperMixin<scalar,time>>(l);
 	auto* isweeper = c.get_level(l);
-	auto* sweeper = dynamic_cast<pfasst::encap::EncapsulatedSweeperMixin<scalar,time>*>(isweeper);
+	auto* sweeper = dynamic_cast<pfasst::encap::EncapSweeper<scalar,time>*>(isweeper);
 	auto* q0 = sweeper->get_state(0);
 	initial(sweeper, q0);
-	// sweeper->exact(q0, 0.0);
       }
     }
 

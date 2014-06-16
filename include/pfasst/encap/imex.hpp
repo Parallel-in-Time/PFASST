@@ -14,7 +14,7 @@ namespace pfasst {
     using pfasst::encap::Encapsulation;
 
     template<typename scalar, typename time>
-    class IMEX : public pfasst::encap::EncapsulatedSweeperMixin<scalar,time> {
+    class IMEX : public pfasst::encap::EncapSweeper<scalar,time> {
       vector<Encapsulation<scalar,time>*> Q, pQ, S, T, Fe, Fi;
       matrix<time> Smat, SEmat, SImat;
 

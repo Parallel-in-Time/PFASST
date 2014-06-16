@@ -53,7 +53,7 @@ int main(int argc, char **argv)
    * the 'initial' function is called once for each level to set the
    * intial conditions.
    */
-  auto initial = [] (EncapsulatedSweeperMixin<double,double> *sweeper, Encapsulation<double,double> *q0) {
+  auto initial = [] (EncapSweeper<double,double> *sweeper, Encapsulation<double,double> *q0) {
     auto* ad = dynamic_cast<AdvectionDiffusionSweeper<double,double>*>(sweeper);
     ad->exact(q0, 0.0);
   };

@@ -50,15 +50,15 @@ namespace pfasst {
     };
 
     template<typename scalar, typename time>
-    class EncapsulationFactory {
+    class EncapFactory {
     public:
       virtual Encapsulation<scalar,time>* create(const EncapType) = 0;
     };
 
     template<typename scalar, typename time>
-    class EncapsulatedSweeperMixin : public ISweeper {
+    class EncapSweeper : public ISweeper {
       vector<scalar> nodes;
-      shared_ptr<EncapsulationFactory<scalar,time>> factory;
+      shared_ptr<EncapFactory<scalar,time>> factory;
 
     public:
 
@@ -72,12 +72,12 @@ namespace pfasst {
 	return nodes;
       }
 
-      void set_factory(EncapsulationFactory<scalar,time>* factory)
+      void set_factory(EncapFactory<scalar,time>* factory)
       {
-	this->factory = shared_ptr<EncapsulationFactory<scalar,time>>(factory);
+	this->factory = shared_ptr<EncapFactory<scalar,time>>(factory);
       }
 
-      EncapsulationFactory<scalar,time>* get_factory() const
+      EncapFactory<scalar,time>* get_factory() const
       {
 	return factory.get();
       }
@@ -132,10 +132,12 @@ namespace pfasst {
 
     public:
 
+      virtual ~PolyInterpMixin() { }
+
       virtual void interpolate(ISweeper *DST, const ISweeper *SRC, bool initial)
       {
-	auto* dst = dynamic_cast<EncapsulatedSweeperMixin<scalar,time>*>(DST);
-	auto* src = dynamic_cast<const EncapsulatedSweeperMixin<scalar,time>*>(SRC);
+	auto* dst = dynamic_cast<EncapSweeper<scalar,time>*>(DST);
+	auto* src = dynamic_cast<const EncapSweeper<scalar,time>*>(SRC);
 
 	if (tmat.size1() == 0)
 	  tmat = pfasst::compute_interp<time>(dst->get_nodes(), src->get_nodes());
@@ -174,8 +176,8 @@ namespace pfasst {
 
       virtual void restrict(ISweeper *DST, const ISweeper *SRC)
       {
-	auto* dst = dynamic_cast<EncapsulatedSweeperMixin<scalar,time>*>(DST);
-	auto* src = dynamic_cast<const EncapsulatedSweeperMixin<scalar,time>*>(SRC);
+	auto* dst = dynamic_cast<EncapSweeper<scalar,time>*>(DST);
+	auto* src = dynamic_cast<const EncapSweeper<scalar,time>*>(SRC);
 
 	auto dnodes = dst->get_nodes();
 	auto snodes = src->get_nodes();
@@ -196,8 +198,8 @@ namespace pfasst {
 
       virtual void fas(time dt, ISweeper *dst, const ISweeper *src)
       {
-	auto* crse = dynamic_cast<EncapsulatedSweeperMixin<scalar,time>*>(dst);
-	auto* fine = dynamic_cast<const EncapsulatedSweeperMixin<scalar,time>*>(src);
+	auto* crse = dynamic_cast<EncapSweeper<scalar,time>*>(dst);
+	auto* fine = dynamic_cast<const EncapSweeper<scalar,time>*>(src);
 
 	int ncrse = crse->get_nodes().size();
 	int nfine = fine->get_nodes().size();
