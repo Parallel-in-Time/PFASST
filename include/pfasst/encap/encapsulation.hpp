@@ -120,14 +120,16 @@ namespace pfasst {
 	this->set_state(this->get_end_state(), 0);
       }
 
-      virtual void integrate(Encapsulation<scalar,time>* dst, time dt) {
+      virtual void integrate(time dt, vector<Encapsulation<scalar,time>*> dst) const
+      {
 	throw NotImplementedYet("sweeper");
       }
     };
 
     template<typename scalar, typename time>
     class PolyInterpMixin : public pfasst::ITransfer {
-      matrix<time> tmat;
+      matrix<time> tmat, fmat;
+
     public:
 
       virtual void interpolate(ISweeper *DST, const ISweeper *SRC, bool initial)
@@ -192,22 +194,55 @@ namespace pfasst {
 	for (int m=0; m<ndst; m++) dst->evaluate(m);
       }
 
-      virtual void fas(ISweeper *DST, const ISweeper *SRC)
+      virtual void fas(time dt, ISweeper *dst, const ISweeper *src)
       {
-	auto* dst = dynamic_cast<EncapsulatedSweeperMixin<scalar,time>*>(DST);
-	auto* src = dynamic_cast<const EncapsulatedSweeperMixin<scalar,time>*>(SRC);
+	auto* crse = dynamic_cast<EncapsulatedSweeperMixin<scalar,time>*>(dst);
+	auto* fine = dynamic_cast<const EncapsulatedSweeperMixin<scalar,time>*>(src);
 
-	int ndst = dst->get_nodes().size();
-	int nsrc = src->get_nodes().size();
+	int ncrse = crse->get_nodes().size();
+	int nfine = fine->get_nodes().size();
 
-	auto* crse_factory = src->get_factory();
-	auto* fine_factory = dst->get_factory();
+	auto* crse_factory = crse->get_factory();
+	auto* fine_factory = fine->get_factory();
 
-	vector<Encapsulation<scalar,time>*> fine_q(ndst), fine_tmp(nsrc);
+	vector<Encapsulation<scalar,time>*> crse_z2n(ncrse-1), fine_z2n(nfine-1), rstr_z2n(ncrse-1);
+	for (int m=0; m<ncrse-1; m++) crse_z2n[m] = crse_factory->create(solution);
+	for (int m=0; m<ncrse-1; m++) rstr_z2n[m] = crse_factory->create(solution);
+	for (int m=0; m<nfine-1; m++) fine_z2n[m] = fine_factory->create(solution);
 
-	for (int m=0; m<ndst; m++) fine_q[m]   = dst->get_state(m);
-	for (int m=0; m<nsrc; m++) fine_tmp[m] = fine_factory->create(solution);
+	// compute '0 to node' integral on the coarse level
+	crse->integrate(dt, crse_z2n);
+	for (int m=1; m<ncrse-1; m++)
+	  crse_z2n[m]->saxpy(1.0, crse_z2n[m-1]);
 
+	// compute '0 to node' integral on the fine level
+	fine->integrate(dt, fine_z2n);
+	for (int m=1; m<nfine-1; m++)
+	  fine_z2n[m]->saxpy(1.0, fine_z2n[m-1]);
+
+	// restrict '0 to node' fine integral
+	int trat = (nfine - 1) / (ncrse - 1);
+	for (int m=1; m<ncrse; m++)
+	  this->restrict(rstr_z2n[m-1], fine_z2n[m*trat-1]);
+
+	// compute 'node to node' tau correction
+	vector<Encapsulation<scalar,time>*> tau(ncrse-1);
+	for (int m=0; m<ncrse-1; m++) tau[m] = crse->get_tau(m);
+
+	tau[0]->copy(rstr_z2n[0]);
+	tau[0]->saxpy(-1.0, crse_z2n[0]);
+
+	for (int m=1; m<ncrse-1; m++) {
+	  tau[m]->copy(rstr_z2n[m]);
+	  tau[m]->saxpy(-1.0, rstr_z2n[m-1]);
+
+	  tau[m]->saxpy(-1.0, crse_z2n[m]);
+	  tau[m]->saxpy(1.0, crse_z2n[m-1]);
+	}
+
+	for (int m=0; m<ncrse-1; m++) delete crse_z2n[m];
+	for (int m=0; m<ncrse-1; m++) delete rstr_z2n[m];
+	for (int m=0; m<nfine-1; m++) delete fine_z2n[m];
       }
 
       // required for interp/restrict helpers

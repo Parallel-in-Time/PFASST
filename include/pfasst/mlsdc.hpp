@@ -79,7 +79,7 @@ namespace pfasst {
 	fine->sweep(t, dt);
 
       trns->restrict(crse, fine);
-      trns->fas(crse, fine);
+      trns->fas(dt, crse, fine);
       crse->save();
 
       return leviter - 1;

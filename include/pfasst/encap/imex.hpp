@@ -49,6 +49,13 @@ namespace pfasst {
 	return pQ[m];
       }
 
+      virtual void integrate(time dt, vector<Encapsulation<scalar,time>*> dst) const
+      {
+	auto* encap = dst[0];
+	encap->mat_apply(dst, dt, Smat, Fe, true);
+	encap->mat_apply(dst, dt, Smat, Fi, false);
+      }
+
       void setup(bool coarse)
       {
 	auto nodes = this->get_nodes();
@@ -84,15 +91,12 @@ namespace pfasst {
 	const int  nnodes = nodes.size();
 
 	// integrate
-	for (int n=0; n<nnodes-1; n++) {
-	  S[n]->setval(0.0);
-	  for (int m=0; m<nnodes; m++) {
-	    S[n]->saxpy(dt * SEmat(n,m), Fe[m]);
-	    S[n]->saxpy(dt * SImat(n,m), Fi[m]);
-	  }
-	  if (T.size() > 0)
-	    S[n]->saxpy(1.0, T[n]);
-	}
+	S[0]->mat_apply(S, dt, SEmat, Fe, true);
+	S[0]->mat_apply(S, dt, SImat, Fi, false);
+	if (T.size() > 0)
+	  for (int m=0; m<nnodes-1; m++)
+	    S[m]->saxpy(1.0, T[m]);
+
 
 	// sweep
 	Encapsulation<scalar,time> *rhs = this->get_factory()->create(pfasst::encap::solution);
@@ -143,7 +147,8 @@ namespace pfasst {
 	  pQ[m]->copy(Q[m]);
       }
 
-      virtual void evaluate(int m) {
+      virtual void evaluate(int m)
+      {
 	// XXX: time
 	f1eval(Fe[m], Q[m], 0.0);
 	f2eval(Fi[m], Q[m], 0.0);
