@@ -25,7 +25,7 @@ namespace pfasst {
       nsweeps.resize(this->nlevels());
       fill(nsweeps.begin(), nsweeps.end(), 1);
       for (auto leviter=this->coarsest(); leviter<=this->finest(); ++leviter)
-	leviter.current()->setup();
+	leviter.current()->setup(leviter!=this->finest());
     }
 
     //
@@ -66,49 +66,64 @@ namespace pfasst {
 
     using LevelIter = typename pfasst::Controller<time>::LevelIter;
 
+    /**
+     * Cycle down: sweep on current (fine), restrict to coarse.
+     */
     LevelIter cycle_down(LevelIter leviter, double t, double dt)
     {
-      auto* sweeper = leviter.current();
-      auto* transfer = leviter.transfer();
-      if (leviter < this->finest()) {
-	transfer->restrict(leviter.current(), leviter.fine());
-	leviter.current()->save();
-      }
+      auto* fine = leviter.current();
+      auto* crse = leviter.coarse();
+      auto* trns = leviter.transfer();
+
       for (int s=0; s<nsweeps[leviter.level]; s++)
-	sweeper->sweep(t, dt);
+	fine->sweep(t, dt);
+
+      trns->restrict(crse, fine);
+      trns->fas(dt, crse, fine);
+      crse->save();
+
       return leviter - 1;
     }
 
+    /**
+     * Cycle up: interpolate coarse correction to fine, sweep on
+     * current (fine).
+     *
+     * Note that if the fine level corresponds to the finest MLSDC
+     * level, we don't perform a sweep.  In this case the only
+     * operation that is performed here is interpolation.
+     */
     LevelIter cycle_up(LevelIter leviter, double t, double dt)
     {
-      auto* sweeper = leviter.current();
-      auto* transfer = leviter.transfer();
-      if (leviter < this->finest()) {
+      auto* fine = leviter.current();
+      auto* crse = leviter.coarse();
+      auto* trns = leviter.transfer();
+
+      trns->interpolate(fine, crse, false);
+
+      if (leviter < this->finest())
 	for (int s=0; s<nsweeps[leviter.level]; s++)
-	  sweeper->sweep(t, dt);
-	transfer->interpolate(leviter.fine(), leviter.current(), false);
-      }
+	  fine->sweep(t, dt);
+
       return leviter + 1;
     }
 
+    /**
+     * Cycle bottom: sweep on the current (coarsest) level.
+     */
     LevelIter cycle_bottom(LevelIter leviter, double t, double dt)
     {
-      auto *sweeper = leviter.current();
-      auto* transfer = leviter.transfer();
-      transfer->restrict(leviter.current(), leviter.fine());
-      leviter.current()->save();
+      auto* crse = leviter.current();
+
       for (int s=0; s<nsweeps[leviter.level]; s++)
-	sweeper->sweep(t, dt);
-      transfer->interpolate(leviter.fine(), leviter.current(), false);
+	crse->sweep(t, dt);
+
       return leviter + 1;
     }
 
-    LevelIter cycle_top(LevelIter leviter, double t, double dt)
-    {
-      throw NotImplementedYet("cycle_top");
-      return leviter;
-    }
-
+    /**
+     * Perform an MLSDC V-cycle.
+     */
     LevelIter cycle_v(LevelIter leviter, double t, double dt)
     {
       if (leviter.level == 0) {
