@@ -12,16 +12,22 @@ namespace pfasst {
   template<typename time>
   class SDC : public Controller<time> {
   public:
-    void run() {
-      ISweeper& swp = *this->get_level(0);
+
+    void run()
+    {
+      auto* sweeper = this->get_level(0);
+
       for (int nstep=0; nstep<this->nsteps; nstep++) {
 	time t = nstep * this->dt;
-	swp.predict(t, this->dt);
-	for (int niter=0; niter<this->niters; niter++)
-	  swp.sweep(t, this->dt);
-	swp.advance();
+
+	sweeper->predict(t, this->dt, nstep==0);
+	for (int niter=1; niter<this->niters; niter++)
+	  sweeper->sweep(t, this->dt);
+
+	sweeper->advance();
       }
     }
+
   };
 
 }
