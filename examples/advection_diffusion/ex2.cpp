@@ -4,6 +4,8 @@
  * This example uses a (serial) multi-level SDC sweeper.
  */
 
+#include <fftw3.h>
+
 #include <pfasst.hpp>
 #include <pfasst/mlsdc.hpp>
 #include <pfasst/encap/vector.hpp>
@@ -69,5 +71,5 @@ int main(int argc, char **argv)
   mlsdc.set_duration(dt, nsteps, niters);
   mlsdc.run();
 
-  return 0;
+  fftw_cleanup();
 }

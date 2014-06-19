@@ -4,6 +4,8 @@
  * This example uses a vanilla SDC sweeper.
  */
 
+#include <fftw3.h>
+
 #include <pfasst.hpp>
 #include <pfasst/sdc.hpp>
 #include <pfasst/encap/vector.hpp>
@@ -35,4 +37,6 @@ int main(int argc, char **argv)
   sweeper->exact(q0, 0.0);
 
   sdc.run();
+
+  fftw_cleanup();
 }

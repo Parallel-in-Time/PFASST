@@ -27,8 +27,8 @@ namespace pfasst {
 
   class ISweeper {
   public:
-    virtual void setup(bool coarse=false) { }
     virtual ~ISweeper() { }
+    virtual void setup(bool coarse=false) { }
 
     virtual void sweep(double t, double dt) = 0; // XXX: this needs to be a templated
     virtual void predict(double t, double dt, bool initial) = 0; // XXX: this needs to be templated
@@ -40,6 +40,7 @@ namespace pfasst {
   public:
     // XXX: pass level iterator to these routines as well
     // XXX: these needs to be templated
+    virtual ~ITransfer() { }
     virtual void interpolate(ISweeper *dst, const ISweeper *src,
 			     bool interp_delta_from_initial=false,
 			     bool interp_initial=false) = 0;
