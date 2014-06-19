@@ -10,6 +10,7 @@
 #include <tuple>
 
 #include <pfasst.hpp>
+#include <pfasst/mlsdc.hpp>
 #include <pfasst/encap/automagic.hpp>
 #include <pfasst/encap/vector.hpp>
 

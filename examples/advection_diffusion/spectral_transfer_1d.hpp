@@ -6,6 +6,8 @@
 #define _SPECTRAL_TRANSFER_1D_HPP_
 
 #include <pfasst/encap/vector.hpp>
+#include <pfasst/encap/poly_interp.hpp>
+
 #include "fft.hpp"
 
 template<typename scalar, typename time>

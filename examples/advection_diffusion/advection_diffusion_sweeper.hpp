@@ -8,7 +8,7 @@
 #include <complex>
 #include <vector>
 
-#include <pfasst/encap/imex.hpp>
+#include <pfasst/encap/imex_sweeper.hpp>
 #include "fft.hpp"
 
 #define pi     3.1415926535897932385
@@ -20,7 +20,7 @@ using pfasst::encap::Encapsulation;
 
 
 template<typename scalar, typename time>
-class AdvectionDiffusionSweeper : public pfasst::imex::IMEX<scalar,time> {
+class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<scalar,time> {
 
   using dvector = pfasst::encap::VectorEncapsulation<scalar,time>;
   FFT<scalar,time> fft;
@@ -89,13 +89,13 @@ public:
 
   void predict(time t, time dt, bool initial)
   {
-    pfasst::imex::IMEX<scalar,time>::predict(t, dt, initial);
+    pfasst::encap::IMEXSweeper<scalar,time>::predict(t, dt, initial);
     echo_error(t+dt, true);
   }
 
   void sweep(time t, time dt)
   {
-    pfasst::imex::IMEX<scalar,time>::sweep(t, dt);
+    pfasst::encap::IMEXSweeper<scalar,time>::sweep(t, dt);
     echo_error(t+dt);
   }
 

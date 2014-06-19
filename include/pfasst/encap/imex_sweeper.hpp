@@ -1,26 +1,26 @@
 
-#ifndef _PFASST_IMEX_HPP_
-#define _PFASST_IMEX_HPP_
+#ifndef _PFASST_ENCAP_IMEX_SWEEPER_HPP_
+#define _PFASST_ENCAP_IMEX_SWEEPER_HPP_
 
 #include <iostream>
 
-#include "encapsulation.hpp"
+#include "encap_sweeper.hpp"
 
 using namespace std;
 
 namespace pfasst {
-  namespace imex {
+  namespace encap {
 
     using pfasst::encap::Encapsulation;
 
     template<typename scalar, typename time>
-    class IMEX : public pfasst::encap::EncapSweeper<scalar,time> {
+    class IMEXSweeper : public pfasst::encap::EncapSweeper<scalar,time> {
       vector<Encapsulation<scalar,time>*> Q, pQ, S, T, Fe, Fi;
       matrix<time> Smat, SEmat, SImat;
 
     public:
 
-      ~IMEX()
+      ~IMEXSweeper()
       {
 	for (int m=0; m<Q.size(); m++)  delete Q[m];
 	for (int m=0; m<S.size(); m++)  delete S[m];
@@ -33,6 +33,7 @@ namespace pfasst {
       void set_state(const Encapsulation<scalar,time> *q0, unsigned int m)
       {
 	Q[m]->copy(q0);
+
       }
 
       Encapsulation<scalar,time>* get_state(unsigned int m) const

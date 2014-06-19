@@ -5,7 +5,7 @@
 #include <tuple>
 
 #include "../quadrature.hpp"
-#include "encapsulation.hpp"
+#include "encap_sweeper.hpp"
 
 using namespace std;
 
