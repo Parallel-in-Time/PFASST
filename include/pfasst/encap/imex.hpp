@@ -50,6 +50,14 @@ namespace pfasst {
 	return pQ[m];
       }
 
+      virtual void advance()
+      {
+	Q[0]->copy(Q[Q.size()-1]);
+	Fe[0]->copy(Fe[Fe.size()-1]);
+	Fi[0]->copy(Fi[Fi.size()-1]);
+      }
+
+
       virtual void integrate(time dt, vector<Encapsulation<scalar,time>*> dst) const
       {
 	auto* encap = dst[0];
@@ -118,13 +126,15 @@ namespace pfasst {
 	delete rhs;
       }
 
-      virtual void predict(time t0, time dt)
+      virtual void predict(time t0, time dt, bool initial)
       {
 	const auto nodes  = this->get_nodes();
 	const int  nnodes = nodes.size();
 
-	f1eval(Fe[0], Q[0], t0);
-	f2eval(Fi[0], Q[0], t0);
+	if (initial) {
+	  f1eval(Fe[0], Q[0], t0);
+	  f2eval(Fi[0], Q[0], t0);
+	}
 
 	Encapsulation<scalar,time> *rhs = this->get_factory()->create(pfasst::encap::solution);
 
@@ -150,9 +160,9 @@ namespace pfasst {
 
       virtual void evaluate(int m)
       {
-	// XXX: time
-	f1eval(Fe[m], Q[m], 0.0);
-	f2eval(Fi[m], Q[m], 0.0);
+	time t = this->get_nodes()[m]; // XXX
+	f1eval(Fe[m], Q[m], t);
+	f2eval(Fi[m], Q[m], t);
       }
 
 

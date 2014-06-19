@@ -30,6 +30,7 @@ class AdvectionDiffusionSweeper : public pfasst::imex::IMEX<scalar,time> {
   scalar v  = 1.0;
   time   t0 = 1.0;
   scalar nu = 0.02;
+  int    nf1evals = 0;
 
 public:
 
@@ -42,7 +43,6 @@ public:
       ddx[i] = complex<scalar>(0.0, 1.0) * kx;
       lap[i] = (kx*kx < 1e-13) ? 0.0 : -kx*kx;
     }
-
   }
 
   void exact(Encapsulation<scalar,time>* q, scalar t)
@@ -66,7 +66,7 @@ public:
     }
   }
 
-  void echo_error(time t)
+  void echo_error(time t, bool predict=false)
   {
     auto& qend = *dynamic_cast<dvector*>(this->get_state(this->get_nodes().size()-1));
     auto  qex  = dvector(qend.size());
@@ -79,13 +79,13 @@ public:
       if (d > max)
 	max = d;
     }
-    cout << "err: " << scientific << max << " (" << qend.size() << ")" << endl;
+    cout << "err: " << scientific << max << " (" << qend.size() << ", " << predict << ")" << endl;
   }
 
-  void predict(time t, time dt)
+  void predict(time t, time dt, bool initial)
   {
-    pfasst::imex::IMEX<scalar,time>::predict(t, dt);
-    echo_error(t+dt);
+    pfasst::imex::IMEX<scalar,time>::predict(t, dt, initial);
+    echo_error(t+dt, true);
   }
 
   void sweep(time t, time dt)
@@ -105,6 +105,8 @@ public:
     for (int i=0; i<q.size(); i++)
       z[i] *= c * ddx[i];
     fft.backward(f);
+
+    nf1evals++;
   }
 
   void f2eval(Encapsulation<scalar,time> *F, Encapsulation<scalar,time> *Q, time t)

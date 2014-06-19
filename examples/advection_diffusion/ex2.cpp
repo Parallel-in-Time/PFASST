@@ -5,6 +5,7 @@
  */
 
 #include <pfasst.hpp>
+#include <pfasst/mlsdc.hpp>
 #include <pfasst/encap/vector.hpp>
 
 #include "advection_diffusion_sweeper.hpp"
@@ -58,11 +59,9 @@ int main(int argc, char **argv)
   /*
    * set initial conditions on each level
    */
-  for (int l=0; l<nlevs; l++) {
-    auto* sweeper = mlsdc.get_level<AdvectionDiffusionSweeper<double,double>>(l);
-    auto* q0 = sweeper->get_state(0);
-    sweeper->exact(q0, 0.0);
-  }
+  auto* sweeper = mlsdc.get_level<AdvectionDiffusionSweeper<double,double>>(mlsdc.nlevels()-1);
+  auto* q0 = sweeper->get_state(0);
+  sweeper->exact(q0, 0.0);
 
   /*
    * run mlsdc!

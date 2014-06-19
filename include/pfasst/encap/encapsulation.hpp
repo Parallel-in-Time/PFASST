@@ -117,7 +117,7 @@ namespace pfasst {
 
       virtual void advance()
       {
-	this->set_state(this->get_end_state(), 0);
+	throw NotImplementedYet("sweeper");
       }
 
       virtual void integrate(time dt, vector<Encapsulation<scalar,time>*> dst) const
@@ -134,66 +134,67 @@ namespace pfasst {
 
       virtual ~PolyInterpMixin() { }
 
-      virtual void interpolate(ISweeper *DST, const ISweeper *SRC, bool initial)
+      virtual void interpolate(ISweeper *dst, const ISweeper *src, bool initial)
       {
-	auto* dst = dynamic_cast<EncapSweeper<scalar,time>*>(DST);
-	auto* src = dynamic_cast<const EncapSweeper<scalar,time>*>(SRC);
+	auto* fine = dynamic_cast<EncapSweeper<scalar,time>*>(dst);
+	auto* crse = dynamic_cast<const EncapSweeper<scalar,time>*>(src);
 
 	if (tmat.size1() == 0)
-	  tmat = pfasst::compute_interp<time>(dst->get_nodes(), src->get_nodes());
+	  tmat = pfasst::compute_interp<time>(fine->get_nodes(), crse->get_nodes());
 
-	int ndst = dst->get_nodes().size();
-	int nsrc = src->get_nodes().size();
+	int nfine = fine->get_nodes().size();
+	int ncrse = crse->get_nodes().size();
 
-	auto* crse_factory = src->get_factory();
-	auto* fine_factory = dst->get_factory();
+	auto* crse_factory = crse->get_factory();
+	auto* fine_factory = fine->get_factory();
 
-	vector<Encapsulation<scalar,time>*> fine_q(ndst), fine_tmp(nsrc);
+	vector<Encapsulation<scalar,time>*> fine_state(nfine), fine_delta(ncrse);
 
-	for (int m=0; m<ndst; m++) fine_q[m]   = dst->get_state(m);
-	for (int m=0; m<nsrc; m++) fine_tmp[m] = fine_factory->create(solution);
+	for (int m=0; m<nfine; m++) fine_state[m] = fine->get_state(m);
+	for (int m=0; m<ncrse; m++) fine_delta[m] = fine_factory->create(solution);
 
 	if (initial)
-	  for (int m=1; m<ndst; m++)
-	    fine_q[m]->copy(fine_q[0]);
+	  for (int m=1; m<nfine; m++)
+	    fine_state[m]->copy(fine_state[0]);
 
-	auto* crse_tmp = crse_factory->create(solution);
-	for (int m=0; m<nsrc; m++) {
-	  crse_tmp->copy(src->get_state(m));
+	auto* crse_delta = crse_factory->create(solution);
+	for (int m=0; m<ncrse; m++) {
+	  crse_delta->copy(crse->get_state(m));
 	  if (initial)
-	    crse_tmp->saxpy(-1.0, src->get_state(0));
+	    crse_delta->saxpy(-1.0, crse->get_state(0));
 	  else
-	    crse_tmp->saxpy(-1.0, src->get_saved_state(m));
-	  interpolate(fine_tmp[m], crse_tmp);
+	    crse_delta->saxpy(-1.0, crse->get_saved_state(m));
+	  interpolate(fine_delta[m], crse_delta);
 	}
-	delete crse_tmp;
+	delete crse_delta;
 
-	dst->get_state(0)->mat_apply(fine_q, 1.0, tmat, fine_tmp, false);
+	fine->get_state(0)->mat_apply(fine_state, 1.0, tmat, fine_delta, false);
 
-	for (int m=0; m<nsrc; m++) delete fine_tmp[m];
-	for (int m=0; m<ndst; m++) dst->evaluate(m);
+	for (int m=0; m<ncrse; m++) delete fine_delta[m];
+	for (int m=0; m<nfine; m++) fine->evaluate(m);
       }
 
-      virtual void restrict(ISweeper *DST, const ISweeper *SRC)
+      virtual void restrict(ISweeper *dst, const ISweeper *src, bool restrict_initial)
       {
-	auto* dst = dynamic_cast<EncapSweeper<scalar,time>*>(DST);
-	auto* src = dynamic_cast<const EncapSweeper<scalar,time>*>(SRC);
+	auto* crse = dynamic_cast<EncapSweeper<scalar,time>*>(dst);
+	auto* fine = dynamic_cast<const EncapSweeper<scalar,time>*>(src);
 
-	auto dnodes = dst->get_nodes();
-	auto snodes = src->get_nodes();
+	auto dnodes = crse->get_nodes();
+	auto snodes = fine->get_nodes();
 
-	int ndst = dst->get_nodes().size();
-	int nsrc = src->get_nodes().size();
+	int ncrse = crse->get_nodes().size();
+	int nfine = fine->get_nodes().size();
 
-	int trat = (nsrc - 1) / (ndst - 1);
+	int trat = (nfine - 1) / (ncrse - 1);
 
-	for (int m=0; m<ndst; m++) {
+	int m0 = restrict_initial ? 0 : 1;
+	for (int m=m0; m<ncrse; m++) {
 	  if (dnodes[m] != snodes[m*trat])
 	    throw NotImplementedYet("coarse nodes must be nested");
-	  this->restrict(dst->get_state(m), src->get_state(m*trat));
+	  this->restrict(crse->get_state(m), fine->get_state(m*trat));
 	}
 
-	for (int m=0; m<ndst; m++) dst->evaluate(m);
+	for (int m=m0; m<ncrse; m++) crse->evaluate(m);
       }
 
       virtual void fas(time dt, ISweeper *dst, const ISweeper *src)
