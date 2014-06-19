@@ -103,7 +103,7 @@ namespace pfasst {
       auto* crse = leviter.coarse();
       auto* trns = leviter.transfer();
 
-      trns->interpolate(fine, crse, false);
+      trns->interpolate(fine, crse);
 
       if (leviter < this->finest())
 	perform_sweeps(leviter, t, dt);

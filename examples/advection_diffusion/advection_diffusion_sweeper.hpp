@@ -45,6 +45,11 @@ public:
     }
   }
 
+  ~AdvectionDiffusionSweeper()
+  {
+    cout << "number of f1 evals: " << nf1evals << endl;
+  }
+
   void exact(Encapsulation<scalar,time>* q, scalar t)
   {
     exact(*dynamic_cast<dvector*>(q), t);

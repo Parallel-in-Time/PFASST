@@ -134,7 +134,9 @@ namespace pfasst {
 
       virtual ~PolyInterpMixin() { }
 
-      virtual void interpolate(ISweeper *dst, const ISweeper *src, bool initial)
+      virtual void interpolate(ISweeper *dst, const ISweeper *src,
+			       bool interp_delta_from_initial,
+			       bool interp_initial)
       {
 	auto* fine = dynamic_cast<EncapSweeper<scalar,time>*>(dst);
 	auto* crse = dynamic_cast<const EncapSweeper<scalar,time>*>(src);
@@ -153,14 +155,15 @@ namespace pfasst {
 	for (int m=0; m<nfine; m++) fine_state[m] = fine->get_state(m);
 	for (int m=0; m<ncrse; m++) fine_delta[m] = fine_factory->create(solution);
 
-	if (initial)
+	if (interp_delta_from_initial)
 	  for (int m=1; m<nfine; m++)
 	    fine_state[m]->copy(fine_state[0]);
 
 	auto* crse_delta = crse_factory->create(solution);
-	for (int m=0; m<ncrse; m++) {
+	int m0 = interp_initial ? 0 : 1;
+	for (int m=m0; m<ncrse; m++) {
 	  crse_delta->copy(crse->get_state(m));
-	  if (initial)
+	  if (interp_delta_from_initial)
 	    crse_delta->saxpy(-1.0, crse->get_state(0));
 	  else
 	    crse_delta->saxpy(-1.0, crse->get_saved_state(m));
@@ -168,10 +171,13 @@ namespace pfasst {
 	}
 	delete crse_delta;
 
+	if (! interp_initial)
+	  fine_delta[0]->setval(0.0);
+
 	fine->get_state(0)->mat_apply(fine_state, 1.0, tmat, fine_delta, false);
 
 	for (int m=0; m<ncrse; m++) delete fine_delta[m];
-	for (int m=0; m<nfine; m++) fine->evaluate(m);
+	for (int m=m0; m<nfine; m++) fine->evaluate(m);
       }
 
       virtual void restrict(ISweeper *dst, const ISweeper *src, bool restrict_initial)
