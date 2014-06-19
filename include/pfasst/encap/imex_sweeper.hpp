@@ -1,26 +1,26 @@
 
-#ifndef _PFASST_IMEX_HPP_
-#define _PFASST_IMEX_HPP_
+#ifndef _PFASST_ENCAP_IMEX_SWEEPER_HPP_
+#define _PFASST_ENCAP_IMEX_SWEEPER_HPP_
 
 #include <iostream>
 
-#include "encapsulation.hpp"
+#include "encap_sweeper.hpp"
 
 using namespace std;
 
 namespace pfasst {
-  namespace imex {
+  namespace encap {
 
     using pfasst::encap::Encapsulation;
 
     template<typename scalar, typename time>
-    class IMEX : public pfasst::encap::EncapSweeper<scalar,time> {
+    class IMEXSweeper : public pfasst::encap::EncapSweeper<scalar,time> {
       vector<Encapsulation<scalar,time>*> Q, pQ, S, T, Fe, Fi;
       matrix<time> Smat, SEmat, SImat;
 
     public:
 
-      ~IMEX()
+      ~IMEXSweeper()
       {
 	for (int m=0; m<Q.size(); m++)  delete Q[m];
 	for (int m=0; m<S.size(); m++)  delete S[m];
@@ -33,6 +33,7 @@ namespace pfasst {
       void set_state(const Encapsulation<scalar,time> *q0, unsigned int m)
       {
 	Q[m]->copy(q0);
+
       }
 
       Encapsulation<scalar,time>* get_state(unsigned int m) const
@@ -49,6 +50,14 @@ namespace pfasst {
       {
 	return pQ[m];
       }
+
+      virtual void advance()
+      {
+	Q[0]->copy(Q[Q.size()-1]);
+	Fe[0]->copy(Fe[Fe.size()-1]);
+	Fi[0]->copy(Fi[Fi.size()-1]);
+      }
+
 
       virtual void integrate(time dt, vector<Encapsulation<scalar,time>*> dst) const
       {
@@ -118,13 +127,15 @@ namespace pfasst {
 	delete rhs;
       }
 
-      virtual void predict(time t0, time dt)
+      virtual void predict(time t0, time dt, bool initial)
       {
 	const auto nodes  = this->get_nodes();
 	const int  nnodes = nodes.size();
 
-	f1eval(Fe[0], Q[0], t0);
-	f2eval(Fi[0], Q[0], t0);
+	if (initial) {
+	  f1eval(Fe[0], Q[0], t0);
+	  f2eval(Fi[0], Q[0], t0);
+	}
 
 	Encapsulation<scalar,time> *rhs = this->get_factory()->create(pfasst::encap::solution);
 
@@ -150,9 +161,9 @@ namespace pfasst {
 
       virtual void evaluate(int m)
       {
-	// XXX: time
-	f1eval(Fe[m], Q[m], 0.0);
-	f2eval(Fi[m], Q[m], 0.0);
+	time t = this->get_nodes()[m]; // XXX
+	f1eval(Fe[m], Q[m], t);
+	f2eval(Fi[m], Q[m], t);
       }
 
 
