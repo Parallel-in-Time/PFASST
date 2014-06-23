@@ -27,7 +27,7 @@ Build status
 ------------
 
 | Branch      | Status                              |
-|---------------------------------------------------|
+|-------------|-------------------------------------|
 | Master      | [![master-status][]][pfasst-travis] |
 | Development | [![dev-status][]][pfasst-travis]    |
 
