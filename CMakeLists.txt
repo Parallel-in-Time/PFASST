@@ -10,9 +10,14 @@ include(ExternalProject)
 # Set default ExternalProject root directory
 set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/3rdparty)
 
-option(pfasst_DISABLE_LIBCXX "Disable use of LLVM's libstdc++ when compiling with Clang." ON)
+option(pfasst_DISABLE_LIBCXX "Disable use of LLVM's libc++ when compiling with Clang." ON)
 option(pfasst_BUILD_EXAMPLES "Build example programs." ON)
 option(pfasst_BUILD_TESTS "Build test suite for PFASST." ON)
+
+# output directories
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${pfasst_SOURCE_DIR}/dist/bin")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${pfasst_SOURCE_DIR}/dist/lib")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${pfasst_SOURCE_DIR}/dist/lib")
 
 # check for C++11 support
 if(${CMAKE_CXX_COMPILER_ID} MATCHES GNU)

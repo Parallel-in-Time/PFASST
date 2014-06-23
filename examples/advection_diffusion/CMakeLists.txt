@@ -18,6 +18,6 @@ foreach(example ${advec_examples})
         ${fftw3_LIBS}
     )
     set_target_properties(${example}
-        PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${pfasst_BINARY_DIR}/examples/advection_diffusion
+        PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/examples/advection_diffusion
     )
 endforeach(example)
