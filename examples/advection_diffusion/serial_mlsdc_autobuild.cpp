@@ -44,24 +44,24 @@ int main(int argc, char **argv)
    */
   auto build_level = [ndofs] (unsigned int level) {
     auto* factory  = new VectorFactory<double,double>(ndofs[level]);
-    auto* sweeper  = new AdvectionDiffusionSweeper<double,double>(ndofs[level]);
-    auto* transfer = new SpectralTransfer1D<double,double>();
+    auto* sweeper  = new AdvectionDiffusionSweeper<double>(ndofs[level]);
+    auto* transfer = new SpectralTransfer1D<double>();
 
-    return auto_build_tuple<double,double>(sweeper,transfer,factory);
+    return auto_build_tuple<double>(sweeper,transfer,factory);
   };
 
   /*
    * the 'initial' function is called once for each level to set the
    * intial conditions.
    */
-  auto initial = [] (EncapSweeper<double,double> *sweeper,
-		     Encapsulation<double,double> *q0) {
-    auto* ad = dynamic_cast<AdvectionDiffusionSweeper<double,double>*>(sweeper);
+  auto initial = [] (EncapSweeper<double> *sweeper,
+		     Encapsulation<double> *q0) {
+    auto* ad = dynamic_cast<AdvectionDiffusionSweeper<double>*>(sweeper);
     ad->exact(q0, 0.0);
   };
 
-  auto_build<double,double>(mlsdc, nodes, build_level);
-  auto_setup<double,double>(mlsdc, initial);
+  auto_build<double>(mlsdc, nodes, build_level);
+  auto_setup<double>(mlsdc, initial);
   mlsdc.set_duration(dt, nsteps, niters);
   mlsdc.run();
 

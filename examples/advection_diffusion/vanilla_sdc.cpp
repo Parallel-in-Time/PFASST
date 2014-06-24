@@ -24,7 +24,7 @@ int main(int argc, char **argv)
 
   auto  nodes   = pfasst::compute_nodes<double>(nnodes, "gauss-lobatto");
   auto* factory = new pfasst::encap::VectorFactory<double,double>(ndofs);
-  auto* sweeper = new AdvectionDiffusionSweeper<double,double>(ndofs);
+  auto* sweeper = new AdvectionDiffusionSweeper<double>(ndofs);
 
   sweeper->set_nodes(nodes);
   sweeper->set_factory(factory);

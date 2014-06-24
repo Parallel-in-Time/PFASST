@@ -13,9 +13,9 @@ namespace pfasst {
 
     using pfasst::encap::Encapsulation;
 
-    template<typename scalar, typename time>
-    class IMEXSweeper : public pfasst::encap::EncapSweeper<scalar,time> {
-      vector<Encapsulation<scalar,time>*> Q, pQ, S, T, Fe, Fi;
+    template<typename time>
+    class IMEXSweeper : public pfasst::encap::EncapSweeper<time> {
+      vector<Encapsulation<time>*> Q, pQ, S, T, Fe, Fi;
       matrix<time> Smat, SEmat, SImat;
 
     public:
@@ -30,23 +30,23 @@ namespace pfasst {
 	for (int m=0; m<Fi.size(); m++) delete Fi[m];
       }
 
-      void set_state(const Encapsulation<scalar,time> *q0, unsigned int m)
+      void set_state(const Encapsulation<time> *q0, unsigned int m)
       {
 	Q[m]->copy(q0);
 
       }
 
-      Encapsulation<scalar,time>* get_state(unsigned int m) const
+      Encapsulation<time>* get_state(unsigned int m) const
       {
 	return Q[m];
       }
 
-      Encapsulation<scalar,time>* get_tau(unsigned int m) const
+      Encapsulation<time>* get_tau(unsigned int m) const
       {
 	return T[m];
       }
 
-      Encapsulation<scalar,time>* get_saved_state(unsigned int m) const
+      Encapsulation<time>* get_saved_state(unsigned int m) const
       {
 	return pQ[m];
       }
@@ -59,7 +59,7 @@ namespace pfasst {
       }
 
 
-      virtual void integrate(time dt, vector<Encapsulation<scalar,time>*> dst) const
+      virtual void integrate(time dt, vector<Encapsulation<time>*> dst) const
       {
 	auto* encap = dst[0];
 	encap->mat_apply(dst, dt, Smat, Fe, true);
@@ -75,7 +75,7 @@ namespace pfasst {
 	SEmat = Smat;
 	SImat = Smat;
 	for (int m=0; m<nodes.size()-1; m++) {
-	  scalar ds = nodes[m+1] - nodes[m];
+	  time ds = nodes[m+1] - nodes[m];
 	  SEmat(m, m)   -= ds;
 	  SImat(m, m+1) -= ds;
 	}
@@ -109,7 +109,7 @@ namespace pfasst {
 
 
 	// sweep
-	Encapsulation<scalar,time> *rhs = this->get_factory()->create(pfasst::encap::solution);
+	Encapsulation<time> *rhs = this->get_factory()->create(pfasst::encap::solution);
 
 	time t = t0;
 	for (int m=0; m<nnodes-1; m++) {
@@ -137,7 +137,7 @@ namespace pfasst {
 	  f2eval(Fi[0], Q[0], t0);
 	}
 
-	Encapsulation<scalar,time> *rhs = this->get_factory()->create(pfasst::encap::solution);
+	Encapsulation<time> *rhs = this->get_factory()->create(pfasst::encap::solution);
 
 	time t = t0;
 	for (int m=0; m<nnodes-1; m++) {
@@ -167,17 +167,17 @@ namespace pfasst {
       }
 
 
-      virtual void f1eval(Encapsulation<scalar,time> *F, Encapsulation<scalar,time> *Q, time t)
+      virtual void f1eval(Encapsulation<time> *F, Encapsulation<time> *Q, time t)
       {
 	throw NotImplementedYet("imex (f1eval)");
       }
 
-      virtual void f2eval(Encapsulation<scalar,time> *F, Encapsulation<scalar,time> *Q, time t)
+      virtual void f2eval(Encapsulation<time> *F, Encapsulation<time> *Q, time t)
       {
 	throw NotImplementedYet("imex (f2eval)");
       }
 
-      virtual void f2comp(Encapsulation<scalar,time> *F, Encapsulation<scalar,time> *Q, time t, time dt, Encapsulation<scalar,time>* rhs)
+      virtual void f2comp(Encapsulation<time> *F, Encapsulation<time> *Q, time t, time dt, Encapsulation<time>* rhs)
       {
 	throw NotImplementedYet("imex (f2comp)");
       }
