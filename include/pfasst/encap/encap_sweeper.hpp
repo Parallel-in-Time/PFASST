@@ -14,10 +14,9 @@
 namespace pfasst {
   namespace encap {
 
-    template<typename time>
     class EncapSweeper : public ISweeper {
       vector<time> nodes;
-      shared_ptr<EncapFactory<time>> factory;
+      shared_ptr<EncapFactory> factory;
 
     public:
 
@@ -31,40 +30,40 @@ namespace pfasst {
 	return nodes;
       }
 
-      void set_factory(EncapFactory<time>* factory)
+      void set_factory(EncapFactory* factory)
       {
-	this->factory = shared_ptr<EncapFactory<time>>(factory);
+	this->factory = shared_ptr<EncapFactory>(factory);
       }
 
-      EncapFactory<time>* get_factory() const
+      EncapFactory* get_factory() const
       {
 	return factory.get();
       }
 
-      virtual void set_state(const Encapsulation<time>* q0, unsigned int m)
+      virtual void set_state(const Encapsulation* q0, unsigned int m)
       {
       	throw NotImplementedYet("sweeper");
       }
 
-      virtual Encapsulation<time>* get_state(unsigned int m) const
+      virtual Encapsulation* get_state(unsigned int m) const
       {
 	throw NotImplementedYet("sweeper");
 	return NULL;
       }
 
-      virtual Encapsulation<time>* get_tau(unsigned int m) const
+      virtual Encapsulation* get_tau(unsigned int m) const
       {
 	throw NotImplementedYet("sweeper");
 	return NULL;
       }
 
-      virtual Encapsulation<time>* get_saved_state(unsigned int m) const
+      virtual Encapsulation* get_saved_state(unsigned int m) const
       {
 	throw NotImplementedYet("sweeper");
 	return NULL;
       }
 
-      virtual Encapsulation<time>* get_end_state()
+      virtual Encapsulation* get_end_state()
       {
 	return this->get_state(this->get_nodes().size()-1);
       }
@@ -79,7 +78,7 @@ namespace pfasst {
 	throw NotImplementedYet("sweeper");
       }
 
-      virtual void integrate(time dt, vector<Encapsulation<time>*> dst) const
+      virtual void integrate(time dt, vector<Encapsulation*> dst) const
       {
 	throw NotImplementedYet("sweeper");
       }

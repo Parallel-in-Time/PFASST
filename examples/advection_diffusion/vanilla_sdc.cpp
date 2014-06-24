@@ -14,7 +14,7 @@
 
 int main(int argc, char **argv)
 {
-  pfasst::SDC<double> sdc;
+  pfasst::SDC sdc;
 
   const int    nsteps = 4;
   const double dt     = 0.01;
@@ -22,9 +22,9 @@ int main(int argc, char **argv)
   const int    ndofs  = 64;
   const int    niters = 4;
 
-  auto  nodes   = pfasst::compute_nodes<double>(nnodes, "gauss-lobatto");
-  auto* factory = new pfasst::encap::VectorFactory<double,double>(ndofs);
-  auto* sweeper = new AdvectionDiffusionSweeper<double>(ndofs);
+  auto  nodes   = pfasst::compute_nodes(nnodes, "gauss-lobatto");
+  auto* factory = new pfasst::encap::VectorFactory<double>(ndofs);
+  auto* sweeper = new AdvectionDiffusionSweeper(ndofs);
 
   sweeper->set_nodes(nodes);
   sweeper->set_factory(factory);

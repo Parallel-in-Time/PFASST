@@ -11,6 +11,8 @@
 #include <memory>
 #include <string>
 
+#include "config.hpp"
+
 using namespace std;
 
 namespace pfasst {
@@ -30,8 +32,8 @@ namespace pfasst {
     virtual ~ISweeper() { }
     virtual void setup(bool coarse=false) { }
 
-    virtual void sweep(double t, double dt) = 0; // XXX: this needs to be a templated
-    virtual void predict(double t, double dt, bool initial) = 0; // XXX: this needs to be templated
+    virtual void sweep(time t, time dt) = 0; // XXX: this needs to be a templated
+    virtual void predict(time t, time dt, bool initial) = 0; // XXX: this needs to be templated
     virtual void advance() = 0;
     virtual void save() { NotImplementedYet("mlsdc/pfasst"); }
   };
@@ -46,7 +48,7 @@ namespace pfasst {
 			     bool interp_initial=false) = 0;
     virtual void restrict(ISweeper *dst, const ISweeper *src,
 			  bool restrict_initial=false) = 0;
-    virtual void fas(double dt, ISweeper *dst, const ISweeper *src) = 0;
+    virtual void fas(time dt, ISweeper *dst, const ISweeper *src) = 0;
   };
 
   class ICommunicator {

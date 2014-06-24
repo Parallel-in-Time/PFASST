@@ -5,13 +5,11 @@
 #ifndef _PFASST_CONTROLLER_HPP_
 #define _PFASST_CONTROLLER_HPP_
 
+#include "config.hpp"
 #include "interfaces.hpp"
 
 namespace pfasst {
 
-  // class LevelIter;
-
-  template<typename time>
   class Controller {
   protected:
     deque<shared_ptr<ISweeper>>  levels;

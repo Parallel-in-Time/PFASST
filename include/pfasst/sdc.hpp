@@ -9,8 +9,7 @@
 
 namespace pfasst {
 
-  template<typename time>
-  class SDC : public Controller<time> {
+  class SDC : public Controller {
   public:
 
     void run()

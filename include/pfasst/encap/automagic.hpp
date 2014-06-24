@@ -12,16 +12,15 @@ using namespace std;
 namespace pfasst {
   namespace encap {
 
-    template<typename time>
-    using auto_build_tuple = tuple<pfasst::encap::EncapSweeper<time>*,
+    using auto_build_tuple = tuple<pfasst::encap::EncapSweeper*,
 				   pfasst::ITransfer*,
-				   pfasst::encap::EncapFactory<time>*>;
+				   pfasst::encap::EncapFactory*>;
 
-    template<typename time, typename controllerT, typename buildT>
+    template<typename controllerT, typename buildT>
     void auto_build(controllerT& c, vector<pair<int,string>> nodes, buildT build) {
       for (unsigned int l=0; l<nodes.size(); l++) {
 	auto nds = pfasst::compute_nodes<time>(get<0>(nodes[l]), get<1>(nodes[l]));
-	auto_build_tuple<time> tpl = build(l);
+	auto_build_tuple tpl = build(l);
 	auto* sweeper = get<0>(tpl);
 	auto* transfer = get<1>(tpl);
 	auto* factory = get<2>(tpl);
@@ -31,12 +30,12 @@ namespace pfasst {
       }
     }
 
-    template<typename time, typename controllerT, typename initialT>
+    template<typename controllerT, typename initialT>
     void auto_setup(controllerT& c, initialT initial) {
       c.setup();
       for (int l=0; l<c.nlevels(); l++) {
 	auto* isweeper = c.get_level(l);
-	auto* sweeper = dynamic_cast<pfasst::encap::EncapSweeper<time>*>(isweeper);
+	auto* sweeper = dynamic_cast<pfasst::encap::EncapSweeper*>(isweeper);
 	auto* q0 = sweeper->get_state(0);
 	initial(sweeper, q0);
       }

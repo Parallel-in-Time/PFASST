@@ -13,10 +13,9 @@
 
 #include <fftw3.h>
 
-template<typename time>
 class FFT {
 
-  using dvector = pfasst::encap::VectorEncapsulation<double,time>;
+  using dvector = pfasst::encap::VectorEncapsulation<double>;
 
   struct workspace {
     fftw_plan        ffft;

@@ -7,6 +7,7 @@
 
 #include <vector>
 
+#include "../config.hpp"
 #include "../interfaces.hpp"
 #include "../quadrature.hpp"
 
@@ -20,7 +21,6 @@ namespace pfasst {
     //
     // encapsulation
     //
-    template<typename time>
     class Encapsulation {
     public:
       virtual ~Encapsulation() { }
@@ -37,22 +37,21 @@ namespace pfasst {
       virtual void zero() {
 	throw NotImplementedYet("encap");
       }
-      virtual void copy(const Encapsulation<time> *) {
+      virtual void copy(const Encapsulation *) {
 	throw NotImplementedYet("encap");
       }
-      virtual void saxpy(time a, const Encapsulation<time> *) {
+      virtual void saxpy(time a, const Encapsulation *) {
 	throw NotImplementedYet("encap");
       }
-      virtual void mat_apply(vector<Encapsulation<time>*> dst, time a, matrix<time> m,
-			     vector<Encapsulation<time>*> src, bool zero=true) {
+      virtual void mat_apply(vector<Encapsulation*> dst, time a, matrix<time> m,
+			     vector<Encapsulation*> src, bool zero=true) {
         throw NotImplementedYet("encap");
       }
     };
 
-    template<typename time>
     class EncapFactory {
     public:
-      virtual Encapsulation<time>* create(const EncapType) = 0;
+      virtual Encapsulation* create(const EncapType) = 0;
     };
 
   }

@@ -22,8 +22,8 @@ using namespace std;
 namespace pfasst {
   namespace encap {
 
-    template<typename scalar, typename time>
-    class VectorEncapsulation : public vector<scalar>, public Encapsulation<time> {
+    template<typename scalar>
+    class VectorEncapsulation : public vector<scalar>, public Encapsulation {
 
     public:
       VectorEncapsulation(int size) : vector<scalar>(size)
@@ -36,13 +36,13 @@ namespace pfasst {
 	std::fill(this->begin(), this->end(), 0.0);
       }
 
-      void copy(const Encapsulation<time>* X)
+      void copy(const Encapsulation* X)
       {
 	const auto* x = dynamic_cast<const VectorEncapsulation*>(X);
 	std::copy(x->begin(), x->end(), this->begin());
       }
 
-      void saxpy(time a, const Encapsulation<time> *X)
+      void saxpy(time a, const Encapsulation *X)
       {
 	const auto& x = *dynamic_cast<const VectorEncapsulation*>(X);
 	auto&       y = *this;
@@ -51,15 +51,15 @@ namespace pfasst {
 	  y[i] += a * x[i];
       }
 
-      void mat_apply(vector<Encapsulation<time>*> DST, time a, matrix<time> mat,
-		     vector<Encapsulation<time>*> SRC, bool zero=true) {
+      void mat_apply(vector<Encapsulation*> DST, time a, matrix<time> mat,
+		     vector<Encapsulation*> SRC, bool zero=true) {
 
 	int ndst = DST.size();
 	int nsrc = SRC.size();
 
-	vector<VectorEncapsulation<scalar,time>*> dst(ndst), src(nsrc);
-	for (int n=0; n<ndst; n++) dst[n] = dynamic_cast<VectorEncapsulation<scalar,time>*>(DST[n]);
-	for (int m=0; m<nsrc; m++) src[m] = dynamic_cast<VectorEncapsulation<scalar,time>*>(SRC[m]);
+	vector<VectorEncapsulation<scalar>*> dst(ndst), src(nsrc);
+	for (int n=0; n<ndst; n++) dst[n] = dynamic_cast<VectorEncapsulation<scalar>*>(DST[n]);
+	for (int m=0; m<nsrc; m++) src[m] = dynamic_cast<VectorEncapsulation<scalar>*>(SRC[m]);
 
 	if (zero)
 	  for (int n=0; n<ndst; n++)
@@ -85,14 +85,14 @@ namespace pfasst {
 
     };
 
-    template<typename scalar, typename time>
-    class VectorFactory : public EncapFactory<time> {
+    template<typename scalar>
+    class VectorFactory : public EncapFactory {
       int size;
     public:
       int dofs() { return size; }
       VectorFactory(const int size) : size(size) { }
-      Encapsulation<time>* create(const EncapType) {
-	return new VectorEncapsulation<scalar,time>(size);
+      Encapsulation* create(const EncapType) {
+	return new VectorEncapsulation<scalar>(size);
       }
     };
 
