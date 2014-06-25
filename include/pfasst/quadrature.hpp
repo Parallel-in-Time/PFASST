@@ -11,6 +11,8 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
+#include "config.hpp"
+
 using std::complex;
 using std::string;
 using std::vector;
@@ -145,23 +147,23 @@ namespace pfasst {
 
   //#define pi 3.1415926535897932384626433832795028841971693993751
 
-  template<typename time>
-  vector<time> compute_nodes(int nnodes, string qtype)
+  template<typename node=time>
+  vector<node> compute_nodes(int nnodes, string qtype)
   {
-    vector<time> nodes(nnodes);
+    vector<node> nodes(nnodes);
 
     if (qtype == "gauss-legendre") {
-      auto roots = polynomial<time>::legendre(nnodes).roots();
+      auto roots = polynomial<node>::legendre(nnodes).roots();
       for (int j=0; j<nnodes; j++)
       	nodes[j] = 0.5 * (1.0 + roots[j]);
     } else if (qtype == "gauss-lobatto") {
-      auto roots = polynomial<time>::legendre(nnodes-1).differentiate().roots();
+      auto roots = polynomial<node>::legendre(nnodes-1).differentiate().roots();
       for (int j=0; j<nnodes-2; j++)
 	nodes[j+1] = 0.5 * (1.0 + roots[j]);
       nodes[0] = 0.0; nodes[nnodes-1] = 1.0;
     } else if (qtype == "gauss-radau") {
-      auto l   = polynomial<time>::legendre(nnodes);
-      auto lm1 = polynomial<time>::legendre(nnodes-1);
+      auto l   = polynomial<node>::legendre(nnodes);
+      auto lm1 = polynomial<node>::legendre(nnodes-1);
       for (int i=0; i<nnodes; i++)
 	l[i] += lm1[i];
       auto roots = l.roots();
@@ -173,18 +175,18 @@ namespace pfasst {
     return nodes;
   }
 
-  template<typename time>
-  matrix<time> compute_quadrature(vector<time> dst, vector<time> src, char type)
+  template<typename node=time>
+  matrix<node> compute_quadrature(vector<node> dst, vector<node> src, char type)
   {
     const int ndst = dst.size();
     const int nsrc = src.size();
 
-    matrix<time> mat(ndst-1, nsrc);
+    matrix<node> mat(ndst-1, nsrc);
 
     //   /* for (int n=0; n<(ndst-1)*nsrc; n++) */
     //   /*   smat[n] = 0.0; */
 
-    polynomial<time> p(nsrc+1), p1(nsrc+1);
+    polynomial<node> p(nsrc+1), p1(nsrc+1);
 
     for (int i=0; i<nsrc; i++) {
       //      if ((flags[i] & SDC_NODE_PROPER) == 0) continue;
@@ -205,7 +207,7 @@ namespace pfasst {
       auto den = p.evaluate(src[i]);
       auto P = p.integrate();
       for (int j=1; j<ndst; j++) {
-	time q = 0.0;
+	node q = 0.0;
 	if (type == 's')
 	  q = P.evaluate(dst[j]) - P.evaluate(dst[j-1]);
 	else
@@ -218,18 +220,18 @@ namespace pfasst {
     return mat;
   }
 
-  template<typename time>
-  matrix<time> compute_interp(vector<time> dst, vector<time> src)
+  template<typename node=time>
+  matrix<node> compute_interp(vector<node> dst, vector<node> src)
   {
     const int ndst = dst.size();
     const int nsrc = src.size();
 
-    matrix<time> mat(ndst, nsrc);
+    matrix<node> mat(ndst, nsrc);
 
     for (int i=0; i<ndst; i++) {
       for (int j=0; j<nsrc; j++) {
-	time den = 1.0;
-	time num = 1.0;
+	node den = 1.0;
+	node num = 1.0;
 
 	for (int k=0; k<nsrc; k++) {
 	  if (k == j) continue;

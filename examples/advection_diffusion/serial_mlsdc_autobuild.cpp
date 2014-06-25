@@ -23,7 +23,7 @@ using namespace pfasst::encap;
 
 int main(int argc, char **argv)
 {
-  MLSDC<double> mlsdc;
+  MLSDC mlsdc;
 
   const int    nsteps = 4;
   const double dt     = 0.01;
@@ -43,25 +43,25 @@ int main(int argc, char **argv)
    * captures the 'ndofs' variable from above.
    */
   auto build_level = [ndofs] (unsigned int level) {
-    auto* factory  = new VectorFactory<double,double>(ndofs[level]);
-    auto* sweeper  = new AdvectionDiffusionSweeper<double,double>(ndofs[level]);
-    auto* transfer = new SpectralTransfer1D<double,double>();
+    auto* factory  = new VectorFactory<double>(ndofs[level]);
+    auto* sweeper  = new AdvectionDiffusionSweeper(ndofs[level]);
+    auto* transfer = new SpectralTransfer1D();
 
-    return auto_build_tuple<double,double>(sweeper,transfer,factory);
+    return auto_build_tuple(sweeper,transfer,factory);
   };
 
   /*
    * the 'initial' function is called once for each level to set the
    * intial conditions.
    */
-  auto initial = [] (EncapSweeper<double,double> *sweeper,
-		     Encapsulation<double,double> *q0) {
-    auto* ad = dynamic_cast<AdvectionDiffusionSweeper<double,double>*>(sweeper);
+  auto initial = [] (EncapSweeper *sweeper,
+		     Encapsulation *q0) {
+    auto* ad = dynamic_cast<AdvectionDiffusionSweeper*>(sweeper);
     ad->exact(q0, 0.0);
   };
 
-  auto_build<double,double>(mlsdc, nodes, build_level);
-  auto_setup<double,double>(mlsdc, initial);
+  auto_build(mlsdc, nodes, build_level);
+  auto_setup(mlsdc, initial);
   mlsdc.set_duration(dt, nsteps, niters);
   mlsdc.run();
 

@@ -12,7 +12,6 @@
 namespace pfasst {
   namespace encap {
 
-    template<typename scalar, typename time>
     class PolyInterpMixin : public pfasst::ITransfer {
       matrix<time> tmat, fmat;
 
@@ -24,8 +23,8 @@ namespace pfasst {
 			       bool interp_delta_from_initial,
 			       bool interp_initial)
       {
-	auto* fine = dynamic_cast<EncapSweeper<scalar,time>*>(dst);
-	auto* crse = dynamic_cast<const EncapSweeper<scalar,time>*>(src);
+	auto* fine = dynamic_cast<EncapSweeper*>(dst);
+	auto* crse = dynamic_cast<const EncapSweeper*>(src);
 
 	if (tmat.size1() == 0)
 	  tmat = pfasst::compute_interp<time>(fine->get_nodes(), crse->get_nodes());
@@ -36,7 +35,7 @@ namespace pfasst {
 	auto* crse_factory = crse->get_factory();
 	auto* fine_factory = fine->get_factory();
 
-	vector<Encapsulation<scalar,time>*> fine_state(nfine), fine_delta(ncrse);
+	vector<Encapsulation*> fine_state(nfine), fine_delta(ncrse);
 
 	for (int m=0; m<nfine; m++) fine_state[m] = fine->get_state(m);
 	for (int m=0; m<ncrse; m++) fine_delta[m] = fine_factory->create(solution);
@@ -58,7 +57,7 @@ namespace pfasst {
 	delete crse_delta;
 
 	if (! interp_initial)
-	  fine_delta[0]->setval(0.0);
+	  fine_delta[0]->zero();
 
 	fine->get_state(0)->mat_apply(fine_state, 1.0, tmat, fine_delta, false);
 
@@ -68,8 +67,8 @@ namespace pfasst {
 
       virtual void restrict(ISweeper *dst, const ISweeper *src, bool restrict_initial)
       {
-	auto* crse = dynamic_cast<EncapSweeper<scalar,time>*>(dst);
-	auto* fine = dynamic_cast<const EncapSweeper<scalar,time>*>(src);
+	auto* crse = dynamic_cast<EncapSweeper*>(dst);
+	auto* fine = dynamic_cast<const EncapSweeper*>(src);
 
 	auto dnodes = crse->get_nodes();
 	auto snodes = fine->get_nodes();
@@ -91,8 +90,8 @@ namespace pfasst {
 
       virtual void fas(time dt, ISweeper *dst, const ISweeper *src)
       {
-	auto* crse = dynamic_cast<EncapSweeper<scalar,time>*>(dst);
-	auto* fine = dynamic_cast<const EncapSweeper<scalar,time>*>(src);
+	auto* crse = dynamic_cast<EncapSweeper*>(dst);
+	auto* fine = dynamic_cast<const EncapSweeper*>(src);
 
 	int ncrse = crse->get_nodes().size();
 	int nfine = fine->get_nodes().size();
@@ -100,7 +99,7 @@ namespace pfasst {
 	auto* crse_factory = crse->get_factory();
 	auto* fine_factory = fine->get_factory();
 
-	vector<Encapsulation<scalar,time>*> crse_z2n(ncrse-1), fine_z2n(nfine-1), rstr_z2n(ncrse-1);
+	vector<Encapsulation*> crse_z2n(ncrse-1), fine_z2n(nfine-1), rstr_z2n(ncrse-1);
 	for (int m=0; m<ncrse-1; m++) crse_z2n[m] = crse_factory->create(solution);
 	for (int m=0; m<ncrse-1; m++) rstr_z2n[m] = crse_factory->create(solution);
 	for (int m=0; m<nfine-1; m++) fine_z2n[m] = fine_factory->create(solution);
@@ -121,7 +120,7 @@ namespace pfasst {
 	  this->restrict(rstr_z2n[m-1], fine_z2n[m*trat-1]);
 
 	// compute 'node to node' tau correction
-	vector<Encapsulation<scalar,time>*> tau(ncrse-1);
+	vector<Encapsulation*> tau(ncrse-1);
 	for (int m=0; m<ncrse-1; m++) tau[m] = crse->get_tau(m);
 
 	tau[0]->copy(rstr_z2n[0]);
@@ -141,11 +140,11 @@ namespace pfasst {
       }
 
       // required for interp/restrict helpers
-      virtual void interpolate(Encapsulation<scalar,time> *dst, const Encapsulation<scalar,time> *src) {
+      virtual void interpolate(Encapsulation *dst, const Encapsulation *src) {
 	throw NotImplementedYet("mlsdc/pfasst");
       }
 
-      virtual void restrict(Encapsulation<scalar,time> *dst, const Encapsulation<scalar,time> *src) {
+      virtual void restrict(Encapsulation *dst, const Encapsulation *src) {
 	throw NotImplementedYet("mlsdc/pfasst");
       }
 
