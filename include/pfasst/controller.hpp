@@ -58,9 +58,8 @@ namespace pfasst {
     /**
      * Level (MLSDC/PFASST) iterator.
      *
-     * This iterator is used to walk through the MLSDC/PFASST
-     * hierarchy of sweepers.  It keeps track of the "current" level,
-     * and has convenience routines to return the current, "fine"
+     * This iterator is used to walk through the MLSDC/PFASST hierarchy of sweepers.  It keeps track
+     * of the "current" level, and has convenience routines to return the current, "fine"
      * (current+1), and "coarse" (current-1) sweepers.
      */
     class LevelIter {
