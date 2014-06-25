@@ -4,7 +4,11 @@
 
 namespace pfasst
 {
+#ifndef PFASST_TIME_PRECISION
   using time = double;
+#else
+  using time = PFASST_TIME_PRECISION;
+#endif
 }
 
 #endif

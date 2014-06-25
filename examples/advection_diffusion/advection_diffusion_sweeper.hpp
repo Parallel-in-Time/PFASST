@@ -28,7 +28,7 @@ class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper {
   vector<complex<double>> ddx, lap;
 
   double v  = 1.0;
-  double t0 = 1.0;
+  time   t0 = 1.0;
   double nu = 0.02;
   int    nf1evals = 0;
 
@@ -50,12 +50,12 @@ public:
     cout << "number of f1 evals: " << nf1evals << endl;
   }
 
-  void exact(Encapsulation* q, double t)
+  void exact(Encapsulation* q, time t)
   {
     exact(*dynamic_cast<dvector*>(q), t);
   }
 
-  void exact(dvector& q, double t)
+  void exact(dvector& q, time t)
   {
     int    n = q.size();
     double a = 1.0/sqrt(4*pi*nu*(t+t0));
@@ -71,7 +71,7 @@ public:
     }
   }
 
-  void echo_error(double t, bool predict=false)
+  void echo_error(time t, bool predict=false)
   {
     auto& qend = *dynamic_cast<dvector*>(this->get_state(this->get_nodes().size()-1));
     auto  qex  = dvector(qend.size());
@@ -87,19 +87,19 @@ public:
     cout << "err: " << scientific << max << " (" << qend.size() << ", " << predict << ")" << endl;
   }
 
-  void predict(double t, double dt, bool initial)
+  void predict(time t, time dt, bool initial)
   {
     pfasst::encap::IMEXSweeper::predict(t, dt, initial);
     echo_error(t+dt, true);
   }
 
-  void sweep(double t, double dt)
+  void sweep(time t, time dt)
   {
     pfasst::encap::IMEXSweeper::sweep(t, dt);
     echo_error(t+dt);
   }
 
-  void f1eval(Encapsulation *F, Encapsulation *Q, double t)
+  void f1eval(Encapsulation *F, Encapsulation *Q, time t)
   {
     auto& f = *dynamic_cast<dvector*>(F);
     auto& q = *dynamic_cast<dvector*>(Q);
@@ -114,7 +114,7 @@ public:
     nf1evals++;
   }
 
-  void f2eval(Encapsulation *F, Encapsulation *Q, double t)
+  void f2eval(Encapsulation *F, Encapsulation *Q, time t)
   {
     auto& f = *dynamic_cast<dvector*>(F);
     auto& q = *dynamic_cast<dvector*>(Q);
@@ -127,7 +127,7 @@ public:
     fft.backward(f);
   }
 
-  void f2comp(Encapsulation *F, Encapsulation *Q, double t, double dt, Encapsulation *RHS)
+  void f2comp(Encapsulation *F, Encapsulation *Q, time t, time dt, Encapsulation *RHS)
   {
     auto& f   = *dynamic_cast<dvector*>(F);
     auto& q   = *dynamic_cast<dvector*>(Q);
@@ -135,11 +135,11 @@ public:
 
     auto* z = fft.forward(rhs);
     for (int i=0; i<q.size(); i++)
-      z[i] /= (1.0 - nu * dt * lap[i]) * double(q.size());
+      z[i] /= (1.0 - nu * double(dt) * lap[i]) * double(q.size());
     fft.backward(q);
 
     for (int i=0; i<q.size(); i++)
-      f[i] = (q[i] - rhs[i]) / dt;
+      f[i] = (q[i] - rhs[i]) / double(dt);
   }
 
 };
