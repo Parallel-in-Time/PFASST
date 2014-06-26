@@ -16,10 +16,10 @@
 
 using namespace std;
 
-class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper {
+template<typename time=pfasst::time_precision>
+class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<time> {
 
-  using time = pfasst::time;
-  using Encapsulation = pfasst::encap::Encapsulation;
+  using Encapsulation = pfasst::encap::Encapsulation<time>;
   using dvector = pfasst::encap::VectorEncapsulation<double>;
 
 
@@ -89,13 +89,13 @@ public:
 
   void predict(time t, time dt, bool initial)
   {
-    pfasst::encap::IMEXSweeper::predict(t, dt, initial);
+    pfasst::encap::IMEXSweeper<time>::predict(t, dt, initial);
     echo_error(t+dt, true);
   }
 
   void sweep(time t, time dt)
   {
-    pfasst::encap::IMEXSweeper::sweep(t, dt);
+    pfasst::encap::IMEXSweeper<time>::sweep(t, dt);
     echo_error(t+dt);
   }
 

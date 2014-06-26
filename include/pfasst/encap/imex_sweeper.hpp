@@ -13,8 +13,9 @@ namespace pfasst {
 
     using pfasst::encap::Encapsulation;
 
-    class IMEXSweeper : public pfasst::encap::EncapSweeper {
-      vector<Encapsulation*> Q, pQ, S, T, Fe, Fi;
+    template<typename time=time_precision>
+    class IMEXSweeper : public pfasst::encap::EncapSweeper<time> {
+      vector<Encapsulation<time>*> Q, pQ, S, T, Fe, Fi;
       matrix<time> Smat, SEmat, SImat;
 
     public:
@@ -29,23 +30,23 @@ namespace pfasst {
 	for (int m=0; m<Fi.size(); m++) delete Fi[m];
       }
 
-      void set_state(const Encapsulation *q0, unsigned int m)
+      void set_state(const Encapsulation<time> *q0, unsigned int m)
       {
 	Q[m]->copy(q0);
 
       }
 
-      Encapsulation* get_state(unsigned int m) const
+      Encapsulation<time>* get_state(unsigned int m) const
       {
 	return Q[m];
       }
 
-      Encapsulation* get_tau(unsigned int m) const
+      Encapsulation<time>* get_tau(unsigned int m) const
       {
 	return T[m];
       }
 
-      Encapsulation* get_saved_state(unsigned int m) const
+      Encapsulation<time>* get_saved_state(unsigned int m) const
       {
 	return pQ[m];
       }
@@ -58,7 +59,7 @@ namespace pfasst {
       }
 
 
-      virtual void integrate(time dt, vector<Encapsulation*> dst) const
+      virtual void integrate(time dt, vector<Encapsulation<time>*> dst) const
       {
 	auto* encap = dst[0];
 	encap->mat_apply(dst, dt, Smat, Fe, true);
@@ -108,7 +109,7 @@ namespace pfasst {
 
 
 	// sweep
-	Encapsulation *rhs = this->get_factory()->create(pfasst::encap::solution);
+	Encapsulation<time> *rhs = this->get_factory()->create(pfasst::encap::solution);
 
 	time t = t0;
 	for (int m=0; m<nnodes-1; m++) {
@@ -136,7 +137,7 @@ namespace pfasst {
 	  f2eval(Fi[0], Q[0], t0);
 	}
 
-	Encapsulation *rhs = this->get_factory()->create(pfasst::encap::solution);
+	Encapsulation<time> *rhs = this->get_factory()->create(pfasst::encap::solution);
 
 	time t = t0;
 	for (int m=0; m<nnodes-1; m++) {
@@ -166,17 +167,17 @@ namespace pfasst {
       }
 
 
-      virtual void f1eval(Encapsulation *F, Encapsulation *Q, time t)
+      virtual void f1eval(Encapsulation<time> *F, Encapsulation<time> *Q, time t)
       {
 	throw NotImplementedYet("imex (f1eval)");
       }
 
-      virtual void f2eval(Encapsulation *F, Encapsulation *Q, time t)
+      virtual void f2eval(Encapsulation<time> *F, Encapsulation<time> *Q, time t)
       {
 	throw NotImplementedYet("imex (f2eval)");
       }
 
-      virtual void f2comp(Encapsulation *F, Encapsulation *Q, time t, time dt, Encapsulation* rhs)
+      virtual void f2comp(Encapsulation<time> *F, Encapsulation<time> *Q, time t, time dt, Encapsulation<time>* rhs)
       {
 	throw NotImplementedYet("imex (f2comp)");
       }

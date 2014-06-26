@@ -14,9 +14,10 @@
 namespace pfasst {
   namespace encap {
 
-    class EncapSweeper : public ISweeper {
+    template<typename time=time_precision>
+    class EncapSweeper : public ISweeper<time> {
       vector<time> nodes;
-      shared_ptr<EncapFactory> factory;
+      shared_ptr<EncapFactory<time>> factory;
 
     public:
 
@@ -30,40 +31,40 @@ namespace pfasst {
 	return nodes;
       }
 
-      void set_factory(EncapFactory* factory)
+      void set_factory(EncapFactory<time>* factory)
       {
-	this->factory = shared_ptr<EncapFactory>(factory);
+	this->factory = shared_ptr<EncapFactory<time>>(factory);
       }
 
-      EncapFactory* get_factory() const
+      EncapFactory<time>* get_factory() const
       {
 	return factory.get();
       }
 
-      virtual void set_state(const Encapsulation* q0, unsigned int m)
+      virtual void set_state(const Encapsulation<time>* q0, unsigned int m)
       {
       	throw NotImplementedYet("sweeper");
       }
 
-      virtual Encapsulation* get_state(unsigned int m) const
+      virtual Encapsulation<time>* get_state(unsigned int m) const
       {
 	throw NotImplementedYet("sweeper");
 	return NULL;
       }
 
-      virtual Encapsulation* get_tau(unsigned int m) const
+      virtual Encapsulation<time>* get_tau(unsigned int m) const
       {
 	throw NotImplementedYet("sweeper");
 	return NULL;
       }
 
-      virtual Encapsulation* get_saved_state(unsigned int m) const
+      virtual Encapsulation<time>* get_saved_state(unsigned int m) const
       {
 	throw NotImplementedYet("sweeper");
 	return NULL;
       }
 
-      virtual Encapsulation* get_end_state()
+      virtual Encapsulation<time>* get_end_state()
       {
 	return this->get_state(this->get_nodes().size()-1);
       }
@@ -78,7 +79,7 @@ namespace pfasst {
 	throw NotImplementedYet("sweeper");
       }
 
-      virtual void integrate(time dt, vector<Encapsulation*> dst) const
+      virtual void integrate(time dt, vector<Encapsulation<time>*> dst) const
       {
 	throw NotImplementedYet("sweeper");
       }

@@ -5,15 +5,15 @@
 #ifndef _PFASST_CONTROLLER_HPP_
 #define _PFASST_CONTROLLER_HPP_
 
-#include "config.hpp"
 #include "interfaces.hpp"
 
 namespace pfasst {
 
+  template<typename time=time_precision>
   class Controller {
   protected:
-    deque<shared_ptr<ISweeper>>  levels;
-    deque<shared_ptr<ITransfer>> transfer;
+    deque<shared_ptr<ISweeper<time>>>  levels;
+    deque<shared_ptr<ITransfer<time>>> transfer;
 
     int    nsteps, niters;
     time  dt;
@@ -30,21 +30,21 @@ namespace pfasst {
       this->dt = dt; this->nsteps = nsteps; this->niters = niters;
     }
 
-    void add_level(ISweeper *swpr, ITransfer *trnsfr=NULL, bool coarse=true) {
+    void add_level(ISweeper<time> *swpr, ITransfer<time> *trnsfr=NULL, bool coarse=true) {
       if (coarse) {
-	levels.push_front(shared_ptr<ISweeper>(swpr));
-	transfer.push_front(shared_ptr<ITransfer>(trnsfr));
+	levels.push_front(shared_ptr<ISweeper<time>>(swpr));
+        transfer.push_front(shared_ptr<ITransfer<time>>(trnsfr));
       } else {
-	levels.push_back(shared_ptr<ISweeper>(swpr));
-	transfer.push_back(shared_ptr<ITransfer>(trnsfr));
+        levels.push_back(shared_ptr<ISweeper<time>>(swpr));
+        transfer.push_back(shared_ptr<ITransfer<time>>(trnsfr));
       }
     }
 
-    template<typename R=ISweeper> R* get_level(int level) {
+    template<typename R=ISweeper<time>> R* get_level(int level) {
       return dynamic_cast<R*>(levels[level].get());
     }
 
-    template<typename R=ITransfer> R* get_transfer(int level) {
+    template<typename R=ITransfer<time>> R* get_transfer(int level) {
       return dynamic_cast<R*>(transfer[level].get());
     }
 
@@ -61,20 +61,20 @@ namespace pfasst {
 
       LevelIter(int level, Controller *ts) : ts(ts), level(level) {}
 
-      template<typename R=ISweeper> R* current() {
+      template<typename R=ISweeper<time>> R* current() {
 	return ts->get_level<R>(level);
       }
-      template<typename R=ISweeper> R* fine() {
+      template<typename R=ISweeper<time>> R* fine() {
 	return ts->get_level<R>(level+1);
       }
-      template<typename R=ISweeper> R* coarse() {
+      template<typename R=ISweeper<time>> R* coarse() {
 	return ts->get_level<R>(level-1);
       }
-      template<typename R=ITransfer> R* transfer() {
+      template<typename R=ITransfer<time>> R* transfer() {
 	return ts->get_transfer<R>(level);
       }
 
-      ISweeper *operator*() { return current(); }
+      ISweeper<time> *operator*() { return current(); }
       bool operator==(LevelIter i) { return level == i.level; }
       bool operator!=(LevelIter i) { return level != i.level; }
       bool operator<=(LevelIter i) { return level <= i.level; }

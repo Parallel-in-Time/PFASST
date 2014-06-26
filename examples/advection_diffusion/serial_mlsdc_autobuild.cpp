@@ -23,7 +23,7 @@ using namespace pfasst::encap;
 
 int main(int argc, char **argv)
 {
-  MLSDC mlsdc;
+  MLSDC<> mlsdc;
 
   const int    nsteps = 4;
   const double dt     = 0.01;
@@ -44,19 +44,19 @@ int main(int argc, char **argv)
    */
   auto build_level = [ndofs] (unsigned int level) {
     auto* factory  = new VectorFactory<double>(ndofs[level]);
-    auto* sweeper  = new AdvectionDiffusionSweeper(ndofs[level]);
-    auto* transfer = new SpectralTransfer1D();
+    auto* sweeper  = new AdvectionDiffusionSweeper<>(ndofs[level]);
+    auto* transfer = new SpectralTransfer1D<>();
 
-    return auto_build_tuple(sweeper,transfer,factory);
+    return auto_build_tuple<>(sweeper,transfer,factory);
   };
 
   /*
    * the 'initial' function is called once for each level to set the
    * intial conditions.
    */
-  auto initial = [] (EncapSweeper *sweeper,
-		     Encapsulation *q0) {
-    auto* ad = dynamic_cast<AdvectionDiffusionSweeper*>(sweeper);
+  auto initial = [] (EncapSweeper<> *sweeper,
+		     Encapsulation<> *q0) {
+    auto* ad = dynamic_cast<AdvectionDiffusionSweeper<>*>(sweeper);
     ad->exact(q0, 0.0);
   };
 

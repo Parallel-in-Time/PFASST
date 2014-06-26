@@ -11,13 +11,13 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
-#include "config.hpp"
-
 using std::complex;
 using std::string;
 using std::vector;
 
 using boost::numeric::ublas::matrix;
+
+#include "interfaces.hpp"
 
 namespace pfasst {
 
@@ -147,7 +147,7 @@ namespace pfasst {
 
   //#define pi 3.1415926535897932384626433832795028841971693993751
 
-  template<typename node=time>
+  template<typename node=time_precision>
   vector<node> compute_nodes(int nnodes, string qtype)
   {
     vector<node> nodes(nnodes);
@@ -175,7 +175,7 @@ namespace pfasst {
     return nodes;
   }
 
-  template<typename node=time>
+  template<typename node=time_precision>
   matrix<node> compute_quadrature(vector<node> dst, vector<node> src, char type)
   {
     const int ndst = dst.size();
@@ -220,7 +220,7 @@ namespace pfasst {
     return mat;
   }
 
-  template<typename node=time>
+  template<typename node=time_precision>
   matrix<node> compute_interp(vector<node> dst, vector<node> src)
   {
     const int ndst = dst.size();

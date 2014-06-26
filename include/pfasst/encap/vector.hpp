@@ -22,8 +22,8 @@ using namespace std;
 namespace pfasst {
   namespace encap {
 
-    template<typename scalar>
-    class VectorEncapsulation : public vector<scalar>, public Encapsulation {
+    template<typename scalar, typename time=time_precision>
+    class VectorEncapsulation : public vector<scalar>, public Encapsulation<time> {
 
     public:
       VectorEncapsulation(int size) : vector<scalar>(size)
@@ -36,13 +36,13 @@ namespace pfasst {
 	std::fill(this->begin(), this->end(), 0.0);
       }
 
-      void copy(const Encapsulation* X)
+      void copy(const Encapsulation<time>* X)
       {
 	const auto* x = dynamic_cast<const VectorEncapsulation*>(X);
 	std::copy(x->begin(), x->end(), this->begin());
       }
 
-      void saxpy(time a, const Encapsulation *X)
+      void saxpy(time a, const Encapsulation<time> *X)
       {
 	const auto& x = *dynamic_cast<const VectorEncapsulation*>(X);
 	auto&       y = *this;
@@ -51,8 +51,8 @@ namespace pfasst {
 	  y[i] += a * x[i];
       }
 
-      void mat_apply(vector<Encapsulation*> DST, time a, matrix<time> mat,
-		     vector<Encapsulation*> SRC, bool zero=true) {
+      void mat_apply(vector<Encapsulation<time>*> DST, time a, matrix<time> mat,
+		     vector<Encapsulation<time>*> SRC, bool zero=true) {
 
 	int ndst = DST.size();
 	int nsrc = SRC.size();
@@ -85,14 +85,14 @@ namespace pfasst {
 
     };
 
-    template<typename scalar>
-    class VectorFactory : public EncapFactory {
+    template<typename scalar, typename time=time_precision>
+    class VectorFactory : public EncapFactory<time> {
       int size;
     public:
       int dofs() { return size; }
       VectorFactory(const int size) : size(size) { }
-      Encapsulation* create(const EncapType) {
-	return new VectorEncapsulation<scalar>(size);
+      Encapsulation<time>* create(const EncapType) {
+	return new VectorEncapsulation<scalar,time>(size);
       }
     };
 

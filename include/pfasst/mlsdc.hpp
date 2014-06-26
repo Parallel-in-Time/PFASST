@@ -16,11 +16,12 @@ using namespace std;
 
 namespace pfasst {
 
-  class MLSDC : public Controller {
+  template<typename time=double>
+  class MLSDC : public Controller<time> {
     vector<int> nsweeps;
     bool predict, initial;
 
-    using LevelIter = typename pfasst::Controller::LevelIter;
+    using LevelIter = typename pfasst::Controller<time>::LevelIter;
 
     void perform_sweeps(LevelIter leviter, time t, time dt)
     {

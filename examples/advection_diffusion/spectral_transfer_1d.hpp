@@ -10,9 +10,10 @@
 
 #include "fft.hpp"
 
-class SpectralTransfer1D : public pfasst::encap::PolyInterpMixin {
+template<typename time=pfasst::time_precision>
+class SpectralTransfer1D : public pfasst::encap::PolyInterpMixin<time> {
 
-  using Encapsulation = pfasst::encap::Encapsulation;
+  using Encapsulation = pfasst::encap::Encapsulation<double>;
   using dvector = pfasst::encap::VectorEncapsulation<double>;
 
   FFT fft;
