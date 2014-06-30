@@ -9,16 +9,17 @@
 
 namespace pfasst {
 
-  // class LevelIter;
-
+  /**
+   * Base SDC/MLSDC/PFASST controller.
+   */
   template<typename time>
   class Controller {
   protected:
     deque<shared_ptr<ISweeper>>  levels;
     deque<shared_ptr<ITransfer>> transfer;
 
-    int    nsteps, niters;
-    time  dt;
+    int nsteps, niters;
+    time dt;
 
   public:
 
@@ -54,7 +55,13 @@ namespace pfasst {
       return levels.size();
     }
 
-
+    /**
+     * Level (MLSDC/PFASST) iterator.
+     *
+     * This iterator is used to walk through the MLSDC/PFASST hierarchy of sweepers.  It keeps track
+     * of the "current" level, and has convenience routines to return the current, "fine"
+     * (current+1), and "coarse" (current-1) sweepers.
+     */
     class LevelIter {
       Controller *ts;
 
