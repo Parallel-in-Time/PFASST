@@ -18,8 +18,8 @@ namespace pfasst {
 				   pfasst::encap::EncapFactory<time>*>;
 
     template<typename time=time_precision, typename controllerT, typename buildT>
-    void auto_build(controllerT& c, vector<pair<int,string>> nodes, buildT build) {
-      for (unsigned int l=0; l<nodes.size(); l++) {
+    void auto_build(controllerT& c, vector<pair<size_t, string>> nodes, buildT build) {
+      for(size_t l = 0; l < nodes.size(); l++) {
 	auto nds = pfasst::compute_nodes<time>(get<0>(nodes[l]), get<1>(nodes[l]));
 	auto_build_tuple<time> tpl = build(l);
 	auto* sweeper = get<0>(tpl);
@@ -34,7 +34,7 @@ namespace pfasst {
     template<typename time=time_precision, typename controllerT, typename initialT>
     void auto_setup(controllerT& c, initialT initial) {
       c.setup();
-      for (int l=0; l<c.nlevels(); l++) {
+      for(size_t l = 0; l < c.nlevels(); l++) {
 	auto* isweeper = c.get_level(l);
 	auto* sweeper = dynamic_cast<pfasst::encap::EncapSweeper<time>*>(isweeper);
 	auto* q0 = sweeper->get_state(0);

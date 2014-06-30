@@ -15,23 +15,25 @@ namespace pfasst {
     deque<shared_ptr<ISweeper<time>>>  levels;
     deque<shared_ptr<ITransfer<time>>> transfer;
 
-    int    nsteps, niters;
-    time  dt;
+    size_t nsteps, niters;
+    time   dt;
 
   public:
 
     void setup() {
-      for (auto l=coarsest(); l<=finest(); ++l) {
+      for(auto l=coarsest(); l<=finest(); ++l) {
 	l.current()->setup();
       }
     }
 
-    void set_duration(time dt, int nsteps, int niters) {
-      this->dt = dt; this->nsteps = nsteps; this->niters = niters;
+    void set_duration(time dt, size_t nsteps, size_t niters) {
+      this->dt = dt;
+      this->nsteps = nsteps;
+      this->niters = niters;
     }
 
     void add_level(ISweeper<time> *swpr, ITransfer<time> *trnsfr=NULL, bool coarse=true) {
-      if (coarse) {
+      if(coarse) {
 	levels.push_front(shared_ptr<ISweeper<time>>(swpr));
         transfer.push_front(shared_ptr<ITransfer<time>>(trnsfr));
       } else {
@@ -40,15 +42,15 @@ namespace pfasst {
       }
     }
 
-    template<typename R=ISweeper<time>> R* get_level(int level) {
+    template<typename R=ISweeper<time>> R* get_level(size_t level) {
       return dynamic_cast<R*>(levels[level].get());
     }
 
-    template<typename R=ITransfer<time>> R* get_transfer(int level) {
+    template<typename R=ITransfer<time>> R* get_transfer(size_t level) {
       return dynamic_cast<R*>(transfer[level].get());
     }
 
-    int nlevels() {
+    size_t nlevels() {
       return levels.size();
     }
 
@@ -57,9 +59,9 @@ namespace pfasst {
       Controller *ts;
 
     public:
-      int level;
+      size_t level;
 
-      LevelIter(int level, Controller *ts) : ts(ts), level(level) {}
+      LevelIter(size_t level, Controller *ts) : ts(ts), level(level) {}
 
       template<typename R=ISweeper<time>> R* current() {
 	return ts->get_level<R>(level);

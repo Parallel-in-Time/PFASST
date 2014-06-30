@@ -16,12 +16,13 @@ namespace pfasst {
     {
       auto* sweeper = this->get_level(0);
 
-      for (int nstep=0; nstep<this->nsteps; nstep++) {
+      for(size_t nstep = 0; nstep < this->nsteps; nstep++) {
 	time t = nstep * this->dt;
 
 	sweeper->predict(t, this->dt, nstep==0);
-	for (int niter=1; niter<this->niters; niter++)
+	for(size_t niter = 1; niter < this->niters; niter++) {
 	  sweeper->sweep(t, this->dt);
+        }
 
 	sweeper->advance();
       }

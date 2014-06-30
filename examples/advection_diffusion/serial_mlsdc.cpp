@@ -20,15 +20,15 @@ int main(int argc, char **argv)
 {
   MLSDC mlsdc;
 
-  const int    nlevs  = 2;
-  const int    nsteps = 4;
+  const size_t nlevs  = 2;
+  const size_t nsteps = 4;
   const double dt     = 0.01;
-  const int    niters = 4;
+  const size_t niters = 4;
   const int    xrat   = 2;
   const int    trat   = 2;
 
-  int nnodes = 5;
-  int ndofs  = 128;
+  size_t nnodes = 5;
+  size_t ndofs  = 128;
 
   /*
    * build space/time discretisation levels and add them to mlsdc
@@ -36,7 +36,7 @@ int main(int argc, char **argv)
    * subsequently refines in time (accoring to 'trat') and space
    * (according to 'xrat').
    */
-  for (int l=0; l<nlevs; l++) {
+  for(size_t l = 0; l < nlevs; l++) {
     auto  nodes    = compute_nodes<double>(nnodes, "gauss-lobatto");
     auto* factory  = new VectorFactory<double>(ndofs);
     auto* sweeper  = new AdvectionDiffusionSweeper(ndofs);

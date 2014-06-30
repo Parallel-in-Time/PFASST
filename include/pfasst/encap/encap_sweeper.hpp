@@ -41,24 +41,24 @@ namespace pfasst {
 	return factory.get();
       }
 
-      virtual void set_state(const Encapsulation<time>* q0, unsigned int m)
+      virtual void set_state(const Encapsulation<time>* q0, size_t m)
       {
       	throw NotImplementedYet("sweeper");
       }
 
-      virtual Encapsulation<time>* get_state(unsigned int m) const
+      virtual Encapsulation<time>* get_state(size_t m) const
       {
 	throw NotImplementedYet("sweeper");
 	return NULL;
       }
 
-      virtual Encapsulation<time>* get_tau(unsigned int m) const
+      virtual Encapsulation<time>* get_tau(size_t m) const
       {
 	throw NotImplementedYet("sweeper");
 	return NULL;
       }
 
-      virtual Encapsulation<time>* get_saved_state(unsigned int m) const
+      virtual Encapsulation<time>* get_saved_state(size_t m) const
       {
 	throw NotImplementedYet("sweeper");
 	return NULL;
@@ -69,7 +69,7 @@ namespace pfasst {
 	return this->get_state(this->get_nodes().size()-1);
       }
 
-      virtual void evaluate(int m)
+      virtual void evaluate(size_t m)
       {
 	throw NotImplementedYet("sweeper");
       }
