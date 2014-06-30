@@ -52,9 +52,9 @@ namespace pfasst {
 
       virtual void advance()
       {
-	Q[0]->copy(Q[Q.size()-1]);
-	Fe[0]->copy(Fe[Fe.size()-1]);
-	Fi[0]->copy(Fi[Fi.size()-1]);
+	Q[0]->copy(Q.back());
+	Fe[0]->copy(Fe.back());
+	Fi[0]->copy(Fi.back());
       }
 
 

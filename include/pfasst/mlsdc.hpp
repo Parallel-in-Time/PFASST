@@ -40,8 +40,9 @@ namespace pfasst {
     {
       nsweeps.resize(this->nlevels());
       fill(nsweeps.begin(), nsweeps.end(), 1);
-      for(auto leviter = this->coarsest(); leviter <= this->finest(); ++leviter)
+      for(auto leviter = this->coarsest(); leviter <= this->finest(); ++leviter) {
 	leviter.current()->setup(leviter!=this->finest());
+      }
     }
 
     /**
@@ -61,12 +62,14 @@ namespace pfasst {
 	initial = nstep == 0;	// only evaluate node 0 functions on first step
 
 	// iterate by performing v-cycles
-	for(size_t niter = 0; niter < this->niters; niter++)
+	for(size_t niter = 0; niter < this->niters; niter++) {
 	  cycle_v(this->finest(), t, this->dt);
+        }
 
 	// advance all levels
-	for(auto leviter = this->coarsest(); leviter <= this->finest(); ++leviter)
+	for(auto leviter = this->coarsest(); leviter <= this->finest(); ++leviter) {
 	  leviter.current()->advance();
+        }
       }
     }
 

@@ -73,7 +73,7 @@ namespace pfasst {
     {
       polynomial<coeffT> p(c.size());
       for(size_t j = 0; j < c.size(); j++) {
-	p[j] = c[j] / c[c.size()-1];
+	p[j] = c[j] / c.back();
       }
       return p;
     }
@@ -174,7 +174,8 @@ namespace pfasst {
       for(size_t j = 0; j < nnodes-2; j++) {
 	nodes[j+1] = 0.5 * (1.0 + roots[j]);
       }
-      nodes[0] = 0.0; nodes[nnodes-1] = 1.0;
+      nodes.front() = 0.0;
+      nodes.back() = 1.0;
     } else if (qtype == "gauss-radau") {
       auto l   = polynomial<node>::legendre(nnodes);
       auto lm1 = polynomial<node>::legendre(nnodes-1);
@@ -185,7 +186,7 @@ namespace pfasst {
       for(size_t j = 1; j < nnodes; j++) {
 	nodes[j-1] = 0.5 * (1.0 - roots[nnodes-j]);
       }
-      nodes[nnodes-1] = 1.0;
+      nodes.back() = 1.0;
     }
 
     return nodes;

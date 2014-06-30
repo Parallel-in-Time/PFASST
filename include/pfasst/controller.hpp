@@ -21,7 +21,7 @@ namespace pfasst {
   public:
 
     void setup() {
-      for(auto l=coarsest(); l<=finest(); ++l) {
+      for(auto l = coarsest(); l <= finest(); ++l) {
 	l.current()->setup();
       }
     }
