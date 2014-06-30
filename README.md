@@ -1,4 +1,4 @@
-PFASST
+PFASST                                                                                  {#mainpage}
 ======
 
 The PFASST algorithm is a time-parallel algorithm for solving ODEs and
@@ -28,14 +28,13 @@ Build status
 
 | Branch      | Status                              |
 |-------------|-------------------------------------|
-| Master      | [![master-status][]][pfasst-travis] |
-| Development | [![dev-status][]][pfasst-travis]    |
+| Master      | ![master-status][]                  |
+| Development | ![dev-status][]                     |
 
+For details see [Travis][pfasst-travis].
 
 
 [documentation]: https://pint.fz-juelich.de/ci/view/PFASST/job/PFASST%20%28Docu%29/doxygen/
 [pfasst-travis]: https://travis-ci.org/Parallel-in-Time/PFASST
 [master-status]: https://travis-ci.org/Parallel-in-Time/PFASST.svg?branch=master
 [dev-status]:    https://travis-ci.org/Parallel-in-Time/PFASST.svg?branch=development
-
-
