@@ -7,29 +7,26 @@
 
 #include "controller.hpp"
 
-namespace pfasst
-{
+namespace pfasst {
 
-  template<typename timeT>
-  class SDC : public Controller<timeT>
-  {
-    public:
+  template<typename time>
+  class SDC : public Controller<time> {
+  public:
 
-      void run()
-      {
-        auto* sweeper = this->get_level(0);
+    void run()
+    {
+      auto* sweeper = this->get_level(0);
 
-        for (int nstep = 0; nstep < this->nsteps; nstep++) {
-          timeT t = nstep * this->dt;
+      for (int nstep=0; nstep<this->nsteps; nstep++) {
+	time t = nstep * this->dt;
 
-          sweeper->predict(t, this->dt, nstep == 0);
+	sweeper->predict(t, this->dt, nstep==0);
+	for (int niter=1; niter<this->niters; niter++)
+	  sweeper->sweep(t, this->dt);
 
-          for (int niter = 1; niter < this->niters; niter++)
-          { sweeper->sweep(t, this->dt); }
-
-          sweeper->advance();
-        }
+	sweeper->advance();
       }
+    }
 
   };
 
