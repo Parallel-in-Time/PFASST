@@ -74,13 +74,12 @@ namespace pfasst {
 
       scalar norm0() const
       {
-	scalar max = 0.0;
-	for (int i=0; i<this->size(); i++) {
-	  scalar v = abs((*this)[i]);
-	  if (v > max)
-	    max = v;
-	}
-	return max;
+        scalar max = 0.0;
+        for(size_t i = 0; i < this->size(); i++) {
+          scalar v = abs(this->at(i));
+          if(v > max) { max = v; }
+        }
+        return max;
       }
 
     };

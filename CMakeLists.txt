@@ -58,7 +58,7 @@ endif()
 message(STATUS "Your compiler has C++11 support. Hurray!")
 
 # enable all compiler warnings
-add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-Wall")
+add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic")
 
 set(3rdparty_INCLUDES)
 set(3rdparty_DEPENDEND_LIBS)

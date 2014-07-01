@@ -25,16 +25,16 @@ int main(int argc, char **argv)
 {
   MLSDC<> mlsdc;
 
-  const int    nsteps = 4;
+  const size_t nsteps = 4;
   const double dt     = 0.01;
-  const int    niters = 4;
+  const size_t niters = 4;
 
-  vector<pair<int,string>> nodes = {
+  vector<pair<size_t,string>> nodes = {
     { 3, "gauss-lobatto" },
     { 5, "gauss-lobatto" }
   };
 
-  vector<int> ndofs = { 64, 128 };
+  vector<size_t> ndofs = { 64, 128 };
 
   /*
    * the 'build' function is called once for each level, and returns a
@@ -42,7 +42,7 @@ int main(int argc, char **argv)
    * routines.  in this case our builder is a lambda function that
    * captures the 'ndofs' variable from above.
    */
-  auto build_level = [ndofs] (unsigned int level) {
+  auto build_level = [ndofs] (size_t level) {
     auto* factory  = new VectorFactory<double>(ndofs[level]);
     auto* sweeper  = new AdvectionDiffusionSweeper<>(ndofs[level]);
     auto* transfer = new SpectralTransfer1D<>();
