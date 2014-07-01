@@ -10,8 +10,8 @@
 namespace pfasst
 {
 
-  template<typename time>
-  class SDC : public Controller<time>
+  template<typename timeT>
+  class SDC : public Controller<timeT>
   {
     public:
 
@@ -20,7 +20,7 @@ namespace pfasst
         auto* sweeper = this->get_level(0);
 
         for (int nstep = 0; nstep < this->nsteps; nstep++) {
-          time t = nstep * this->dt;
+          timeT t = nstep * this->dt;
 
           sweeper->predict(t, this->dt, nstep == 0);
 

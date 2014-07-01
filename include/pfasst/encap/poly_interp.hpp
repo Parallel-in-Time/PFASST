@@ -14,10 +14,10 @@ namespace pfasst
   namespace encap
   {
 
-    template<typename ScalarT, typename time>
+    template<typename ScalarT, typename timeT>
     class PolyInterpMixin : public pfasst::ITransfer
     {
-        matrix<time> tmat, fmat;
+        matrix<timeT> tmat, fmat;
 
       public:
 
@@ -27,11 +27,11 @@ namespace pfasst
                                  bool interp_delta_from_initial,
                                  bool interp_initial)
         {
-          auto* fine = dynamic_cast<EncapSweeper<ScalarT, time>*>(dst);
-          auto* crse = dynamic_cast<const EncapSweeper<ScalarT, time>*>(src);
+          auto* fine = dynamic_cast<EncapSweeper<ScalarT, timeT>*>(dst);
+          auto* crse = dynamic_cast<const EncapSweeper<ScalarT, timeT>*>(src);
 
           if (tmat.size1() == 0)
-          { tmat = pfasst::compute_interp<time>(fine->get_nodes(), crse->get_nodes()); }
+          { tmat = pfasst::compute_interp<timeT>(fine->get_nodes(), crse->get_nodes()); }
 
           int nfine = fine->get_nodes().size();
           int ncrse = crse->get_nodes().size();
@@ -39,7 +39,7 @@ namespace pfasst
           auto* crse_factory = crse->get_factory();
           auto* fine_factory = fine->get_factory();
 
-          vector<Encapsulation<ScalarT, time>*> fine_state(nfine), fine_delta(ncrse);
+          vector<Encapsulation<ScalarT, timeT>*> fine_state(nfine), fine_delta(ncrse);
 
           for (int m = 0; m < nfine; m++) { fine_state[m] = fine->get_state(m); }
 
@@ -77,8 +77,8 @@ namespace pfasst
 
         virtual void restrict(ISweeper* dst, const ISweeper* src, bool restrict_initial)
         {
-          auto* crse = dynamic_cast<EncapSweeper<ScalarT, time>*>(dst);
-          auto* fine = dynamic_cast<const EncapSweeper<ScalarT, time>*>(src);
+          auto* crse = dynamic_cast<EncapSweeper<ScalarT, timeT>*>(dst);
+          auto* fine = dynamic_cast<const EncapSweeper<ScalarT, timeT>*>(src);
 
           auto dnodes = crse->get_nodes();
           auto snodes = fine->get_nodes();
@@ -100,10 +100,10 @@ namespace pfasst
           for (int m = m0; m < ncrse; m++) { crse->evaluate(m); }
         }
 
-        virtual void fas(time dt, ISweeper* dst, const ISweeper* src)
+        virtual void fas(timeT dt, ISweeper* dst, const ISweeper* src)
         {
-          auto* crse = dynamic_cast<EncapSweeper<ScalarT, time>*>(dst);
-          auto* fine = dynamic_cast<const EncapSweeper<ScalarT, time>*>(src);
+          auto* crse = dynamic_cast<EncapSweeper<ScalarT, timeT>*>(dst);
+          auto* fine = dynamic_cast<const EncapSweeper<ScalarT, timeT>*>(src);
 
           int ncrse = crse->get_nodes().size();
           int nfine = fine->get_nodes().size();
@@ -111,7 +111,7 @@ namespace pfasst
           auto* crse_factory = crse->get_factory();
           auto* fine_factory = fine->get_factory();
 
-          vector<Encapsulation<ScalarT, time>*> crse_z2n(ncrse - 1), fine_z2n(nfine - 1), rstr_z2n(ncrse - 1);
+          vector<Encapsulation<ScalarT, timeT>*> crse_z2n(ncrse - 1), fine_z2n(nfine - 1), rstr_z2n(ncrse - 1);
 
           for (int m = 0; m < ncrse - 1; m++) { crse_z2n[m] = crse_factory->create(solution); }
 
@@ -138,7 +138,7 @@ namespace pfasst
           { this->restrict(rstr_z2n[m - 1], fine_z2n[m * trat - 1]); }
 
           // compute 'node to node' tau correction
-          vector<Encapsulation<ScalarT, time>*> tau(ncrse - 1);
+          vector<Encapsulation<ScalarT, timeT>*> tau(ncrse - 1);
 
           for (int m = 0; m < ncrse - 1; m++) { tau[m] = crse->get_tau(m); }
 
@@ -161,12 +161,12 @@ namespace pfasst
         }
 
         // required for interp/restrict helpers
-        virtual void interpolate(Encapsulation<ScalarT, time>* dst, const Encapsulation<ScalarT, time>* src)
+        virtual void interpolate(Encapsulation<ScalarT, timeT>* dst, const Encapsulation<ScalarT, timeT>* src)
         {
           throw NotImplementedYet("mlsdc/pfasst");
         }
 
-        virtual void restrict(Encapsulation<ScalarT, time>* dst, const Encapsulation<ScalarT, time>* src)
+        virtual void restrict(Encapsulation<ScalarT, timeT>* dst, const Encapsulation<ScalarT, timeT>* src)
         {
           throw NotImplementedYet("mlsdc/pfasst");
         }

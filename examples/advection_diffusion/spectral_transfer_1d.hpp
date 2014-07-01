@@ -10,16 +10,16 @@
 
 #include "fft.hpp"
 
-template<typename ScalarT, typename time>
-class SpectralTransfer1D : public pfasst::encap::PolyInterpMixin<ScalarT, time>
+template<typename ScalarT, typename timeT>
+class SpectralTransfer1D : public pfasst::encap::PolyInterpMixin<ScalarT, timeT>
 {
-    typedef pfasst::encap::VectorEncapsulation<ScalarT, time> DVectorT;
+    typedef pfasst::encap::VectorEncapsulation<ScalarT, timeT> DVectorT;
 
-    FFT<ScalarT, time> fft;
+    FFT<ScalarT, timeT> fft;
 
   public:
 
-    void interpolate(Encapsulation<ScalarT, time>* dst, const Encapsulation<ScalarT, time>* src)
+    void interpolate(Encapsulation<ScalarT, timeT>* dst, const Encapsulation<ScalarT, timeT>* src)
     {
       auto& crse = *dynamic_cast<const DVectorT*>(src);
       auto& fine = *dynamic_cast<DVectorT*>(dst);
@@ -41,7 +41,7 @@ class SpectralTransfer1D : public pfasst::encap::PolyInterpMixin<ScalarT, time>
       fft.backward(fine);
     }
 
-    void restrict(Encapsulation<ScalarT, time>* dst, const Encapsulation<ScalarT, time>* src)
+    void restrict(Encapsulation<ScalarT, timeT>* dst, const Encapsulation<ScalarT, timeT>* src)
     {
       auto& crse = *dynamic_cast<DVectorT*>(dst);
       auto& fine = *dynamic_cast<const DVectorT*>(src);

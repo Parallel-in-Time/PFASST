@@ -13,7 +13,7 @@ namespace pfasst
   /**
    * Base SDC/MLSDC/PFASST controller.
    */
-  template<typename time>
+  template<typename timeT>
   class Controller
   {
     protected:
@@ -21,7 +21,7 @@ namespace pfasst
       deque<shared_ptr<ITransfer>> transfer;
 
       int nsteps, niters;
-      time dt;
+      timeT dt;
 
     public:
 
@@ -32,7 +32,7 @@ namespace pfasst
         }
       }
 
-      void set_duration(time dt, int nsteps, int niters)
+      void set_duration(timeT dt, int nsteps, int niters)
       {
         this->dt = dt; this->nsteps = nsteps; this->niters = niters;
       }

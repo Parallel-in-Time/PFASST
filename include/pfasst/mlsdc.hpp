@@ -17,15 +17,15 @@ using namespace std;
 namespace pfasst
 {
 
-  template<typename time>
-  class MLSDC : public Controller<time>
+  template<typename timeT>
+  class MLSDC : public Controller<timeT>
   {
       vector<int> nsweeps;
       bool predict, initial;
 
-      using LevelIter = typename pfasst::Controller<time>::LevelIter;
+      using LevelIter = typename pfasst::Controller<timeT>::LevelIter;
 
-      void perform_sweeps(LevelIter leviter, time t, time dt)
+      void perform_sweeps(LevelIter leviter, timeT t, timeT dt)
       {
         auto* sweeper = leviter.current();
 
@@ -60,7 +60,7 @@ namespace pfasst
       void run()
       {
         for (int nstep = 0; nstep < this->nsteps; nstep++) {
-          time t = nstep * this->dt;
+          timeT t = nstep * this->dt;
 
           predict = true;   // use predictor for first fine sweep of each step
           initial = nstep == 0; // only evaluate node 0 functions on first step
@@ -78,7 +78,7 @@ namespace pfasst
       /**
        * Cycle down: sweep on current (fine), restrict to coarse.
        */
-      LevelIter cycle_down(LevelIter leviter, time t, time dt)
+      LevelIter cycle_down(LevelIter leviter, timeT t, timeT dt)
       {
         auto* fine = leviter.current();
         auto* crse = leviter.coarse();
@@ -101,7 +101,7 @@ namespace pfasst
        * level, we don't perform a sweep.  In this case the only
        * operation that is performed here is interpolation.
        */
-      LevelIter cycle_up(LevelIter leviter, time t, time dt)
+      LevelIter cycle_up(LevelIter leviter, timeT t, timeT dt)
       {
         auto* fine = leviter.current();
         auto* crse = leviter.coarse();
@@ -118,7 +118,7 @@ namespace pfasst
       /**
        * Cycle bottom: sweep on the current (coarsest) level.
        */
-      LevelIter cycle_bottom(LevelIter leviter, time t, time dt)
+      LevelIter cycle_bottom(LevelIter leviter, timeT t, timeT dt)
       {
         perform_sweeps(leviter, t, dt);
         return leviter + 1;
@@ -127,7 +127,7 @@ namespace pfasst
       /**
        * Perform an MLSDC V-cycle.
        */
-      LevelIter cycle_v(LevelIter leviter, time t, time dt)
+      LevelIter cycle_v(LevelIter leviter, timeT t, timeT dt)
       {
         if (leviter.level == 0) {
           leviter = cycle_bottom(leviter, t, dt);

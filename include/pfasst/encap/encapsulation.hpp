@@ -22,7 +22,7 @@ namespace pfasst
     //
     // encapsulation
     //
-    template<typename ScalarT, typename time>
+    template<typename ScalarT, typename timeT>
     class Encapsulation
     {
       public:
@@ -43,26 +43,26 @@ namespace pfasst
         {
           throw NotImplementedYet("encap");
         }
-        virtual void copy(const Encapsulation<ScalarT, time>*)
+        virtual void copy(const Encapsulation<ScalarT, timeT>*)
         {
           throw NotImplementedYet("encap");
         }
-        virtual void saxpy(time a, const Encapsulation<ScalarT, time>*)
+        virtual void saxpy(timeT a, const Encapsulation<ScalarT, timeT>*)
         {
           throw NotImplementedYet("encap");
         }
-        virtual void mat_apply(vector<Encapsulation<ScalarT, time>*> dst, time a, matrix<time> m,
-                               vector<Encapsulation<ScalarT, time>*> src, bool zero = true)
+        virtual void mat_apply(vector<Encapsulation<ScalarT, timeT>*> dst, timeT a, matrix<timeT> m,
+                               vector<Encapsulation<ScalarT, timeT>*> src, bool zero = true)
         {
           throw NotImplementedYet("encap");
         }
     };
 
-    template<typename ScalarT, typename time>
+    template<typename ScalarT, typename timeT>
     class EncapFactory
     {
       public:
-        virtual Encapsulation<ScalarT, time>* create(const EncapType) = 0;
+        virtual Encapsulation<ScalarT, timeT>* create(const EncapType) = 0;
     };
 
   }

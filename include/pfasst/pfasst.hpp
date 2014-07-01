@@ -12,11 +12,11 @@ using namespace std;
 namespace pfasst
 {
 
-  template<typename timeT>
-  class PFASST : public Controller<timeT>
+  template<typename timeTT>
+  class PFASST : public Controller<timeTT>
   {
 
-      void run(timeT dt, int nsteps)
+      void run(timeTT dt, int nsteps)
       {
 
       }

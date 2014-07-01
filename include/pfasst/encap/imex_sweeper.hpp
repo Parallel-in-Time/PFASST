@@ -15,11 +15,11 @@ namespace pfasst
 
     using pfasst::encap::Encapsulation;
 
-    template<typename ScalarT, typename time>
-    class IMEXSweeper : public pfasst::encap::EncapSweeper<ScalarT, time>
+    template<typename ScalarT, typename timeT>
+    class IMEXSweeper : public pfasst::encap::EncapSweeper<ScalarT, timeT>
     {
-        vector<Encapsulation<ScalarT, time>*> Q, pQ, S, T, Fe, Fi;
-        matrix<time> Smat, SEmat, SImat;
+        vector<Encapsulation<ScalarT, timeT>*> Q, pQ, S, T, Fe, Fi;
+        matrix<timeT> Smat, SEmat, SImat;
 
       public:
 
@@ -38,23 +38,23 @@ namespace pfasst
           for (int m = 0; m < Fi.size(); m++) { delete Fi[m]; }
         }
 
-        void set_state(const Encapsulation<ScalarT, time>* q0, unsigned int m)
+        void set_state(const Encapsulation<ScalarT, timeT>* q0, unsigned int m)
         {
           Q[m]->copy(q0);
 
         }
 
-        Encapsulation<ScalarT, time>* get_state(unsigned int m) const
+        Encapsulation<ScalarT, timeT>* get_state(unsigned int m) const
         {
           return Q[m];
         }
 
-        Encapsulation<ScalarT, time>* get_tau(unsigned int m) const
+        Encapsulation<ScalarT, timeT>* get_tau(unsigned int m) const
         {
           return T[m];
         }
 
-        Encapsulation<ScalarT, time>* get_saved_state(unsigned int m) const
+        Encapsulation<ScalarT, timeT>* get_saved_state(unsigned int m) const
         {
           return pQ[m];
         }
@@ -67,7 +67,7 @@ namespace pfasst
         }
 
 
-        virtual void integrate(time dt, vector<Encapsulation<ScalarT, time>*> dst) const
+        virtual void integrate(timeT dt, vector<Encapsulation<ScalarT, timeT>*> dst) const
         {
           auto* encap = dst[0];
           encap->mat_apply(dst, dt, Smat, Fe, true);
@@ -107,7 +107,7 @@ namespace pfasst
           }
         }
 
-        virtual void sweep(time t0, time dt)
+        virtual void sweep(timeT t0, timeT dt)
         {
           const auto nodes  = this->get_nodes();
           const int  nnodes = nodes.size();
@@ -122,12 +122,12 @@ namespace pfasst
 
 
           // sweep
-          Encapsulation<ScalarT, time>* rhs = this->get_factory()->create(pfasst::encap::solution);
+          Encapsulation<ScalarT, timeT>* rhs = this->get_factory()->create(pfasst::encap::solution);
 
-          time t = t0;
+          timeT t = t0;
 
           for (int m = 0; m < nnodes - 1; m++) {
-            time ds = dt * (nodes[m + 1] - nodes[m]);
+            timeT ds = dt * (nodes[m + 1] - nodes[m]);
 
             rhs->copy(Q[m]);
             rhs->saxpy(ds, Fe[m]);
@@ -141,7 +141,7 @@ namespace pfasst
           delete rhs;
         }
 
-        virtual void predict(time t0, time dt, bool initial)
+        virtual void predict(timeT t0, timeT dt, bool initial)
         {
           const auto nodes  = this->get_nodes();
           const int  nnodes = nodes.size();
@@ -151,12 +151,12 @@ namespace pfasst
             f2eval(Fi[0], Q[0], t0);
           }
 
-          Encapsulation<ScalarT, time>* rhs = this->get_factory()->create(pfasst::encap::solution);
+          Encapsulation<ScalarT, timeT>* rhs = this->get_factory()->create(pfasst::encap::solution);
 
-          time t = t0;
+          timeT t = t0;
 
           for (int m = 0; m < nnodes - 1; m++) {
-            time ds = dt * (nodes[m + 1] - nodes[m]);
+            timeT ds = dt * (nodes[m + 1] - nodes[m]);
             rhs->copy(Q[m]);
             rhs->saxpy(ds, Fe[m]);
             f2comp(Fi[m + 1], Q[m + 1], t, ds, rhs);
@@ -176,24 +176,24 @@ namespace pfasst
 
         virtual void evaluate(int m)
         {
-          time t = this->get_nodes()[m]; // XXX
+          timeT t = this->get_nodes()[m]; // XXX
           f1eval(Fe[m], Q[m], t);
           f2eval(Fi[m], Q[m], t);
         }
 
 
-        virtual void f1eval(Encapsulation<ScalarT, time>* F, Encapsulation<ScalarT, time>* Q, time t)
+        virtual void f1eval(Encapsulation<ScalarT, timeT>* F, Encapsulation<ScalarT, timeT>* Q, timeT t)
         {
           throw NotImplementedYet("imex (f1eval)");
         }
 
-        virtual void f2eval(Encapsulation<ScalarT, time>* F, Encapsulation<ScalarT, time>* Q, time t)
+        virtual void f2eval(Encapsulation<ScalarT, timeT>* F, Encapsulation<ScalarT, timeT>* Q, timeT t)
         {
           throw NotImplementedYet("imex (f2eval)");
         }
 
-        virtual void f2comp(Encapsulation<ScalarT, time>* F, Encapsulation<ScalarT, time>* Q, time t, time dt,
-                            Encapsulation<ScalarT, time>* rhs)
+        virtual void f2comp(Encapsulation<ScalarT, timeT>* F, Encapsulation<ScalarT, timeT>* Q, timeT t, timeT dt,
+                            Encapsulation<ScalarT, timeT>* rhs)
         {
           throw NotImplementedYet("imex (f2comp)");
         }

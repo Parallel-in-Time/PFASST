@@ -13,10 +13,10 @@
 
 #include <fftw3.h>
 
-template<typename ScalarT, typename time>
+template<typename ScalarT, typename timeT>
 class FFT
 {
-    typedef pfasst::encap::VectorEncapsulation<ScalarT, time> DVectorT;
+    typedef pfasst::encap::VectorEncapsulation<ScalarT, timeT> DVectorT;
 
     struct workspace {
       fftw_plan        ffft;

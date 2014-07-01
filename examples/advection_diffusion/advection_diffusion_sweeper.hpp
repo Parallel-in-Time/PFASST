@@ -19,16 +19,16 @@ using namespace std;
 using pfasst::encap::Encapsulation;
 
 
-template<typename ScalarT, typename time>
-class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<ScalarT, time>
+template<typename ScalarT, typename timeT>
+class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<ScalarT, timeT>
 {
-    typedef pfasst::encap::VectorEncapsulation<ScalarT, time> DVectorT;
-    FFT<ScalarT, time> fft;
+    typedef pfasst::encap::VectorEncapsulation<ScalarT, timeT> DVectorT;
+    FFT<ScalarT, timeT> fft;
 
     vector<complex<ScalarT>> ddx, lap;
 
     ScalarT v  = 1.0;
-    time   t0 = 1.0;
+    timeT   t0 = 1.0;
     ScalarT nu = 0.02;
     int    nf1evals = 0;
 
@@ -51,7 +51,7 @@ class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<ScalarT, tim
       cout << "number of f1 evals: " << nf1evals << endl;
     }
 
-    void exact(Encapsulation<ScalarT, time>* q, ScalarT t)
+    void exact(Encapsulation<ScalarT, timeT>* q, ScalarT t)
     {
       exact(*dynamic_cast<DVectorT*>(q), t);
     }
@@ -72,7 +72,7 @@ class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<ScalarT, tim
       }
     }
 
-    void echo_error(time t, bool predict = false)
+    void echo_error(timeT t, bool predict = false)
     {
       auto& qend = *dynamic_cast<DVectorT*>(this->get_state(this->get_nodes().size() - 1));
       auto  qex  = DVectorT(qend.size());
@@ -91,19 +91,19 @@ class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<ScalarT, tim
       cout << "err: " << scientific << max << " (" << qend.size() << ", " << predict << ")" << endl;
     }
 
-    void predict(time t, time dt, bool initial)
+    void predict(timeT t, timeT dt, bool initial)
     {
-      pfasst::encap::IMEXSweeper<ScalarT, time>::predict(t, dt, initial);
+      pfasst::encap::IMEXSweeper<ScalarT, timeT>::predict(t, dt, initial);
       echo_error(t + dt, true);
     }
 
-    void sweep(time t, time dt)
+    void sweep(timeT t, timeT dt)
     {
-      pfasst::encap::IMEXSweeper<ScalarT, time>::sweep(t, dt);
+      pfasst::encap::IMEXSweeper<ScalarT, timeT>::sweep(t, dt);
       echo_error(t + dt);
     }
 
-    void f1eval(Encapsulation<ScalarT, time>* F, Encapsulation<ScalarT, time>* Q, time t)
+    void f1eval(Encapsulation<ScalarT, timeT>* F, Encapsulation<ScalarT, timeT>* Q, timeT t)
     {
       auto& f = *dynamic_cast<DVectorT*>(F);
       auto& q = *dynamic_cast<DVectorT*>(Q);
@@ -120,7 +120,7 @@ class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<ScalarT, tim
       nf1evals++;
     }
 
-    void f2eval(Encapsulation<ScalarT, time>* F, Encapsulation<ScalarT, time>* Q, time t)
+    void f2eval(Encapsulation<ScalarT, timeT>* F, Encapsulation<ScalarT, timeT>* Q, timeT t)
     {
       auto& f = *dynamic_cast<DVectorT*>(F);
       auto& q = *dynamic_cast<DVectorT*>(Q);
@@ -135,8 +135,8 @@ class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<ScalarT, tim
       fft.backward(f);
     }
 
-    void f2comp(Encapsulation<ScalarT, time>* F, Encapsulation<ScalarT, time>* Q, time t, time dt,
-                Encapsulation<ScalarT, time>* RHS)
+    void f2comp(Encapsulation<ScalarT, timeT>* F, Encapsulation<ScalarT, timeT>* Q, timeT t, timeT dt,
+                Encapsulation<ScalarT, timeT>* RHS)
     {
       auto& f   = *dynamic_cast<DVectorT*>(F);
       auto& q   = *dynamic_cast<DVectorT*>(Q);
