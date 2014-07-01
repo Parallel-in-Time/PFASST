@@ -16,7 +16,7 @@
 using namespace pfasst;
 using namespace pfasst::encap;
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   MLSDC<double> mlsdc;
 
@@ -36,11 +36,11 @@ int main(int argc, char **argv)
    * subsequently refines in time (accoring to 'trat') and space
    * (according to 'xrat').
    */
-  for (int l=0; l<nlevs; l++) {
+  for (int l = 0; l < nlevs; l++) {
     auto  nodes    = compute_nodes<double>(nnodes, "gauss-lobatto");
-    auto* factory  = new VectorFactory<double,double>(ndofs);
-    auto* sweeper  = new AdvectionDiffusionSweeper<double,double>(ndofs);
-    auto* transfer = new SpectralTransfer1D<double,double>();
+    auto* factory  = new VectorFactory<double, double>(ndofs);
+    auto* sweeper  = new AdvectionDiffusionSweeper<double, double>(ndofs);
+    auto* transfer = new SpectralTransfer1D<double, double>();
 
     sweeper->set_nodes(nodes);
     sweeper->set_factory(factory);
@@ -48,7 +48,7 @@ int main(int argc, char **argv)
     mlsdc.add_level(sweeper, transfer);
 
     ndofs  = ndofs / xrat;
-    nnodes = (nnodes-1) / trat + 1;
+    nnodes = (nnodes - 1) / trat + 1;
   }
 
   /*
@@ -61,7 +61,7 @@ int main(int argc, char **argv)
   /*
    * set initial conditions on each level
    */
-  auto* sweeper = mlsdc.get_level<AdvectionDiffusionSweeper<double,double>>(mlsdc.nlevels()-1);
+  auto* sweeper = mlsdc.get_level<AdvectionDiffusionSweeper<double, double>>(mlsdc.nlevels() - 1);
   auto* q0 = sweeper->get_state(0);
   sweeper->exact(q0, 0.0);
 
