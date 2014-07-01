@@ -13,16 +13,16 @@
 template<typename scalar, typename time>
 class SpectralTransfer1D : public pfasst::encap::PolyInterpMixin<scalar, time>
 {
+    typedef pfasst::encap::VectorEncapsulation<scalar, time> DVectorT;
 
-    using dvector = pfasst::encap::VectorEncapsulation<scalar, time>;
     FFT<scalar, time> fft;
 
   public:
 
     void interpolate(Encapsulation<scalar, time>* dst, const Encapsulation<scalar, time>* src)
     {
-      auto& crse = *dynamic_cast<const dvector*>(src);
-      auto& fine = *dynamic_cast<dvector*>(dst);
+      auto& crse = *dynamic_cast<const DVectorT*>(src);
+      auto& fine = *dynamic_cast<DVectorT*>(dst);
 
       auto* crse_z = fft.forward(crse);
       auto* fine_z = fft.get_workspace(fine.size())->z;
@@ -43,8 +43,8 @@ class SpectralTransfer1D : public pfasst::encap::PolyInterpMixin<scalar, time>
 
     void restrict(Encapsulation<scalar, time>* dst, const Encapsulation<scalar, time>* src)
     {
-      auto& crse = *dynamic_cast<dvector*>(dst);
-      auto& fine = *dynamic_cast<const dvector*>(src);
+      auto& crse = *dynamic_cast<DVectorT*>(dst);
+      auto& fine = *dynamic_cast<const DVectorT*>(src);
 
       int xrat = fine.size() / crse.size();
 

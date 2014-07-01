@@ -16,8 +16,7 @@
 template<typename scalar, typename time>
 class FFT
 {
-
-    using dvector = pfasst::encap::VectorEncapsulation<scalar, time>;
+    typedef pfasst::encap::VectorEncapsulation<scalar, time> DVectorT;
 
     struct workspace {
       fftw_plan        ffft;
@@ -57,7 +56,7 @@ class FFT
       return workspaces[ndofs];
     }
 
-    complex<double>* forward(const dvector& x)
+    complex<double>* forward(const DVectorT& x)
     {
       workspace* wk = get_workspace(x.size());
 
@@ -68,7 +67,7 @@ class FFT
       return wk->z;
     }
 
-    void backward(dvector& x)
+    void backward(DVectorT& x)
     {
       workspace* wk = get_workspace(x.size());
       fftw_execute_dft(wk->ifft, wk->wk, wk->wk);
