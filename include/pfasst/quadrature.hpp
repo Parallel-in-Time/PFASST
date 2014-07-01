@@ -23,13 +23,13 @@ namespace pfasst
   typedef unsigned int uint;
 
   template<typename coeffT>
-  class polynomial
+  class Polynomial
   {
       vector<coeffT> c;
 
     public:
 
-      polynomial(uint n) : c(n)
+      Polynomial(uint n) : c(n)
       {
         fill(c.begin(), c.end(), 0.0);
       }
@@ -41,9 +41,9 @@ namespace pfasst
 
       coeffT& operator[](const unsigned int i) { return c.at(i); }
 
-      polynomial<coeffT> differentiate() const
+      Polynomial<coeffT> differentiate() const
       {
-        polynomial<coeffT> p(c.size() - 1);
+        Polynomial<coeffT> p(c.size() - 1);
 
         for (int j = 1; j < c.size(); j++)
         { p[j - 1] = j * c[j]; }
@@ -51,9 +51,9 @@ namespace pfasst
         return p;
       }
 
-      polynomial<coeffT> integrate() const
+      Polynomial<coeffT> integrate() const
       {
-        polynomial<coeffT> p(c.size() + 1);
+        Polynomial<coeffT> p(c.size() + 1);
 
         for (int j = 0; j < c.size(); j++)
         { p[j + 1] = c[j] / (j + 1); }
@@ -73,9 +73,9 @@ namespace pfasst
         return v;
       }
 
-      polynomial<coeffT> normalize() const
+      Polynomial<coeffT> normalize() const
       {
-        polynomial<coeffT> p(c.size());
+        Polynomial<coeffT> p(c.size());
 
         for (int j = 0; j < c.size(); j++)
         { p[j] = c[j] / c[c.size() - 1]; }
@@ -88,7 +88,7 @@ namespace pfasst
         uint n = c.size() - 1;
 
         // initial guess
-        polynomial<complex<coeffT>> z0(n), z1(n);
+        Polynomial<complex<coeffT>> z0(n), z1(n);
 
         for (int j = 0; j < n; j++) {
           z0[j] = pow(complex<double>(0.4, 0.9), j);
@@ -96,7 +96,7 @@ namespace pfasst
         }
 
         // durand-kerner-weierstrass iterations
-        polynomial<coeffT> p = normalize();
+        Polynomial<coeffT> p = normalize();
 
         for (int k = 0; k < 100; k++) {
           complex<coeffT> num, den;
@@ -135,22 +135,22 @@ namespace pfasst
         return roots;
       }
 
-      static polynomial<coeffT> legendre(const uint order)
+      static Polynomial<coeffT> legendre(const uint order)
       {
         if (order == 0) {
-          polynomial<coeffT> p(1);
+          Polynomial<coeffT> p(1);
           p[0] = 1.0;
           return p;
         }
 
         if (order == 1) {
-          polynomial<coeffT> p(2);
+          Polynomial<coeffT> p(2);
           p[0] = 0.0;
           p[1] = 1.0;
           return p;
         }
 
-        polynomial<coeffT> p0(order + 1), p1(order + 1), p2(order + 1);
+        Polynomial<coeffT> p0(order + 1), p1(order + 1), p2(order + 1);
         p0[0] = 1.0; p1[1] = 1.0;
 
         // (n + 1) P_{n+1} = (2n + 1) x P_{n} - n P_{n-1}
@@ -178,20 +178,20 @@ namespace pfasst
     vector<timeT> nodes(nnodes);
 
     if (qtype == "gauss-legendre") {
-      auto roots = polynomial<timeT>::legendre(nnodes).roots();
+      auto roots = Polynomial<timeT>::legendre(nnodes).roots();
 
       for (int j = 0; j < nnodes; j++)
       { nodes[j] = 0.5 * (1.0 + roots[j]); }
     } else if (qtype == "gauss-lobatto") {
-      auto roots = polynomial<timeT>::legendre(nnodes - 1).differentiate().roots();
+      auto roots = Polynomial<timeT>::legendre(nnodes - 1).differentiate().roots();
 
       for (int j = 0; j < nnodes - 2; j++)
       { nodes[j + 1] = 0.5 * (1.0 + roots[j]); }
 
       nodes[0] = 0.0; nodes[nnodes - 1] = 1.0;
     } else if (qtype == "gauss-radau") {
-      auto l   = polynomial<timeT>::legendre(nnodes);
-      auto lm1 = polynomial<timeT>::legendre(nnodes - 1);
+      auto l   = Polynomial<timeT>::legendre(nnodes);
+      auto lm1 = Polynomial<timeT>::legendre(nnodes - 1);
 
       for (int i = 0; i < nnodes; i++)
       { l[i] += lm1[i]; }
@@ -218,7 +218,7 @@ namespace pfasst
     //   /* for (int n=0; n<(ndst-1)*nsrc; n++) */
     //   /*   smat[n] = 0.0; */
 
-    polynomial<timeT> p(nsrc + 1), p1(nsrc + 1);
+    Polynomial<timeT> p(nsrc + 1), p1(nsrc + 1);
 
     for (int i = 0; i < nsrc; i++) {
       //      if ((flags[i] & SDC_NODE_PROPER) == 0) continue;
