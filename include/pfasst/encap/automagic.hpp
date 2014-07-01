@@ -19,8 +19,8 @@ namespace pfasst
           pfasst::ITransfer*,
           pfasst::encap::EncapFactory<ScalarT, timeT>*>;
 
-    template<typename ScalarT, typename timeT, typename controllerT, typename buildT>
-    void auto_build(controllerT& c, vector<pair<int, string>> nodes, buildT build)
+    template<typename ScalarT, typename timeT, typename ControllerT, typename buildT>
+    void auto_build(ControllerT& c, vector<pair<int, string>> nodes, buildT build)
     {
       for (unsigned int l = 0; l < nodes.size(); l++) {
         auto nds = pfasst::compute_nodes<timeT>(get<0>(nodes[l]), get<1>(nodes[l]));
@@ -34,8 +34,8 @@ namespace pfasst
       }
     }
 
-    template<typename ScalarT, typename timeT, typename controllerT, typename initialT>
-    void auto_setup(controllerT& c, initialT initial)
+    template<typename ScalarT, typename timeT, typename ControllerT, typename initialT>
+    void auto_setup(ControllerT& c, initialT initial)
     {
       c.setup();
 
