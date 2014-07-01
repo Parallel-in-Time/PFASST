@@ -12,7 +12,7 @@
 
 #include "advection_diffusion_sweeper.hpp"
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   pfasst::SDC<double> sdc;
 
@@ -23,8 +23,8 @@ int main(int argc, char **argv)
   const int    niters = 4;
 
   auto  nodes   = pfasst::compute_nodes<double>(nnodes, "gauss-lobatto");
-  auto* factory = new pfasst::encap::VectorFactory<double,double>(ndofs);
-  auto* sweeper = new AdvectionDiffusionSweeper<double,double>(ndofs);
+  auto* factory = new pfasst::encap::VectorFactory<double, double>(ndofs);
+  auto* sweeper = new AdvectionDiffusionSweeper<double, double>(ndofs);
 
   sweeper->set_nodes(nodes);
   sweeper->set_factory(factory);
