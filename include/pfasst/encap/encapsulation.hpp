@@ -22,7 +22,7 @@ namespace pfasst
     //
     // encapsulation
     //
-    template<typename scalar, typename time>
+    template<typename ScalarT, typename time>
     class Encapsulation
     {
       public:
@@ -39,30 +39,30 @@ namespace pfasst
         }
 
         // required for host based encap helpers
-        virtual void setval(scalar)
+        virtual void setval(ScalarT)
         {
           throw NotImplementedYet("encap");
         }
-        virtual void copy(const Encapsulation<scalar, time>*)
+        virtual void copy(const Encapsulation<ScalarT, time>*)
         {
           throw NotImplementedYet("encap");
         }
-        virtual void saxpy(time a, const Encapsulation<scalar, time>*)
+        virtual void saxpy(time a, const Encapsulation<ScalarT, time>*)
         {
           throw NotImplementedYet("encap");
         }
-        virtual void mat_apply(vector<Encapsulation<scalar, time>*> dst, time a, matrix<time> m,
-                               vector<Encapsulation<scalar, time>*> src, bool zero = true)
+        virtual void mat_apply(vector<Encapsulation<ScalarT, time>*> dst, time a, matrix<time> m,
+                               vector<Encapsulation<ScalarT, time>*> src, bool zero = true)
         {
           throw NotImplementedYet("encap");
         }
     };
 
-    template<typename scalar, typename time>
+    template<typename ScalarT, typename time>
     class EncapFactory
     {
       public:
-        virtual Encapsulation<scalar, time>* create(const EncapType) = 0;
+        virtual Encapsulation<ScalarT, time>* create(const EncapType) = 0;
     };
 
   }

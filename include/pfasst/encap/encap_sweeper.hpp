@@ -16,11 +16,11 @@ namespace pfasst
   namespace encap
   {
 
-    template<typename scalar, typename time>
+    template<typename ScalarT, typename time>
     class EncapSweeper : public ISweeper
     {
-        vector<scalar> nodes;
-        shared_ptr<EncapFactory<scalar, time>> factory;
+        vector<ScalarT> nodes;
+        shared_ptr<EncapFactory<ScalarT, time>> factory;
 
       public:
 
@@ -34,40 +34,40 @@ namespace pfasst
           return nodes;
         }
 
-        void set_factory(EncapFactory<scalar, time>* factory)
+        void set_factory(EncapFactory<ScalarT, time>* factory)
         {
-          this->factory = shared_ptr<EncapFactory<scalar, time>>(factory);
+          this->factory = shared_ptr<EncapFactory<ScalarT, time>>(factory);
         }
 
-        EncapFactory<scalar, time>* get_factory() const
+        EncapFactory<ScalarT, time>* get_factory() const
         {
           return factory.get();
         }
 
-        virtual void set_state(const Encapsulation<scalar, time>* q0, unsigned int m)
+        virtual void set_state(const Encapsulation<ScalarT, time>* q0, unsigned int m)
         {
           throw NotImplementedYet("sweeper");
         }
 
-        virtual Encapsulation<scalar, time>* get_state(unsigned int m) const
-        {
-          throw NotImplementedYet("sweeper");
-          return NULL;
-        }
-
-        virtual Encapsulation<scalar, time>* get_tau(unsigned int m) const
+        virtual Encapsulation<ScalarT, time>* get_state(unsigned int m) const
         {
           throw NotImplementedYet("sweeper");
           return NULL;
         }
 
-        virtual Encapsulation<scalar, time>* get_saved_state(unsigned int m) const
+        virtual Encapsulation<ScalarT, time>* get_tau(unsigned int m) const
         {
           throw NotImplementedYet("sweeper");
           return NULL;
         }
 
-        virtual Encapsulation<scalar, time>* get_end_state()
+        virtual Encapsulation<ScalarT, time>* get_saved_state(unsigned int m) const
+        {
+          throw NotImplementedYet("sweeper");
+          return NULL;
+        }
+
+        virtual Encapsulation<ScalarT, time>* get_end_state()
         {
           return this->get_state(this->get_nodes().size() - 1);
         }
@@ -82,7 +82,7 @@ namespace pfasst
           throw NotImplementedYet("sweeper");
         }
 
-        virtual void integrate(time dt, vector<Encapsulation<scalar, time>*> dst) const
+        virtual void integrate(time dt, vector<Encapsulation<ScalarT, time>*> dst) const
         {
           throw NotImplementedYet("sweeper");
         }

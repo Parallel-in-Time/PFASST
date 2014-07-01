@@ -13,16 +13,16 @@
 
 #include <fftw3.h>
 
-template<typename scalar, typename time>
+template<typename ScalarT, typename time>
 class FFT
 {
-    typedef pfasst::encap::VectorEncapsulation<scalar, time> DVectorT;
+    typedef pfasst::encap::VectorEncapsulation<ScalarT, time> DVectorT;
 
     struct workspace {
       fftw_plan        ffft;
       fftw_plan        ifft;
       fftw_complex*    wk;
-      complex<scalar>* z;
+      complex<ScalarT>* z;
     };
 
     map<int, workspace*> workspaces;
@@ -49,7 +49,7 @@ class FFT
         wk->wk = fftw_alloc_complex(ndofs);
         wk->ffft = fftw_plan_dft_1d(ndofs, wk->wk, wk->wk, FFTW_FORWARD, FFTW_ESTIMATE);
         wk->ifft = fftw_plan_dft_1d(ndofs, wk->wk, wk->wk, FFTW_BACKWARD, FFTW_ESTIMATE);
-        wk->z = reinterpret_cast<complex<scalar>*>(wk->wk);
+        wk->z = reinterpret_cast<complex<ScalarT>*>(wk->wk);
         workspaces.insert(pair<int, workspace*>(ndofs, wk));
       }
 

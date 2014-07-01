@@ -19,17 +19,17 @@ using namespace std;
 using pfasst::encap::Encapsulation;
 
 
-template<typename scalar, typename time>
-class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<scalar, time>
+template<typename ScalarT, typename time>
+class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<ScalarT, time>
 {
-    typedef pfasst::encap::VectorEncapsulation<scalar, time> DVectorT;
-    FFT<scalar, time> fft;
+    typedef pfasst::encap::VectorEncapsulation<ScalarT, time> DVectorT;
+    FFT<ScalarT, time> fft;
 
-    vector<complex<scalar>> ddx, lap;
+    vector<complex<ScalarT>> ddx, lap;
 
-    scalar v  = 1.0;
+    ScalarT v  = 1.0;
     time   t0 = 1.0;
-    scalar nu = 0.02;
+    ScalarT nu = 0.02;
     int    nf1evals = 0;
 
   public:
@@ -40,8 +40,8 @@ class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<scalar, time
       lap.resize(nvars);
 
       for (int i = 0; i < nvars; i++) {
-        scalar kx = TWO_PI * (i <= nvars / 2 ? i : i - nvars);
-        ddx[i] = complex<scalar>(0.0, 1.0) * kx;
+        ScalarT kx = TWO_PI * (i <= nvars / 2 ? i : i - nvars);
+        ddx[i] = complex<ScalarT>(0.0, 1.0) * kx;
         lap[i] = (kx * kx < 1e-13) ? 0.0 : -kx * kx;
       }
     }
@@ -51,22 +51,22 @@ class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<scalar, time
       cout << "number of f1 evals: " << nf1evals << endl;
     }
 
-    void exact(Encapsulation<scalar, time>* q, scalar t)
+    void exact(Encapsulation<ScalarT, time>* q, ScalarT t)
     {
       exact(*dynamic_cast<DVectorT*>(q), t);
     }
 
-    void exact(DVectorT& q, scalar t)
+    void exact(DVectorT& q, ScalarT t)
     {
       int    n = q.size();
-      scalar a = 1.0 / sqrt(4 * PI * nu * (t + t0));
+      ScalarT a = 1.0 / sqrt(4 * PI * nu * (t + t0));
 
       for (int i = 0; i < n; i++)
       { q[i] = 0.0; }
 
       for (int ii = -2; ii < 3; ii++) {
         for (int i = 0; i < n; i++) {
-          scalar x = scalar(i) / n - 0.5 + ii - t * v;
+          ScalarT x = ScalarT(i) / n - 0.5 + ii - t * v;
           q[i] += a * exp(-x * x / (4 * nu * (t + t0)));
         }
       }
@@ -79,10 +79,10 @@ class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<scalar, time
 
       exact(qex, t);
 
-      scalar max = 0.0;
+      ScalarT max = 0.0;
 
       for (int i = 0; i < qend.size(); i++) {
-        scalar d = abs(qend[i] - qex[i]);
+        ScalarT d = abs(qend[i] - qex[i]);
 
         if (d > max)
         { max = d; }
@@ -93,22 +93,22 @@ class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<scalar, time
 
     void predict(time t, time dt, bool initial)
     {
-      pfasst::encap::IMEXSweeper<scalar, time>::predict(t, dt, initial);
+      pfasst::encap::IMEXSweeper<ScalarT, time>::predict(t, dt, initial);
       echo_error(t + dt, true);
     }
 
     void sweep(time t, time dt)
     {
-      pfasst::encap::IMEXSweeper<scalar, time>::sweep(t, dt);
+      pfasst::encap::IMEXSweeper<ScalarT, time>::sweep(t, dt);
       echo_error(t + dt);
     }
 
-    void f1eval(Encapsulation<scalar, time>* F, Encapsulation<scalar, time>* Q, time t)
+    void f1eval(Encapsulation<ScalarT, time>* F, Encapsulation<ScalarT, time>* Q, time t)
     {
       auto& f = *dynamic_cast<DVectorT*>(F);
       auto& q = *dynamic_cast<DVectorT*>(Q);
 
-      scalar c = -v / scalar(q.size());
+      ScalarT c = -v / ScalarT(q.size());
 
       auto* z = fft.forward(q);
 
@@ -120,12 +120,12 @@ class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<scalar, time
       nf1evals++;
     }
 
-    void f2eval(Encapsulation<scalar, time>* F, Encapsulation<scalar, time>* Q, time t)
+    void f2eval(Encapsulation<ScalarT, time>* F, Encapsulation<ScalarT, time>* Q, time t)
     {
       auto& f = *dynamic_cast<DVectorT*>(F);
       auto& q = *dynamic_cast<DVectorT*>(Q);
 
-      scalar c = nu / scalar(q.size());
+      ScalarT c = nu / ScalarT(q.size());
 
       auto* z = fft.forward(q);
 
@@ -135,8 +135,8 @@ class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<scalar, time
       fft.backward(f);
     }
 
-    void f2comp(Encapsulation<scalar, time>* F, Encapsulation<scalar, time>* Q, time t, time dt,
-                Encapsulation<scalar, time>* RHS)
+    void f2comp(Encapsulation<ScalarT, time>* F, Encapsulation<ScalarT, time>* Q, time t, time dt,
+                Encapsulation<ScalarT, time>* RHS)
     {
       auto& f   = *dynamic_cast<DVectorT*>(F);
       auto& q   = *dynamic_cast<DVectorT*>(Q);
@@ -145,7 +145,7 @@ class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<scalar, time
       auto* z = fft.forward(rhs);
 
       for (int i = 0; i < q.size(); i++)
-      { z[i] /= (1.0 - nu * dt * lap[i]) * scalar(q.size()); }
+      { z[i] /= (1.0 - nu * dt * lap[i]) * ScalarT(q.size()); }
 
       fft.backward(q);
 
