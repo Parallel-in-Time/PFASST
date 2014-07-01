@@ -47,7 +47,7 @@ int main(int argc, char** argv)
     auto* sweeper  = new AdvectionDiffusionSweeper<double, double>(ndofs[level]);
     auto* transfer = new SpectralTransfer1D<double, double>();
 
-    return auto_build_tuple<double, double>(sweeper, transfer, factory);
+    return AutoBuildTupleT<double, double>(sweeper, transfer, factory);
   };
 
   /*

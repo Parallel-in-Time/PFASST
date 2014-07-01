@@ -15,16 +15,16 @@ namespace pfasst
   {
 
     template<typename ScalarT, typename timeT>
-    using auto_build_tuple = tuple<pfasst::encap::EncapSweeper<ScalarT, timeT>*,
-          pfasst::ITransfer*,
-          pfasst::encap::EncapFactory<ScalarT, timeT>*>;
+    using AutoBuildTupleT = tuple<pfasst::encap::EncapSweeper<ScalarT, timeT>*,
+                                  pfasst::ITransfer*,
+                                  pfasst::encap::EncapFactory<ScalarT, timeT>*>;
 
     template<typename ScalarT, typename timeT, typename ControllerT, typename BuildT>
     void auto_build(ControllerT& c, vector<pair<int, string>> nodes, BuildT build)
     {
       for (unsigned int l = 0; l < nodes.size(); l++) {
         auto nds = pfasst::compute_nodes<timeT>(get<0>(nodes[l]), get<1>(nodes[l]));
-        auto_build_tuple<ScalarT, timeT> tpl = build(l);
+        AutoBuildTupleT<ScalarT, timeT> tpl = build(l);
         auto* sweeper = get<0>(tpl);
         auto* transfer = get<1>(tpl);
         auto* factory = get<2>(tpl);
