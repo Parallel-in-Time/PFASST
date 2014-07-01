@@ -84,7 +84,7 @@ namespace pfasst {
         assert(ncrse > 1);
 	size_t nfine = fine->get_nodes().size();
 
-	int trat = ((int)nfine - 1) / ((int)ncrse - 1);
+	int trat = (int(nfine) - 1) / (int(ncrse) - 1);
 
 	int m0 = restrict_initial ? 0 : 1;
 	for(size_t m = m0; m < ncrse; m++) {
@@ -128,7 +128,7 @@ namespace pfasst {
         }
 
 	// restrict '0 to node' fine integral
-	int trat = ((int)nfine - 1) / ((int)ncrse - 1);
+	int trat = (int(nfine) - 1) / (int(ncrse) - 1);
 	for (size_t m = 1; m < ncrse; m++) {
 	  this->restrict(rstr_z2n[m-1], fine_z2n[m*trat-1]);
         }

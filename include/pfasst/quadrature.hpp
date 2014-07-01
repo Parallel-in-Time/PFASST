@@ -144,7 +144,7 @@ namespace pfasst {
         for(size_t j = 1; j < order+1; j++) {
 	  p2[j] = ( (2 * m + 1) * p1[j-1] - m * p0[j] ) / (m + 1);
         }
-        p2[0] = - (int)m * p0[0] / (m + 1);
+        p2[0] = - int(m) * p0[0] / (m + 1);
 
         for(size_t j = 0; j < order+1; j++) {
 	  p0[j] = p1[j];

@@ -37,7 +37,7 @@ public:
     ddx.resize(nvars);
     lap.resize(nvars);
     for(size_t i = 0; i < nvars; i++) {
-      double kx = two_pi * ( (i <= (int)nvars/2) ? (int)i : (int)i - (int)nvars );
+      double kx = two_pi * ( (i <= nvars/2) ? int(i) : int(i) - int(nvars) );
       ddx[i] = complex<double>(0.0, 1.0) * kx;
       lap[i] = (kx*kx < 1e-13) ? 0.0 : -kx*kx;
     }
