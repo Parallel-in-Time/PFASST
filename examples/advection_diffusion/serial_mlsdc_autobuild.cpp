@@ -21,7 +21,7 @@ using namespace std;
 using namespace pfasst;
 using namespace pfasst::encap;
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
   MLSDC<double> mlsdc;
 
@@ -29,7 +29,7 @@ int main(int argc, char** argv)
   const double dt     = 0.01;
   const int    niters = 4;
 
-  vector<pair<int, string>> nodes = {
+  vector<pair<int,string>> nodes = {
     { 3, "gauss-lobatto" },
     { 5, "gauss-lobatto" }
   };
@@ -42,26 +42,26 @@ int main(int argc, char** argv)
    * routines.  in this case our builder is a lambda function that
    * captures the 'ndofs' variable from above.
    */
-  auto build_level = [ndofs](unsigned int level) {
-    auto* factory  = new VectorFactory<double, double>(ndofs[level]);
-    auto* sweeper  = new AdvectionDiffusionSweeper<double, double>(ndofs[level]);
-    auto* transfer = new SpectralTransfer1D<double, double>();
+  auto build_level = [ndofs] (unsigned int level) {
+    auto* factory  = new VectorFactory<double,double>(ndofs[level]);
+    auto* sweeper  = new AdvectionDiffusionSweeper<double,double>(ndofs[level]);
+    auto* transfer = new SpectralTransfer1D<double,double>();
 
-    return AutoBuildTupleT<double, double>(sweeper, transfer, factory);
+    return auto_build_tuple<double,double>(sweeper,transfer,factory);
   };
 
   /*
    * the 'initial' function is called once for each level to set the
    * intial conditions.
    */
-  auto initial = [](EncapSweeper<double, double>* sweeper,
-  Encapsulation<double, double>* q0) {
-    auto* ad = dynamic_cast<AdvectionDiffusionSweeper<double, double>*>(sweeper);
+  auto initial = [] (EncapSweeper<double,double> *sweeper,
+		     Encapsulation<double,double> *q0) {
+    auto* ad = dynamic_cast<AdvectionDiffusionSweeper<double,double>*>(sweeper);
     ad->exact(q0, 0.0);
   };
 
-  auto_build<double, double>(mlsdc, nodes, build_level);
-  auto_setup<double, double>(mlsdc, initial);
+  auto_build<double,double>(mlsdc, nodes, build_level);
+  auto_setup<double,double>(mlsdc, initial);
   mlsdc.set_duration(dt, nsteps, niters);
   mlsdc.run();
 
