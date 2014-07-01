@@ -51,10 +51,6 @@ namespace pfasst {
      */
     virtual void setup(bool coarse=false) { }
 
-<<<<<<< HEAD
-    virtual void sweep(time t, time dt) = 0;
-    virtual void predict(time t, time dt, bool initial) = 0;
-=======
     /**
      * Perform a predictor sweep.
      *
@@ -65,7 +61,7 @@ namespace pfasst {
      *     functions values at the first node already exist (usually this is the case when advancing
      *     from one time step to the next).
      */
-    virtual void predict(double t, double dt, bool initial) = 0;
+    virtual void predict(time t, time dt, bool initial) = 0;
 
     /**
      * Perform one SDC sweep/iteration.
@@ -73,7 +69,7 @@ namespace pfasst {
      * Compute a correction and update solution values.  Note that `sweep` can assume that valid
      * function values exist from a previous `sweep` or `predict`.
      */
-    virtual void sweep(double t, double dt) = 0;
+    virtual void sweep(time t, time dt) = 0;
 
     /**
      * Advance from one time step to the next.
@@ -81,7 +77,6 @@ namespace pfasst {
      * Essentially this means copying the solution and function values from the last node to the
      * first node.
      */
->>>>>>> release/v0.1.0
     virtual void advance() = 0;
 
     /**
