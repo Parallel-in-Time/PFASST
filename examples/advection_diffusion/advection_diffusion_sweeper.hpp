@@ -11,8 +11,8 @@
 #include <pfasst/encap/imex_sweeper.hpp>
 #include "fft.hpp"
 
-#define pi     3.1415926535897932385
-#define two_pi 6.2831853071795864769
+#define PI     3.1415926535897932385
+#define TWO_PI 6.2831853071795864769
 
 
 using namespace std;
@@ -41,7 +41,7 @@ class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<scalar, time
       lap.resize(nvars);
 
       for (int i = 0; i < nvars; i++) {
-        scalar kx = two_pi * (i <= nvars / 2 ? i : i - nvars);
+        scalar kx = TWO_PI * (i <= nvars / 2 ? i : i - nvars);
         ddx[i] = complex<scalar>(0.0, 1.0) * kx;
         lap[i] = (kx * kx < 1e-13) ? 0.0 : -kx * kx;
       }
@@ -60,7 +60,7 @@ class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<scalar, time
     void exact(dvector& q, scalar t)
     {
       int    n = q.size();
-      scalar a = 1.0 / sqrt(4 * pi * nu * (t + t0));
+      scalar a = 1.0 / sqrt(4 * PI * nu * (t + t0));
 
       for (int i = 0; i < n; i++)
       { q[i] = 0.0; }
