@@ -35,7 +35,6 @@ namespace pfasst
         void set_state(const Encapsulation<time>* q0, size_t m)
         {
           Q[m]->copy(q0);
-
         }
 
         Encapsulation<time>* get_state(size_t m) const
@@ -174,7 +173,6 @@ namespace pfasst
           f1eval(Fe[m], Q[m], t);
           f2eval(Fi[m], Q[m], t);
         }
-
 
         virtual void f1eval(Encapsulation<time>* F, Encapsulation<time>* Q, time t)
         {

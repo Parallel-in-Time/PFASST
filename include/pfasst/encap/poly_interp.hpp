@@ -21,7 +21,6 @@ namespace pfasst
         matrix<time> tmat, fmat;
 
       public:
-
         virtual ~PolyInterpMixin() { }
 
         virtual void interpolate(ISweeper<time>* dst, const ISweeper<time>* src,

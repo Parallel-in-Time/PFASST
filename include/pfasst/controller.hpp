@@ -24,7 +24,6 @@ namespace pfasst
       time   dt;
 
     public:
-
       void setup()
       {
         for (auto l = coarsest(); l <= finest(); ++l) {

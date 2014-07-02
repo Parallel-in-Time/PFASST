@@ -16,7 +16,6 @@
 
 class FFT
 {
-
     typedef pfasst::encap::VectorEncapsulation<double> DVectorT;
 
     struct workspace {
@@ -29,7 +28,6 @@ class FFT
     map<size_t, workspace*> workspaces;
 
   public:
-
     ~FFT()
     {
       for (auto& x : workspaces) {

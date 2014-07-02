@@ -19,7 +19,6 @@ using namespace std;
 template<typename time = pfasst::time_precision>
 class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<time>
 {
-
     typedef pfasst::encap::Encapsulation<time> Encapsulation;
     typedef pfasst::encap::VectorEncapsulation<double> DVectorT;
 

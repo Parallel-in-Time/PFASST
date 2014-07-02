@@ -28,13 +28,14 @@ namespace pfasst
       void perform_sweeps(LevelIter leviter, time t, time dt)
       {
         auto* sweeper = leviter.current();
-        for (size_t s = 0; s < nsweeps[leviter.level]; s++)
+        for (size_t s = 0; s < nsweeps[leviter.level]; s++) {
           if (predict) {
             sweeper->predict(t, dt, initial & predict);
             predict = false;
           } else {
             sweeper->sweep(t, dt);
           }
+        }
       }
 
     public:

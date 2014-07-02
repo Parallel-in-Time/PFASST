@@ -13,7 +13,6 @@
 template<typename time = pfasst::time_precision>
 class SpectralTransfer1D : public pfasst::encap::PolyInterpMixin<time>
 {
-
     typedef pfasst::encap::Encapsulation<double> Encapsulation;
     typedef pfasst::encap::VectorEncapsulation<double> DVectorT;
 

@@ -27,7 +27,6 @@ namespace pfasst
     template<typename scalar, typename time = time_precision>
     class VectorEncapsulation : public vector<scalar>, public Encapsulation<time>
     {
-
       public:
         VectorEncapsulation(int size) : vector<scalar>(size)
         {
@@ -62,18 +61,23 @@ namespace pfasst
           int nsrc = SRC.size();
 
           vector<VectorEncapsulation<scalar>*> dst(ndst), src(nsrc);
-          for (int n = 0; n < ndst; n++) { dst[n] = dynamic_cast<VectorEncapsulation<scalar>*>(DST[n]); }
-          for (int m = 0; m < nsrc; m++) { src[m] = dynamic_cast<VectorEncapsulation<scalar>*>(SRC[m]); }
+          for (int n = 0; n < ndst; n++) {
+            dst[n] = dynamic_cast<VectorEncapsulation<scalar>*>(DST[n]);
+          }
+          for (int m = 0; m < nsrc; m++) {
+            src[m] = dynamic_cast<VectorEncapsulation<scalar>*>(SRC[m]);
+          }
 
-          if (zero)
-            for (int n = 0; n < ndst; n++)
-            { dst[n]->zero(); }
+          if (zero) { for (int n = 0; n < ndst; n++) { dst[n]->zero(); } }
 
           int ndofs = (*dst[0]).size();
-          for (int i = 0; i < ndofs; i++)
-            for (int n = 0; n < ndst; n++)
-              for (int m = 0; m < nsrc; m++)
-              { dst[n]->data()[i] += a * mat(n, m) * src[m]->data()[i]; }
+          for (int i = 0; i < ndofs; i++) {
+            for (int n = 0; n < ndst; n++) {
+              for (int m = 0; m < nsrc; m++) {
+                dst[n]->data()[i] += a * mat(n, m) * src[m]->data()[i];
+              }
+            }
+          }
         }
 
         scalar norm0() const
