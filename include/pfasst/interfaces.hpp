@@ -15,6 +15,8 @@ using namespace std;
 
 namespace pfasst {
 
+  using time_precision = double;
+
   /**
    * Not implemented yet exception.
    *
@@ -36,6 +38,7 @@ namespace pfasst {
    * Note that, at this level, time is always represented as a `double`.  We do this to avoid a
    * complicated mess of templates, especially for MLSDC and PFASST.
    */
+  template<typename time=time_precision>
   class ISweeper {
   public:
     virtual ~ISweeper() { }
@@ -58,7 +61,7 @@ namespace pfasst {
      *     functions values at the first node already exist (usually this is the case when advancing
      *     from one time step to the next).
      */
-    virtual void predict(double t, double dt, bool initial) = 0;
+    virtual void predict(time t, time dt, bool initial) = 0;
 
     /**
      * Perform one SDC sweep/iteration.
@@ -66,7 +69,7 @@ namespace pfasst {
      * Compute a correction and update solution values.  Note that `sweep` can assume that valid
      * function values exist from a previous `sweep` or `predict`.
      */
-    virtual void sweep(double t, double dt) = 0;
+    virtual void sweep(time t, time dt) = 0;
 
     /**
      * Advance from one time step to the next.
@@ -89,6 +92,7 @@ namespace pfasst {
   /**
    * Abstract time/space transfer (restrict/interpolate) class.
    */
+  template<typename time=time_precision>
   class ITransfer {
   public:
     // XXX: pass level iterator to these routines as well
@@ -103,7 +107,7 @@ namespace pfasst {
      * @param interp_initial True if a delta for the initial condtion should also be computed
      *     (PFASST).
      */
-    virtual void interpolate(ISweeper *fine, const ISweeper *crse,
+    virtual void interpolate(ISweeper<time> *dst, const ISweeper<time> *src,
 			     bool interp_delta_from_initial=false,
 			     bool interp_initial=false) = 0;
 
@@ -112,13 +116,13 @@ namespace pfasst {
      *
      * @param restrict_initial True if the initial condition should also be restricted.
      */
-    virtual void restrict(ISweeper *crse, const ISweeper *fine,
+    virtual void restrict(ISweeper<time> *dst, const ISweeper<time> *src,
 			  bool restrict_initial=false) = 0;
 
     /**
      * Compute FAS correction between the coarse and fine sweepers.
      */
-    virtual void fas(double dt, ISweeper *crse, const ISweeper *fine) = 0;
+    virtual void fas(time dt, ISweeper<time> *dst, const ISweeper<time> *src) = 0;
 
   };
 

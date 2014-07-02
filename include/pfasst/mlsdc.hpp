@@ -16,9 +16,9 @@ using namespace std;
 
 namespace pfasst {
 
-  template<typename time>
+  template<typename time=double>
   class MLSDC : public Controller<time> {
-    vector<int> nsweeps;
+    vector<size_t> nsweeps;
     bool predict, initial;
 
     using LevelIter = typename pfasst::Controller<time>::LevelIter;
@@ -26,8 +26,8 @@ namespace pfasst {
     void perform_sweeps(LevelIter leviter, time t, time dt)
     {
       auto* sweeper = leviter.current();
-      for (int s=0; s<nsweeps[leviter.level]; s++)
-	if (predict) {
+      for(size_t s = 0; s < nsweeps[leviter.level]; s++)
+	if(predict) {
 	  sweeper->predict(t, dt, initial & predict);
 	  predict = false;
 	} else {
@@ -36,13 +36,13 @@ namespace pfasst {
     }
 
   public:
-
     void setup()
     {
       nsweeps.resize(this->nlevels());
       fill(nsweeps.begin(), nsweeps.end(), 1);
-      for (auto leviter=this->coarsest(); leviter<=this->finest(); ++leviter)
+      for(auto leviter = this->coarsest(); leviter <= this->finest(); ++leviter) {
 	leviter.current()->setup(leviter!=this->finest());
+      }
     }
 
     /**
@@ -55,19 +55,21 @@ namespace pfasst {
      */
     void run()
     {
-      for (int nstep=0; nstep<this->nsteps; nstep++) {
+      for(size_t nstep = 0; nstep < this->nsteps; nstep++) {
 	time t = nstep * this->dt;
 
 	predict = true;		// use predictor for first fine sweep of each step
 	initial = nstep == 0;	// only evaluate node 0 functions on first step
 
 	// iterate by performing v-cycles
-	for (int niter=0; niter<this->niters; niter++)
+	for(size_t niter = 0; niter < this->niters; niter++) {
 	  cycle_v(this->finest(), t, this->dt);
+        }
 
 	// advance all levels
-	for (auto leviter=this->coarsest(); leviter<=this->finest(); ++leviter)
+	for(auto leviter = this->coarsest(); leviter <= this->finest(); ++leviter) {
 	  leviter.current()->advance();
+        }
       }
     }
 
@@ -105,8 +107,9 @@ namespace pfasst {
 
       trns->interpolate(fine, crse);
 
-      if (leviter < this->finest())
+      if(leviter < this->finest()) {
 	perform_sweeps(leviter, t, dt);
+      }
 
       return leviter + 1;
     }
@@ -125,7 +128,7 @@ namespace pfasst {
      */
     LevelIter cycle_v(LevelIter leviter, time t, time dt)
     {
-      if (leviter.level == 0) {
+      if(leviter.level == 0) {
       	leviter = cycle_bottom(leviter, t, dt);
       } else {
       	leviter = cycle_down(leviter, t, dt);
