@@ -21,10 +21,10 @@ using boost::numeric::ublas::matrix;
 
 namespace pfasst
 {
-  template<typename coeffT>
+  template<typename CoeffT>
   class polynomial
   {
-      vector<coeffT> c;
+      vector<CoeffT> c;
 
     public:
       polynomial(size_t n) : c(n)
@@ -37,23 +37,23 @@ namespace pfasst
         return c.size() - 1;
       }
 
-      coeffT& operator[](const size_t i)
+      CoeffT& operator[](const size_t i)
       {
         return c.at(i);
       }
 
-      polynomial<coeffT> differentiate() const
+      polynomial<CoeffT> differentiate() const
       {
-        polynomial<coeffT> p(c.size() - 1);
+        polynomial<CoeffT> p(c.size() - 1);
         for (size_t j = 1; j < c.size(); j++) {
           p[j - 1] = j * c[j];
         }
         return p;
       }
 
-      polynomial<coeffT> integrate() const
+      polynomial<CoeffT> integrate() const
       {
-        polynomial<coeffT> p(c.size() + 1);
+        polynomial<CoeffT> p(c.size() + 1);
         for (size_t j = 0; j < c.size(); j++) {
           p[j + 1] = c[j] / (j + 1);
         }
@@ -71,31 +71,31 @@ namespace pfasst
         return v;
       }
 
-      polynomial<coeffT> normalize() const
+      polynomial<CoeffT> normalize() const
       {
-        polynomial<coeffT> p(c.size());
+        polynomial<CoeffT> p(c.size());
         for (size_t j = 0; j < c.size(); j++) {
           p[j] = c[j] / c.back();
         }
         return p;
       }
 
-      vector<coeffT> roots() const
+      vector<CoeffT> roots() const
       {
         assert(c.size() >= 1);
         size_t n = c.size() - 1;
 
         // initial guess
-        polynomial<complex<coeffT>> z0(n), z1(n);
+        polynomial<complex<CoeffT>> z0(n), z1(n);
         for (size_t j = 0; j < n; j++) {
           z0[j] = pow(complex<double>(0.4, 0.9), j);
           z1[j] = z0[j];
         }
 
         // durand-kerner-weierstrass iterations
-        polynomial<coeffT> p = normalize();
+        polynomial<CoeffT> p = normalize();
         for (size_t k = 0; k < 100; k++) {
-          complex<coeffT> num, den;
+          complex<CoeffT> num, den;
           for (size_t i = 0; i < n; i++) {
             num = p.evaluate(z0[i]);
             den = 1.0;
@@ -107,38 +107,38 @@ namespace pfasst
           }
 
           // converged?
-          coeffT acc = 0.0;
+          CoeffT acc = 0.0;
           for (size_t j = 0; j < n; j++) { acc += abs(z0[j] - z1[j]); }
-          if (acc < 2 * std::numeric_limits<coeffT>::epsilon()) { break; }
+          if (acc < 2 * std::numeric_limits<CoeffT>::epsilon()) { break; }
 
           z1 = z0;
         }
 
-        vector<coeffT> roots(n);
+        vector<CoeffT> roots(n);
         for (size_t j = 0; j < n; j++) {
-          roots[j] = (abs(z0[j]) < 4 * std::numeric_limits<coeffT>::epsilon()) ? 0.0 : real(z0[j]);
+          roots[j] = (abs(z0[j]) < 4 * std::numeric_limits<CoeffT>::epsilon()) ? 0.0 : real(z0[j]);
         }
 
         sort(roots.begin(), roots.end());
         return roots;
       }
 
-      static polynomial<coeffT> legendre(const size_t order)
+      static polynomial<CoeffT> legendre(const size_t order)
       {
         if (order == 0) {
-          polynomial<coeffT> p(1);
+          polynomial<CoeffT> p(1);
           p[0] = 1.0;
           return p;
         }
 
         if (order == 1) {
-          polynomial<coeffT> p(2);
+          polynomial<CoeffT> p(2);
           p[0] = 0.0;
           p[1] = 1.0;
           return p;
         }
 
-        polynomial<coeffT> p0(order + 1), p1(order + 1), p2(order + 1);
+        polynomial<CoeffT> p0(order + 1), p1(order + 1), p2(order + 1);
         p0[0] = 1.0; p1[1] = 1.0;
 
         // (n + 1) P_{n+1} = (2n + 1) x P_{n} - n P_{n-1}
