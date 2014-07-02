@@ -19,8 +19,8 @@ namespace pfasst
           pfasst::ITransfer<time>*,
           pfasst::encap::EncapFactory<time>*>;
 
-    template<typename time = time_precision, typename controllerT, typename BuildT>
-    void auto_build(controllerT& c, vector<pair<size_t, string>> nodes, BuildT build)
+    template<typename time = time_precision, typename ControllerT, typename BuildT>
+    void auto_build(ControllerT& c, vector<pair<size_t, string>> nodes, BuildT build)
     {
       for (size_t l = 0; l < nodes.size(); l++) {
         auto nds = pfasst::compute_nodes<time>(get<0>(nodes[l]), get<1>(nodes[l]));
@@ -34,8 +34,8 @@ namespace pfasst
       }
     }
 
-    template<typename time = time_precision, typename controllerT, typename initialT>
-    void auto_setup(controllerT& c, initialT initial)
+    template<typename time = time_precision, typename ControllerT, typename initialT>
+    void auto_setup(ControllerT& c, initialT initial)
     {
       c.setup();
       for (size_t l = 0; l < c.nlevels(); l++) {
