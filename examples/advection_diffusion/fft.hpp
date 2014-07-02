@@ -17,7 +17,7 @@
 class FFT
 {
 
-    using dvector = pfasst::encap::VectorEncapsulation<double>;
+    typedef pfasst::encap::VectorEncapsulation<double> DVectorT;
 
     struct workspace {
       fftw_plan        ffft;
@@ -56,7 +56,7 @@ class FFT
       return workspaces[ndofs];
     }
 
-    complex<double>* forward(const dvector& x)
+    complex<double>* forward(const DVectorT& x)
     {
       workspace* wk = get_workspace(x.size());
       for (size_t i = 0; i < x.size(); i++) {
@@ -66,7 +66,7 @@ class FFT
       return wk->z;
     }
 
-    void backward(dvector& x)
+    void backward(DVectorT& x)
     {
       workspace* wk = get_workspace(x.size());
       fftw_execute_dft(wk->ifft, wk->wk, wk->wk);
