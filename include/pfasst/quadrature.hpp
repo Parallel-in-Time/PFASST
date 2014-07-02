@@ -19,6 +19,8 @@ using boost::numeric::ublas::matrix;
 
 #include "interfaces.hpp"
 
+#define PI 3.1415926535897932384626433832795028841971693993751
+
 namespace pfasst
 {
   template<typename CoeffT>
@@ -158,19 +160,20 @@ namespace pfasst
       }
   };
 
-  //#define pi 3.1415926535897932384626433832795028841971693993751
-
   template<typename node = time_precision>
   vector<node> compute_nodes(size_t nnodes, string qtype)
   {
     vector<node> nodes(nnodes);
 
     if (qtype == "gauss-legendre") {
+
       auto roots = Polynomial<node>::legendre(nnodes).roots();
       for (size_t j = 0; j < nnodes; j++) {
         nodes[j] = 0.5 * (1.0 + roots[j]);
       }
+
     } else if (qtype == "gauss-lobatto") {
+
       auto roots = Polynomial<node>::legendre(nnodes - 1).differentiate().roots();
       assert(nnodes >= 2);
       for (size_t j = 0; j < nnodes - 2; j++) {
@@ -178,7 +181,9 @@ namespace pfasst
       }
       nodes.front() = 0.0;
       nodes.back() = 1.0;
+
     } else if (qtype == "gauss-radau") {
+
       auto l   = Polynomial<node>::legendre(nnodes);
       auto lm1 = Polynomial<node>::legendre(nnodes - 1);
       for (size_t i = 0; i < nnodes; i++) {
@@ -189,6 +194,23 @@ namespace pfasst
         nodes[j - 1] = 0.5 * (1.0 - roots[nnodes - j]);
       }
       nodes.back() = 1.0;
+
+    } else if (qtype == "clenshaw-curtis") {
+
+      for (size_t j = 0; j < nnodes; j++) {
+        nodes[j] = 0.5 * (1.0 - cos(j * PI / (nnodes-1)));
+      }
+
+    } else if (qtype == "uniform") {
+
+      for (size_t j = 0; j < nnodes; j++) {
+        nodes[j] = node(j) / (nnodes-1);
+      }
+
+    } else {
+
+      throw ValueError("invalid node type passed to compute_nodes.");
+
     }
 
     return nodes;
@@ -203,20 +225,16 @@ namespace pfasst
     assert(ndst >= 1);
     matrix<node> mat(ndst - 1, nsrc);
 
-    //   /* for (int n=0; n<(ndst-1)*nsrc; n++) */
-    //   /*   smat[n] = 0.0; */
-
     Polynomial<node> p(nsrc + 1), p1(nsrc + 1);
 
     for (size_t i = 0; i < nsrc; i++) {
-      //      if ((flags[i] & SDC_NODE_PROPER) == 0) continue;
 
       // construct interpolating polynomial coefficients
       p[0] = 1.0;
       for (size_t j = 1; j < nsrc + 1; j++) { p[j] = 0.0; }
       for (size_t m = 0; m < nsrc; m++) {
-        //if (((flags[m] & SDC_NODE_PROPER) == 0) || (m == i)) continue;
         if (m == i) { continue; }
+
         // p_{m+1}(x) = (x - x_j) * p_m(x)
         p1[0] = 0.0;
         for (size_t j = 0; j < nsrc;   j++) { p1[j + 1]  = p[j]; }
