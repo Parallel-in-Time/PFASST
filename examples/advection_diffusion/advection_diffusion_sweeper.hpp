@@ -75,17 +75,18 @@ class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<time>
 
     void echo_error(time t, bool predict = false)
     {
-      auto& qend = *dynamic_cast<DVectorT*>(this->get_state(this->get_nodes().size() - 1));
-      auto  qex  = DVectorT(qend.size());
+      DVectorT* qend = dynamic_cast<DVectorT*>(this->get_state(this->get_nodes().size() - 1));
+      assert(qend != nullptr);
+      DVectorT qex  = DVectorT(qend->size());
 
       exact(qex, t);
 
       double max = 0.0;
-      for (size_t i = 0; i < qend.size(); i++) {
-        double d = abs(qend[i] - qex[i]);
+      for (size_t i = 0; i < qend->size(); i++) {
+        double d = abs(qend->at(i) - qex[i]);
         if (d > max) { max = d; }
       }
-      cout << "err: " << scientific << max << " (" << qend.size() << ", " << predict << ")" << endl;
+      cout << "err: " << scientific << max << " (" << qend->size() << ", " << predict << ")" << endl;
     }
 
     void predict(time t, time dt, bool initial)
