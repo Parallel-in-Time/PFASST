@@ -21,7 +21,7 @@ using namespace std;
 using namespace pfasst;
 using namespace pfasst::encap;
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   MLSDC<> mlsdc;
 
@@ -29,7 +29,7 @@ int main(int argc, char **argv)
   const double dt     = 0.01;
   const size_t niters = 4;
 
-  vector<pair<size_t,string>> nodes = {
+  vector<pair<size_t, string>> nodes = {
     { 3, "gauss-lobatto" },
     { 5, "gauss-lobatto" }
   };
@@ -42,20 +42,20 @@ int main(int argc, char **argv)
    * routines.  in this case our builder is a lambda function that
    * captures the 'ndofs' variable from above.
    */
-  auto build_level = [ndofs] (size_t level) {
+  auto build_level = [ndofs](size_t level) {
     auto* factory  = new VectorFactory<double>(ndofs[level]);
     auto* sweeper  = new AdvectionDiffusionSweeper<>(ndofs[level]);
     auto* transfer = new SpectralTransfer1D<>();
 
-    return auto_build_tuple<>(sweeper,transfer,factory);
+    return AutoBuildTuple<>(sweeper, transfer, factory);
   };
 
   /*
    * the 'initial' function is called once for each level to set the
    * intial conditions.
    */
-  auto initial = [] (EncapSweeper<> *sweeper,
-		     Encapsulation<> *q0) {
+  auto initial = [](EncapSweeper<>* sweeper,
+  Encapsulation<>* q0) {
     auto* ad = dynamic_cast<AdvectionDiffusionSweeper<>*>(sweeper);
     ad->exact(q0, 0.0);
   };

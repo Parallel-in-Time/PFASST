@@ -12,7 +12,7 @@
 
 #include "advection_diffusion_sweeper.hpp"
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   pfasst::SDC<> sdc;
 
