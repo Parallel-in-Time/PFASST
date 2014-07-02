@@ -16,7 +16,7 @@
 using namespace pfasst;
 using namespace pfasst::encap;
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   MLSDC<> mlsdc;
 
@@ -36,7 +36,7 @@ int main(int argc, char **argv)
    * subsequently refines in time (accoring to 'trat') and space
    * (according to 'xrat').
    */
-  for(size_t l = 0; l < nlevs; l++) {
+  for (size_t l = 0; l < nlevs; l++) {
     auto  nodes    = compute_nodes<double>(nnodes, "gauss-lobatto");
     auto* factory  = new VectorFactory<double>(ndofs);
     auto* sweeper  = new AdvectionDiffusionSweeper<>(ndofs);
@@ -48,7 +48,7 @@ int main(int argc, char **argv)
     mlsdc.add_level(sweeper, transfer);
 
     ndofs  = ndofs / xrat;
-    nnodes = (nnodes-1) / trat + 1;
+    nnodes = (nnodes - 1) / trat + 1;
   }
 
   /*
@@ -61,7 +61,7 @@ int main(int argc, char **argv)
   /*
    * set initial conditions on each level
    */
-  auto* sweeper = mlsdc.get_level<AdvectionDiffusionSweeper<>>(mlsdc.nlevels()-1);
+  auto* sweeper = mlsdc.get_level<AdvectionDiffusionSweeper<>>(mlsdc.nlevels() - 1);
   auto* q0 = sweeper->get_state(0);
   sweeper->exact(q0, 0.0);
 
