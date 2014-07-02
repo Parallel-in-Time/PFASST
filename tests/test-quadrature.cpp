@@ -14,16 +14,16 @@ using namespace std;
 
 TEST(PolyTest, LegendrePolys)
 {
-  auto l0 = pfasst::polynomial<double>::legendre(0);
+  auto l0 = pfasst::Polynomial<double>::legendre(0);
   EXPECT_EQ(l0.order(), 0);
   EXPECT_EQ(l0[0], 1.0);
 
-  auto l1 = pfasst::polynomial<double>::legendre(1);
+  auto l1 = pfasst::Polynomial<double>::legendre(1);
   EXPECT_EQ(l1.order(), 1);
   EXPECT_EQ(l1[0], 0.0);
   EXPECT_EQ(l1[1], 1.0);
 
-  auto l2 = pfasst::polynomial<double>::legendre(2);
+  auto l2 = pfasst::Polynomial<double>::legendre(2);
   EXPECT_EQ(l2.order(), 2);
   EXPECT_EQ(l2[0], -0.5);
   EXPECT_EQ(l2[1],  0.0);

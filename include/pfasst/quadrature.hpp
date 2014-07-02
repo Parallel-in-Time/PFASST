@@ -22,12 +22,12 @@ using boost::numeric::ublas::matrix;
 namespace pfasst
 {
   template<typename CoeffT>
-  class polynomial
+  class Polynomial
   {
       vector<CoeffT> c;
 
     public:
-      polynomial(size_t n) : c(n)
+      Polynomial(size_t n) : c(n)
       {
         fill(c.begin(), c.end(), 0.0);
       }
@@ -42,18 +42,18 @@ namespace pfasst
         return c.at(i);
       }
 
-      polynomial<CoeffT> differentiate() const
+      Polynomial<CoeffT> differentiate() const
       {
-        polynomial<CoeffT> p(c.size() - 1);
+        Polynomial<CoeffT> p(c.size() - 1);
         for (size_t j = 1; j < c.size(); j++) {
           p[j - 1] = j * c[j];
         }
         return p;
       }
 
-      polynomial<CoeffT> integrate() const
+      Polynomial<CoeffT> integrate() const
       {
-        polynomial<CoeffT> p(c.size() + 1);
+        Polynomial<CoeffT> p(c.size() + 1);
         for (size_t j = 0; j < c.size(); j++) {
           p[j + 1] = c[j] / (j + 1);
         }
@@ -71,9 +71,9 @@ namespace pfasst
         return v;
       }
 
-      polynomial<CoeffT> normalize() const
+      Polynomial<CoeffT> normalize() const
       {
-        polynomial<CoeffT> p(c.size());
+        Polynomial<CoeffT> p(c.size());
         for (size_t j = 0; j < c.size(); j++) {
           p[j] = c[j] / c.back();
         }
@@ -86,14 +86,14 @@ namespace pfasst
         size_t n = c.size() - 1;
 
         // initial guess
-        polynomial<complex<CoeffT>> z0(n), z1(n);
+        Polynomial<complex<CoeffT>> z0(n), z1(n);
         for (size_t j = 0; j < n; j++) {
           z0[j] = pow(complex<double>(0.4, 0.9), j);
           z1[j] = z0[j];
         }
 
         // durand-kerner-weierstrass iterations
-        polynomial<CoeffT> p = normalize();
+        Polynomial<CoeffT> p = normalize();
         for (size_t k = 0; k < 100; k++) {
           complex<CoeffT> num, den;
           for (size_t i = 0; i < n; i++) {
@@ -123,22 +123,22 @@ namespace pfasst
         return roots;
       }
 
-      static polynomial<CoeffT> legendre(const size_t order)
+      static Polynomial<CoeffT> legendre(const size_t order)
       {
         if (order == 0) {
-          polynomial<CoeffT> p(1);
+          Polynomial<CoeffT> p(1);
           p[0] = 1.0;
           return p;
         }
 
         if (order == 1) {
-          polynomial<CoeffT> p(2);
+          Polynomial<CoeffT> p(2);
           p[0] = 0.0;
           p[1] = 1.0;
           return p;
         }
 
-        polynomial<CoeffT> p0(order + 1), p1(order + 1), p2(order + 1);
+        Polynomial<CoeffT> p0(order + 1), p1(order + 1), p2(order + 1);
         p0[0] = 1.0; p1[1] = 1.0;
 
         // (n + 1) P_{n+1} = (2n + 1) x P_{n} - n P_{n-1}
@@ -166,12 +166,12 @@ namespace pfasst
     vector<node> nodes(nnodes);
 
     if (qtype == "gauss-legendre") {
-      auto roots = polynomial<node>::legendre(nnodes).roots();
+      auto roots = Polynomial<node>::legendre(nnodes).roots();
       for (size_t j = 0; j < nnodes; j++) {
         nodes[j] = 0.5 * (1.0 + roots[j]);
       }
     } else if (qtype == "gauss-lobatto") {
-      auto roots = polynomial<node>::legendre(nnodes - 1).differentiate().roots();
+      auto roots = Polynomial<node>::legendre(nnodes - 1).differentiate().roots();
       assert(nnodes >= 2);
       for (size_t j = 0; j < nnodes - 2; j++) {
         nodes[j + 1] = 0.5 * (1.0 + roots[j]);
@@ -179,8 +179,8 @@ namespace pfasst
       nodes.front() = 0.0;
       nodes.back() = 1.0;
     } else if (qtype == "gauss-radau") {
-      auto l   = polynomial<node>::legendre(nnodes);
-      auto lm1 = polynomial<node>::legendre(nnodes - 1);
+      auto l   = Polynomial<node>::legendre(nnodes);
+      auto lm1 = Polynomial<node>::legendre(nnodes - 1);
       for (size_t i = 0; i < nnodes; i++) {
         l[i] += lm1[i];
       }
@@ -206,7 +206,7 @@ namespace pfasst
     //   /* for (int n=0; n<(ndst-1)*nsrc; n++) */
     //   /*   smat[n] = 0.0; */
 
-    polynomial<node> p(nsrc + 1), p1(nsrc + 1);
+    Polynomial<node> p(nsrc + 1), p1(nsrc + 1);
 
     for (size_t i = 0; i < nsrc; i++) {
       //      if ((flags[i] & SDC_NODE_PROPER) == 0) continue;
