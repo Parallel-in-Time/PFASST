@@ -15,16 +15,16 @@ namespace pfasst
   {
 
     template<typename time = time_precision>
-    using auto_build_tuple = tuple<pfasst::encap::EncapSweeper<time>*,
-          pfasst::ITransfer<time>*,
-          pfasst::encap::EncapFactory<time>*>;
+    using AutoBuildTuple = tuple<pfasst::encap::EncapSweeper<time>*,
+                                 pfasst::ITransfer<time>*,
+                                 pfasst::encap::EncapFactory<time>*>;
 
     template<typename time = time_precision, typename ControllerT, typename BuildT>
     void auto_build(ControllerT& c, vector<pair<size_t, string>> nodes, BuildT build)
     {
       for (size_t l = 0; l < nodes.size(); l++) {
         auto nds = pfasst::compute_nodes<time>(get<0>(nodes[l]), get<1>(nodes[l]));
-        auto_build_tuple<time> tpl = build(l);
+        AutoBuildTuple<time> tpl = build(l);
         auto* sweeper = get<0>(tpl);
         auto* transfer = get<1>(tpl);
         auto* factory = get<2>(tpl);
