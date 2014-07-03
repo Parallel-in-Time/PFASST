@@ -43,7 +43,9 @@ namespace pfasst
         this->niters = niters;
       }
 
-      void add_level(shared_ptr<ISweeper<time>> swpr, shared_ptr<ITransfer<time>> trnsfr = shared_ptr<ITransfer<time>>(nullptr), bool coarse = true)
+      void add_level(shared_ptr<ISweeper<time>> swpr, 
+                     shared_ptr<ITransfer<time>> trnsfr = shared_ptr<ITransfer<time>>(nullptr),
+                     bool coarse = true)
       {
         if (coarse) {
           levels.push_front(swpr);

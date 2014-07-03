@@ -18,7 +18,8 @@ namespace pfasst
 {
 
   template<typename time = double>
-  class MLSDC : public Controller<time>
+  class MLSDC 
+    : public Controller<time>
   {
       vector<size_t> nsweeps;
       bool predict, initial;

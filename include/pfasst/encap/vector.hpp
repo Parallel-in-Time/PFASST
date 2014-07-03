@@ -27,7 +27,8 @@ namespace pfasst
      *     precision of the time points; defaults to pfasst::time_precision
      */
     template<typename scalar, typename time = time_precision>
-    class VectorEncapsulation : public vector<scalar>, public Encapsulation<time>
+    class VectorEncapsulation 
+      : public vector<scalar>, public Encapsulation<time>
     {
       public:
         //! @{

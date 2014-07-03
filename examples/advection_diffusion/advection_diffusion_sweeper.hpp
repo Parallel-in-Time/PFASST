@@ -20,7 +20,8 @@
 using namespace std;
 
 template<typename time = pfasst::time_precision>
-class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<time>
+class AdvectionDiffusionSweeper 
+  : public pfasst::encap::IMEXSweeper<time>
 {
     typedef pfasst::encap::Encapsulation<time> Encapsulation;
     typedef pfasst::encap::VectorEncapsulation<double> DVectorT;
@@ -88,7 +89,9 @@ class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<time>
         double d = abs(qend->at(i) - qex->at(i));
         if (d > max) { max = d; }
       }
-      cout << "err: " << scientific << max << " (" << qend->size() << ", " << predict << ")" << endl;
+      cout << "err: " << scientific << max 
+           << " (" << qend->size() << ", " << predict << ")"
+           << endl;
     }
 
     void predict(time t, time dt, bool initial)
@@ -147,7 +150,8 @@ class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<time>
       fft.backward(f);
     }
 
-    void f2comp(shared_ptr<Encapsulation> f, shared_ptr<Encapsulation> q, time t, time dt, shared_ptr<Encapsulation> rhs)
+    void f2comp(shared_ptr<Encapsulation> f, shared_ptr<Encapsulation> q, time t, time dt, 
+                shared_ptr<Encapsulation> rhs)
     {
       shared_ptr<DVectorT> f_cast   = dynamic_pointer_cast<DVectorT>(f);
       assert(f_cast);
@@ -159,7 +163,8 @@ class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<time>
       this->f2comp(f_cast, q_cast, t, dt, rhs_cast);
     }
 
-    void f2comp(shared_ptr<DVectorT> f, shared_ptr<DVectorT> q, time t, time dt, shared_ptr<DVectorT> rhs)
+    void f2comp(shared_ptr<DVectorT> f, shared_ptr<DVectorT> q, time t, time dt, 
+                shared_ptr<DVectorT> rhs)
     {
       auto* z = fft.forward(rhs);
       for (size_t i = 0; i < q->size(); i++) {

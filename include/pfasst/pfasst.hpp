@@ -13,7 +13,8 @@ namespace pfasst
 {
 
   template<typename timeT>
-  class PFASST : public Controller<timeT>
+  class PFASST 
+    : public Controller<timeT>
   {
 
       void run(timeT dt, size_t nsteps)

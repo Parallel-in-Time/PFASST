@@ -17,7 +17,8 @@ namespace pfasst
   {
 
     template<typename time = time_precision>
-    class EncapSweeper : public ISweeper<time>
+    class EncapSweeper 
+      : public ISweeper<time>
     {
         vector<time> nodes;
         shared_ptr<EncapFactory<time>> factory;

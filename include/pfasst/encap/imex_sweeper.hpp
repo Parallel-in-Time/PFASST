@@ -19,7 +19,8 @@ namespace pfasst
     using pfasst::encap::Encapsulation;
 
     template<typename time = time_precision>
-    class IMEXSweeper : public pfasst::encap::EncapSweeper<time>
+    class IMEXSweeper 
+      : public pfasst::encap::EncapSweeper<time>
     {
         vector<shared_ptr<Encapsulation<time>>> Q, pQ, S, T, Fe, Fi;
         matrix<time> Smat, SEmat, SImat;
@@ -164,17 +165,20 @@ namespace pfasst
           f2eval(Fi[m], Q[m], t);
         }
 
-        virtual void f1eval(shared_ptr<Encapsulation<time>> F, shared_ptr<Encapsulation<time>> Q, time t)
+        virtual void f1eval(shared_ptr<Encapsulation<time>> F, shared_ptr<Encapsulation<time>> Q, 
+                            time t)
         {
           throw NotImplementedYet("imex (f1eval)");
         }
 
-        virtual void f2eval(shared_ptr<Encapsulation<time>> F, shared_ptr<Encapsulation<time>> Q, time t)
+        virtual void f2eval(shared_ptr<Encapsulation<time>> F, shared_ptr<Encapsulation<time>> Q, 
+                            time t)
         {
           throw NotImplementedYet("imex (f2eval)");
         }
 
-        virtual void f2comp(shared_ptr<Encapsulation<time>> F, shared_ptr<Encapsulation<time>> Q, time t, time dt,
+        virtual void f2comp(shared_ptr<Encapsulation<time>> F, shared_ptr<Encapsulation<time>> Q, 
+                            time t, time dt,
                             shared_ptr<Encapsulation<time>> rhs)
         {
           throw NotImplementedYet("imex (f2comp)");
