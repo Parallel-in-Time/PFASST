@@ -23,16 +23,24 @@ namespace pfasst
 {
   namespace encap
   {
-
+    /**
+     * @tparam scalar
+     *     precision and numerical type of the data values
+     * @tparam time
+     *     precision of the time points; defaults to pfasst::time_precision
+     */
     template<typename scalar, typename time = time_precision>
     class VectorEncapsulation : public vector<scalar>, public Encapsulation<time>
     {
       public:
+        //! @{
         VectorEncapsulation(int size) : vector<scalar>(size)
         {
           zero();
         }
+        //! @}
 
+        //! @{
         void zero()
         {
           std::fill(this->begin(), this->end(), 0.0);
@@ -43,7 +51,9 @@ namespace pfasst
           const auto* x = dynamic_cast<const VectorEncapsulation*>(X);
           std::copy(x->begin(), x->end(), this->begin());
         }
+        //! @}
 
+        //! @{
         void saxpy(time a, const Encapsulation<time>* X)
         {
           const auto& x = *dynamic_cast<const VectorEncapsulation*>(X);
@@ -80,6 +90,9 @@ namespace pfasst
           }
         }
 
+        /**
+         * @brief maximum norm of contained data
+         */
         scalar norm0() const
         {
           scalar max = 0.0;
@@ -89,9 +102,15 @@ namespace pfasst
           }
           return max;
         }
-
+        //! @}
     };
 
+    /**
+     * @tparam scalar
+     *     precision and numerical type of the data values
+     * @tparam time
+     *     precision of the time points; defaults to pfasst::time_precision
+     */
     template<typename scalar, typename time = time_precision>
     class VectorFactory : public EncapFactory<time>
     {
