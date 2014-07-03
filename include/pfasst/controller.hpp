@@ -11,7 +11,9 @@ namespace pfasst
 {
 
   /**
-   * Base SDC/MLSDC/PFASST controller.
+   * @brief base SDC/MLSDC/PFASST controller
+   * @tparam time time precision
+   *     defaults to pfasst::time_precision
    */
   template<typename time = time_precision>
   class Controller
@@ -65,11 +67,11 @@ namespace pfasst
       }
 
       /**
-       * Level (MLSDC/PFASST) iterator.
-       *
-       * This iterator is used to walk through the MLSDC/PFASST hierarchy of sweepers.  It keeps track
-       * of the "current" level, and has convenience routines to return the current, "fine"
-       * (current+1), and "coarse" (current-1) sweepers.
+       * @brief level (MLSDC/PFASST) iterator
+       * @details This iterator is used to walk through the MLSDC/PFASST hierarchy of sweepers.
+       *     It keeps track of the _current_ level, and has convenience routines to return the 
+       *     LevelIter::current(), LevelIter::fine() (i.e. `current+1`), and LevelIter::coarse()
+       *     (`current-1`) sweepers.
        */
       class LevelIter
       {
