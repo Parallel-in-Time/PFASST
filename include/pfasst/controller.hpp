@@ -5,6 +5,10 @@
 #ifndef _PFASST_CONTROLLER_HPP_
 #define _PFASST_CONTROLLER_HPP_
 
+#include <deque>
+#include <memory>
+#include <cassert>
+
 #include "interfaces.hpp"
 
 namespace pfasst
@@ -51,14 +55,20 @@ namespace pfasst
         }
       }
 
-      template<typename R = ISweeper<time>> R* get_level(size_t level)
+      template<typename R = ISweeper<time>>
+      R* get_level(size_t level)
       {
-        return dynamic_cast<R*>(levels[level].get());
+        R* r = dynamic_cast<R*>(levels[level].get());
+        assert(r != nullptr);
+        return r;
       }
 
-      template<typename R = ITransfer<time>> R* get_transfer(size_t level)
+      template<typename R = ITransfer<time>>
+      R* get_transfer(size_t level)
       {
-        return dynamic_cast<R*>(transfer[level].get());
+        R* r = dynamic_cast<R*>(transfer[level].get());
+        assert(r != nullptr);
+        return r;
       }
 
       size_t nlevels()
@@ -83,21 +93,25 @@ namespace pfasst
 
           LevelIter(size_t level, Controller* ts) : ts(ts), level(level) {}
 
-          template<typename R = ISweeper<time>> R* current()
+          template<typename R = ISweeper<time>>
+          R* current()
           {
-            return ts->get_level<R>(level);
+            return ts->template get_level<R>(level);
           }
-          template<typename R = ISweeper<time>> R* fine()
+          template<typename R = ISweeper<time>>
+          R* fine()
           {
-            return ts->get_level<R>(level + 1);
+            return ts->template get_level<R>(level + 1);
           }
-          template<typename R = ISweeper<time>> R* coarse()
+          template<typename R = ISweeper<time>>
+          R* coarse()
           {
-            return ts->get_level<R>(level - 1);
+            return ts->template get_level<R>(level - 1);
           }
-          template<typename R = ITransfer<time>> R* transfer()
+          template<typename R = ITransfer<time>>
+          R* transfer()
           {
-            return ts->get_transfer<R>(level);
+            return ts->template get_transfer<R>(level);
           }
 
           ISweeper<time>* operator*() { return current(); }
