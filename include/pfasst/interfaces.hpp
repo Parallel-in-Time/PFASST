@@ -36,6 +36,22 @@ namespace pfasst
   };
 
   /**
+   * Value exception.
+   *
+   * Thrown when a PFASST routine is passed an invalid value.
+   */
+  class ValueError : public exception
+  {
+      string msg;
+    public:
+      ValueError(string msg) : msg(msg) { }
+      const char* what() const throw()
+      {
+        return (string("ValueError: ") + this->msg).c_str();
+      }
+  };
+
+  /**
    * Abstract SDC sweeper.
    *
    * Note that, at this level, time is always represented as a `double`.  We do this to avoid a
