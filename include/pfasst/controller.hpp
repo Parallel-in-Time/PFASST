@@ -104,8 +104,8 @@ namespace pfasst
           bool operator>=(LevelIter i) { return level >= i.level; }
           bool operator< (LevelIter i) { return level <  i.level; }
           bool operator> (LevelIter i) { return level >  i.level; }
-          LevelIter operator- (int i) { return LevelIter(level - 1, ts); }
-          LevelIter operator+ (int i) { return LevelIter(level + 1, ts); }
+          LevelIter operator- (size_t i) { return LevelIter(level - i, ts); }
+          LevelIter operator+ (size_t i) { return LevelIter(level + i, ts); }
           void operator++() { level++; }
           void operator--() { level--; }
       };
