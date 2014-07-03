@@ -24,7 +24,7 @@ namespace pfasst
       vector<size_t> nsweeps;
       bool predict, initial;
 
-      using LevelIter = typename pfasst::Controller<time>::LevelIter;
+      typedef typename pfasst::Controller<time>::LevelIter LevelIter;
 
       void perform_sweeps(LevelIter leviter, time t, time dt)
       {

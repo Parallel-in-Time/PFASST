@@ -8,6 +8,7 @@
 #include <deque>
 #include <memory>
 #include <cassert>
+#include <iterator>
 
 #include "interfaces.hpp"
 
@@ -29,6 +30,7 @@ namespace pfasst
       time   dt;
 
     public:
+      //! @{
       void setup()
       {
         for (auto l = coarsest(); l <= finest(); ++l) {
@@ -55,7 +57,9 @@ namespace pfasst
           transfer.push_back(trnsfr);
         }
       }
+      //! @}
 
+      //! @{
       template<typename R = ISweeper<time>>
       shared_ptr<R> get_level(size_t level)
       {
@@ -76,6 +80,7 @@ namespace pfasst
       {
         return levels.size();
       }
+      //! @}
 
       /**
        * level (MLSDC/PFASST) iterator.
@@ -84,16 +89,32 @@ namespace pfasst
        * It keeps track of the _current_ level, and has convenience routines to return the 
        * LevelIter::current(), LevelIter::fine() (i.e. `current+1`), and LevelIter::coarse()
        * (`current-1`) sweepers.
+       * 
+       * Under the hood it satisfies the requirements of std::random_access_iterator_tag, thus 
+       * implementing a `RandomAccessIterator`.
        */
       class LevelIter
+        : iterator<random_access_iterator_tag, shared_ptr<ISweeper<time>>, size_t,
+                   ISweeper<time>*, ISweeper<time>>
       {
           Controller* ts;
 
         public:
+          typedef size_t                     difference_type;
+          typedef shared_ptr<ISweeper<time>> value_type;
+          typedef ISweeper<time>*            pointer;
+          typedef ISweeper<time>             reference;
+          typedef random_access_iterator_tag iterator_category;
+
           size_t level;
 
-          LevelIter(size_t level, Controller* ts) : ts(ts), level(level) {}
+          //! @{
+          LevelIter(size_t level, Controller* ts)
+            : ts(ts), level(level)
+          {}
+          //! @}
 
+          //! @{
           template<typename R = ISweeper<time>>
           shared_ptr<R> current()
           {
@@ -114,25 +135,35 @@ namespace pfasst
           {
             return ts->template get_transfer<R>(level);
           }
+          //! @}
 
-          shared_ptr<ISweeper<time>> operator*() { return current(); }
-          bool operator==(LevelIter i) { return level == i.level; }
-          bool operator!=(LevelIter i) { return level != i.level; }
-          bool operator<=(LevelIter i) { return level <= i.level; }
-          bool operator>=(LevelIter i) { return level >= i.level; }
-          bool operator< (LevelIter i) { return level <  i.level; }
-          bool operator> (LevelIter i) { return level >  i.level; }
-          LevelIter operator- (size_t i) { return LevelIter(level - i, ts); }
-          LevelIter operator+ (size_t i) { return LevelIter(level + i, ts); }
-          void operator++() { level++; }
-          void operator--() { level--; }
+          //! @{
+          // required by std::iterator
+          template<typename R = reference>
+          shared_ptr<R> operator*()                { return current<R>(); }
+          LevelIter  operator++()                  { level++; return *this; }
+          // required by std::input_iterator_tag
+          template<typename R = reference>
+          shared_ptr<R> operator->()               { return current<R>(); }
+          bool       operator==(LevelIter i)       { return level == i.level; }
+          bool       operator!=(LevelIter i)       { return level != i.level; }
+          // required by std::bidirectional_iterator_tag
+          LevelIter  operator--()                  { level--; return *this; }
+          // required by std::random_access_iterator_tag
+          LevelIter  operator- (difference_type i) { return LevelIter(level - i, ts); }
+          LevelIter  operator+ (difference_type i) { return LevelIter(level + i, ts); }
+          bool       operator<=(LevelIter i)       { return level <= i.level; }
+          bool       operator>=(LevelIter i)       { return level >= i.level; }
+          bool       operator< (LevelIter i)       { return level <  i.level; }
+          bool       operator> (LevelIter i)       { return level >  i.level; }
+          //! @}
       };
 
+      //! @{
       LevelIter finest()   { return LevelIter(nlevels() - 1, this); }
       LevelIter coarsest() { return LevelIter(0, this); }
-
+      //! @}
   };
-
 }
 
 #endif
