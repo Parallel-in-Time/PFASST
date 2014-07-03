@@ -17,7 +17,7 @@ namespace pfasst
     template<typename time = time_precision>
     using AutoBuildTuple = tuple<pfasst::encap::EncapSweeper<time>*,
                                  pfasst::ITransfer<time>*,
-                                 pfasst::encap::EncapFactory<time>*>;
+                                 shared_ptr<pfasst::encap::EncapFactory<time>>>;
 
     template<typename ControllerT, typename BuildT, typename time = time_precision>
     void auto_build(ControllerT& c, vector<pair<size_t, string>> nodes, BuildT build)
@@ -27,7 +27,7 @@ namespace pfasst
         AutoBuildTuple<time> tpl = build(l);
         auto* sweeper = get<0>(tpl);
         auto* transfer = get<1>(tpl);
-        auto* factory = get<2>(tpl);
+        auto factory = get<2>(tpl);
         sweeper->set_nodes(nds);
         sweeper->set_factory(factory);
         c.add_level(sweeper, transfer, false);
@@ -39,9 +39,10 @@ namespace pfasst
     {
       c.setup();
       for (size_t l = 0; l < c.nlevels(); l++) {
-        auto* isweeper = c.get_level(l);
+        auto isweeper = c.get_level(l);
         auto* sweeper = dynamic_cast<pfasst::encap::EncapSweeper<time>*>(isweeper);
-        auto* q0 = sweeper->get_state(0);
+        assert(sweeper != nullptr);
+        auto q0 = sweeper->get_state(0);
         initial(sweeper, q0);
       }
     }

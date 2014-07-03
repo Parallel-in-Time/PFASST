@@ -22,8 +22,8 @@ int main(int argc, char** argv)
   const size_t ndofs  = 64;
   const size_t niters = 4;
 
-  auto  nodes   = pfasst::compute_nodes(nnodes, "gauss-lobatto");
-  auto* factory = new pfasst::encap::VectorFactory<double>(ndofs);
+  auto  nodes  = pfasst::compute_nodes(nnodes, "gauss-lobatto");
+  auto factory = make_shared<pfasst::encap::VectorFactory<double>>(ndofs);
   auto* sweeper = new AdvectionDiffusionSweeper<>(ndofs);
 
   sweeper->set_nodes(nodes);
@@ -33,7 +33,7 @@ int main(int argc, char** argv)
   sdc.set_duration(dt, nsteps, niters);
   sdc.setup();
 
-  auto* q0 = sweeper->get_state(0);
+  auto q0 = sweeper->get_state(0);
   sweeper->exact(q0, 0.0);
 
   sdc.run();

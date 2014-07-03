@@ -2,7 +2,10 @@
 #ifndef _PFASST_ENCAP_IMEX_SWEEPER_HPP_
 #define _PFASST_ENCAP_IMEX_SWEEPER_HPP_
 
-#include <iostream>
+#include <vector>
+#include <memory>
+
+#include <boost/numeric/ublas/matrix.hpp>
 
 #include "encapsulation.hpp"
 #include "encap_sweeper.hpp"
@@ -13,42 +16,34 @@ namespace pfasst
 {
   namespace encap
   {
-
     using pfasst::encap::Encapsulation;
 
     template<typename time = time_precision>
     class IMEXSweeper : public pfasst::encap::EncapSweeper<time>
     {
-        vector<Encapsulation<time>*> Q, pQ, S, T, Fe, Fi;
+        vector<shared_ptr<Encapsulation<time>>> Q, pQ, S, T, Fe, Fi;
         matrix<time> Smat, SEmat, SImat;
 
       public:
         ~IMEXSweeper()
-        {
-          for (size_t m = 0; m < Q.size(); m++)  { delete Q[m]; }
-          for (size_t m = 0; m < S.size(); m++)  { delete S[m]; }
-          for (size_t m = 0; m < T.size(); m++)  { delete T[m]; }
-          for (size_t m = 0; m < pQ.size(); m++) { delete pQ[m]; }
-          for (size_t m = 0; m < Fe.size(); m++) { delete Fe[m]; }
-          for (size_t m = 0; m < Fi.size(); m++) { delete Fi[m]; }
-        }
+        {}
 
-        void set_state(const Encapsulation<time>* q0, size_t m)
+        void set_state(shared_ptr<const Encapsulation<time>> q0, size_t m)
         {
           Q[m]->copy(q0);
         }
 
-        Encapsulation<time>* get_state(size_t m) const
+        shared_ptr<Encapsulation<time>> get_state(size_t m) const
         {
           return Q[m];
         }
 
-        Encapsulation<time>* get_tau(size_t m) const
+        shared_ptr<Encapsulation<time>> get_tau(size_t m) const
         {
           return T[m];
         }
 
-        Encapsulation<time>* get_saved_state(size_t m) const
+        shared_ptr<Encapsulation<time>> get_saved_state(size_t m) const
         {
           return pQ[m];
         }
@@ -60,7 +55,7 @@ namespace pfasst
           Fi[0]->copy(Fi.back());
         }
 
-        virtual void integrate(time dt, vector<Encapsulation<time>*> dst) const
+        virtual void integrate(time dt, vector<shared_ptr<Encapsulation<time>>> dst) const
         {
           dst[0]->mat_apply(dst, dt, Smat, Fe, true);
           dst[0]->mat_apply(dst, dt, Smat, Fi, false);
@@ -77,7 +72,7 @@ namespace pfasst
           SImat = Smat;
           for (size_t m = 0; m < nodes.size() - 1; m++) {
             time ds = nodes[m + 1] - nodes[m];
-            SEmat(m, m)   -= ds;
+            SEmat(m, m)     -= ds;
             SImat(m, m + 1) -= ds;
           }
 
@@ -114,7 +109,7 @@ namespace pfasst
           }
 
           // sweep
-          Encapsulation<time>* rhs = this->get_factory()->create(pfasst::encap::solution);
+          shared_ptr<Encapsulation<time>> rhs = this->get_factory()->create(pfasst::encap::solution);
 
           time t = t0;
           for (size_t m = 0; m < nnodes - 1; m++) {
@@ -128,8 +123,6 @@ namespace pfasst
 
             t += ds;
           }
-
-          delete rhs;
         }
 
         virtual void predict(time t0, time dt, bool initial)
@@ -143,7 +136,7 @@ namespace pfasst
             f2eval(Fi[0], Q[0], t0);
           }
 
-          Encapsulation<time>* rhs = this->get_factory()->create(pfasst::encap::solution);
+          shared_ptr<Encapsulation<time>> rhs = this->get_factory()->create(pfasst::encap::solution);
 
           time t = t0;
           for (size_t m = 0; m < nnodes - 1; m++) {
@@ -155,8 +148,6 @@ namespace pfasst
 
             t += ds;
           }
-
-          delete rhs;
         }
 
         virtual void save()
@@ -173,18 +164,18 @@ namespace pfasst
           f2eval(Fi[m], Q[m], t);
         }
 
-        virtual void f1eval(Encapsulation<time>* F, Encapsulation<time>* Q, time t)
+        virtual void f1eval(shared_ptr<Encapsulation<time>> F, shared_ptr<Encapsulation<time>> Q, time t)
         {
           throw NotImplementedYet("imex (f1eval)");
         }
 
-        virtual void f2eval(Encapsulation<time>* F, Encapsulation<time>* Q, time t)
+        virtual void f2eval(shared_ptr<Encapsulation<time>> F, shared_ptr<Encapsulation<time>> Q, time t)
         {
           throw NotImplementedYet("imex (f2eval)");
         }
 
-        virtual void f2comp(Encapsulation<time>* F, Encapsulation<time>* Q, time t, time dt,
-                            Encapsulation<time>* rhs)
+        virtual void f2comp(shared_ptr<Encapsulation<time>> F, shared_ptr<Encapsulation<time>> Q, time t, time dt,
+                            shared_ptr<Encapsulation<time>> rhs)
         {
           throw NotImplementedYet("imex (f2comp)");
         }

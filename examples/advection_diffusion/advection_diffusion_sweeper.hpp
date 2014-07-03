@@ -51,41 +51,41 @@ class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<time>
       cout << "number of f1 evals: " << nf1evals << endl;
     }
 
-    void exact(Encapsulation* q, time t)
+    void exact(shared_ptr<Encapsulation> q, time t)
     {
-      DVectorT* q_cast = dynamic_cast<DVectorT*>(q);
-      assert(q_cast != nullptr);
-      this->exact(*q_cast, t);
+      shared_ptr<DVectorT> q_cast = dynamic_pointer_cast<DVectorT>(q);
+      assert(q_cast);
+      this->exact(q_cast, t);
     }
 
-    void exact(DVectorT& q, time t)
+    void exact(shared_ptr<DVectorT> q, time t)
     {
-      size_t n = q.size();
+      size_t n = q->size();
       double a = 1.0 / sqrt(4 * PI * nu * (t + t0));
 
       for (size_t i = 0; i < n; i++) {
-        q[i] = 0.0;
+        q->at(i) = 0.0;
       }
 
       for (int ii = -2; ii < 3; ii++) {
         for (size_t i = 0; i < n; i++) {
           double x = double(i) / n - 0.5 + ii - t * v;
-          q[i] += a * exp(-x * x / (4 * nu * (t + t0)));
+          q->at(i) += a * exp(-x * x / (4 * nu * (t + t0)));
         }
       }
     }
 
     void echo_error(time t, bool predict = false)
     {
-      DVectorT* qend = dynamic_cast<DVectorT*>(this->get_state(this->get_nodes().size() - 1));
-      assert(qend != nullptr);
-      DVectorT qex  = DVectorT(qend->size());
+      shared_ptr<DVectorT> qend = dynamic_pointer_cast<DVectorT>(this->get_state(this->get_nodes().size() - 1));
+      assert(qend);
+      shared_ptr<DVectorT> qex = make_shared<DVectorT>(qend->size());
 
       exact(qex, t);
 
       double max = 0.0;
       for (size_t i = 0; i < qend->size(); i++) {
-        double d = abs(qend->at(i) - qex[i]);
+        double d = abs(qend->at(i) - qex->at(i));
         if (d > max) { max = d; }
       }
       cout << "err: " << scientific << max << " (" << qend->size() << ", " << predict << ")" << endl;
@@ -103,75 +103,74 @@ class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<time>
       echo_error(t + dt);
     }
 
-    void f1eval(Encapsulation* f, Encapsulation* q, time t)
+    void f1eval(shared_ptr<Encapsulation> f, shared_ptr<Encapsulation> q, time t)
     {
-      DVectorT* f_cast = dynamic_cast<DVectorT*>(f);
-      assert(f_cast != nullptr);
-      DVectorT* q_cast = dynamic_cast<DVectorT*>(q);
-      assert(q_cast != nullptr);
+      shared_ptr<DVectorT> f_cast = dynamic_pointer_cast<DVectorT>(f);
+      assert(f_cast);
+      shared_ptr<DVectorT> q_cast = dynamic_pointer_cast<DVectorT>(q);
+      assert(q_cast);
 
       this->f1eval(f_cast, q_cast, t);
     }
 
-    void f1eval(DVectorT* f, DVectorT* q, time t)
+    void f1eval(shared_ptr<DVectorT> f, shared_ptr<DVectorT> q, time t)
     {
       double c = -v / double(q->size());
 
-      auto* z = fft.forward(*q);
+      auto* z = fft.forward(q);
       for (size_t i = 0; i < q->size(); i++) {
         z[i] *= c * ddx[i];
       }
-      fft.backward(*f);
+      fft.backward(f);
 
       nf1evals++;
     }
 
-    void f2eval(Encapsulation* f, Encapsulation* q, time t)
+    void f2eval(shared_ptr<Encapsulation> f, shared_ptr<Encapsulation> q, time t)
     {
-      DVectorT* f_cast = dynamic_cast<DVectorT*>(f);
-      assert(f_cast != nullptr);
-      DVectorT* q_cast = dynamic_cast<DVectorT*>(q);
-      assert(q_cast != nullptr);
+      shared_ptr<DVectorT> f_cast = dynamic_pointer_cast<DVectorT>(f);
+      assert(f_cast);
+      shared_ptr<DVectorT> q_cast = dynamic_pointer_cast<DVectorT>(q);
+      assert(q_cast);
 
       this->f2eval(f_cast, q_cast, t);
     }
 
-    void f2eval(DVectorT* f, DVectorT* q, time t)
+    void f2eval(shared_ptr<DVectorT> f, shared_ptr<DVectorT> q, time t)
     {
       double c = nu / double(q->size());
 
-      auto* z = fft.forward(*q);
+      auto* z = fft.forward(q);
       for (size_t i = 0; i < q->size(); i++) {
         z[i] *= c * lap[i];
       }
-      fft.backward(*f);
+      fft.backward(f);
     }
 
-    void f2comp(Encapsulation* f, Encapsulation* q, time t, time dt, Encapsulation* rhs)
+    void f2comp(shared_ptr<Encapsulation> f, shared_ptr<Encapsulation> q, time t, time dt, shared_ptr<Encapsulation> rhs)
     {
-      DVectorT* f_cast   = dynamic_cast<DVectorT*>(f);
-      assert(f_cast != nullptr);
-      DVectorT* q_cast   = dynamic_cast<DVectorT*>(q);
-      assert(q_cast != nullptr);
-      DVectorT* rhs_cast = dynamic_cast<DVectorT*>(rhs);
-      assert(rhs_cast != nullptr);
+      shared_ptr<DVectorT> f_cast   = dynamic_pointer_cast<DVectorT>(f);
+      assert(f_cast);
+      shared_ptr<DVectorT> q_cast   = dynamic_pointer_cast<DVectorT>(q);
+      assert(q_cast);
+      shared_ptr<DVectorT> rhs_cast = dynamic_pointer_cast<DVectorT>(rhs);
+      assert(rhs_cast);
 
       this->f2comp(f_cast, q_cast, t, dt, rhs_cast);
     }
 
-    void f2comp(DVectorT* f, DVectorT* q, time t, time dt, DVectorT* rhs)
+    void f2comp(shared_ptr<DVectorT> f, shared_ptr<DVectorT> q, time t, time dt, shared_ptr<DVectorT> rhs)
     {
-      auto* z = fft.forward(*rhs);
+      auto* z = fft.forward(rhs);
       for (size_t i = 0; i < q->size(); i++) {
         z[i] /= (1.0 - nu * double(dt) * lap[i]) * double(q->size());
       }
-      fft.backward(*q);
+      fft.backward(q);
 
       for (size_t i = 0; i < q->size(); i++) {
         f->at(i) = (q->at(i) - rhs->at(i)) / double(dt);
       }
     }
-
 };
 
 #endif

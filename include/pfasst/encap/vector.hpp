@@ -6,6 +6,7 @@
 #define _PFASST_VECTOR_HPP_
 
 #include <algorithm>
+#include <memory>
 #include <vector>
 #include <cassert>
 
@@ -77,29 +78,29 @@ namespace pfasst
           this->assign(this->size(), scalar(0.0));
         }
 
-        void copy(const Encapsulation<time>* x)
+        void copy(shared_ptr<const Encapsulation<time>> x)
         {
-          const VectorEncapsulation<scalar, time>* x_cast = dynamic_cast<const VectorEncapsulation<scalar, time>*>(x);
-          assert(x_cast != nullptr);
+          shared_ptr<const VectorEncapsulation<scalar, time>> x_cast = dynamic_pointer_cast<const VectorEncapsulation<scalar, time>>(x);
+          assert(x_cast);
           this->copy(x_cast);
         }
 
-        void copy(const VectorEncapsulation<scalar, time>* x)
+        void copy(shared_ptr<const VectorEncapsulation<scalar, time>> x)
         {
           std::copy(x->cbegin(), x->cend(), this->begin());
         }
         //! @}
 
         //! @{
-        void saxpy(time a, const Encapsulation<time>* x)
+        void saxpy(time a, shared_ptr<const Encapsulation<time>> x)
         {
-          const VectorEncapsulation<scalar, time>* x_cast = dynamic_cast<const VectorEncapsulation<scalar, time>*>(x);
-          assert(x_cast != nullptr);
+          shared_ptr<const VectorEncapsulation<scalar, time>> x_cast = dynamic_pointer_cast<const VectorEncapsulation<scalar, time>>(x);
+          assert(x_cast);
 
           this->saxpy(a, x_cast);
         }
 
-        void saxpy(time a, const VectorEncapsulation<scalar, time>* x)
+        void saxpy(time a, shared_ptr<const VectorEncapsulation<scalar, time>> x)
         {
           assert(this->size() == x->size());
           for (size_t i = 0; i < this->size(); i++)
@@ -110,27 +111,27 @@ namespace pfasst
          * @note In case any of the elements of `dst` or `src` can not be transformed via 
          *     `dynamic_cast` into pfasst::encap::VectorEncapsulation std::abort is called.
          */
-        void mat_apply(vector<Encapsulation<time>*> dst, time a, matrix<time> mat,
-                       vector<Encapsulation<time>*> src, bool zero = true)
+        void mat_apply(vector<shared_ptr<Encapsulation<time>>> dst, time a, matrix<time> mat,
+                       vector<shared_ptr<Encapsulation<time>>> src, bool zero = true)
         {
           size_t ndst = dst.size();
           size_t nsrc = src.size();
 
-          vector<VectorEncapsulation<scalar, time>*> dst_cast(ndst), src_cast(nsrc);
-          for (int n = 0; n < ndst; n++) {
-            dst_cast[n] = dynamic_cast<VectorEncapsulation<scalar, time>*>(dst[n]);
-            assert(dst_cast[n] != nullptr);
+          vector<shared_ptr<VectorEncapsulation<scalar, time>>> dst_cast(ndst), src_cast(nsrc);
+          for (size_t n = 0; n < ndst; n++) {
+            dst_cast[n] = dynamic_pointer_cast<VectorEncapsulation<scalar, time>>(dst[n]);
+            assert(dst_cast[n]);
           }
-          for (int m = 0; m < nsrc; m++) {
-            src_cast[m] = dynamic_cast<VectorEncapsulation<scalar, time>*>(src[m]);
-            assert(src_cast[m] != nullptr);
+          for (size_t m = 0; m < nsrc; m++) {
+            src_cast[m] = dynamic_pointer_cast<VectorEncapsulation<scalar, time>>(src[m]);
+            assert(src_cast[m]);
           }
 
           dst_cast[0]->mat_apply(dst_cast, a, mat, src_cast, zero);
         }
 
-        void mat_apply(vector<VectorEncapsulation<scalar, time>*> dst, time a, matrix<time> mat,
-                       vector<VectorEncapsulation<scalar, time>*> src, bool zero = true)
+        void mat_apply(vector<shared_ptr<VectorEncapsulation<scalar, time>>> dst, time a, matrix<time> mat,
+                       vector<shared_ptr<VectorEncapsulation<scalar, time>>> src, bool zero = true)
         {
           size_t ndst = dst.size();
           size_t nsrc = src.size();
@@ -173,9 +174,9 @@ namespace pfasst
       public:
         int dofs() { return size; }
         VectorFactory(const int size) : size(size) { }
-        Encapsulation<time>* create(const EncapType)
+        shared_ptr<Encapsulation<time>> create(const EncapType)
         {
-          return new VectorEncapsulation<scalar, time>(size);
+          return make_shared<VectorEncapsulation<scalar, time>>(size);
         }
     };
 

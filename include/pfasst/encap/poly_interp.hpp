@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <cassert>
+#include <memory>
 
 #include "../interfaces.hpp"
 #include "encap_sweeper.hpp"
@@ -47,10 +48,10 @@ namespace pfasst
           size_t nfine = fine->get_nodes().size();
           size_t ncrse = crse->get_nodes().size();
 
-          auto* crse_factory = crse->get_factory();
-          auto* fine_factory = fine->get_factory();
+          auto crse_factory = crse->get_factory();
+          auto fine_factory = fine->get_factory();
 
-          vector<Encapsulation<time>*> fine_state(nfine), fine_delta(ncrse);
+          vector<shared_ptr<Encapsulation<time>>> fine_state(nfine), fine_delta(ncrse);
 
           for (size_t m = 0; m < nfine; m++) { fine_state[m] = fine->get_state(m); }
           for (size_t m = 0; m < ncrse; m++) { fine_delta[m] = fine_factory->create(solution); }
@@ -61,7 +62,7 @@ namespace pfasst
             }
           }
 
-          auto* crse_delta = crse_factory->create(solution);
+          auto crse_delta = crse_factory->create(solution);
           size_t m0 = interp_initial ? 0 : 1;
           for (size_t m = m0; m < ncrse; m++) {
             crse_delta->copy(crse->get_state(m));
@@ -72,7 +73,6 @@ namespace pfasst
             }
             interpolate(fine_delta[m], crse_delta);
           }
-          delete crse_delta;
 
           if (!interp_initial) {
             fine_delta[0]->zero();
@@ -80,7 +80,6 @@ namespace pfasst
 
           fine->get_state(0)->mat_apply(fine_state, 1.0, tmat, fine_delta, false);
 
-          for (size_t m = 0; m < ncrse; m++) { delete fine_delta[m]; }
           for (size_t m = m0; m < nfine; m++) { fine->evaluate(m); }
         }
 
@@ -133,10 +132,10 @@ namespace pfasst
           size_t nfine = fine->get_nodes().size();
           assert(nfine >= 1);
 
-          auto* crse_factory = crse->get_factory();
-          auto* fine_factory = fine->get_factory();
+          auto crse_factory = crse->get_factory();
+          auto fine_factory = fine->get_factory();
 
-          vector<Encapsulation<time>*> crse_z2n(ncrse - 1), fine_z2n(nfine - 1), rstr_z2n(ncrse - 1);
+          vector<shared_ptr<Encapsulation<time>>> crse_z2n(ncrse - 1), fine_z2n(nfine - 1), rstr_z2n(ncrse - 1);
           for (size_t m = 0; m < ncrse - 1; m++) { crse_z2n[m] = crse_factory->create(solution); }
           for (size_t m = 0; m < ncrse - 1; m++) { rstr_z2n[m] = crse_factory->create(solution); }
           for (size_t m = 0; m < nfine - 1; m++) { fine_z2n[m] = fine_factory->create(solution); }
@@ -160,7 +159,7 @@ namespace pfasst
           }
 
           // compute 'node to node' tau correction
-          vector<Encapsulation<time>*> tau(ncrse - 1);
+          vector<shared_ptr<Encapsulation<time>>> tau(ncrse - 1);
           for (size_t m = 0; m < ncrse - 1; m++) {
             tau[m] = crse->get_tau(m);
           }
@@ -175,19 +174,15 @@ namespace pfasst
             tau[m]->saxpy(-1.0, crse_z2n[m]);
             tau[m]->saxpy(1.0, crse_z2n[m - 1]);
           }
-
-          for (size_t m = 0; m < ncrse - 1; m++) { delete crse_z2n[m]; }
-          for (size_t m = 0; m < ncrse - 1; m++) { delete rstr_z2n[m]; }
-          for (size_t m = 0; m < nfine - 1; m++) { delete fine_z2n[m]; }
         }
 
         // required for interp/restrict helpers
-        virtual void interpolate(Encapsulation<time>* dst, const Encapsulation<time>* src)
+        virtual void interpolate(shared_ptr<Encapsulation<time>> dst, shared_ptr<const Encapsulation<time>> src)
         {
           throw NotImplementedYet("mlsdc/pfasst");
         }
 
-        virtual void restrict(Encapsulation<time>* dst, const Encapsulation<time>* src)
+        virtual void restrict(shared_ptr<Encapsulation<time>> dst, shared_ptr<const Encapsulation<time>> src)
         {
           throw NotImplementedYet("mlsdc/pfasst");
         }
