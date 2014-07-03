@@ -4,6 +4,7 @@
 
 #include <iostream>
 
+#include "encapsulation.hpp"
 #include "encap_sweeper.hpp"
 
 using namespace std;
@@ -59,12 +60,10 @@ namespace pfasst
           Fi[0]->copy(Fi.back());
         }
 
-
         virtual void integrate(time dt, vector<Encapsulation<time>*> dst) const
         {
-          auto* encap = dst[0];
-          encap->mat_apply(dst, dt, Smat, Fe, true);
-          encap->mat_apply(dst, dt, Smat, Fi, false);
+          dst[0]->mat_apply(dst, dt, Smat, Fe, true);
+          dst[0]->mat_apply(dst, dt, Smat, Fi, false);
         }
 
         void setup(bool coarse)

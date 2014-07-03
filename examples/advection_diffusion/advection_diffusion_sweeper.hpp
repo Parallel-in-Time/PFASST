@@ -8,8 +8,10 @@
 #include <complex>
 #include <vector>
 #include <cassert>
+#include <ostream>
 
 #include <pfasst/encap/imex_sweeper.hpp>
+
 #include "fft.hpp"
 
 #define PI     3.1415926535897932385

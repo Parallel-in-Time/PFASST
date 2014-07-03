@@ -9,12 +9,7 @@
 #include <vector>
 #include <cassert>
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <unistd.h>
-
-#define GPCHKERR(err, msg) if ((err) == -1) { perror(msg); return; }
+#include <boost/numeric/ublas/matrix.hpp>
 
 #include "encapsulation.hpp"
 
@@ -35,16 +30,51 @@ namespace pfasst
     {
       public:
         //! @{
-        VectorEncapsulation(int size) : vector<scalar>(size)
+        /**
+         */
+        VectorEncapsulation(int size) 
+          : vector<scalar>(size)
         {
           zero();
         }
+
+        /**
+         * @brief copy constuctor
+         * @note delegated to sdt::vector<scalar>
+         */
+        VectorEncapsulation(const VectorEncapsulation<scalar, time>& other)
+          : vector<scalar>(other)
+        {}
+        /**
+         * @throws std::bad_cast
+         *     if `other` can not be transformed into pfasst::encap::VectorEncapsulation via 
+         *     `dynamic_cast`
+         */
+        VectorEncapsulation(const Encapsulation<time>& other)
+          : VectorEncapsulation(dynamic_cast<const VectorEncapsulation<scalar, time>>(other))
+        {}
+
+        /**
+         * @brief move constructor
+         * @note delegated to std::vector<scalar>
+         */
+        VectorEncapsulation(VectorEncapsulation<scalar, time>&& other)
+          : vector<scalar>(other)
+        {}
+        /**
+         * @throws std::bad_cast
+         *     if `other` can not be transformed into pfasst::encap::VectorEncapsulation via 
+         *     `dynamic_cast`
+         */
+        VectorEncapsulation(Encapsulation<time>&& other)
+          : VectorEncapsulation(dynamic_cast<VectorEncapsulation<scalar, time>&&>(other))
+        {}
         //! @}
 
         //! @{
         void zero()
         {
-          std::fill(this->begin(), this->end(), 0.0);
+          this->assign(this->size(), scalar(0.0));
         }
 
         void copy(const Encapsulation<time>* x)
@@ -56,7 +86,7 @@ namespace pfasst
 
         void copy(const VectorEncapsulation<scalar, time>* x)
         {
-          std::copy(x->begin(), x->end(), this->begin());
+          std::copy(x->cbegin(), x->cend(), this->begin());
         }
         //! @}
 
@@ -71,10 +101,15 @@ namespace pfasst
 
         void saxpy(time a, const VectorEncapsulation<scalar, time>* x)
         {
+          assert(this->size() == x->size());
           for (size_t i = 0; i < this->size(); i++)
           { this->at(i) += a * x->at(i); }
         }
 
+        /**
+         * @note In case any of the elements of `dst` or `src` can not be transformed via 
+         *     `dynamic_cast` into pfasst::encap::VectorEncapsulation std::abort is called.
+         */
         void mat_apply(vector<Encapsulation<time>*> dst, time a, matrix<time> mat,
                        vector<Encapsulation<time>*> src, bool zero = true)
         {
@@ -91,7 +126,7 @@ namespace pfasst
             assert(src_cast[m] != nullptr);
           }
 
-          this->mat_apply(dst_cast, a, mat, src_cast, zero);
+          dst_cast[0]->mat_apply(dst_cast, a, mat, src_cast, zero);
         }
 
         void mat_apply(vector<VectorEncapsulation<scalar, time>*> dst, time a, matrix<time> mat,
@@ -100,7 +135,7 @@ namespace pfasst
           size_t ndst = dst.size();
           size_t nsrc = src.size();
 
-          if (zero) { for (size_t n = 0; n < ndst; n++) { dst[n]->zero(); } }
+          if (zero) { for (auto elem : dst) { elem->zero(); } }
 
           size_t ndofs = dst[0]->size();
           for (size_t i = 0; i < ndofs; i++) {
@@ -113,16 +148,14 @@ namespace pfasst
         }
 
         /**
-         * maximum norm of contained data.
+         * maximum norm of contained elements.
+         * 
+         * This uses std::max with custom comparison function.
          */
         scalar norm0() const
         {
-          scalar max = 0.0;
-          for (size_t i = 0; i < this->size(); i++) {
-            scalar v = abs(this->at(i));
-            if (v > max) { max = v; }
-          }
-          return max;
+          return std::max(this->cbegin(), this->cend(),
+                          [](scalar a, scalar b) {return std::abs(a) < std::abs(b); } );
         }
         //! @}
     };
