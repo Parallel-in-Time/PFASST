@@ -39,10 +39,10 @@ int main(int argc, char** argv)
    * (according to 'xrat').
    */
   for (size_t l = 0; l < nlevs; l++) {
-    auto  nodes    = compute_nodes<double>(nnodes, "gauss-lobatto");
-    shared_ptr<VectorFactory<double>> factory  = make_shared<VectorFactory<double>>(ndofs);
-    AdvectionDiffusionSweeper<>*      sweeper  = new AdvectionDiffusionSweeper<>(ndofs);
-    SpectralTransfer1D<>*             transfer = new SpectralTransfer1D<>();
+    auto nodes    = compute_nodes<double>(nnodes, "gauss-lobatto");
+    auto factory  = make_shared<VectorFactory<double>>(ndofs);
+    auto sweeper  = make_shared<AdvectionDiffusionSweeper<>>(ndofs);
+    auto transfer = make_shared<SpectralTransfer1D<>>();
 
     sweeper->set_nodes(nodes);
     sweeper->set_factory(factory);
@@ -63,7 +63,7 @@ int main(int argc, char** argv)
   /*
    * set initial conditions on each level
    */
-  auto* sweeper = mlsdc.get_level<AdvectionDiffusionSweeper<>>(mlsdc.nlevels() - 1);
+  auto sweeper = mlsdc.get_level<AdvectionDiffusionSweeper<>>(mlsdc.nlevels() - 1);
   auto q0 = sweeper->get_state(0);
   sweeper->exact(q0, 0.0);
 

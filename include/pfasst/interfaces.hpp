@@ -128,7 +128,7 @@ namespace pfasst
        * @param[in] interp_initial
        *     `true` if a delta for the initial condtion should also be computed (PFASST).
        */
-      virtual void interpolate(ISweeper<time>* dst, const ISweeper<time>* src,
+      virtual void interpolate(shared_ptr<ISweeper<time>> dst, shared_ptr<const ISweeper<time>> src,
                                bool interp_delta_from_initial = false,
                                bool interp_initial = false) = 0;
 
@@ -137,13 +137,13 @@ namespace pfasst
        * @param[in] restrict_initial
        *     `true` if the initial condition should also be restricted.
        */
-      virtual void restrict(ISweeper<time>* dst, const ISweeper<time>* src,
+      virtual void restrict(shared_ptr<ISweeper<time>> dst, shared_ptr<const ISweeper<time>> src,
                             bool restrict_initial = false) = 0;
 
       /**
        * compute FAS correction between the coarse and fine sweepers.
        */
-      virtual void fas(time dt, ISweeper<time>* dst, const ISweeper<time>* src) = 0;
+      virtual void fas(time dt, shared_ptr<ISweeper<time>> dst, shared_ptr<const ISweeper<time>> src) = 0;
 
   };
 

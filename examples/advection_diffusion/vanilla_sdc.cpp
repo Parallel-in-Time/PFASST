@@ -4,6 +4,8 @@
  * This example uses a vanilla SDC sweeper.
  */
 
+#include <memory>
+
 #include <fftw3.h>
 
 #include <pfasst.hpp>
@@ -22,9 +24,9 @@ int main(int argc, char** argv)
   const size_t ndofs  = 64;
   const size_t niters = 4;
 
-  auto  nodes  = pfasst::compute_nodes(nnodes, "gauss-lobatto");
+  auto nodes   = pfasst::compute_nodes(nnodes, "gauss-lobatto");
   auto factory = make_shared<pfasst::encap::VectorFactory<double>>(ndofs);
-  auto* sweeper = new AdvectionDiffusionSweeper<>(ndofs);
+  auto sweeper = make_shared<AdvectionDiffusionSweeper<>>(ndofs);
 
   sweeper->set_nodes(nodes);
   sweeper->set_factory(factory);

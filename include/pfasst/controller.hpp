@@ -13,7 +13,6 @@
 
 namespace pfasst
 {
-
   /**
    * base SDC/MLSDC/PFASST controller.
    * @tparam time time precision
@@ -44,30 +43,30 @@ namespace pfasst
         this->niters = niters;
       }
 
-      void add_level(ISweeper<time>* swpr, ITransfer<time>* trnsfr = NULL, bool coarse = true)
+      void add_level(shared_ptr<ISweeper<time>> swpr, shared_ptr<ITransfer<time>> trnsfr = shared_ptr<ITransfer<time>>(nullptr), bool coarse = true)
       {
         if (coarse) {
-          levels.push_front(shared_ptr<ISweeper<time>>(swpr));
-          transfer.push_front(shared_ptr<ITransfer<time>>(trnsfr));
+          levels.push_front(swpr);
+          transfer.push_front(trnsfr);
         } else {
-          levels.push_back(shared_ptr<ISweeper<time>>(swpr));
-          transfer.push_back(shared_ptr<ITransfer<time>>(trnsfr));
+          levels.push_back(swpr);
+          transfer.push_back(trnsfr);
         }
       }
 
       template<typename R = ISweeper<time>>
-      R* get_level(size_t level)
+      shared_ptr<R> get_level(size_t level)
       {
-        R* r = dynamic_cast<R*>(levels[level].get());
-        assert(r != nullptr);
+        shared_ptr<R> r = dynamic_pointer_cast<R>(levels[level]);
+        assert(r);
         return r;
       }
 
       template<typename R = ITransfer<time>>
-      R* get_transfer(size_t level)
+      shared_ptr<R> get_transfer(size_t level)
       {
-        R* r = dynamic_cast<R*>(transfer[level].get());
-        assert(r != nullptr);
+        shared_ptr<R> r = dynamic_pointer_cast<R>(transfer[level]);
+        assert(r);
         return r;
       }
 
@@ -94,27 +93,27 @@ namespace pfasst
           LevelIter(size_t level, Controller* ts) : ts(ts), level(level) {}
 
           template<typename R = ISweeper<time>>
-          R* current()
+          shared_ptr<R> current()
           {
             return ts->template get_level<R>(level);
           }
           template<typename R = ISweeper<time>>
-          R* fine()
+          shared_ptr<R> fine()
           {
             return ts->template get_level<R>(level + 1);
           }
           template<typename R = ISweeper<time>>
-          R* coarse()
+          shared_ptr<R> coarse()
           {
             return ts->template get_level<R>(level - 1);
           }
           template<typename R = ITransfer<time>>
-          R* transfer()
+          shared_ptr<R> transfer()
           {
             return ts->template get_transfer<R>(level);
           }
 
-          ISweeper<time>* operator*() { return current(); }
+          shared_ptr<ISweeper<time>> operator*() { return current(); }
           bool operator==(LevelIter i) { return level == i.level; }
           bool operator!=(LevelIter i) { return level != i.level; }
           bool operator<=(LevelIter i) { return level <= i.level; }

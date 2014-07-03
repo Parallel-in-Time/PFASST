@@ -27,7 +27,7 @@ namespace pfasst
 
       void perform_sweeps(LevelIter leviter, time t, time dt)
       {
-        auto* sweeper = leviter.current();
+        auto sweeper = leviter.current();
         for (size_t s = 0; s < nsweeps[leviter.level]; s++) {
           if (predict) {
             sweeper->predict(t, dt, initial & predict);
@@ -79,9 +79,9 @@ namespace pfasst
        */
       LevelIter cycle_down(LevelIter leviter, time t, time dt)
       {
-        auto* fine = leviter.current();
-        auto* crse = leviter.coarse();
-        auto* trns = leviter.transfer();
+        auto fine = leviter.current();
+        auto crse = leviter.coarse();
+        auto trns = leviter.transfer();
 
         perform_sweeps(leviter, t, dt);
 
@@ -101,9 +101,9 @@ namespace pfasst
        */
       LevelIter cycle_up(LevelIter leviter, time t, time dt)
       {
-        auto* fine = leviter.current();
-        auto* crse = leviter.coarse();
-        auto* trns = leviter.transfer();
+        auto fine = leviter.current();
+        auto crse = leviter.coarse();
+        auto trns = leviter.transfer();
 
         trns->interpolate(fine, crse);
 

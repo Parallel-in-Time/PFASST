@@ -17,7 +17,7 @@ namespace pfasst
 
       void run()
       {
-        auto* sweeper = this->get_level(0);
+        auto sweeper = this->get_level(0);
 
         for (size_t nstep = 0; nstep < this->nsteps; nstep++) {
           time t = nstep * this->dt;
