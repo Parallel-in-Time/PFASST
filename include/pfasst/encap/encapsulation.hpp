@@ -19,15 +19,23 @@ namespace pfasst
 
     typedef enum EncapType { solution, function } EncapType;
 
-    //
-    // encapsulation
-    //
+    /**
+     * basic encapsulation.
+     * 
+     * An Encapsulation provides basic functionality of the user data used by PFASST such as 
+     * mathematical operation @em axpy \\(y=ax+y\\) and packing/unpacking for message passing.
+     * @tparam time time precision
+     *     defaults to pfasst::time_precision
+     */
     template<typename time = time_precision>
     class Encapsulation
     {
       public:
+        //! @{
         virtual ~Encapsulation() { }
+        //! @}
 
+        //! @{
         // required for time-parallel communications
         virtual void send()
         {
@@ -37,7 +45,9 @@ namespace pfasst
         {
           throw NotImplementedYet("pfasst");
         }
+        //! @}
 
+        //! @{
         // required for host based encap helpers
         virtual void zero()
         {
@@ -47,15 +57,29 @@ namespace pfasst
         {
           throw NotImplementedYet("encap");
         }
+        //! @}
+
+        //! @{
+        /**
+         * provides basic mathematical operation \\(y+=ax\\).
+         * 
+         * This is the main mathematical operation applied by PFASST on the data structures.
+         * Here, \\(a\\) is a time point and \\(x\\) another data structure (usually of the 
+         * same type).
+         */
         virtual void saxpy(time a, const Encapsulation<time>*)
         {
           throw NotImplementedYet("encap");
         }
+        /**
+         * defines matrix-vector multiplication for this data type.
+         */
         virtual void mat_apply(vector<Encapsulation<time>*> dst, time a, matrix<time> m,
                                vector<Encapsulation<time>*> src, bool zero = true)
         {
           throw NotImplementedYet("encap");
         }
+        //! @}
     };
 
     template<typename time = time_precision>

@@ -49,11 +49,9 @@ namespace pfasst
       }
 
       /**
-       * Evolve ODE using MLSDC.
-       *
-       * This assumes that the user has set initial conditions on the
-       * finest level.
-       *
+       * evolve ODE using MLSDC.
+       * 
+       * This assumes that the user has set initial conditions on the finest level.
        * Currently uses a fixed number of iterations per step.
        */
       void run()
@@ -77,7 +75,7 @@ namespace pfasst
       }
 
       /**
-       * Cycle down: sweep on current (fine), restrict to coarse.
+       * cycle down: sweep on current (fine), restrict to coarse.
        */
       LevelIter cycle_down(LevelIter leviter, time t, time dt)
       {
@@ -95,12 +93,11 @@ namespace pfasst
       }
 
       /**
-       * Cycle up: interpolate coarse correction to fine, sweep on
-       * current (fine).
-       *
-       * Note that if the fine level corresponds to the finest MLSDC
-       * level, we don't perform a sweep.  In this case the only
-       * operation that is performed here is interpolation.
+       * cycle up: interpolate coarse correction to fine, sweep on current (fine).
+       * 
+       * Note that if the fine level corresponds to the finest MLSDC level, we don't perform a 
+       * sweep.
+       * In this case the only operation that is performed here is interpolation.
        */
       LevelIter cycle_up(LevelIter leviter, time t, time dt)
       {
@@ -118,7 +115,7 @@ namespace pfasst
       }
 
       /**
-       * Cycle bottom: sweep on the current (coarsest) level.
+       * cycle bottom: sweep on the current (coarsest) level.
        */
       LevelIter cycle_bottom(LevelIter leviter, time t, time dt)
       {
@@ -127,7 +124,7 @@ namespace pfasst
       }
 
       /**
-       * Perform an MLSDC V-cycle.
+       * perform an MLSDC V-cycle.
        */
       LevelIter cycle_v(LevelIter leviter, time t, time dt)
       {
