@@ -9,6 +9,7 @@
 #include <cassert>
 
 #include "../interfaces.hpp"
+#include "encap_sweeper.hpp"
 
 namespace pfasst
 {
@@ -27,9 +28,18 @@ namespace pfasst
                                  bool interp_delta_from_initial,
                                  bool interp_initial)
         {
-          auto* fine = dynamic_cast<EncapSweeper<time>*>(dst);
-          auto* crse = dynamic_cast<const EncapSweeper<time>*>(src);
+          EncapSweeper<time>* fine = dynamic_cast<EncapSweeper<time>*>(dst);
+          assert(fine != nullptr);
+          const EncapSweeper<time>* crse = dynamic_cast<const EncapSweeper<time>*>(src);
+          assert(crse != nullptr);
 
+          this->interpolate(fine, crse, interp_delta_from_initial, interp_initial);
+        }
+
+        virtual void interpolate(EncapSweeper<time>* fine, const EncapSweeper<time>* crse,
+                                 bool interp_delta_from_initial,
+                                 bool interp_initial)
+        {
           if (tmat.size1() == 0) {
             tmat = pfasst::compute_interp<time>(fine->get_nodes(), crse->get_nodes());
           }
@@ -76,9 +86,16 @@ namespace pfasst
 
         virtual void restrict(ISweeper<time>* dst, const ISweeper<time>* src, bool restrict_initial)
         {
-          auto* crse = dynamic_cast<EncapSweeper<time>*>(dst);
-          auto* fine = dynamic_cast<const EncapSweeper<time>*>(src);
+          EncapSweeper<time>* crse = dynamic_cast<EncapSweeper<time>*>(dst);
+          assert(crse != nullptr);
+          const EncapSweeper<time>* fine = dynamic_cast<const EncapSweeper<time>*>(src);
+          assert(fine != nullptr);
 
+          this->restrict(crse, fine, restrict_initial);
+        }
+
+        virtual void restrict(EncapSweeper<time>* crse, const EncapSweeper<time>* fine, bool restrict_initial)
+        {
           auto dnodes = crse->get_nodes();
           auto snodes = fine->get_nodes();
 
@@ -101,9 +118,16 @@ namespace pfasst
 
         virtual void fas(time dt, ISweeper<time>* dst, const ISweeper<time>* src)
         {
-          auto* crse = dynamic_cast<EncapSweeper<time>*>(dst);
-          auto* fine = dynamic_cast<const EncapSweeper<time>*>(src);
+          EncapSweeper<time>* crse = dynamic_cast<EncapSweeper<time>*>(dst);
+          assert(crse != nullptr);
+          const EncapSweeper<time>* fine = dynamic_cast<const EncapSweeper<time>*>(src);
+          assert(fine != nullptr);
 
+          this->fas(dt, crse, fine);
+        }
+
+        virtual void fas(time dt, EncapSweeper<time>* crse, const EncapSweeper<time>* fine)
+        {
           size_t ncrse = crse->get_nodes().size();
           assert(ncrse > 1);
           size_t nfine = fine->get_nodes().size();

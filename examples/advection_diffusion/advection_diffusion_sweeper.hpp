@@ -7,6 +7,7 @@
 
 #include <complex>
 #include <vector>
+#include <cassert>
 
 #include <pfasst/encap/imex_sweeper.hpp>
 #include "fft.hpp"
@@ -50,7 +51,9 @@ class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<time>
 
     void exact(Encapsulation* q, time t)
     {
-      exact(*dynamic_cast<DVectorT*>(q), t);
+      DVectorT* q_cast = dynamic_cast<DVectorT*>(q);
+      assert(q_cast != nullptr);
+      this->exact(*q_cast, t);
     }
 
     void exact(DVectorT& q, time t)
@@ -72,17 +75,18 @@ class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<time>
 
     void echo_error(time t, bool predict = false)
     {
-      auto& qend = *dynamic_cast<DVectorT*>(this->get_state(this->get_nodes().size() - 1));
-      auto  qex  = DVectorT(qend.size());
+      DVectorT* qend = dynamic_cast<DVectorT*>(this->get_state(this->get_nodes().size() - 1));
+      assert(qend != nullptr);
+      DVectorT qex  = DVectorT(qend->size());
 
       exact(qex, t);
 
       double max = 0.0;
-      for (size_t i = 0; i < qend.size(); i++) {
-        double d = abs(qend[i] - qex[i]);
+      for (size_t i = 0; i < qend->size(); i++) {
+        double d = abs(qend->at(i) - qex[i]);
         if (d > max) { max = d; }
       }
-      cout << "err: " << scientific << max << " (" << qend.size() << ", " << predict << ")" << endl;
+      cout << "err: " << scientific << max << " (" << qend->size() << ", " << predict << ")" << endl;
     }
 
     void predict(time t, time dt, bool initial)
@@ -97,50 +101,72 @@ class AdvectionDiffusionSweeper : public pfasst::encap::IMEXSweeper<time>
       echo_error(t + dt);
     }
 
-    void f1eval(Encapsulation* F, Encapsulation* Q, time t)
+    void f1eval(Encapsulation* f, Encapsulation* q, time t)
     {
-      auto& f = *dynamic_cast<DVectorT*>(F);
-      auto& q = *dynamic_cast<DVectorT*>(Q);
+      DVectorT* f_cast = dynamic_cast<DVectorT*>(f);
+      assert(f_cast != nullptr);
+      DVectorT* q_cast = dynamic_cast<DVectorT*>(q);
+      assert(q_cast != nullptr);
 
-      double c = -v / double(q.size());
+      this->f1eval(f_cast, q_cast, t);
+    }
 
-      auto* z = fft.forward(q);
-      for (size_t i = 0; i < q.size(); i++) {
+    void f1eval(DVectorT* f, DVectorT* q, time t)
+    {
+      double c = -v / double(q->size());
+
+      auto* z = fft.forward(*q);
+      for (size_t i = 0; i < q->size(); i++) {
         z[i] *= c * ddx[i];
       }
-      fft.backward(f);
+      fft.backward(*f);
 
       nf1evals++;
     }
 
-    void f2eval(Encapsulation* F, Encapsulation* Q, time t)
+    void f2eval(Encapsulation* f, Encapsulation* q, time t)
     {
-      auto& f = *dynamic_cast<DVectorT*>(F);
-      auto& q = *dynamic_cast<DVectorT*>(Q);
+      DVectorT* f_cast = dynamic_cast<DVectorT*>(f);
+      assert(f_cast != nullptr);
+      DVectorT* q_cast = dynamic_cast<DVectorT*>(q);
+      assert(q_cast != nullptr);
 
-      double c = nu / double(q.size());
-
-      auto* z = fft.forward(q);
-      for (size_t i = 0; i < q.size(); i++) {
-        z[i] *= c * lap[i];
-      }
-      fft.backward(f);
+      this->f2eval(f_cast, q_cast, t);
     }
 
-    void f2comp(Encapsulation* F, Encapsulation* Q, time t, time dt, Encapsulation* RHS)
+    void f2eval(DVectorT* f, DVectorT* q, time t)
     {
-      auto& f   = *dynamic_cast<DVectorT*>(F);
-      auto& q   = *dynamic_cast<DVectorT*>(Q);
-      auto& rhs = *dynamic_cast<DVectorT*>(RHS);
+      double c = nu / double(q->size());
 
-      auto* z = fft.forward(rhs);
-      for (size_t i = 0; i < q.size(); i++) {
-        z[i] /= (1.0 - nu * double(dt) * lap[i]) * double(q.size());
+      auto* z = fft.forward(*q);
+      for (size_t i = 0; i < q->size(); i++) {
+        z[i] *= c * lap[i];
       }
-      fft.backward(q);
+      fft.backward(*f);
+    }
 
-      for (size_t i = 0; i < q.size(); i++) {
-        f[i] = (q[i] - rhs[i]) / double(dt);
+    void f2comp(Encapsulation* f, Encapsulation* q, time t, time dt, Encapsulation* rhs)
+    {
+      DVectorT* f_cast   = dynamic_cast<DVectorT*>(f);
+      assert(f_cast != nullptr);
+      DVectorT* q_cast   = dynamic_cast<DVectorT*>(q);
+      assert(q_cast != nullptr);
+      DVectorT* rhs_cast = dynamic_cast<DVectorT*>(rhs);
+      assert(rhs_cast != nullptr);
+
+      this->f2comp(f_cast, q_cast, t, dt, rhs_cast);
+    }
+
+    void f2comp(DVectorT* f, DVectorT* q, time t, time dt, DVectorT* rhs)
+    {
+      auto* z = fft.forward(*rhs);
+      for (size_t i = 0; i < q->size(); i++) {
+        z[i] /= (1.0 - nu * double(dt) * lap[i]) * double(q->size());
+      }
+      fft.backward(*q);
+
+      for (size_t i = 0; i < q->size(); i++) {
+        f->at(i) = (q->at(i) - rhs->at(i)) / double(dt);
       }
     }
 
