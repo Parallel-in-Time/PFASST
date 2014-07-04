@@ -65,13 +65,13 @@ class AdvectionDiffusionSweeper
       double a = 1.0 / sqrt(4 * PI * nu * (t + t0));
 
       for (size_t i = 0; i < n; i++) {
-        q->at(i) = 0.0;
+        q->data()[i] = 0.0;
       }
 
       for (int ii = -2; ii < 3; ii++) {
         for (size_t i = 0; i < n; i++) {
           double x = double(i) / n - 0.5 + ii - t * v;
-          q->at(i) += a * exp(-x * x / (4 * nu * (t + t0)));
+          q->data()[i] += a * exp(-x * x / (4 * nu * (t + t0)));
         }
       }
     }
@@ -86,7 +86,7 @@ class AdvectionDiffusionSweeper
 
       double max = 0.0;
       for (size_t i = 0; i < qend->size(); i++) {
-        double d = abs(qend->at(i) - qex->at(i));
+        double d = abs(qend->data()[i] - qex->data()[i]);
         if (d > max) { max = d; }
       }
       cout << "err: " << scientific << max 
@@ -173,7 +173,7 @@ class AdvectionDiffusionSweeper
       fft.backward(q);
 
       for (size_t i = 0; i < q->size(); i++) {
-        f->at(i) = (q->at(i) - rhs->at(i)) / double(dt);
+        f->data()[i] = (q->data()[i] - rhs->data()[i]) / double(dt);
       }
     }
 };

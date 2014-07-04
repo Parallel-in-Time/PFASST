@@ -105,7 +105,7 @@ namespace pfasst
         {
           assert(this->size() == x->size());
           for (size_t i = 0; i < this->size(); i++)
-          { this->at(i) += a * x->at(i); }
+          { this->data()[i] += a * x->data()[i]; }
         }
 
         /**
@@ -142,8 +142,10 @@ namespace pfasst
           size_t ndofs = dst[0]->size();
           for (size_t i = 0; i < ndofs; i++) {
             for (size_t n = 0; n < ndst; n++) {
+              assert(dst[n]->size() == ndofs);
               for (size_t m = 0; m < nsrc; m++) {
-                dst[n]->at(i) += a * mat(n, m) * src[m]->at(i);
+                assert(src[m]->size() == ndofs);
+                dst[n]->data()[i] += a * mat(n, m) * src[m]->data()[i];
               }
             }
           }

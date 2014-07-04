@@ -70,7 +70,7 @@ class SpectralTransfer1D
       size_t xrat = fine->size() / crse->size();
 
       for (size_t i = 0; i < crse->size(); i++) {
-        crse->at(i) = fine->at(xrat * i);
+        crse->data()[i] = fine->at(xrat * i);
       }
     }
 

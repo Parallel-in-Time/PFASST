@@ -59,7 +59,7 @@ class FFT
     {
       shared_ptr<workspace> wk = get_workspace(x->size());
       for (size_t i = 0; i < x->size(); i++) {
-        wk->z[i] = x->at(i);
+        wk->z[i] = x->data()[i];
       }
       fftw_execute_dft(wk->ffft, wk->wk, wk->wk);
       return wk->z;
@@ -70,7 +70,7 @@ class FFT
       shared_ptr<workspace> wk = get_workspace(x->size());
       fftw_execute_dft(wk->ifft, wk->wk, wk->wk);
       for (size_t i = 0; i < x->size(); i++) {
-        x->at(i) = real(wk->z[i]);
+        x->data()[i] = real(wk->z[i]);
       }
     }
 
