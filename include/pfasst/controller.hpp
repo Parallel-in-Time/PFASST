@@ -68,6 +68,22 @@ namespace pfasst
         return r;
       }
 
+      template<typename R = ISweeper<time>>
+      shared_ptr<R> get_finest()
+      {
+        shared_ptr<R> r = dynamic_pointer_cast<R>(levels.back());
+        assert(r);
+        return r;
+      }
+
+      template<typename R = ISweeper<time>>
+      shared_ptr<R> get_coarsest()
+      {
+        shared_ptr<R> r = dynamic_pointer_cast<R>(levels.front());
+        assert(r);
+        return r;
+      }
+
       template<typename R = ITransfer<time>>
       shared_ptr<R> get_transfer(size_t level)
       {
