@@ -20,7 +20,13 @@ XXX
 Documentation
 -------------
 
-Doxygen generated documentation can be found [on the PinT server][documentation].
+Doxygen generated documentation can be found [on the PinT server][documentation].  
+Currently, it features the following content:
+
+* \subpage #page_building_installing
+* \subpage #page_examples
+* \subpage #page_contributing
+* \subpage #page_style_guide
 
 
 Build status
