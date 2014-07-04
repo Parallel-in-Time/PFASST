@@ -33,7 +33,6 @@ class AdvectionDiffusionSweeper
     double v  = 1.0;
     time   t0 = 1.0;
     double nu = 0.02;
-    size_t nf1evals = 0;
 
   public:
     AdvectionDiffusionSweeper(size_t nvars)
@@ -49,7 +48,7 @@ class AdvectionDiffusionSweeper
 
     ~AdvectionDiffusionSweeper()
     {
-      cout << "number of f1 evals: " << nf1evals << endl;
+      cout << "number of f1 evals: " << this->get_f1evals() << endl;
     }
 
     void exact(shared_ptr<Encapsulation> q, time t)
@@ -76,7 +75,7 @@ class AdvectionDiffusionSweeper
       }
     }
 
-    void echo_error(time t, bool predict = false)
+    DVectorT::value_type echo_error(time t, bool predict = false)
     {
       shared_ptr<DVectorT> qend = dynamic_pointer_cast<DVectorT>(this->get_state(this->get_nodes().size() - 1));
       assert(qend);
@@ -84,14 +83,16 @@ class AdvectionDiffusionSweeper
 
       exact(qex, t);
 
-      double max = 0.0;
+      DVectorT::value_type max = 0.0;
       for (size_t i = 0; i < qend->size(); i++) {
-        double d = abs(qend->data()[i] - qex->data()[i]);
+        DVectorT::value_type d = abs(qend->data()[i] - qex->data()[i]);
         if (d > max) { max = d; }
       }
       cout << "err: " << scientific << max 
            << " (" << qend->size() << ", " << predict << ")"
            << endl;
+
+      return max;
     }
 
     void predict(time t, time dt, bool initial)
@@ -126,7 +127,7 @@ class AdvectionDiffusionSweeper
       }
       fft.backward(f);
 
-      nf1evals++;
+      this->nf1evals++;
     }
 
     void f2eval(shared_ptr<Encapsulation> f, shared_ptr<Encapsulation> q, time t)

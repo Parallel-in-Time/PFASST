@@ -22,8 +22,10 @@ namespace pfasst
     class IMEXSweeper 
       : public pfasst::encap::EncapSweeper<time>
     {
+      protected:
         vector<shared_ptr<Encapsulation<time>>> Q, pQ, S, T, Fe, Fi;
         matrix<time> Smat, SEmat, SImat;
+        size_t nf1evals = 0;
 
       public:
         ~IMEXSweeper()
@@ -47,6 +49,11 @@ namespace pfasst
         shared_ptr<Encapsulation<time>> get_saved_state(size_t m) const
         {
           return pQ[m];
+        }
+
+        size_t get_f1evals()
+        {
+          return this->nf1evals;
         }
 
         virtual void advance()
