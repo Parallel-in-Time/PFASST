@@ -20,10 +20,10 @@ namespace pfasst
     typedef enum EncapType { solution, function } EncapType;
 
     /**
-     * @brief basic encapsulation
-     * @details An Encapsulation provides basic functionality of the user data used by PFASST such
-     *     as mathematical operation @em axpy @f$y=ax+y@f$ and packing/unpacking for message 
-     *     passing.
+     * basic encapsulation.
+     * 
+     * An Encapsulation provides basic functionality of the user data used by PFASST such as 
+     * mathematical operation @em axpy @f$y=ax+y@f$ and packing/unpacking for message passing.
      * @tparam time time precision
      *     defaults to pfasst::time_precision
      */
@@ -61,18 +61,18 @@ namespace pfasst
 
         //! @{
         /**
-         * @brief provides basic mathematical operation @f$y+=ax@f$
-         * @details This is the main mathematical operation applied by PFASST on the data 
-         *     structures.
-         *     Here, @f$a@f$ is a time point and @f$x@f$ another data structure (usually of the 
-         *     same type).
+         * provides basic mathematical operation @f$y+=ax@f$.
+         * 
+         * This is the main mathematical operation applied by PFASST on the data structures.
+         * Here, @f$a@f$ is a time point and @f$x@f$ another data structure (usually of the same 
+         * type).
          */
         virtual void saxpy(time a, const Encapsulation<time>*)
         {
           throw NotImplementedYet("encap");
         }
         /**
-         * @brief defines matrix-vector multiplication for this data type
+         * defines matrix-vector multiplication for this data type.
          */
         virtual void mat_apply(vector<Encapsulation<time>*> dst, time a, matrix<time> m,
                                vector<Encapsulation<time>*> src, bool zero = true)

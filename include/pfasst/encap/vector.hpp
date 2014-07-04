@@ -91,7 +91,7 @@ namespace pfasst
         }
 
         /**
-         * @brief maximum norm of contained data
+         * maximum norm of contained data.
          */
         scalar norm0() const
         {

@@ -19,9 +19,10 @@ namespace pfasst
   using time_precision = double;
 
   /**
-   * @brief not implemented yet exception
-   * @details Used by PFASST to mark methods that are required for a particular algorithm 
-   *     (SDC/MLSDC/PFASST) that may not be necessary for all others.
+   * not implemented yet exception.
+   * 
+   * Used by PFASST to mark methods that are required for a particular algorithm (SDC/MLSDC/PFASST) 
+   * that may not be necessary for all others.
    */
   class NotImplementedYet : public exception
   {
@@ -35,8 +36,9 @@ namespace pfasst
   };
 
   /**
-   * @brief value exception
-   * @details Thrown when a PFASST routine is passed an invalid value.
+   * value exception.
+   * 
+   * Thrown when a PFASST routine is passed an invalid value.
    */
   class ValueError : public exception
   {
@@ -50,7 +52,7 @@ namespace pfasst
   };
 
   /**
-   * @brief abstract SDC sweeper
+   * abstract SDC sweeper.
    * @tparam time time precision
    *     defaults to pfasst::time_precision
    */
@@ -61,7 +63,7 @@ namespace pfasst
       virtual ~ISweeper() { }
 
       /**
-       * @brief setup (allocate etc) the sweeper
+       * setup (allocate etc) the sweeper.
        * @param[in] coarse
        *     `true` if this sweeper exists on a coarsened MLSDC or PFASST level.
        *     This implies that space for an FAS correction and "saved" solutions are necessary.
@@ -69,10 +71,11 @@ namespace pfasst
       virtual void setup(bool coarse = false) { }
 
       /**
-       * @brief perform a predictor sweep
-       * @details Compute a provisional solution from the initial condition.
-       *     This is typically very similar to a regular SDC sweep, except that integral terms based
-       *     on previous iterations don't exist yet.
+       * perform a predictor sweep.
+       * 
+       * Compute a provisional solution from the initial condition.
+       * This is typically very similar to a regular SDC sweep, except that integral terms based on 
+       * previous iterations don't exist yet.
        * @param[in] initial
        *     `true` if function values at the first node need to be computed.
        *     `false` if functions values at the first node already exist (usually this is the case 
@@ -81,31 +84,33 @@ namespace pfasst
       virtual void predict(time t, time dt, bool initial) = 0;
 
       /**
-       * @brief perform one SDC sweep/iteration
-       * @details Compute a correction and update solution values.
-       *     Note that this function can assume that valid function values exist from a previous 
-       *     pfasst::ISweeper::sweep() or pfasst::ISweeper::predict().
+       * perform one SDC sweep/iteration.
+       * Compute a correction and update solution values.
+       * Note that this function can assume that valid function values exist from a previous 
+       * pfasst::ISweeper::sweep() or pfasst::ISweeper::predict().
        */
       virtual void sweep(time t, time dt) = 0;
 
       /**
-       * @brief advance from one time step to the next
-       * @details Essentially this means copying the solution and function values from the last 
-       *     node to the first node.
+       * advance from one time step to the next.
+       * 
+       * Essentially this means copying the solution and function values from the last node to the 
+       * first node.
        */
       virtual void advance() = 0;
 
       /**
-       * @brief save solutions (and/or function values) at all nodes
-       * @details This is typically done in MLSDC/PFASST immediately after a call to restrict.
-       *     The saved states are used to compute deltas during interpolation.
+       * save solutions (and/or function values) at all nodes.
+       * 
+       * This is typically done in MLSDC/PFASST immediately after a call to restrict.
+       * The saved states are used to compute deltas during interpolation.
        */
       virtual void save() { NotImplementedYet("mlsdc/pfasst"); }
 
   };
 
   /**
-   * @brief abstract time/space transfer (restrict/interpolate) class
+   * abstract time/space transfer (restrict/interpolate) class.
    * @tparam time time precision
    *     defaults to pfasst::time_precision
    */
@@ -117,7 +122,7 @@ namespace pfasst
       virtual ~ITransfer() { }
 
       /**
-       * @brief interpolate, in time and space, from the coarse sweeper to the fine sweeper
+       * interpolate, in time and space, from the coarse sweeper to the fine sweeper.
        * @param[in] interp_delta_from_initial
        *     `true` if the delta computed at each node should be relative to the initial condition.
        * @param[in] interp_initial
@@ -128,7 +133,7 @@ namespace pfasst
                                bool interp_initial = false) = 0;
 
       /**
-       * @brief restrict, in time and space, from the fine sweeper to the coarse sweeper
+       * restrict, in time and space, from the fine sweeper to the coarse sweeper.
        * @param[in] restrict_initial
        *     `true` if the initial condition should also be restricted.
        */
@@ -136,14 +141,14 @@ namespace pfasst
                             bool restrict_initial = false) = 0;
 
       /**
-       * @brief compute FAS correction between the coarse and fine sweepers
+       * compute FAS correction between the coarse and fine sweepers.
        */
       virtual void fas(time dt, ISweeper<time>* dst, const ISweeper<time>* src) = 0;
 
   };
 
   /**
-   * @brief abstract time communicator
+   * abstract time communicator.
    */
   class ICommunicator
   {
