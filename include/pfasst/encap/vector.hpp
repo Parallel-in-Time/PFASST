@@ -6,15 +6,11 @@
 #define _PFASST_VECTOR_HPP_
 
 #include <algorithm>
+#include <memory>
 #include <vector>
 #include <cassert>
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <unistd.h>
-
-#define GPCHKERR(err, msg) if ((err) == -1) { perror(msg); return; }
+#include <boost/numeric/ublas/matrix.hpp>
 
 #include "encapsulation.hpp"
 
@@ -31,98 +27,139 @@ namespace pfasst
      *     precision of the time points; defaults to pfasst::time_precision
      */
     template<typename scalar, typename time = time_precision>
-    class VectorEncapsulation : public vector<scalar>, public Encapsulation<time>
+    class VectorEncapsulation 
+      : public vector<scalar>, public Encapsulation<time>
     {
       public:
         //! @{
-        VectorEncapsulation(int size) : vector<scalar>(size)
+        /**
+         */
+        VectorEncapsulation(int size) 
+          : vector<scalar>(size)
         {
           zero();
         }
+
+        /**
+         * @brief copy constuctor
+         * @note delegated to sdt::vector<scalar>
+         */
+        VectorEncapsulation(const VectorEncapsulation<scalar, time>& other)
+          : vector<scalar>(other)
+        {}
+        /**
+         * @throws std::bad_cast
+         *     if `other` can not be transformed into pfasst::encap::VectorEncapsulation via 
+         *     `dynamic_cast`
+         */
+        VectorEncapsulation(const Encapsulation<time>& other)
+          : VectorEncapsulation(dynamic_cast<const VectorEncapsulation<scalar, time>>(other))
+        {}
+
+        /**
+         * @brief move constructor
+         * @note delegated to std::vector<scalar>
+         */
+        VectorEncapsulation(VectorEncapsulation<scalar, time>&& other)
+          : vector<scalar>(other)
+        {}
+        /**
+         * @throws std::bad_cast
+         *     if `other` can not be transformed into pfasst::encap::VectorEncapsulation via 
+         *     `dynamic_cast`
+         */
+        VectorEncapsulation(Encapsulation<time>&& other)
+          : VectorEncapsulation(dynamic_cast<VectorEncapsulation<scalar, time>&&>(other))
+        {}
         //! @}
 
         //! @{
         void zero()
         {
-          std::fill(this->begin(), this->end(), 0.0);
+          this->assign(this->size(), scalar(0.0));
         }
 
-        void copy(const Encapsulation<time>* x)
+        void copy(shared_ptr<const Encapsulation<time>> x)
         {
-          const VectorEncapsulation<scalar, time>* x_cast = dynamic_cast<const VectorEncapsulation<scalar, time>*>(x);
-          assert(x_cast != nullptr);
+          shared_ptr<const VectorEncapsulation<scalar, time>> x_cast = dynamic_pointer_cast<const VectorEncapsulation<scalar, time>>(x);
+          assert(x_cast);
           this->copy(x_cast);
         }
 
-        void copy(const VectorEncapsulation<scalar, time>* x)
+        void copy(shared_ptr<const VectorEncapsulation<scalar, time>> x)
         {
-          std::copy(x->begin(), x->end(), this->begin());
+          std::copy(x->cbegin(), x->cend(), this->begin());
         }
         //! @}
 
         //! @{
-        void saxpy(time a, const Encapsulation<time>* x)
+        void saxpy(time a, shared_ptr<const Encapsulation<time>> x)
         {
-          const VectorEncapsulation<scalar, time>* x_cast = dynamic_cast<const VectorEncapsulation<scalar, time>*>(x);
-          assert(x_cast != nullptr);
+          shared_ptr<const VectorEncapsulation<scalar, time>> x_cast = dynamic_pointer_cast<const VectorEncapsulation<scalar, time>>(x);
+          assert(x_cast);
 
           this->saxpy(a, x_cast);
         }
 
-        void saxpy(time a, const VectorEncapsulation<scalar, time>* x)
+        void saxpy(time a, shared_ptr<const VectorEncapsulation<scalar, time>> x)
         {
+          assert(this->size() == x->size());
           for (size_t i = 0; i < this->size(); i++)
-          { this->at(i) += a * x->at(i); }
+          { this->data()[i] += a * x->data()[i]; }
         }
 
-        void mat_apply(vector<Encapsulation<time>*> dst, time a, matrix<time> mat,
-                       vector<Encapsulation<time>*> src, bool zero = true)
+        /**
+         * @note In case any of the elements of `dst` or `src` can not be transformed via 
+         *     `dynamic_cast` into pfasst::encap::VectorEncapsulation std::abort is called.
+         */
+        void mat_apply(vector<shared_ptr<Encapsulation<time>>> dst, time a, matrix<time> mat,
+                       vector<shared_ptr<Encapsulation<time>>> src, bool zero = true)
         {
           size_t ndst = dst.size();
           size_t nsrc = src.size();
 
-          vector<VectorEncapsulation<scalar, time>*> dst_cast(ndst), src_cast(nsrc);
-          for (int n = 0; n < ndst; n++) {
-            dst_cast[n] = dynamic_cast<VectorEncapsulation<scalar, time>*>(dst[n]);
-            assert(dst_cast[n] != nullptr);
+          vector<shared_ptr<VectorEncapsulation<scalar, time>>> dst_cast(ndst), src_cast(nsrc);
+          for (size_t n = 0; n < ndst; n++) {
+            dst_cast[n] = dynamic_pointer_cast<VectorEncapsulation<scalar, time>>(dst[n]);
+            assert(dst_cast[n]);
           }
-          for (int m = 0; m < nsrc; m++) {
-            src_cast[m] = dynamic_cast<VectorEncapsulation<scalar, time>*>(src[m]);
-            assert(src_cast[m] != nullptr);
+          for (size_t m = 0; m < nsrc; m++) {
+            src_cast[m] = dynamic_pointer_cast<VectorEncapsulation<scalar, time>>(src[m]);
+            assert(src_cast[m]);
           }
 
-          this->mat_apply(dst_cast, a, mat, src_cast, zero);
+          dst_cast[0]->mat_apply(dst_cast, a, mat, src_cast, zero);
         }
 
-        void mat_apply(vector<VectorEncapsulation<scalar, time>*> dst, time a, matrix<time> mat,
-                       vector<VectorEncapsulation<scalar, time>*> src, bool zero = true)
+        void mat_apply(vector<shared_ptr<VectorEncapsulation<scalar, time>>> dst, time a, matrix<time> mat,
+                       vector<shared_ptr<VectorEncapsulation<scalar, time>>> src, bool zero = true)
         {
           size_t ndst = dst.size();
           size_t nsrc = src.size();
 
-          if (zero) { for (size_t n = 0; n < ndst; n++) { dst[n]->zero(); } }
+          if (zero) { for (auto elem : dst) { elem->zero(); } }
 
           size_t ndofs = dst[0]->size();
           for (size_t i = 0; i < ndofs; i++) {
             for (size_t n = 0; n < ndst; n++) {
+              assert(dst[n]->size() == ndofs);
               for (size_t m = 0; m < nsrc; m++) {
-                dst[n]->at(i) += a * mat(n, m) * src[m]->at(i);
+                assert(src[m]->size() == ndofs);
+                dst[n]->data()[i] += a * mat(n, m) * src[m]->data()[i];
               }
             }
           }
         }
 
         /**
-         * maximum norm of contained data.
+         * maximum norm of contained elements.
+         * 
+         * This uses std::max with custom comparison function.
          */
         scalar norm0() const
         {
-          scalar max = 0.0;
-          for (size_t i = 0; i < this->size(); i++) {
-            scalar v = abs(this->at(i));
-            if (v > max) { max = v; }
-          }
-          return max;
+          return std::max(this->cbegin(), this->cend(),
+                          [](scalar a, scalar b) {return std::abs(a) < std::abs(b); } );
         }
         //! @}
     };
@@ -140,9 +177,9 @@ namespace pfasst
       public:
         int dofs() { return size; }
         VectorFactory(const int size) : size(size) { }
-        Encapsulation<time>* create(const EncapType)
+        shared_ptr<Encapsulation<time>> create(const EncapType)
         {
-          return new VectorEncapsulation<scalar, time>(size);
+          return make_shared<VectorEncapsulation<scalar, time>>(size);
         }
     };
 

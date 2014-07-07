@@ -4,6 +4,8 @@
  * This example uses a (serial) multi-level SDC sweeper.
  */
 
+#include <memory>
+
 #include <fftw3.h>
 
 #include <pfasst.hpp>
@@ -37,10 +39,10 @@ int main(int argc, char** argv)
    * (according to 'xrat').
    */
   for (size_t l = 0; l < nlevs; l++) {
-    auto  nodes    = compute_nodes<double>(nnodes, "gauss-lobatto");
-    auto* factory  = new VectorFactory<double>(ndofs);
-    auto* sweeper  = new AdvectionDiffusionSweeper<>(ndofs);
-    auto* transfer = new SpectralTransfer1D<>();
+    auto nodes    = compute_nodes<double>(nnodes, "gauss-lobatto");
+    auto factory  = make_shared<VectorFactory<double>>(ndofs);
+    auto sweeper  = make_shared<AdvectionDiffusionSweeper<>>(ndofs);
+    auto transfer = make_shared<SpectralTransfer1D<>>();
 
     sweeper->set_nodes(nodes);
     sweeper->set_factory(factory);
@@ -61,8 +63,8 @@ int main(int argc, char** argv)
   /*
    * set initial conditions on each level
    */
-  auto* sweeper = mlsdc.get_level<AdvectionDiffusionSweeper<>>(mlsdc.nlevels() - 1);
-  auto* q0 = sweeper->get_state(0);
+  auto sweeper = mlsdc.get_finest<AdvectionDiffusionSweeper<>>();
+  auto q0 = sweeper->get_state(0);
   sweeper->exact(q0, 0.0);
 
   /*

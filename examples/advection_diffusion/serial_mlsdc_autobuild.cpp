@@ -7,6 +7,9 @@
  * controller.
  */
 
+#include <memory>
+#include <cassert>
+
 #include <fftw3.h>
 
 #include <pfasst.hpp>
@@ -43,9 +46,9 @@ int main(int argc, char** argv)
    * captures the 'ndofs' variable from above.
    */
   auto build_level = [ndofs](size_t level) {
-    auto* factory  = new VectorFactory<double>(ndofs[level]);
-    auto* sweeper  = new AdvectionDiffusionSweeper<>(ndofs[level]);
-    auto* transfer = new SpectralTransfer1D<>();
+    auto factory  = make_shared<VectorFactory<double>>(ndofs[level]);
+    auto sweeper  = make_shared<AdvectionDiffusionSweeper<>>(ndofs[level]);
+    auto transfer = make_shared<SpectralTransfer1D<>>();
 
     return AutoBuildTuple<>(sweeper, transfer, factory);
   };
@@ -54,9 +57,9 @@ int main(int argc, char** argv)
    * the 'initial' function is called once for each level to set the
    * intial conditions.
    */
-  auto initial = [](EncapSweeper<>* sweeper,
-  Encapsulation<>* q0) {
-    auto* ad = dynamic_cast<AdvectionDiffusionSweeper<>*>(sweeper);
+  auto initial = [](shared_ptr<EncapSweeper<>> sweeper, shared_ptr<Encapsulation<>> q0) {
+    auto ad = dynamic_pointer_cast<AdvectionDiffusionSweeper<>>(sweeper);
+    assert(ad);
     ad->exact(q0, 0.0);
   };
 

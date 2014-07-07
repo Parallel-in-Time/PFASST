@@ -6,6 +6,7 @@
 #define _PFASST_ENCAPSULATED_HPP_
 
 #include <vector>
+#include <memory>
 
 #include "../interfaces.hpp"
 #include "../quadrature.hpp"
@@ -53,7 +54,7 @@ namespace pfasst
         {
           throw NotImplementedYet("encap");
         }
-        virtual void copy(const Encapsulation<time>*)
+        virtual void copy(shared_ptr<const Encapsulation<time>>)
         {
           throw NotImplementedYet("encap");
         }
@@ -67,15 +68,15 @@ namespace pfasst
          * Here, \\(a\\) is a time point and \\(x\\) another data structure (usually of the 
          * same type).
          */
-        virtual void saxpy(time a, const Encapsulation<time>*)
+        virtual void saxpy(time a, shared_ptr<const Encapsulation<time>>)
         {
           throw NotImplementedYet("encap");
         }
         /**
          * defines matrix-vector multiplication for this data type.
          */
-        virtual void mat_apply(vector<Encapsulation<time>*> dst, time a, matrix<time> m,
-                               vector<Encapsulation<time>*> src, bool zero = true)
+        virtual void mat_apply(vector<shared_ptr<Encapsulation<time>>> dst, time a, matrix<time> m,
+                               vector<shared_ptr<Encapsulation<time>>> src, bool zero = true)
         {
           throw NotImplementedYet("encap");
         }
@@ -86,7 +87,7 @@ namespace pfasst
     class EncapFactory
     {
       public:
-        virtual Encapsulation<time>* create(const EncapType) = 0;
+        virtual shared_ptr<Encapsulation<time>> create(const EncapType) = 0;
     };
 
   }
