@@ -26,10 +26,12 @@ namespace pfasst {
       virtual ~Encapsulation() { }
 
       // required for time-parallel communications
-      virtual void send() {
+      virtual void post(ICommunicator* comm) { }
+
+      virtual void send(ICommunicator* comm) {
 	throw NotImplementedYet("pfasst");
       }
-      virtual void recv() {
+      virtual void recv(ICommunicator* comm) {
 	throw NotImplementedYet("pfasst");
       }
 

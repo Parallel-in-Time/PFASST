@@ -31,6 +31,21 @@ namespace pfasst {
 	return nodes;
       }
 
+      virtual void post(ICommunicator* comm)
+      {
+	this->get_state(0)->post(comm);
+      }
+
+      virtual void send(ICommunicator* comm)
+      {
+	this->get_state(this->get_nodes().size()-1)->send(comm);
+      }
+
+      virtual void recv(ICommunicator* comm)
+      {
+	this->get_state(0)->recv(comm);
+      }
+
       void set_factory(EncapFactory<scalar,time>* factory)
       {
 	this->factory = shared_ptr<EncapFactory<scalar,time>>(factory);
