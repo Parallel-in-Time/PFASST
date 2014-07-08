@@ -14,42 +14,47 @@
 #include "fft.hpp"
 
 template<typename time = pfasst::time_precision>
-class SpectralTransfer1D 
+class SpectralTransfer1D
   : public pfasst::encap::PolyInterpMixin<time>
 {
     typedef pfasst::encap::Encapsulation<double> Encapsulation;
-    typedef pfasst::encap::VectorEncapsulation<double> DVectorT;
 
     FFT fft;
 
-  public:
-    void interpolate(shared_ptr<Encapsulation> dst, shared_ptr<const Encapsulation> src)
+    inline DVectorT& as_dvector(shared_ptr<Encapsulation> x)
     {
-      shared_ptr<DVectorT> fine = dynamic_pointer_cast<DVectorT>(dst);
-      assert(fine);
-      shared_ptr<const DVectorT> crse = dynamic_pointer_cast<const DVectorT>(src);
-      assert(crse);
-
-      this->interpolate(fine, crse);
+      shared_ptr<DVectorT> y = dynamic_pointer_cast<DVectorT>(x); assert(y);
+      return *y.get();
     }
 
-    void interpolate(shared_ptr<DVectorT> fine, shared_ptr<const DVectorT> crse)
+    inline const DVectorT& as_const_dvector(shared_ptr<const Encapsulation> x)
     {
-      auto* crse_z = fft.forward(crse);
-      auto* fine_z = fft.get_workspace(fine->size())->z;
+      shared_ptr<const DVectorT> y = dynamic_pointer_cast<const DVectorT>(x); assert(y);
+      return *y.get();
+    }
 
-      for (size_t i = 0; i < fine->size(); i++) {
+  public:
+
+    void interpolate(shared_ptr<Encapsulation> dst, shared_ptr<const Encapsulation> src)
+    {
+      auto& fine = as_dvector(dst);
+      auto& crse = as_const_dvector(src);
+
+      auto* crse_z = fft.forward(crse);
+      auto* fine_z = fft.get_workspace(fine.size())->z;
+
+      for (size_t i = 0; i < fine.size(); i++) {
         fine_z[i] = 0.0;
       }
 
-      double c = 1.0 / crse->size();
+      double c = 1.0 / crse.size();
 
-      for (size_t i = 0; i < crse->size() / 2; i++) {
+      for (size_t i = 0; i < crse.size() / 2; i++) {
         fine_z[i] = c * crse_z[i];
       }
 
-      for (size_t i = 1; i < crse->size() / 2; i++) {
-        fine_z[fine->size() - crse->size() / 2 + i] = c * crse_z[crse->size() / 2 + i];
+      for (size_t i = 1; i < crse.size() / 2; i++) {
+        fine_z[fine.size() - crse.size() / 2 + i] = c * crse_z[crse.size() / 2 + i];
       }
 
       fft.backward(fine);
@@ -57,20 +62,13 @@ class SpectralTransfer1D
 
     void restrict(shared_ptr<Encapsulation> dst, shared_ptr<const Encapsulation> src)
     {
-      shared_ptr<DVectorT> crse = dynamic_pointer_cast<DVectorT>(dst);
-      assert(crse);
-      shared_ptr<const DVectorT> fine = dynamic_pointer_cast<const DVectorT>(src);
-      assert(fine);
+      auto& fine = as_const_dvector(src);
+      auto& crse = as_dvector(dst);
 
-      this->restrict(crse, fine);
-    }
+      size_t xrat = fine.size() / crse.size();
 
-    void restrict(shared_ptr<DVectorT> crse, shared_ptr<const DVectorT> fine)
-    {
-      size_t xrat = fine->size() / crse->size();
-
-      for (size_t i = 0; i < crse->size(); i++) {
-        crse->data()[i] = fine->at(xrat * i);
+      for (size_t i = 0; i < crse.size(); i++) {
+        crse[i] = fine[xrat*i];
       }
     }
 
