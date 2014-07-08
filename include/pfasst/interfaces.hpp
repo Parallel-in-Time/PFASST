@@ -10,6 +10,7 @@
 #include <iterator>
 #include <memory>
 #include <string>
+#include <type_traits>
 
 using namespace std;
 
@@ -106,8 +107,12 @@ namespace pfasst
        * The saved states are used to compute deltas during interpolation.
        */
       virtual void save() { NotImplementedYet("mlsdc/pfasst"); }
-
   };
+
+  template<typename SweeperT>
+  struct has_factory
+    : std::false_type
+  {};
 
   /**
    * abstract time/space transfer (restrict/interpolate) class.

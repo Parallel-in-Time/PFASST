@@ -11,6 +11,7 @@
 #include <ostream>
 
 #include <pfasst/encap/imex_sweeper.hpp>
+#include <pfasst/interfaces.hpp>
 
 #include "fft.hpp"
 
@@ -178,5 +179,10 @@ class AdvectionDiffusionSweeper
       }
     }
 };
+
+template<>
+struct pfasst::has_factory<AdvectionDiffusionSweeper<pfasst::time_precision>>
+  : std::true_type
+{};
 
 #endif
