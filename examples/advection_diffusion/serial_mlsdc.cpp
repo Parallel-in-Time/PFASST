@@ -18,7 +18,7 @@
 using namespace pfasst;
 using namespace pfasst::encap;
 
-int main(int argc, char** argv)
+int main(int /*argc*/, char** /*argv*/)
 {
   MLSDC<> mlsdc;
 

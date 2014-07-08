@@ -20,8 +20,8 @@ namespace pfasst
 
   /**
    * not implemented yet exception.
-   * 
-   * Used by PFASST to mark methods that are required for a particular algorithm (SDC/MLSDC/PFASST) 
+   *
+   * Used by PFASST to mark methods that are required for a particular algorithm (SDC/MLSDC/PFASST)
    * that may not be necessary for all others.
    */
   class NotImplementedYet : public exception
@@ -37,7 +37,7 @@ namespace pfasst
 
   /**
    * value exception.
-   * 
+   *
    * Thrown when a PFASST routine is passed an invalid value.
    */
   class ValueError : public exception
@@ -68,17 +68,17 @@ namespace pfasst
        *     `true` if this sweeper exists on a coarsened MLSDC or PFASST level.
        *     This implies that space for an FAS correction and "saved" solutions are necessary.
        */
-      virtual void setup(bool coarse = false) { }
+      virtual void setup(bool coarse = false) { (void) coarse; }
 
       /**
        * perform a predictor sweep.
-       * 
+       *
        * Compute a provisional solution from the initial condition.
-       * This is typically very similar to a regular SDC sweep, except that integral terms based on 
+       * This is typically very similar to a regular SDC sweep, except that integral terms based on
        * previous iterations don't exist yet.
        * @param[in] initial
        *     `true` if function values at the first node need to be computed.
-       *     `false` if functions values at the first node already exist (usually this is the case 
+       *     `false` if functions values at the first node already exist (usually this is the case
        *     when advancing from one time step to the next).
        */
       virtual void predict(time t, time dt, bool initial) = 0;
@@ -86,22 +86,22 @@ namespace pfasst
       /**
        * perform one SDC sweep/iteration.
        * Compute a correction and update solution values.
-       * Note that this function can assume that valid function values exist from a previous 
+       * Note that this function can assume that valid function values exist from a previous
        * pfasst::ISweeper::sweep() or pfasst::ISweeper::predict().
        */
       virtual void sweep(time t, time dt) = 0;
 
       /**
        * advance from one time step to the next.
-       * 
-       * Essentially this means copying the solution and function values from the last node to the 
+       *
+       * Essentially this means copying the solution and function values from the last node to the
        * first node.
        */
       virtual void advance() = 0;
 
       /**
        * save solutions (and/or function values) at all nodes.
-       * 
+       *
        * This is typically done in MLSDC/PFASST immediately after a call to restrict.
        * The saved states are used to compute deltas during interpolation.
        */
@@ -128,7 +128,7 @@ namespace pfasst
        * @param[in] interp_initial
        *     `true` if a delta for the initial condtion should also be computed (PFASST).
        */
-      virtual void interpolate(shared_ptr<ISweeper<time>> dst, 
+      virtual void interpolate(shared_ptr<ISweeper<time>> dst,
                                shared_ptr<const ISweeper<time>> src,
                                bool interp_delta_from_initial = false,
                                bool interp_initial = false) = 0;
@@ -138,14 +138,14 @@ namespace pfasst
        * @param[in] restrict_initial
        *     `true` if the initial condition should also be restricted.
        */
-      virtual void restrict(shared_ptr<ISweeper<time>> dst, 
+      virtual void restrict(shared_ptr<ISweeper<time>> dst,
                             shared_ptr<const ISweeper<time>> src,
                             bool restrict_initial = false) = 0;
 
       /**
        * compute FAS correction between the coarse and fine sweepers.
        */
-      virtual void fas(time dt, shared_ptr<ISweeper<time>> dst, 
+      virtual void fas(time dt, shared_ptr<ISweeper<time>> dst,
                        shared_ptr<const ISweeper<time>> src) = 0;
 
   };
