@@ -66,7 +66,9 @@ namespace pfasst {
 	for (int m=m0; m<nfine; m++) fine->evaluate(m);
       }
 
-      virtual void restrict(ISweeper *dst, const ISweeper *src, bool restrict_initial)
+      virtual void restrict(ISweeper *dst, const ISweeper *src,
+			    bool restrict_initial,
+			    bool restrict_initial_only)
       {
 	auto* crse = dynamic_cast<EncapSweeper<scalar,time>*>(dst);
 	auto* fine = dynamic_cast<const EncapSweeper<scalar,time>*>(src);

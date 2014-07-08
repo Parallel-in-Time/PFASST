@@ -65,12 +65,6 @@ namespace pfasst {
 	  for (int n=0; n<ndst; n++)
 	    dst[n]->setval(0.0);
 
-	// for (int m=0; m<ndst; m++) cout << DST[m] << endl;
-	// for (int m=0; m<nsrc; m++) cout << SRC[m] << endl;
-
-	// for (int m=0; m<ndst; m++) cout << dst[m]->size() << endl;
-	// for (int m=0; m<nsrc; m++) cout << src[m]->size() << endl;
-
 	int ndofs = (*dst[0]).size();
 	for (int i=0; i<ndofs; i++)
 	  for (int n=0; n<ndst; n++)

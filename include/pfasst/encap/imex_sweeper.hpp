@@ -153,8 +153,9 @@ namespace pfasst {
 	delete rhs;
       }
 
-      virtual void save()
+      virtual void save(bool /*initial_only*/)
       {
+	// XXX: initial_only
 	for (int m=0; m<pQ.size(); m++)
 	  pQ[m]->copy(Q[m]);
       }
