@@ -104,6 +104,8 @@ public:
     auto& f = *dynamic_cast<dvector*>(F);
     auto& q = *dynamic_cast<dvector*>(Q);
 
+    cout << "f1eval " << scientific << q.norm0() << endl;
+
     scalar c = -v / scalar(q.size());
 
     auto* z = fft.forward(q);
