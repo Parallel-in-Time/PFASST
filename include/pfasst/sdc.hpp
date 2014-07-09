@@ -10,7 +10,6 @@
 
 #include "controller.hpp"
 #include "quadrature.hpp"
-#include "encap/encap_sweeper.hpp"
 
 namespace pfasst
 {
@@ -41,17 +40,16 @@ namespace pfasst
   template<typename sweeperT, 
            typename dataFactoryT,
            typename time = time_precision>
-  SDC<time> sdc_factory(  size_t niters
-                        , size_t nsteps
-                        , time dt
-                        , size_t ndofs
-                        , size_t nnodes
-                        , string node_type
-                        , time iv)
+  SDC<time> sdc_factory(
+      size_t niters
+    , size_t nsteps
+    , time dt
+    , size_t ndofs
+    , size_t nnodes
+    , string node_type
+    , time iv
+  )
   {
-    static_assert(pfasst::has_factory<sweeperT>::value,
-                  "Sweeper must handle an EncapsulationFactory");
-
     SDC<time> sdc;
 
     auto nodes = compute_nodes(nnodes, node_type);

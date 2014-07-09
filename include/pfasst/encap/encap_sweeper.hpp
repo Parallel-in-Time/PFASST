@@ -91,12 +91,6 @@ namespace pfasst
 
   }
 
-  template<>
-  struct has_factory<encap::EncapSweeper<pfasst::time_precision>>
-    : std::true_type
-  {};
-
-
 }
 
 #endif
