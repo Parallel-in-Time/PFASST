@@ -26,14 +26,14 @@ namespace pfasst
       deque<shared_ptr<ISweeper<time>>>  levels;
       deque<shared_ptr<ITransfer<time>>> transfer;
 
-      size_t nsteps, niters;
-      time   dt;
+      time dt;
 
     public:
       //! @{
       void setup()
       {
         for (auto l = coarsest(); l <= finest(); ++l) {
+	  l.current()->set_controller(this);
           l.current()->setup();
         }
       }
@@ -41,11 +41,11 @@ namespace pfasst
       void set_duration(time dt, size_t nsteps, size_t niters)
       {
         this->dt = dt;
-        this->nsteps = nsteps;
-        this->niters = niters;
+        steps.set_size(nsteps);
+	iterations.set_size(niters);
       }
 
-      void add_level(shared_ptr<ISweeper<time>> swpr, 
+      void add_level(shared_ptr<ISweeper<time>> swpr,
                      shared_ptr<ITransfer<time>> trnsfr = shared_ptr<ITransfer<time>>(nullptr),
                      bool coarse = true)
       {
@@ -63,32 +63,26 @@ namespace pfasst
       template<typename R = ISweeper<time>>
       shared_ptr<R> get_level(size_t level)
       {
-        shared_ptr<R> r = dynamic_pointer_cast<R>(levels[level]);
-        assert(r);
+        shared_ptr<R> r = dynamic_pointer_cast<R>(levels[level]); assert(r);
         return r;
       }
 
       template<typename R = ISweeper<time>>
       shared_ptr<R> get_finest()
       {
-        shared_ptr<R> r = dynamic_pointer_cast<R>(levels.back());
-        assert(r);
-        return r;
+	return get_level<R>(nlevels()-1);
       }
 
       template<typename R = ISweeper<time>>
       shared_ptr<R> get_coarsest()
       {
-        shared_ptr<R> r = dynamic_pointer_cast<R>(levels.front());
-        assert(r);
-        return r;
+	return get_level<R>(0);
       }
 
       template<typename R = ITransfer<time>>
       shared_ptr<R> get_transfer(size_t level)
       {
-        shared_ptr<R> r = dynamic_pointer_cast<R>(transfer[level]);
-        assert(r);
+        shared_ptr<R> r = dynamic_pointer_cast<R>(transfer[level]); assert(r);
         return r;
       }
 
@@ -100,13 +94,13 @@ namespace pfasst
 
       /**
        * level (MLSDC/PFASST) iterator.
-       * 
+       *
        * This iterator is used to walk through the MLSDC/PFASST hierarchy of sweepers.
-       * It keeps track of the _current_ level, and has convenience routines to return the 
+       * It keeps track of the _current_ level, and has convenience routines to return the
        * LevelIter::current(), LevelIter::fine() (i.e. `current+1`), and LevelIter::coarse()
        * (`current-1`) sweepers.
-       * 
-       * Under the hood it satisfies the requirements of std::random_access_iterator_tag, thus 
+       *
+       * Under the hood it satisfies the requirements of std::random_access_iterator_tag, thus
        * implementing a `RandomAccessIterator`.
        */
       class LevelIter
@@ -179,6 +173,41 @@ namespace pfasst
       LevelIter finest()   { return LevelIter(nlevels() - 1, this); }
       LevelIter coarsest() { return LevelIter(0, this); }
       //! @}
+
+
+      /**
+       * Simple range iterator.
+       */
+      class RangeIter {
+          friend Controller;
+          size_t i, n;
+        public:
+          void set_size(size_t n) { this->n = n; }
+          void reset(size_t i = 0) { this->i = i; }
+          bool valid() { return i < n; }
+          void next() { i++; }
+      } steps, iterations;
+
+      size_t get_step()
+      {
+        return steps.i;
+      }
+
+      size_t get_iteration()
+      {
+        return iterations.i;
+      }
+
+      time get_time()
+      {
+        return get_step() * get_time_step();
+      }
+
+      time get_time_step()
+      {
+        return dt;
+      }
+
   };
 }
 

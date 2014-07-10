@@ -20,7 +20,7 @@
 using namespace std;
 
 template<typename time = pfasst::time_precision>
-class AdvectionDiffusionSweeper 
+class AdvectionDiffusionSweeper
   : public pfasst::encap::IMEXSweeper<time>
 {
     typedef pfasst::encap::Encapsulation<time> Encapsulation;
@@ -89,20 +89,27 @@ class AdvectionDiffusionSweeper
         double d = abs(qend->data()[i] - qex->data()[i]);
         if (d > max) { max = d; }
       }
-      cout << "err: " << scientific << max 
+
+      auto n = this->get_controller()->get_step();
+      auto k = this->get_controller()->get_iteration();
+      cout << "err: " << n << " " << k << " " << scientific << max
            << " (" << qend->size() << ", " << predict << ")"
            << endl;
     }
 
-    void predict(time t, time dt, bool initial)
+    void predict(bool initial)
     {
-      pfasst::encap::IMEXSweeper<time>::predict(t, dt, initial);
+      pfasst::encap::IMEXSweeper<time>::predict(initial);
+      time t  = this->get_controller()->get_time();
+      time dt = this->get_controller()->get_time_step();
       echo_error(t + dt, true);
     }
 
-    void sweep(time t, time dt)
+    void sweep()
     {
-      pfasst::encap::IMEXSweeper<time>::sweep(t, dt);
+      pfasst::encap::IMEXSweeper<time>::sweep();
+      time t  = this->get_controller()->get_time();
+      time dt = this->get_controller()->get_time_step();
       echo_error(t + dt);
     }
 
@@ -150,7 +157,7 @@ class AdvectionDiffusionSweeper
       fft.backward(f);
     }
 
-    void f2comp(shared_ptr<Encapsulation> f, shared_ptr<Encapsulation> q, time t, time dt, 
+    void f2comp(shared_ptr<Encapsulation> f, shared_ptr<Encapsulation> q, time t, time dt,
                 shared_ptr<Encapsulation> rhs)
     {
       shared_ptr<DVectorT> f_cast   = dynamic_pointer_cast<DVectorT>(f);
@@ -163,7 +170,7 @@ class AdvectionDiffusionSweeper
       this->f2comp(f_cast, q_cast, t, dt, rhs_cast);
     }
 
-    void f2comp(shared_ptr<DVectorT> f, shared_ptr<DVectorT> q, time t, time dt, 
+    void f2comp(shared_ptr<DVectorT> f, shared_ptr<DVectorT> q, time t, time dt,
                 shared_ptr<DVectorT> rhs)
     {
       auto* z = fft.forward(rhs);
