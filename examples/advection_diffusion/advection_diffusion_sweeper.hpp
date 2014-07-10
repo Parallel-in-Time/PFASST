@@ -5,10 +5,11 @@
 #ifndef _ADVECTION_DIFFUSION_SWEEPER_HPP_
 #define _ADVECTION_DIFFUSION_SWEEPER_HPP_
 
-#include <complex>
-#include <vector>
 #include <cassert>
+#include <complex>
+#include <map>
 #include <ostream>
+#include <vector>
 
 #include <pfasst/encap/imex_sweeper.hpp>
 
@@ -29,6 +30,7 @@ class AdvectionDiffusionSweeper
     FFT fft;
 
     vector<complex<double>> ddx, lap;
+    map<pair<size_t, size_t>, double> errors;
 
     double v  = 1.0;
     time   t0 = 1.0;
@@ -95,6 +97,9 @@ class AdvectionDiffusionSweeper
       cout << "err: " << n << " " << k << " " << scientific << max
            << " (" << qend->size() << ", " << predict << ")"
            << endl;
+
+      errors.insert(pair<pair<size_t, size_t>, double>
+		    (pair<size_t, size_t>(n, k), max));
     }
 
     void predict(bool initial)
