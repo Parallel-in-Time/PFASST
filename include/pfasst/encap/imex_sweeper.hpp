@@ -151,11 +151,15 @@ namespace pfasst
           }
         }
 
-        virtual void save()
+        virtual void save(bool initial_only)
         {
-          for (size_t m = 0; m < pQ.size(); m++) {
-            pQ[m]->copy(Q[m]);
-          }
+	  if (initial_only) {
+	    pQ[0]->copy(Q[0]);
+	  } else {
+	    for (size_t m = 0; m < pQ.size(); m++) {
+	      pQ[m]->copy(Q[m]);
+	    }
+	  }
         }
 
         virtual void evaluate(size_t m)

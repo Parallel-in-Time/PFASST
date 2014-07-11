@@ -112,7 +112,7 @@ namespace pfasst
        * This is typically done in MLSDC/PFASST immediately after a call to restrict.
        * The saved states are used to compute deltas during interpolation.
        */
-      virtual void save() { NotImplementedYet("mlsdc/pfasst"); }
+      virtual void save(bool initial_only=false) { NotImplementedYet("mlsdc/pfasst"); }
 
     virtual void post(ICommunicator* comm) { };
     virtual void send(ICommunicator* comm) { NotImplementedYet("pfasst"); }
@@ -151,7 +151,8 @@ namespace pfasst
        */
       virtual void restrict(shared_ptr<ISweeper<time>> dst,
                             shared_ptr<const ISweeper<time>> src,
-                            bool restrict_initial = false) = 0;
+                            bool restrict_initial = false,
+			    bool restrict_initial_only = false) = 0;
 
       /**
        * compute FAS correction between the coarse and fine sweepers.
