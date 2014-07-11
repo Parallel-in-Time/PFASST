@@ -102,6 +102,11 @@ class AdvectionDiffusionSweeper
 		    (pair<size_t, size_t>(n, k), max));
     }
 
+    auto get_errors()
+    {
+      return errors;
+    }
+
     void predict(bool initial)
     {
       pfasst::encap::IMEXSweeper<time>::predict(initial);
