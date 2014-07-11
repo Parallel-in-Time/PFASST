@@ -20,6 +20,8 @@
 
 using namespace std;
 
+typedef map<pair<size_t, size_t>, double> error_map;
+
 template<typename time = pfasst::time_precision>
 class AdvectionDiffusionSweeper
   : public pfasst::encap::IMEXSweeper<time>
@@ -30,7 +32,7 @@ class AdvectionDiffusionSweeper
     FFT fft;
 
     vector<complex<double>> ddx, lap;
-    map<pair<size_t, size_t>, double> errors;
+    error_map errors;
 
     double v  = 1.0;
     time   t0 = 1.0;
@@ -102,7 +104,7 @@ class AdvectionDiffusionSweeper
 		    (pair<size_t, size_t>(n, k), max));
     }
 
-    auto get_errors()
+    error_map get_errors()
     {
       return errors;
     }

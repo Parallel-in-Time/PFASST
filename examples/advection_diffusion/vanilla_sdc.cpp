@@ -14,7 +14,7 @@
 
 #include "advection_diffusion_sweeper.hpp"
 
-auto run_vanilla_sdc()
+error_map run_vanilla_sdc()
 {
   pfasst::SDC<> sdc;
 
