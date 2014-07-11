@@ -18,9 +18,10 @@ namespace pfasst
 {
 
   template<typename time = double>
-  class MLSDC 
+  class MLSDC
     : public Controller<time>
   {
+    protected:
       vector<size_t> nsweeps;
       bool predict, initial;
 
@@ -51,7 +52,7 @@ namespace pfasst
 
       /**
        * evolve ODE using MLSDC.
-       * 
+       *
        * This assumes that the user has set initial conditions on the finest level.
        * Currently uses a fixed number of iterations per step.
        */
@@ -95,8 +96,8 @@ namespace pfasst
 
       /**
        * cycle up: interpolate coarse correction to fine, sweep on current (fine).
-       * 
-       * Note that if the fine level corresponds to the finest MLSDC level, we don't perform a 
+       *
+       * Note that if the fine level corresponds to the finest MLSDC level, we don't perform a
        * sweep.
        * In this case the only operation that is performed here is interpolation.
        */
