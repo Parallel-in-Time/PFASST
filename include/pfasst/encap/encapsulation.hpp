@@ -22,8 +22,8 @@ namespace pfasst
 
     /**
      * basic encapsulation.
-     * 
-     * An Encapsulation provides basic functionality of the user data used by PFASST such as 
+     *
+     * An Encapsulation provides basic functionality of the user data used by PFASST such as
      * mathematical operation @em axpy \\(y=ax+y\\) and packing/unpacking for message passing.
      * @tparam time time precision
      *     defaults to pfasst::time_precision
@@ -38,11 +38,14 @@ namespace pfasst
 
         //! @{
         // required for time-parallel communications
-        virtual void send()
+        virtual void post(ICommunicator* comm) { }
+
+
+        virtual void send(ICommunicator* comm)
         {
           throw NotImplementedYet("pfasst");
         }
-        virtual void recv()
+        virtual void recv(ICommunicator* comm)
         {
           throw NotImplementedYet("pfasst");
         }
@@ -63,9 +66,9 @@ namespace pfasst
         //! @{
         /**
          * provides basic mathematical operation \\(y+=ax\\).
-         * 
+         *
          * This is the main mathematical operation applied by PFASST on the data structures.
-         * Here, \\(a\\) is a time point and \\(x\\) another data structure (usually of the 
+         * Here, \\(a\\) is a time point and \\(x\\) another data structure (usually of the
          * same type).
          */
         virtual void saxpy(time a, shared_ptr<const Encapsulation<time>>)

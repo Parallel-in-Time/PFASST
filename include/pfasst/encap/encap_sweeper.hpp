@@ -17,13 +17,28 @@ namespace pfasst
   {
 
     template<typename time = time_precision>
-    class EncapSweeper 
+    class EncapSweeper
       : public ISweeper<time>
     {
         vector<time> nodes;
         shared_ptr<EncapFactory<time>> factory;
 
       public:
+
+      virtual void post(ICommunicator* comm)
+      {
+	this->get_state(0)->post(comm);
+      }
+
+      virtual void send(ICommunicator* comm)
+      {
+	this->get_state(this->get_nodes().size()-1)->send(comm);
+      }
+
+      virtual void recv(ICommunicator* comm)
+      {
+	this->get_state(0)->recv(comm);
+      }
 
         void set_nodes(vector<time> nodes)
         {

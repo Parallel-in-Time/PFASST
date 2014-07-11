@@ -27,14 +27,14 @@ namespace pfasst
      *     precision of the time points; defaults to pfasst::time_precision
      */
     template<typename scalar, typename time = time_precision>
-    class VectorEncapsulation 
+    class VectorEncapsulation
       : public vector<scalar>, public Encapsulation<time>
     {
       public:
         //! @{
         /**
          */
-        VectorEncapsulation(int size) 
+        VectorEncapsulation(int size)
           : vector<scalar>(size)
         {
           zero();
@@ -49,7 +49,7 @@ namespace pfasst
         {}
         /**
          * @throws std::bad_cast
-         *     if `other` can not be transformed into pfasst::encap::VectorEncapsulation via 
+         *     if `other` can not be transformed into pfasst::encap::VectorEncapsulation via
          *     `dynamic_cast`
          */
         VectorEncapsulation(const Encapsulation<time>& other)
@@ -65,7 +65,7 @@ namespace pfasst
         {}
         /**
          * @throws std::bad_cast
-         *     if `other` can not be transformed into pfasst::encap::VectorEncapsulation via 
+         *     if `other` can not be transformed into pfasst::encap::VectorEncapsulation via
          *     `dynamic_cast`
          */
         VectorEncapsulation(Encapsulation<time>&& other)
@@ -109,7 +109,7 @@ namespace pfasst
         }
 
         /**
-         * @note In case any of the elements of `dst` or `src` can not be transformed via 
+         * @note In case any of the elements of `dst` or `src` can not be transformed via
          *     `dynamic_cast` into pfasst::encap::VectorEncapsulation std::abort is called.
          */
         void mat_apply(vector<shared_ptr<Encapsulation<time>>> dst, time a, matrix<time> mat,
@@ -153,7 +153,7 @@ namespace pfasst
 
         /**
          * maximum norm of contained elements.
-         * 
+         *
          * This uses std::max with custom comparison function.
          */
         scalar norm0() const

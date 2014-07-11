@@ -18,7 +18,7 @@ namespace pfasst
   {
 
     template<typename time = time_precision>
-    class PolyInterpMixin 
+    class PolyInterpMixin
       : public pfasst::ITransfer<time>
     {
         matrix<time> tmat, fmat;
@@ -26,7 +26,7 @@ namespace pfasst
       public:
         virtual ~PolyInterpMixin() { }
 
-        virtual void interpolate(shared_ptr<ISweeper<time>> dst, 
+        virtual void interpolate(shared_ptr<ISweeper<time>> dst,
                                  shared_ptr<const ISweeper<time>> src,
                                  bool interp_delta_from_initial,
                                  bool interp_initial)
@@ -39,7 +39,7 @@ namespace pfasst
           this->interpolate(fine, crse, interp_delta_from_initial, interp_initial);
         }
 
-        virtual void interpolate(shared_ptr<EncapSweeper<time>> fine, 
+        virtual void interpolate(shared_ptr<EncapSweeper<time>> fine,
                                  shared_ptr<const EncapSweeper<time>> crse,
                                  bool interp_delta_from_initial,
                                  bool interp_initial)
@@ -86,8 +86,8 @@ namespace pfasst
           for (size_t m = m0; m < nfine; m++) { fine->evaluate(m); }
         }
 
-        virtual void restrict(shared_ptr<ISweeper<time>> dst, 
-                              shared_ptr<const ISweeper<time>> src, 
+        virtual void restrict(shared_ptr<ISweeper<time>> dst,
+                              shared_ptr<const ISweeper<time>> src,
                               bool restrict_initial)
         {
           shared_ptr<EncapSweeper<time>> crse = dynamic_pointer_cast<EncapSweeper<time>>(dst);
@@ -98,8 +98,8 @@ namespace pfasst
           this->restrict(crse, fine, restrict_initial);
         }
 
-        virtual void restrict(shared_ptr<EncapSweeper<time>> crse, 
-                              shared_ptr<const EncapSweeper<time>> fine, 
+        virtual void restrict(shared_ptr<EncapSweeper<time>> crse,
+                              shared_ptr<const EncapSweeper<time>> fine,
                               bool restrict_initial)
         {
           auto dnodes = crse->get_nodes();
@@ -122,7 +122,7 @@ namespace pfasst
           for (size_t m = m0; m < ncrse; m++) { crse->evaluate(m); }
         }
 
-        virtual void fas(time dt, shared_ptr<ISweeper<time>> dst, 
+        virtual void fas(time dt, shared_ptr<ISweeper<time>> dst,
                          shared_ptr<const ISweeper<time>> src)
         {
           shared_ptr<EncapSweeper<time>> crse = dynamic_pointer_cast<EncapSweeper<time>>(dst);
@@ -133,7 +133,7 @@ namespace pfasst
           this->fas(dt, crse, fine);
         }
 
-        virtual void fas(time dt, shared_ptr<EncapSweeper<time>> crse, 
+        virtual void fas(time dt, shared_ptr<EncapSweeper<time>> crse,
                          shared_ptr<const EncapSweeper<time>> fine)
         {
           size_t ncrse = crse->get_nodes().size();
@@ -188,13 +188,13 @@ namespace pfasst
         }
 
         // required for interp/restrict helpers
-        virtual void interpolate(shared_ptr<Encapsulation<time>> dst, 
+        virtual void interpolate(shared_ptr<Encapsulation<time>> dst,
                                  shared_ptr<const Encapsulation<time>> src)
         {
           throw NotImplementedYet("mlsdc/pfasst");
         }
 
-        virtual void restrict(shared_ptr<Encapsulation<time>> dst, 
+        virtual void restrict(shared_ptr<Encapsulation<time>> dst,
                               shared_ptr<const Encapsulation<time>> src)
         {
           throw NotImplementedYet("mlsdc/pfasst");
