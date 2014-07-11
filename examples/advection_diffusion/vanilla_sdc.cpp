@@ -14,7 +14,7 @@
 
 #include "advection_diffusion_sweeper.hpp"
 
-int main(int argc, char** argv)
+error_map run_vanilla_sdc()
 {
   pfasst::SDC<> sdc;
 
@@ -41,4 +41,14 @@ int main(int argc, char** argv)
   sdc.run();
 
   fftw_cleanup();
+
+  return sweeper->get_errors();
 }
+
+
+#ifndef PFASST_UNIT_TESTING
+int main(int argc, char** argv)
+{
+  run_vanilla_sdc();
+}
+#endif

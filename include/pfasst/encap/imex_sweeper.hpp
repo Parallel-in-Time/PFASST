@@ -94,11 +94,14 @@ namespace pfasst
           }
         }
 
-        virtual void sweep(time t0, time dt)
+        virtual void sweep()
         {
           const auto   nodes  = this->get_nodes();
           const size_t nnodes = nodes.size();
           assert(nnodes >= 1);
+
+	  time dt = this->get_controller()->get_time_step();
+          time t  = this->get_controller()->get_time();
 
           // integrate
           S[0]->mat_apply(S, dt, SEmat, Fe, true);
@@ -112,7 +115,6 @@ namespace pfasst
           // sweep
           shared_ptr<Encapsulation<time>> rhs = this->get_factory()->create(pfasst::encap::solution);
 
-          time t = t0;
           for (size_t m = 0; m < nnodes - 1; m++) {
             time ds = dt * (nodes[m + 1] - nodes[m]);
 
@@ -126,20 +128,22 @@ namespace pfasst
           }
         }
 
-        virtual void predict(time t0, time dt, bool initial)
+        virtual void predict(bool initial)
         {
           const auto   nodes  = this->get_nodes();
           const size_t nnodes = nodes.size();
           assert(nnodes >= 1);
 
+	  time dt = this->get_controller()->get_time_step();
+          time t  = this->get_controller()->get_time();
+
           if (initial) {
-            f1eval(Fe[0], Q[0], t0);
-            f2eval(Fi[0], Q[0], t0);
+            f1eval(Fe[0], Q[0], t);
+            f2eval(Fi[0], Q[0], t);
           }
 
           shared_ptr<Encapsulation<time>> rhs = this->get_factory()->create(pfasst::encap::solution);
 
-          time t = t0;
           for (size_t m = 0; m < nnodes - 1; m++) {
             time ds = dt * (nodes[m + 1] - nodes[m]);
             rhs->copy(Q[m]);

@@ -5,10 +5,11 @@
 #ifndef _ADVECTION_DIFFUSION_SWEEPER_HPP_
 #define _ADVECTION_DIFFUSION_SWEEPER_HPP_
 
-#include <complex>
-#include <vector>
 #include <cassert>
+#include <complex>
+#include <map>
 #include <ostream>
+#include <vector>
 
 #include <pfasst/encap/imex_sweeper.hpp>
 
@@ -18,6 +19,8 @@
 #define TWO_PI 6.2831853071795864769
 
 using namespace std;
+
+typedef map<pair<size_t, size_t>, double> error_map;
 
 template<typename time = pfasst::time_precision>
 class AdvectionDiffusionSweeper
@@ -29,6 +32,7 @@ class AdvectionDiffusionSweeper
     FFT fft;
 
     vector<complex<double>> ddx, lap;
+    error_map errors;
 
     double v  = 1.0;
     time   t0 = 1.0;
@@ -89,20 +93,35 @@ class AdvectionDiffusionSweeper
         double d = abs(qend->data()[i] - qex->data()[i]);
         if (d > max) { max = d; }
       }
-      cout << "err: " << scientific << max
+
+      auto n = this->get_controller()->get_step();
+      auto k = this->get_controller()->get_iteration();
+      cout << "err: " << n << " " << k << " " << scientific << max
            << " (" << qend->size() << ", " << predict << ")"
            << endl;
+
+      errors.insert(pair<pair<size_t, size_t>, double>
+		    (pair<size_t, size_t>(n, k), max));
     }
 
-    void predict(time t, time dt, bool initial)
+    error_map get_errors()
     {
-      pfasst::encap::IMEXSweeper<time>::predict(t, dt, initial);
+      return errors;
+    }
+
+    void predict(bool initial)
+    {
+      pfasst::encap::IMEXSweeper<time>::predict(initial);
+      time t  = this->get_controller()->get_time();
+      time dt = this->get_controller()->get_time_step();
       echo_error(t + dt, true);
     }
 
-    void sweep(time t, time dt)
+    void sweep()
     {
-      pfasst::encap::IMEXSweeper<time>::sweep(t, dt);
+      pfasst::encap::IMEXSweeper<time>::sweep();
+      time t  = this->get_controller()->get_time();
+      time dt = this->get_controller()->get_time_step();
       echo_error(t + dt);
     }
 
