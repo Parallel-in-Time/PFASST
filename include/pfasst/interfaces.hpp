@@ -114,9 +114,9 @@ namespace pfasst
        */
       virtual void save(bool initial_only=false) { NotImplementedYet("mlsdc/pfasst"); }
 
-    virtual void post(ICommunicator* comm) { };
-    virtual void send(ICommunicator* comm) { NotImplementedYet("pfasst"); }
-    virtual void recv(ICommunicator* comm) { NotImplementedYet("pfasst"); }
+      virtual void post(ICommunicator* comm, int tag) { };
+      virtual void send(ICommunicator* comm, int tag, bool blocking) { NotImplementedYet("pfasst"); }
+      virtual void recv(ICommunicator* comm, int tag, bool blocking) { NotImplementedYet("pfasst"); }
 
   };
 

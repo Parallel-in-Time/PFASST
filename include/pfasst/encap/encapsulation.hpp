@@ -21,7 +21,7 @@ namespace pfasst
     typedef enum EncapType { solution, function } EncapType;
 
     /**
-     * basic encapsulation.
+     * Data/solution encapsulation.
      *
      * An Encapsulation provides basic functionality of the user data used by PFASST such as
      * mathematical operation @em axpy \\(y=ax+y\\) and packing/unpacking for message passing.
@@ -38,14 +38,15 @@ namespace pfasst
 
         //! @{
         // required for time-parallel communications
-        virtual void post(ICommunicator* comm) { }
+        virtual void post(ICommunicator* comm, int tag) { }
 
 
-        virtual void send(ICommunicator* comm)
+        virtual void send(ICommunicator* comm, int tag, bool blocking)
         {
           throw NotImplementedYet("pfasst");
         }
-        virtual void recv(ICommunicator* comm)
+
+        virtual void recv(ICommunicator* comm, int tag, bool blocking)
         {
           throw NotImplementedYet("pfasst");
         }
@@ -75,6 +76,7 @@ namespace pfasst
         {
           throw NotImplementedYet("encap");
         }
+
         /**
          * defines matrix-vector multiplication for this data type.
          */

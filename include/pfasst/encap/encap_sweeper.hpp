@@ -25,19 +25,19 @@ namespace pfasst
 
       public:
 
-      virtual void post(ICommunicator* comm)
+      virtual void post(ICommunicator* comm, int tag)
       {
-	this->get_state(0)->post(comm);
+	this->get_state(0)->post(comm, tag);
       }
 
-      virtual void send(ICommunicator* comm)
+      virtual void send(ICommunicator* comm, int tag, bool blocking)
       {
-	this->get_state(this->get_nodes().size()-1)->send(comm);
+	this->get_state(this->get_nodes().size()-1)->send(comm, tag, blocking);
       }
 
-      virtual void recv(ICommunicator* comm)
+      virtual void recv(ICommunicator* comm, int tag, bool blocking)
       {
-	this->get_state(0)->recv(comm);
+	this->get_state(0)->recv(comm, tag, blocking);
       }
 
         void set_nodes(vector<time> nodes)

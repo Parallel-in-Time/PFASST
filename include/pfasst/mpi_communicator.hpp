@@ -27,6 +27,9 @@ namespace pfasst {
     public:
       MPI_Comm comm;
 
+      MPICommunicator(MPI_Comm comm) { set_comm(comm); }
+      MPICommunicator() { }
+
       void set_comm(MPI_Comm comm)
       {
 	this->comm = comm;
