@@ -88,20 +88,27 @@ namespace pfasst
 
         virtual void restrict(shared_ptr<ISweeper<time>> dst,
                               shared_ptr<const ISweeper<time>> src,
-                              bool restrict_initial)
+                              bool restrict_initial,
+			      bool restrict_initial_only)
         {
           shared_ptr<EncapSweeper<time>> crse = dynamic_pointer_cast<EncapSweeper<time>>(dst);
           assert(crse);
           shared_ptr<const EncapSweeper<time>> fine = dynamic_pointer_cast<const EncapSweeper<time>>(src);
           assert(fine);
 
-          this->restrict(crse, fine, restrict_initial);
+          this->restrict(crse, fine, restrict_initial, restrict_initial_only);
         }
 
         virtual void restrict(shared_ptr<EncapSweeper<time>> crse,
                               shared_ptr<const EncapSweeper<time>> fine,
-                              bool restrict_initial)
+                              bool restrict_initial,
+			      bool restrict_initial_only)
         {
+	  if (restrict_initial_only) {
+            this->restrict(crse->get_state(0), fine->get_state(0));
+	    return;
+	  }
+
           auto dnodes = crse->get_nodes();
           auto snodes = fine->get_nodes();
 
