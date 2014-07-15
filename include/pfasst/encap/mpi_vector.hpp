@@ -80,9 +80,12 @@ namespace pfasst {
 	  err = MPI_Send(this->data(), sizeof(scalar)*this->size(), MPI_CHAR,
 			 (mpi.rank()+1) % mpi.size(), tag, mpi.comm);
 	} else {
-	  // XXX: should wait here...
 	  MPI_Status stat;
-	  MPI_Wait(&send_request, &stat);
+	  err = MPI_Wait(&send_request, &stat);
+	  if (err != MPI_SUCCESS) {
+	    throw MPIError();
+	  }
+
 	  err = MPI_Isend(this->data(), sizeof(scalar)*this->size(), MPI_CHAR,
 			  (mpi.rank()+1) % mpi.size(), tag, mpi.comm, &send_request);
 	}
