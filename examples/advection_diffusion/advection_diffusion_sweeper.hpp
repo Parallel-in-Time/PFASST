@@ -19,13 +19,14 @@
 #endif
 
 using namespace std;
+using pfasst::encap::Encapsulation;
+using pfasst::encap::as_vector;
+
 
 template<typename time = pfasst::time_precision>
 class AdvectionDiffusionSweeper
   : public pfasst::encap::IMEXSweeper<time>
 {
-    typedef pfasst::encap::Encapsulation<time> Encapsulation;
-
     FFT fft;
 
     vector<complex<double>> ddx, lap;
@@ -34,12 +35,6 @@ class AdvectionDiffusionSweeper
     time   t0 = 1.0;
     double nu = 0.02;
     size_t nf1evals = 0;
-
-    inline DVectorT& as_dvector(shared_ptr<Encapsulation> x)
-    {
-      shared_ptr<DVectorT> y = dynamic_pointer_cast<DVectorT>(x); assert(y);
-      return *y.get();
-    }
 
   public:
     AdvectionDiffusionSweeper(size_t nvars)
@@ -58,9 +53,9 @@ class AdvectionDiffusionSweeper
       cout << "number of f1 evals: " << nf1evals << endl;
     }
 
-    void exact(shared_ptr<Encapsulation> q, time t)
+    void exact(shared_ptr<Encapsulation<time>> q, time t)
     {
-      this->exact(as_dvector(q), t);
+      this->exact(as_vector<double,time>(q), t);
     }
 
     void exact(DVectorT& q, time t)
@@ -82,8 +77,8 @@ class AdvectionDiffusionSweeper
 
     void echo_error(time t, bool predict = false)
     {
-      DVectorT& qend = as_dvector(this->get_end_state());
-      DVectorT  qex(qend.size());
+      auto& qend = as_vector<double,time>(this->get_end_state());
+      DVectorT qex(qend.size());
 
       exact(qex, t);
 
@@ -109,10 +104,10 @@ class AdvectionDiffusionSweeper
       echo_error(t + dt);
     }
 
-    void f1eval(shared_ptr<Encapsulation> _f, shared_ptr<Encapsulation> _q, time /*t*/)
+    void f1eval(shared_ptr<Encapsulation<time>> _f, shared_ptr<Encapsulation<time>> _q, time /*t*/)
     {
-      DVectorT& q = as_dvector(_q);
-      DVectorT& f = as_dvector(_f);
+      auto& q = as_vector<double,time>(_q);
+      auto& f = as_vector<double,time>(_f);
 
       double c = -v / double(q.size());
 
@@ -125,10 +120,10 @@ class AdvectionDiffusionSweeper
       nf1evals++;
     }
 
-    void f2eval(shared_ptr<Encapsulation> _f, shared_ptr<Encapsulation> _q, time /*t*/)
+    void f2eval(shared_ptr<Encapsulation<time>> _f, shared_ptr<Encapsulation<time>> _q, time /*t*/)
     {
-      DVectorT& q = as_dvector(_q);
-      DVectorT& f = as_dvector(_f);
+      auto& q = as_vector<double,time>(_q);
+      auto& f = as_vector<double,time>(_f);
 
       double c = nu / double(q.size());
 
@@ -139,12 +134,12 @@ class AdvectionDiffusionSweeper
       fft.backward(f);
     }
 
-    void f2comp(shared_ptr<Encapsulation> _f, shared_ptr<Encapsulation> _q, time /*t*/, time dt,
-                shared_ptr<Encapsulation> _rhs)
+    void f2comp(shared_ptr<Encapsulation<time>> _f, shared_ptr<Encapsulation<time>> _q, time /*t*/, time dt,
+                shared_ptr<Encapsulation<time>> _rhs)
     {
-      DVectorT& q = as_dvector(_q);
-      DVectorT& f = as_dvector(_f);
-      DVectorT& rhs = as_dvector(_rhs);
+      auto& q = as_vector<double,time>(_q);
+      auto& f = as_vector<double,time>(_f);
+      auto& rhs = as_vector<double,time>(_rhs);
 
       auto* z = fft.forward(rhs);
       for (size_t i = 0; i < q.size(); i++) {
