@@ -162,7 +162,8 @@ namespace pfasst
       virtual void interpolate(shared_ptr<ISweeper<time>> dst,
                                shared_ptr<const ISweeper<time>> src,
                                bool interp_delta_from_initial = false,
-                               bool interp_initial = false) = 0;
+                               bool interp_initial = false,
+                               bool interp_initial_only = false) = 0;
 
       /**
        * restrict, in time and space, from the fine sweeper to the coarse sweeper.
