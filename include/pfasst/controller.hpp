@@ -180,9 +180,9 @@ namespace pfasst
        * Simple range iterator.
        */
       class RangeIter {
+        public:
           friend Controller;
           size_t i, n;
-        public:
           void set_size(size_t n) { this->n = n; }
           void reset(size_t i = 0) { this->i = i; }
           bool valid() { return i < n; }
