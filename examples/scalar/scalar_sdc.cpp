@@ -1,0 +1,41 @@
+/*
+ *
+ */
+ 
+ #include<complex>
+ #include<memory>
+ 
+ #include<pfasst.hpp>
+ #include<pfasst/sdc.hpp>
+ #include<pfasst/encap/vector.hpp>
+ 
+ #include "scalar_sweeper.hpp"
+ 
+ int main(int arg, char** argv)
+ {
+    pfasst::SDC<> sdc;
+    
+    const size_t nsteps = 2;
+    const double dt     = 0.5;
+    const size_t nnodes = 4;
+    const size_t niters = 6;
+    const complex<double> lambda = complex<double>(-1.0,1.0); 
+    const complex<double> y0     = complex<double>(1.0,0.0);
+    
+    auto nodes   = pfasst::compute_nodes(nnodes, "gauss-lobatto");
+    auto factory = make_shared<pfasst::encap::VectorFactory<complex<double>>>(1);
+    auto sweeper = make_shared<ScalarSweeper<>>(lambda, y0); 
+    
+    sweeper->set_nodes(nodes);
+    sweeper->set_factory(factory);
+    
+    sdc.add_level(sweeper);
+    sdc.set_duration(dt, nsteps, niters);
+    sdc.setup();
+    
+    auto q0 = sweeper->get_state(0);
+    sweeper->exact(q0,0.0);
+    
+    sdc.run();
+ 
+ }
