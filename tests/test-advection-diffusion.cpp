@@ -34,7 +34,6 @@ TEST(ErrorTest, VanillaSDC)
 
   auto errors = run_vanilla_sdc();
   auto get_iter  = [](const vtype x) { return get<1>(get<0>(x)); };
-  auto get_step  = [](const vtype x) { return get<0>(get<0>(x)); };
   auto get_error = [](const vtype x) { return get<1>(x); };
 
   auto max_iter = get_iter(*std::max_element(errors.begin(), errors.end(),
@@ -57,7 +56,6 @@ TEST(ErrorTest, SerialMLSDC)
 
   auto errors = run_serial_mlsdc();
   auto get_iter  = [](const vtype x) { return get<1>(get<0>(x)); };
-  auto get_step  = [](const vtype x) { return get<0>(get<0>(x)); };
   auto get_error = [](const vtype x) { return get<1>(x); };
 
   auto max_iter = get_iter(*std::max_element(errors.begin(), errors.end(),

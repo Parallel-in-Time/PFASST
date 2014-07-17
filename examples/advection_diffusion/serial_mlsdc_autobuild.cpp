@@ -65,7 +65,7 @@ int main(int /*argc*/, char** /*argv*/)
 
   auto_build(mlsdc, nodes, build_level);
   auto_setup(mlsdc, initial);
-  mlsdc.set_duration(dt, nsteps, niters);
+  mlsdc.set_duration(0.0, nsteps*dt, dt, niters);
   mlsdc.run();
 
   fftw_cleanup();

@@ -32,7 +32,7 @@ error_map run_vanilla_sdc()
   sweeper->set_factory(factory);
 
   sdc.add_level(sweeper);
-  sdc.set_duration(dt, nsteps, niters);
+  sdc.set_duration(0.0, nsteps*dt, dt, niters);
   sdc.setup();
 
   auto q0 = sweeper->get_state(0);
@@ -47,7 +47,7 @@ error_map run_vanilla_sdc()
 
 
 #ifndef PFASST_UNIT_TESTING
-int main(int argc, char** argv)
+int main(int /*argc*/, char** /*argv*/)
 {
   run_vanilla_sdc();
 }

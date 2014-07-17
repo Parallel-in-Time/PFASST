@@ -26,7 +26,8 @@ namespace pfasst
       deque<shared_ptr<ISweeper<time>>>  levels;
       deque<shared_ptr<ITransfer<time>>> transfer;
 
-      time dt;
+      int step, iteration, max_iterations;
+      time t, dt, tend;
 
     public:
       //! @{
@@ -38,11 +39,15 @@ namespace pfasst
         }
       }
 
-      void set_duration(time dt, size_t nsteps, size_t niters)
+    // XXX
+      void set_duration(time t0, time tend, time dt, int niters)
       {
+        this->t = t0;
+        this->tend = tend;
         this->dt = dt;
-        steps.set_size(nsteps);
-	iterations.set_size(niters);
+        this->step = 0;
+        this->iteration = 0;
+        this->max_iterations = niters;
       }
 
       void add_level(shared_ptr<ISweeper<time>> swpr,
@@ -176,36 +181,52 @@ namespace pfasst
 
 
       /**
-       * Simple range iterator.
+       * Get current time step number.
        */
-      class RangeIter {
-          friend Controller;
-          size_t i, n;
-        public:
-          void set_size(size_t n) { this->n = n; }
-          void reset(size_t i = 0) { this->i = i; }
-          bool valid() { return i < n; }
-          void next() { i++; }
-      } steps, iterations;
-
-      size_t get_step()
+      int get_step()
       {
-        return steps.i;
-      }
-
-      size_t get_iteration()
-      {
-        return iterations.i;
-      }
-
-      time get_time()
-      {
-        return get_step() * get_time_step();
+        return step;
       }
 
       time get_time_step()
       {
         return dt;
+      }
+
+      time get_time()
+      {
+        return t;
+      }
+
+      void advance_time(int nsteps=1)
+      {
+        step += nsteps;
+        t += nsteps*dt;
+      }
+
+      time get_end_time()
+      {
+        return tend;
+      }
+
+      int get_iteration()
+      {
+        return iteration;
+      }
+
+      void set_iteration(int iter)
+      {
+        this->iteration = iter;
+      }
+
+      void advance_iteration()
+      {
+        iteration++;
+      }
+
+      int get_max_iteration()
+      {
+        return max_iterations;
       }
 
   };

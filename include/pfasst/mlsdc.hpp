@@ -58,15 +58,12 @@ namespace pfasst
        */
       void run()
       {
-	auto& steps = this->steps;
-	auto& iters = this->iterations;
-
-        for (steps.reset(); steps.valid(); steps.next()) {
+        for (; this->get_time() < this->get_end_time(); this->advance_time()) {
           predict = true;   // use predictor for first fine sweep of each step
           initial = this->get_step() == 0; // only evaluate node 0 functions on first step
 
           // iterate by performing v-cycles
-	  for (iters.reset(); iters.valid(); iters.next()) {
+	  for (this->set_iteration(0); this->get_iteration() < this->get_max_iteration(); this->advance_iteration()) {
             cycle_v(this->finest());
           }
 

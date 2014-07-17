@@ -70,7 +70,7 @@ error_map run_serial_mlsdc()
   /*
    * run mlsdc!
    */
-  mlsdc.set_duration(dt, nsteps, niters);
+  mlsdc.set_duration(0.0, nsteps*dt, dt, niters);
   mlsdc.run();
 
   fftw_cleanup();
