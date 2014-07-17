@@ -16,7 +16,7 @@ using pfasst::sdc_factory;
 
 #include "advection_diffusion_sweeper.hpp"
 
-int main(int argc, char** argv)
+int main(int /*argc*/, char** /*argv*/)
 {
   typedef double time_precision;
 

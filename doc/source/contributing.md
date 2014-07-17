@@ -1,4 +1,4 @@
-# Contributing
+# Contributing                                                                  {#page_contributing}
 
 ## Branching and Tagging Model
 
