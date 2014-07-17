@@ -169,21 +169,21 @@ namespace pfasst
           f2eval(Fi[m], Q[m], t);
         }
 
-        virtual void f1eval(shared_ptr<Encapsulation<time>> F, shared_ptr<Encapsulation<time>> Q,
-                            time t)
+        virtual void f1eval(shared_ptr<Encapsulation<time>> /*f*/, shared_ptr<Encapsulation<time>> /*q*/,
+			    time /*t*/)
         {
           throw NotImplementedYet("imex (f1eval)");
         }
 
-        virtual void f2eval(shared_ptr<Encapsulation<time>> F, shared_ptr<Encapsulation<time>> Q,
-                            time t)
+        virtual void f2eval(shared_ptr<Encapsulation<time>> /*f*/, shared_ptr<Encapsulation<time>> /*q*/,
+			    time /*t*/)
         {
           throw NotImplementedYet("imex (f2eval)");
         }
 
-        virtual void f2comp(shared_ptr<Encapsulation<time>> F, shared_ptr<Encapsulation<time>> Q,
-                            time t, time dt,
-                            shared_ptr<Encapsulation<time>> rhs)
+        virtual void f2comp(shared_ptr<Encapsulation<time>> /*f*/, shared_ptr<Encapsulation<time>> /*q*/,
+                            time /*t*/, time /*dt*/,
+                            shared_ptr<Encapsulation<time>> /*rhs*/)
         {
           throw NotImplementedYet("imex (f2comp)");
         }

@@ -17,7 +17,7 @@ namespace pfasst
   {
 
     template<typename time = time_precision>
-    class EncapSweeper 
+    class EncapSweeper
       : public ISweeper<time>
     {
         vector<time> nodes;
@@ -45,24 +45,24 @@ namespace pfasst
           return factory;
         }
 
-        virtual void set_state(shared_ptr<const Encapsulation<time>> q0, size_t m)
+        virtual void set_state(shared_ptr<const Encapsulation<time>> /*q0*/, size_t /*m*/)
         {
           throw NotImplementedYet("sweeper");
         }
 
-        virtual shared_ptr<Encapsulation<time>> get_state(size_t m) const
-        {
-          throw NotImplementedYet("sweeper");
-          return NULL;
-        }
-
-        virtual shared_ptr<Encapsulation<time>> get_tau(size_t m) const
+        virtual shared_ptr<Encapsulation<time>> get_state(size_t /*m*/) const
         {
           throw NotImplementedYet("sweeper");
           return NULL;
         }
 
-        virtual shared_ptr<Encapsulation<time>> get_saved_state(size_t m) const
+        virtual shared_ptr<Encapsulation<time>> get_tau(size_t /*m*/) const
+        {
+          throw NotImplementedYet("sweeper");
+          return NULL;
+        }
+
+        virtual shared_ptr<Encapsulation<time>> get_saved_state(size_t /*m*/) const
         {
           throw NotImplementedYet("sweeper");
           return NULL;
@@ -73,7 +73,7 @@ namespace pfasst
           return this->get_state(this->get_nodes().size() - 1);
         }
 
-        virtual void evaluate(size_t m)
+      virtual void evaluate(size_t /*m*/)
         {
           throw NotImplementedYet("sweeper");
         }
@@ -83,7 +83,7 @@ namespace pfasst
           throw NotImplementedYet("sweeper");
         }
 
-        virtual void integrate(time dt, vector<shared_ptr<Encapsulation<time>>> dst) const
+        virtual void integrate(time /*dt*/, vector<shared_ptr<Encapsulation<time>>> /*dst*/) const
         {
           throw NotImplementedYet("sweeper");
         }

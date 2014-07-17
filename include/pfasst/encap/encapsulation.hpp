@@ -22,8 +22,8 @@ namespace pfasst
 
     /**
      * basic encapsulation.
-     * 
-     * An Encapsulation provides basic functionality of the user data used by PFASST such as 
+     *
+     * An Encapsulation provides basic functionality of the user data used by PFASST such as
      * mathematical operation @em axpy \\(y=ax+y\\) and packing/unpacking for message passing.
      * @tparam time time precision
      *     defaults to pfasst::time_precision
@@ -63,21 +63,22 @@ namespace pfasst
         //! @{
         /**
          * provides basic mathematical operation \\(y+=ax\\).
-         * 
+         *
          * This is the main mathematical operation applied by PFASST on the data structures.
-         * Here, \\(a\\) is a time point and \\(x\\) another data structure (usually of the 
+         * Here, \\(a\\) is a time point and \\(x\\) another data structure (usually of the
          * same type).
          */
-        virtual void saxpy(time a, shared_ptr<const Encapsulation<time>>)
+        virtual void saxpy(time /*a*/, shared_ptr<const Encapsulation<time>> /*x*/)
         {
           throw NotImplementedYet("encap");
         }
         /**
          * defines matrix-vector multiplication for this data type.
          */
-        virtual void mat_apply(vector<shared_ptr<Encapsulation<time>>> dst, time a, matrix<time> m,
-                               vector<shared_ptr<Encapsulation<time>>> src, bool zero = true)
+        virtual void mat_apply(vector<shared_ptr<Encapsulation<time>>> /*dst*/, time /*a*/, matrix<time> /*m*/,
+			       vector<shared_ptr<Encapsulation<time>>> /*src*/, bool zero = true)
         {
+	  (void) zero;
           throw NotImplementedYet("encap");
         }
         //! @}

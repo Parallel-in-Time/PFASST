@@ -88,7 +88,7 @@ namespace pfasst
        *     `true` if this sweeper exists on a coarsened MLSDC or PFASST level.
        *     This implies that space for an FAS correction and "saved" solutions are necessary.
        */
-      virtual void setup(bool coarse = false) { }
+      virtual void setup(bool coarse = false) { (void) coarse; }
 
       /**
        * perform a predictor sweep.

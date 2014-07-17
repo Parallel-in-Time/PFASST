@@ -15,10 +15,10 @@
 
 #include <fftw3.h>
 
+typedef pfasst::encap::VectorEncapsulation<double> DVectorT;
+
 class FFT
 {
-    typedef pfasst::encap::VectorEncapsulation<double> DVectorT;
-
     struct workspace {
       fftw_plan        ffft;
       fftw_plan        ifft;
@@ -36,7 +36,6 @@ class FFT
         fftw_free(wk->wk);
         fftw_destroy_plan(wk->ffft);
         fftw_destroy_plan(wk->ifft);
-//         delete wk;
       }
       workspaces.clear();
     }
@@ -55,22 +54,22 @@ class FFT
       return workspaces[ndofs];
     }
 
-    complex<double>* forward(shared_ptr<const DVectorT> x)
+    complex<double>* forward(const DVectorT& x)
     {
-      shared_ptr<workspace> wk = get_workspace(x->size());
-      for (size_t i = 0; i < x->size(); i++) {
-        wk->z[i] = x->data()[i];
+      shared_ptr<workspace> wk = get_workspace(x.size());
+      for (size_t i = 0; i < x.size(); i++) {
+        wk->z[i] = x[i];
       }
       fftw_execute_dft(wk->ffft, wk->wk, wk->wk);
       return wk->z;
     }
 
-    void backward(shared_ptr<DVectorT> x)
+    void backward(DVectorT& x)
     {
-      shared_ptr<workspace> wk = get_workspace(x->size());
+      shared_ptr<workspace> wk = get_workspace(x.size());
       fftw_execute_dft(wk->ifft, wk->wk, wk->wk);
-      for (size_t i = 0; i < x->size(); i++) {
-        x->data()[i] = real(wk->z[i]);
+      for (size_t i = 0; i < x.size(); i++) {
+        x[i] = real(wk->z[i]);
       }
     }
 

@@ -79,7 +79,7 @@ error_map run_serial_mlsdc()
 }
 
 #ifndef PFASST_UNIT_TESTING
-int main(int argc, char** argv)
+int main(int /*argc*/, char** /*argv*/)
 {
   run_serial_mlsdc();
 }
