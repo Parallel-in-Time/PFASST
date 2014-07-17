@@ -21,6 +21,7 @@ namespace pfasst
     class PolyInterpMixin
       : public pfasst::ITransfer<time>
     {
+        using EncapVecT = vector<shared_ptr<Encapsulation<time>>>;
         matrix<time> tmat, fmat;
 
       public:
@@ -54,7 +55,7 @@ namespace pfasst
           auto crse_factory = crse->get_factory();
           auto fine_factory = fine->get_factory();
 
-          vector<shared_ptr<Encapsulation<time>>> fine_state(nfine), fine_delta(ncrse);
+          EncapVecT fine_state(nfine), fine_delta(ncrse);
 
           for (size_t m = 0; m < nfine; m++) { fine_state[m] = fine->get_state(m); }
           for (size_t m = 0; m < ncrse; m++) { fine_delta[m] = fine_factory->create(solution); }
@@ -123,7 +124,7 @@ namespace pfasst
         }
 
         virtual void fas(time dt, shared_ptr<ISweeper<time>> dst,
-                         shared_ptr<const ISweeper<time>> src)
+                                  shared_ptr<const ISweeper<time>> src)
         {
           shared_ptr<EncapSweeper<time>> crse = dynamic_pointer_cast<EncapSweeper<time>>(dst);
           assert(crse);
@@ -136,17 +137,14 @@ namespace pfasst
         virtual void fas(time dt, shared_ptr<EncapSweeper<time>> crse,
                          shared_ptr<const EncapSweeper<time>> fine)
         {
-          size_t ncrse = crse->get_nodes().size();
-          assert(ncrse > 1);
-          size_t nfine = fine->get_nodes().size();
-          assert(nfine >= 1);
+          size_t ncrse = crse->get_nodes().size(); assert(ncrse >= 1);
+          size_t nfine = fine->get_nodes().size(); assert(nfine >= 1);
 
           auto crse_factory = crse->get_factory();
           auto fine_factory = fine->get_factory();
 
-          vector<shared_ptr<Encapsulation<time>>>   crse_z2n(ncrse - 1)
-                                                  , fine_z2n(nfine - 1)
-                                                  , rstr_z2n(ncrse - 1);
+          EncapVecT crse_z2n(ncrse - 1), fine_z2n(nfine - 1), rstr_z2n(ncrse - 1);
+
           for (size_t m = 0; m < ncrse - 1; m++) { crse_z2n[m] = crse_factory->create(solution); }
           for (size_t m = 0; m < ncrse - 1; m++) { rstr_z2n[m] = crse_factory->create(solution); }
           for (size_t m = 0; m < nfine - 1; m++) { fine_z2n[m] = fine_factory->create(solution); }
@@ -170,21 +168,27 @@ namespace pfasst
           }
 
           // compute 'node to node' tau correction
-          vector<shared_ptr<Encapsulation<time>>> tau(ncrse - 1);
-          for (size_t m = 0; m < ncrse - 1; m++) {
-            tau[m] = crse->get_tau(m);
+          EncapVecT tau(ncrse - 1), rstr_and_crse(2 * (ncrse - 1));
+          for (size_t m = 0; m < ncrse - 1; m++) { tau[m] = crse->get_tau(m); }
+          for (size_t m = 0; m < ncrse - 1; m++) { rstr_and_crse[m] = rstr_z2n[m]; }
+          for (size_t m = 0; m < ncrse - 1; m++) { rstr_and_crse[ncrse - 1 + m] = crse_z2n[m]; }
+
+          if (fmat.size1() == 0) {
+            fmat.resize(ncrse - 1, 2 * (ncrse - 1));
+            fmat.clear();
+
+            for (size_t m = 0; m < ncrse - 1; m++) {
+              fmat(m, m) = 1.0;
+              fmat(m, ncrse - 1 + m) = -1.0;
+
+              for (size_t n = 0; n < m; n++) {
+                fmat(m, n) = -1.0;
+                fmat(m, ncrse - 1 + n) = 1.0;
+              }
+            }
           }
 
-          tau[0]->copy(rstr_z2n[0]);
-          tau[0]->saxpy(-1.0, crse_z2n[0]);
-
-          for (size_t m = 1; m < ncrse - 1; m++) {
-            tau[m]->copy(rstr_z2n[m]);
-            tau[m]->saxpy(-1.0, rstr_z2n[m - 1]);
-
-            tau[m]->saxpy(-1.0, crse_z2n[m]);
-            tau[m]->saxpy(1.0, crse_z2n[m - 1]);
-          }
+          tau[0]->mat_apply(tau, 1.0, fmat, rstr_and_crse, true);
         }
 
         // required for interp/restrict helpers
