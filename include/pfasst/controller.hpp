@@ -26,7 +26,7 @@ namespace pfasst
       deque<shared_ptr<ISweeper<time>>>  levels;
       deque<shared_ptr<ITransfer<time>>> transfer;
 
-      int step, iteration, max_iterations;
+      size_t step, iteration, max_iterations;
       time t, dt, tend;
 
     public:
@@ -39,8 +39,7 @@ namespace pfasst
         }
       }
 
-    // XXX
-      void set_duration(time t0, time tend, time dt, int niters)
+      void set_duration(time t0, time tend, time dt, size_t niters)
       {
         this->t = t0;
         this->tend = tend;
@@ -183,7 +182,7 @@ namespace pfasst
       /**
        * Get current time step number.
        */
-      int get_step()
+      size_t get_step()
       {
         return step;
       }
@@ -198,7 +197,7 @@ namespace pfasst
         return t;
       }
 
-      void advance_time(int nsteps=1)
+      void advance_time(size_t nsteps=1)
       {
         step += nsteps;
         t += nsteps*dt;
@@ -209,12 +208,12 @@ namespace pfasst
         return tend;
       }
 
-      int get_iteration()
+      size_t get_iteration()
       {
         return iteration;
       }
 
-      void set_iteration(int iter)
+      void set_iteration(size_t iter)
       {
         this->iteration = iter;
       }
@@ -224,7 +223,7 @@ namespace pfasst
         iteration++;
       }
 
-      int get_max_iteration()
+      size_t get_max_iterations()
       {
         return max_iterations;
       }
