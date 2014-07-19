@@ -18,7 +18,7 @@
 using namespace pfasst;
 using namespace pfasst::encap;
 
-int main(int /*argc*/, char** /*argv*/)
+error_map run_serial_mlsdc()
 {
   MLSDC<> mlsdc;
 
@@ -70,8 +70,17 @@ int main(int /*argc*/, char** /*argv*/)
   /*
    * run mlsdc!
    */
-  mlsdc.set_duration(dt, nsteps, niters);
+  mlsdc.set_duration(0.0, nsteps*dt, dt, niters);
   mlsdc.run();
 
   fftw_cleanup();
+
+  return sweeper->get_errors();
 }
+
+#ifndef PFASST_UNIT_TESTING
+int main(int /*argc*/, char** /*argv*/)
+{
+  run_serial_mlsdc();
+}
+#endif

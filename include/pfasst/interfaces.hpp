@@ -5,6 +5,7 @@
 #ifndef _PFASST_INTERFACES_HPP_
 #define _PFASST_INTERFACES_HPP_
 
+#include <cassert>
 #include <deque>
 #include <exception>
 #include <iterator>
@@ -17,6 +18,9 @@ namespace pfasst
 {
 
   using time_precision = double;
+
+  template<typename time>
+  class Controller;
 
   /**
    * not implemented yet exception.
@@ -59,8 +63,24 @@ namespace pfasst
   template<typename time = time_precision>
   class ISweeper
   {
+      Controller<time>* controller;
+
     public:
       virtual ~ISweeper() { }
+
+      /**
+       * set the sweepers controller.
+       */
+      void set_controller(Controller<time>* ctrl)
+      {
+	controller = ctrl;
+      }
+
+      Controller<time>* get_controller()
+      {
+	assert(controller);
+	return controller;
+      }
 
       /**
        * setup (allocate etc) the sweeper.
@@ -81,7 +101,7 @@ namespace pfasst
        *     `false` if functions values at the first node already exist (usually this is the case
        *     when advancing from one time step to the next).
        */
-      virtual void predict(time t, time dt, bool initial) = 0;
+      virtual void predict(bool initial) = 0;
 
       /**
        * perform one SDC sweep/iteration.
@@ -89,7 +109,7 @@ namespace pfasst
        * Note that this function can assume that valid function values exist from a previous
        * pfasst::ISweeper::sweep() or pfasst::ISweeper::predict().
        */
-      virtual void sweep(time t, time dt) = 0;
+      virtual void sweep() = 0;
 
       /**
        * advance from one time step to the next.

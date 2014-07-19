@@ -5,13 +5,16 @@
 #ifndef _PFASST_SDC_HPP_
 #define _PFASST_SDC_HPP_
 
+#include <iostream>
+using namespace std;
+
 #include "controller.hpp"
 
 namespace pfasst
 {
 
   template<typename time = time_precision>
-  class SDC 
+  class SDC
     : public Controller<time>
   {
     public:
@@ -20,14 +23,16 @@ namespace pfasst
       {
         auto sweeper = this->get_level(0);
 
-        for (size_t nstep = 0; nstep < this->nsteps; nstep++) {
-          time t = nstep * this->dt;
-
-          sweeper->predict(t, this->dt, nstep == 0);
-          for (size_t niter = 1; niter < this->niters; niter++) {
-            sweeper->sweep(t, this->dt);
+        for (; this->get_time() < this->get_end_time(); this->advance_time()) {
+          bool initial = this->get_step() == 0;
+	  for (this->set_iteration(0); this->get_iteration() < this->get_max_iterations(); this->advance_iteration()) {
+	    bool predict = this->get_iteration() == 0;
+	    if (predict) {
+	      sweeper->predict(initial);
+	    } else {
+	      sweeper->sweep();
+	    }
           }
-
           sweeper->advance();
         }
       }
