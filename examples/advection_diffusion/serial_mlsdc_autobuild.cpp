@@ -7,6 +7,9 @@
  * controller.
  */
 
+#include <memory>
+#include <cassert>
+
 #include <fftw3.h>
 
 #include <pfasst.hpp>
@@ -21,20 +24,20 @@ using namespace std;
 using namespace pfasst;
 using namespace pfasst::encap;
 
-int main(int argc, char **argv)
+int main(int /*argc*/, char** /*argv*/)
 {
-  MLSDC<double> mlsdc;
+  MLSDC<> mlsdc;
 
-  const int    nsteps = 4;
+  const size_t nsteps = 4;
   const double dt     = 0.01;
-  const int    niters = 4;
+  const size_t niters = 4;
 
-  vector<pair<int,string>> nodes = {
+  vector<pair<size_t, string>> nodes = {
     { 3, "gauss-lobatto" },
     { 5, "gauss-lobatto" }
   };
 
-  vector<int> ndofs = { 64, 128 };
+  vector<size_t> ndofs = { 64, 128 };
 
   /*
    * the 'build' function is called once for each level, and returns a
@@ -42,27 +45,27 @@ int main(int argc, char **argv)
    * routines.  in this case our builder is a lambda function that
    * captures the 'ndofs' variable from above.
    */
-  auto build_level = [ndofs] (unsigned int level) {
-    auto* factory  = new VectorFactory<double,double>(ndofs[level]);
-    auto* sweeper  = new AdvectionDiffusionSweeper<double,double>(ndofs[level]);
-    auto* transfer = new SpectralTransfer1D<double,double>();
+  auto build_level = [ndofs](size_t level) {
+    auto factory  = make_shared<VectorFactory<double>>(ndofs[level]);
+    auto sweeper  = make_shared<AdvectionDiffusionSweeper<>>(ndofs[level]);
+    auto transfer = make_shared<SpectralTransfer1D<>>();
 
-    return auto_build_tuple<double,double>(sweeper,transfer,factory);
+    return AutoBuildTuple<>(sweeper, transfer, factory);
   };
 
   /*
    * the 'initial' function is called once for each level to set the
    * intial conditions.
    */
-  auto initial = [] (EncapSweeper<double,double> *sweeper,
-		     Encapsulation<double,double> *q0) {
-    auto* ad = dynamic_cast<AdvectionDiffusionSweeper<double,double>*>(sweeper);
+  auto initial = [](shared_ptr<EncapSweeper<>> sweeper, shared_ptr<Encapsulation<>> q0) {
+    auto ad = dynamic_pointer_cast<AdvectionDiffusionSweeper<>>(sweeper);
+    assert(ad);
     ad->exact(q0, 0.0);
   };
 
-  auto_build<double,double>(mlsdc, nodes, build_level);
-  auto_setup<double,double>(mlsdc, initial);
-  mlsdc.set_duration(dt, nsteps, niters);
+  auto_build(mlsdc, nodes, build_level);
+  auto_setup(mlsdc, initial);
+  mlsdc.set_duration(0.0, nsteps*dt, dt, niters);
   mlsdc.run();
 
   fftw_cleanup();

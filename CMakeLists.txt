@@ -10,9 +10,14 @@ include(ExternalProject)
 # Set default ExternalProject root directory
 set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/3rdparty)
 
-option(pfasst_DISABLE_LIBCXX "Disable use of LLVM's libstdc++ when compiling with Clang." ON)
+option(pfasst_DISABLE_LIBCXX "Disable use of LLVM's libc++ when compiling with Clang." ON)
 option(pfasst_BUILD_EXAMPLES "Build example programs." ON)
 option(pfasst_BUILD_TESTS "Build test suite for PFASST." ON)
+
+# output directories
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${pfasst_SOURCE_DIR}/dist/bin")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${pfasst_SOURCE_DIR}/dist/lib")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${pfasst_SOURCE_DIR}/dist/lib")
 
 # check for C++11 support
 if(${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
@@ -25,10 +30,13 @@ if(${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
 elseif(${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
     check_cxx_compiler_flag(-std=c++11 HAVE_STD11)
     if(HAVE_STD11)
-        if(pfasst_DISABLE_LIBCXX)
+        if(pfasst_DISABLE_LIBCXX AND NOT APPLE)
             add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-std=c++11")
             add_to_string_list("${CMAKE_CXX_LINK_FLAGS}" CMAKE_CXX_LINK_FLAGS "-std=c++11")
         else()
+            if(APPLE)
+                message(WARNING "You are on an Apple system. libc++ is forcly enabled.")
+            endif(APPLE)
             add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-std=c++11" "-stdlib=libc++")
             add_to_string_list("${CMAKE_CXX_LINK_FLAGS}" CMAKE_CXX_LINK_FLAGS "-std=c++11" "-stdlib=libc++")
         endif()
@@ -37,6 +45,7 @@ elseif(${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
     endif()
 elseif(${CMAKE_CXX_COMPILER_ID} MATCHES XL)
     # NOTE: This branch is not tested yet (in theory it should work)
+    message(WARNING "IMB XL C/C++ support is experimental and not yet tested.")
     check_cxx_compiler_flag(-qlanglvl=extended0x HAVE_STD11)
     if(HAVE_STD11)
         add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-qlanglvl=extended0x -qwarn0x")
@@ -49,7 +58,7 @@ endif()
 message(STATUS "Your compiler has C++11 support. Hurray!")
 
 # enable all compiler warnings
-add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-Wall")
+add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic")
 
 set(3rdparty_INCLUDES)
 set(3rdparty_DEPENDEND_LIBS)

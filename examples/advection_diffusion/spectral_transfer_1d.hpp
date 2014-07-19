@@ -5,49 +5,60 @@
 #ifndef _SPECTRAL_TRANSFER_1D_HPP_
 #define _SPECTRAL_TRANSFER_1D_HPP_
 
+#include <cassert>
+#include <memory>
+
 #include <pfasst/encap/vector.hpp>
 #include <pfasst/encap/poly_interp.hpp>
 
 #include "fft.hpp"
 
-template<typename scalar, typename time>
-class SpectralTransfer1D : public pfasst::encap::PolyInterpMixin<scalar,time> {
+template<typename time = pfasst::time_precision>
+class SpectralTransfer1D
+  : public pfasst::encap::PolyInterpMixin<time>
+{
+    typedef pfasst::encap::Encapsulation<double> Encapsulation;
 
-  using dvector = pfasst::encap::VectorEncapsulation<scalar,time>;
-  FFT<scalar,time> fft;
+    FFT fft;
 
-public:
+  public:
 
-  void interpolate(Encapsulation<scalar,time> *dst, const Encapsulation<scalar,time> *src) {
-    auto& crse = *dynamic_cast<const dvector*>(src);
-    auto& fine = *dynamic_cast<dvector*>(dst);
+    void interpolate(shared_ptr<Encapsulation> dst, shared_ptr<const Encapsulation> src)
+    {
+      auto& fine = as_vector<double,time>(dst);
+      auto& crse = as_vector<double,time>(src);
 
-    auto* crse_z = fft.forward(crse);
-    auto* fine_z = fft.get_workspace(fine.size())->z;
+      auto* crse_z = fft.forward(crse);
+      auto* fine_z = fft.get_workspace(fine.size())->z;
 
-    for (int i=0; i<fine.size(); i++)
-      fine_z[i] = 0.0;
+      for (size_t i = 0; i < fine.size(); i++) {
+        fine_z[i] = 0.0;
+      }
 
-    double c = 1.0 / crse.size();
+      double c = 1.0 / crse.size();
 
-    for (int i=0; i<crse.size()/2; i++)
-      fine_z[i] = c * crse_z[i];
+      for (size_t i = 0; i < crse.size() / 2; i++) {
+        fine_z[i] = c * crse_z[i];
+      }
 
-    for (int i=1; i<crse.size()/2; i++)
-      fine_z[fine.size()-crse.size()/2+i] = c * crse_z[crse.size()/2+i];
+      for (size_t i = 1; i < crse.size() / 2; i++) {
+        fine_z[fine.size() - crse.size() / 2 + i] = c * crse_z[crse.size() / 2 + i];
+      }
 
-    fft.backward(fine);
-  }
+      fft.backward(fine);
+    }
 
-  void restrict(Encapsulation<scalar,time> *dst, const Encapsulation<scalar,time> *src) {
-    auto& crse = *dynamic_cast<dvector*>(dst);
-    auto& fine = *dynamic_cast<const dvector*>(src);
+    void restrict(shared_ptr<Encapsulation> dst, shared_ptr<const Encapsulation> src)
+    {
+      auto& fine = as_vector<double,time>(src);
+      auto& crse = as_vector<double,time>(dst);
 
-    int xrat = fine.size() / crse.size();
+      size_t xrat = fine.size() / crse.size();
 
-    for (int i=0; i<crse.size(); i++)
-      crse[i] = fine[xrat*i];
-  }
+      for (size_t i = 0; i < crse.size(); i++) {
+        crse[i] = fine[xrat*i];
+      }
+    }
 
 };
 

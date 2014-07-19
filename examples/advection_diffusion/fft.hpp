@@ -8,69 +8,70 @@
 #define _FFT_HPP_
 
 #include <map>
+#include <memory>
+#include <cstddef>
 
 #include <pfasst/encap/vector.hpp>
 
 #include <fftw3.h>
 
-template<typename scalar, typename time>
-class FFT {
+typedef pfasst::encap::VectorEncapsulation<double> DVectorT;
 
-  using dvector = pfasst::encap::VectorEncapsulation<scalar,time>;
+class FFT
+{
+    struct workspace {
+      fftw_plan        ffft;
+      fftw_plan        ifft;
+      fftw_complex*    wk;
+      complex<double>* z;
+    };
 
-  struct workspace {
-    fftw_plan        ffft;
-    fftw_plan        ifft;
-    fftw_complex*    wk;
-    complex<scalar>* z;
-  };
+    map<size_t, shared_ptr<workspace>> workspaces;
 
-  map<int,workspace*> workspaces;
-
-public:
-
-  ~FFT()
-  {
-    for (auto& x: workspaces) {
-      auto* wk = std::get<1>(x);
-      fftw_free(wk->wk);
-      fftw_destroy_plan(wk->ffft);
-      fftw_destroy_plan(wk->ifft);
-      delete wk;
-    }
-    workspaces.clear();
-  }
-
-  workspace* get_workspace(int ndofs)
-  {
-    if (workspaces.find(ndofs) == workspaces.end()) {
-      workspace* wk = new workspace;
-      wk->wk = fftw_alloc_complex(ndofs);
-      wk->ffft = fftw_plan_dft_1d(ndofs, wk->wk, wk->wk, FFTW_FORWARD, FFTW_ESTIMATE);
-      wk->ifft = fftw_plan_dft_1d(ndofs, wk->wk, wk->wk, FFTW_BACKWARD, FFTW_ESTIMATE);
-      wk->z = reinterpret_cast<complex<scalar>*>(wk->wk);
-      workspaces.insert(pair<int,workspace*>(ndofs, wk));
+  public:
+    ~FFT()
+    {
+      for (auto& x : workspaces) {
+        shared_ptr<workspace> wk = std::get<1>(x);
+        fftw_free(wk->wk);
+        fftw_destroy_plan(wk->ffft);
+        fftw_destroy_plan(wk->ifft);
+      }
+      workspaces.clear();
     }
 
-    return workspaces[ndofs];
-  }
+    shared_ptr<workspace> get_workspace(size_t ndofs)
+    {
+      if (workspaces.find(ndofs) == workspaces.end()) {
+        shared_ptr<workspace> wk = make_shared<workspace>();
+        wk->wk = fftw_alloc_complex(ndofs);
+        wk->ffft = fftw_plan_dft_1d(ndofs, wk->wk, wk->wk, FFTW_FORWARD, FFTW_ESTIMATE);
+        wk->ifft = fftw_plan_dft_1d(ndofs, wk->wk, wk->wk, FFTW_BACKWARD, FFTW_ESTIMATE);
+        wk->z = reinterpret_cast<complex<double>*>(wk->wk);
+        workspaces.insert(pair<size_t, shared_ptr<workspace>>(ndofs, wk));
+      }
 
-  complex<double>* forward(const dvector& x)
-  {
-    workspace *wk = get_workspace(x.size());
-    for (size_t i=0; i<x.size(); i++)
-      wk->z[i] = x[i];
-    fftw_execute_dft(wk->ffft, wk->wk, wk->wk);
-    return wk->z;
-  }
+      return workspaces[ndofs];
+    }
 
-  void backward(dvector &x)
-  {
-    workspace *wk = get_workspace(x.size());
-    fftw_execute_dft(wk->ifft, wk->wk, wk->wk);
-    for (size_t i=0; i<x.size(); i++)
-      x[i] = real(wk->z[i]);
-  }
+    complex<double>* forward(const DVectorT& x)
+    {
+      shared_ptr<workspace> wk = get_workspace(x.size());
+      for (size_t i = 0; i < x.size(); i++) {
+        wk->z[i] = x[i];
+      }
+      fftw_execute_dft(wk->ffft, wk->wk, wk->wk);
+      return wk->z;
+    }
+
+    void backward(DVectorT& x)
+    {
+      shared_ptr<workspace> wk = get_workspace(x.size());
+      fftw_execute_dft(wk->ifft, wk->wk, wk->wk);
+      for (size_t i = 0; i < x.size(); i++) {
+        x[i] = real(wk->z[i]);
+      }
+    }
 
 };
 

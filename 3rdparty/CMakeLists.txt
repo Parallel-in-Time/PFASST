@@ -34,7 +34,7 @@ if(pfasst_BUILD_EXAMPLES)
         UPDATE_COMMAND ""
         PATCH_COMMAND ""
         BUILD_IN_SOURCE ON
-        CONFIGURE_COMMAND ${fftw3_SOURCE_DIR}/configure CC=${CMAKE_C_COMPILER} --prefix=${fftw3_INSTALL_DIR} --libdir=${fftw3_INSTALL_DIR}/lib CXX=${CMAKE_CXX_COMPILER}
+        CONFIGURE_COMMAND ${fftw3_SOURCE_DIR}/configure CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${CMAKE_CXX_FLAGS} --prefix=${fftw3_INSTALL_DIR} --libdir=${fftw3_INSTALL_DIR}/lib
         BUILD_COMMAND make
         TEST_COMMAND ""
         INSTALL_DIR ${fftw3_SOURCE_DIR}-install
@@ -65,6 +65,10 @@ if(pfasst_BUILD_TESTS)
       UPDATE_COMMAND ""
       PATCH_COMMAND ""
       CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release
+      -DCMAKE_C_COMPILE=${CMAKE_C_COMPILER}
+      -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+      -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+      -DGTEST_USE_OWN_TR1_TUPLE=ON
       -Dgtest_force_shared_crt=ON
       -Dgmock_build_tests=${gtest_BUILD_TESTS}
       # Disable install step

@@ -11,78 +11,82 @@
 #include "../quadrature.hpp"
 #include "encapsulation.hpp"
 
-namespace pfasst {
-  namespace encap {
+namespace pfasst
+{
+  namespace encap
+  {
 
-    template<typename scalar, typename time>
-    class EncapSweeper : public ISweeper {
-      vector<scalar> nodes;
-      shared_ptr<EncapFactory<scalar,time>> factory;
+    template<typename time = time_precision>
+    class EncapSweeper
+      : public ISweeper<time>
+    {
+        vector<time> nodes;
+        shared_ptr<EncapFactory<time>> factory;
 
-    public:
+      public:
 
-      void set_nodes(vector<time> nodes)
-      {
-	this->nodes = nodes;
-      }
+        void set_nodes(vector<time> nodes)
+        {
+          this->nodes = nodes;
+        }
 
-      const vector<time> get_nodes() const
-      {
-	return nodes;
-      }
+        const vector<time> get_nodes() const
+        {
+          return nodes;
+        }
 
-      void set_factory(EncapFactory<scalar,time>* factory)
-      {
-	this->factory = shared_ptr<EncapFactory<scalar,time>>(factory);
-      }
+        void set_factory(shared_ptr<EncapFactory<time>> factory)
+        {
+          this->factory = shared_ptr<EncapFactory<time>>(factory);
+        }
 
-      EncapFactory<scalar,time>* get_factory() const
-      {
-	return factory.get();
-      }
+        shared_ptr<EncapFactory<time>> get_factory() const
+        {
+          return factory;
+        }
 
-      virtual void set_state(const Encapsulation<scalar,time>* q0, unsigned int m)
-      {
-      	throw NotImplementedYet("sweeper");
-      }
+        virtual void set_state(shared_ptr<const Encapsulation<time>> /*q0*/, size_t /*m*/)
+        {
+          throw NotImplementedYet("sweeper");
+        }
 
-      virtual Encapsulation<scalar,time>* get_state(unsigned int m) const
-      {
-	throw NotImplementedYet("sweeper");
-	return NULL;
-      }
+        virtual shared_ptr<Encapsulation<time>> get_state(size_t /*m*/) const
+        {
+          throw NotImplementedYet("sweeper");
+          return NULL;
+        }
 
-      virtual Encapsulation<scalar,time>* get_tau(unsigned int m) const
-      {
-	throw NotImplementedYet("sweeper");
-	return NULL;
-      }
+        virtual shared_ptr<Encapsulation<time>> get_tau(size_t /*m*/) const
+        {
+          throw NotImplementedYet("sweeper");
+          return NULL;
+        }
 
-      virtual Encapsulation<scalar,time>* get_saved_state(unsigned int m) const
-      {
-	throw NotImplementedYet("sweeper");
-	return NULL;
-      }
+        virtual shared_ptr<Encapsulation<time>> get_saved_state(size_t /*m*/) const
+        {
+          throw NotImplementedYet("sweeper");
+          return NULL;
+        }
 
-      virtual Encapsulation<scalar,time>* get_end_state()
-      {
-	return this->get_state(this->get_nodes().size()-1);
-      }
+        virtual shared_ptr<Encapsulation<time>> get_end_state()
+        {
+          return this->get_state(this->get_nodes().size() - 1);
+        }
 
-      virtual void evaluate(int m)
-      {
-	throw NotImplementedYet("sweeper");
-      }
+      virtual void evaluate(size_t /*m*/)
+        {
+          throw NotImplementedYet("sweeper");
+        }
 
-      virtual void advance()
-      {
-	throw NotImplementedYet("sweeper");
-      }
+        virtual void advance()
+        {
+          throw NotImplementedYet("sweeper");
+        }
 
-      virtual void integrate(time dt, vector<Encapsulation<scalar,time>*> dst) const
-      {
-	throw NotImplementedYet("sweeper");
-      }
+        virtual void integrate(time /*dt*/, vector<shared_ptr<Encapsulation<time>>> /*dst*/) const
+        {
+          throw NotImplementedYet("sweeper");
+        }
     };
 
   }
