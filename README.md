@@ -11,6 +11,13 @@ contains basic implementations of the 'spectral deferred correction'
 algorithms.
 
 
+News
+----
+
+* July 25, 2014: PFASST v0.1.0 released.  Please see the [release
+  notes](#releases) for more information.
+
+
 References
 ----------
 
@@ -20,13 +27,19 @@ XXX
 Documentation
 -------------
 
-Doxygen generated documentation can be found [on the PinT server][documentation].  
+Doxygen generated documentation can be found [on the PinT server][documentation].
 Currently, it features the following content:
 
 * \subpage #page_building_installing
 * \subpage #page_examples
 * \subpage #page_contributing
 * \subpage #page_style_guide
+
+
+Releases
+--------
+
+* **v0.1.0** Initial release with basic implementations of SDC and MLSDC.
 
 
 Build status
