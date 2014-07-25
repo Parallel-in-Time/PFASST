@@ -132,11 +132,11 @@ namespace pfasst
        * This is typically done in MLSDC/PFASST immediately after a call to restrict.
        * The saved states are used to compute deltas during interpolation.
        */
-      virtual void save(bool initial_only=false) { NotImplementedYet("mlsdc/pfasst"); }
+      virtual void save(bool initial_only=false) { (void) initial_only; NotImplementedYet("mlsdc/pfasst"); }
 
-      virtual void post(ICommunicator* comm, int tag) { };
-      virtual void send(ICommunicator* comm, int tag, bool blocking) { NotImplementedYet("pfasst"); }
-      virtual void recv(ICommunicator* comm, int tag, bool blocking) { NotImplementedYet("pfasst"); }
+      virtual void post(ICommunicator* /*comm*/, int /*tag*/) { };
+      virtual void send(ICommunicator* /*comm*/, int /*tag*/, bool /*blocking*/) { NotImplementedYet("pfasst"); }
+      virtual void recv(ICommunicator* /*comm*/, int /*tag*/, bool /*blocking*/) { NotImplementedYet("pfasst"); }
 
   };
 

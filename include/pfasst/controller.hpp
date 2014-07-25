@@ -188,6 +188,12 @@ namespace pfasst
         return step;
       }
 
+      void set_step(size_t n)
+      {
+        t += (n - step)*dt;
+        step = n;
+      }
+
       time get_time_step()
       {
         return dt;

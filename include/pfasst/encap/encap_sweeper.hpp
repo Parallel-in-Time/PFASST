@@ -25,20 +25,20 @@ namespace pfasst
 
       public:
 
-      virtual void post(ICommunicator* comm, int tag)
-      {
-	this->get_state(0)->post(comm, tag);
-      }
+        virtual void post(ICommunicator* comm, int tag)
+        {
+          this->get_state(0)->post(comm, tag);
+        }
 
-      virtual void send(ICommunicator* comm, int tag, bool blocking)
-      {
-	this->get_state(this->get_nodes().size()-1)->send(comm, tag, blocking);
-      }
+        virtual void send(ICommunicator* comm, int tag, bool blocking)
+        {
+          this->get_state(this->get_nodes().size()-1)->send(comm, tag, blocking);
+        }
 
-      virtual void recv(ICommunicator* comm, int tag, bool blocking)
-      {
-	this->get_state(0)->recv(comm, tag, blocking);
-      }
+        virtual void recv(ICommunicator* comm, int tag, bool blocking)
+        {
+          this->get_state(0)->recv(comm, tag, blocking);
+        }
 
         void set_nodes(vector<time> nodes)
         {
@@ -88,7 +88,7 @@ namespace pfasst
           return this->get_state(this->get_nodes().size() - 1);
         }
 
-      virtual void evaluate(size_t /*m*/)
+        virtual void evaluate(size_t /*m*/)
         {
           throw NotImplementedYet("sweeper");
         }

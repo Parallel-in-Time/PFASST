@@ -38,15 +38,14 @@ namespace pfasst
 
         //! @{
         // required for time-parallel communications
-        virtual void post(ICommunicator* comm, int tag) { }
+        virtual void post(ICommunicator* /*comm*/, int /*tag*/) { }
 
-
-        virtual void send(ICommunicator* comm, int tag, bool blocking)
+        virtual void send(ICommunicator* /*comm*/, int /*tag*/, bool /*blocking*/)
         {
           throw NotImplementedYet("pfasst");
         }
 
-        virtual void recv(ICommunicator* comm, int tag, bool blocking)
+        virtual void recv(ICommunicator* /*comm*/, int /*tag*/, bool /*blocking*/)
         {
           throw NotImplementedYet("pfasst");
         }
