@@ -19,6 +19,7 @@ install:
   - if [ "${CXX}" == "clang++" ]; then sudo apt-get -qq install clang-3.2; fi
   - sudo apt-get install g++-4.8 # clang need it for libstdc++ update
   - sudo apt-get install libboost1.53-all-dev
+  - sudo apt-get install mpich2 libmpich2-dev
 
 before_script:
   # update compilers
@@ -31,4 +32,3 @@ script:
   - cmake -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -Dpfasst_DISABLE_LIBCXX=ON -Dpfasst_BUILD_TESTS=ON -Dpfasst_BUILD_EXAMPLES=ON ..
   - make
   - make test
-
