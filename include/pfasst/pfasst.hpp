@@ -58,8 +58,8 @@ namespace pfasst
       predict = true;
       auto crse = this->coarsest().current();
       for (int nstep=0; nstep<comm->rank()+1; nstep++) {
-	this->steps.i = comm->rank();
-	this->iterations.i = nstep;
+        this->set_step(comm->rank());
+        // XXX: set iteration?
 
 	initial = nstep == 0;
 	perform_sweeps(0);
@@ -72,8 +72,6 @@ namespace pfasst
 	auto fine = leviter.current();
 	auto trns = leviter.transfer();
 
-	this->steps.i = comm->rank();
-	this->iterations.i = -1;
 	trns->interpolate(fine, crse, true, true);
 	if (leviter < this->finest())
 	  perform_sweeps(leviter.level);
@@ -82,7 +80,7 @@ namespace pfasst
 
     void broadcast()
     {
-      cout << "BROADCAST" << endl; //  XXX
+      throw NotImplementedYet("broadcast");
       this->get_level(this->nlevels()-1)->advance();
     }
 
@@ -96,20 +94,19 @@ namespace pfasst
      */
     void run()
     {
-      //      int nblocks = this->nsteps / comm->size();
-      int nblocks = 1;
+      int nblocks = int(this->get_end_time() / this->get_time_step()) / comm->size();
+
+      if (nblocks == 0) {
+        throw ValueError("invalid duration: there are more time processors than time steps");
+      }
 
       initial = true;
-      auto& iters = this->iterations;
-
       for (int nblock=0; nblock<nblocks; nblock++) {
-	int  nstep = nblock * comm->size() + comm->rank();
-	this->steps.i = nstep;
+        this->set_step(nblock * comm->size() + comm->rank());
 
 	predictor();
 
-	for (iters.reset(); iters.valid(); iters.next()) {
-
+        for (this->set_iteration(0); this->get_iteration() < this->get_max_iterations(); this->advance_iteration()) {
 	  for (auto leviter=this->coarsest()+1; leviter<=this->finest(); ++leviter) {
 	    int tag = leviter.level*10000 + this->get_iteration() + 10;
 	    leviter.current()->post(comm, tag);
