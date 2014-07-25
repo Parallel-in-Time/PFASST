@@ -21,6 +21,7 @@ namespace pfasst
   class MLSDC
     : public Controller<time>
   {
+    protected:
       vector<size_t> nsweeps;
       bool predict, initial;
 

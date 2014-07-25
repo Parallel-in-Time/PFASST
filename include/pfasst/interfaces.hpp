@@ -55,6 +55,13 @@ namespace pfasst
       }
   };
 
+  class ICommunicator {
+  public:
+    virtual ~ICommunicator() { }
+    virtual int size() = 0;
+    virtual int rank() = 0;
+  };
+
   /**
    * abstract SDC sweeper.
    * @tparam time time precision
@@ -125,7 +132,11 @@ namespace pfasst
        * This is typically done in MLSDC/PFASST immediately after a call to restrict.
        * The saved states are used to compute deltas during interpolation.
        */
-      virtual void save() { NotImplementedYet("mlsdc/pfasst"); }
+      virtual void save(bool initial_only=false) { NotImplementedYet("mlsdc/pfasst"); }
+
+      virtual void post(ICommunicator* comm, int tag) { };
+      virtual void send(ICommunicator* comm, int tag, bool blocking) { NotImplementedYet("pfasst"); }
+      virtual void recv(ICommunicator* comm, int tag, bool blocking) { NotImplementedYet("pfasst"); }
 
   };
 
@@ -151,7 +162,8 @@ namespace pfasst
       virtual void interpolate(shared_ptr<ISweeper<time>> dst,
                                shared_ptr<const ISweeper<time>> src,
                                bool interp_delta_from_initial = false,
-                               bool interp_initial = false) = 0;
+                               bool interp_initial = false,
+                               bool interp_initial_only = false) = 0;
 
       /**
        * restrict, in time and space, from the fine sweeper to the coarse sweeper.
@@ -160,7 +172,8 @@ namespace pfasst
        */
       virtual void restrict(shared_ptr<ISweeper<time>> dst,
                             shared_ptr<const ISweeper<time>> src,
-                            bool restrict_initial = false) = 0;
+                            bool restrict_initial = false,
+			    bool restrict_initial_only = false) = 0;
 
       /**
        * compute FAS correction between the coarse and fine sweepers.
@@ -168,17 +181,6 @@ namespace pfasst
       virtual void fas(time dt, shared_ptr<ISweeper<time>> dst,
                        shared_ptr<const ISweeper<time>> src) = 0;
 
-  };
-
-  /**
-   * abstract time communicator.
-   */
-  class ICommunicator
-  {
-    public:
-      virtual void post() { }
-      virtual void send() = 0;
-      virtual void recv() = 0;
   };
 
 }

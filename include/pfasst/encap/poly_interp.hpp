@@ -30,20 +30,22 @@ namespace pfasst
         virtual void interpolate(shared_ptr<ISweeper<time>> dst,
                                  shared_ptr<const ISweeper<time>> src,
                                  bool interp_delta_from_initial,
-                                 bool interp_initial)
+                                 bool interp_initial,
+                                 bool interp_initial_only)
         {
           shared_ptr<EncapSweeper<time>> fine = dynamic_pointer_cast<EncapSweeper<time>>(dst);
           assert(fine);
           shared_ptr<const EncapSweeper<time>> crse = dynamic_pointer_cast<const EncapSweeper<time>>(src);
           assert(crse);
 
-          this->interpolate(fine, crse, interp_delta_from_initial, interp_initial);
+          this->interpolate(fine, crse, interp_delta_from_initial, interp_initial, interp_initial_only);
         }
 
         virtual void interpolate(shared_ptr<EncapSweeper<time>> fine,
                                  shared_ptr<const EncapSweeper<time>> crse,
                                  bool interp_delta_from_initial,
-                                 bool interp_initial)
+                                 bool interp_initial,
+                                 bool interp_initial_only)
         {
           if (tmat.size1() == 0) {
             tmat = pfasst::compute_interp<time>(fine->get_nodes(), crse->get_nodes());
@@ -54,6 +56,19 @@ namespace pfasst
 
           auto crse_factory = crse->get_factory();
           auto fine_factory = fine->get_factory();
+
+          if (interp_initial_only) {
+            auto crse_delta = crse_factory->create(solution);
+            this->restrict(crse_delta, fine->get_state(0));
+            crse_delta->saxpy(-1.0, crse->get_state(0));
+
+            auto fine_delta = fine_factory->create(solution);
+            this->interpolate(fine_delta, crse_delta);
+            fine->get_state(0)->saxpy(-1.0, fine_delta);
+
+            fine->evaluate(0);
+            return;
+          }
 
           EncapVecT fine_state(nfine), fine_delta(ncrse);
 
@@ -89,20 +104,27 @@ namespace pfasst
 
         virtual void restrict(shared_ptr<ISweeper<time>> dst,
                               shared_ptr<const ISweeper<time>> src,
-                              bool restrict_initial)
+                              bool restrict_initial,
+			      bool restrict_initial_only)
         {
           shared_ptr<EncapSweeper<time>> crse = dynamic_pointer_cast<EncapSweeper<time>>(dst);
           assert(crse);
           shared_ptr<const EncapSweeper<time>> fine = dynamic_pointer_cast<const EncapSweeper<time>>(src);
           assert(fine);
 
-          this->restrict(crse, fine, restrict_initial);
+          this->restrict(crse, fine, restrict_initial, restrict_initial_only);
         }
 
         virtual void restrict(shared_ptr<EncapSweeper<time>> crse,
                               shared_ptr<const EncapSweeper<time>> fine,
-                              bool restrict_initial)
+                              bool restrict_initial,
+			      bool restrict_initial_only)
         {
+	  if (restrict_initial_only) {
+            this->restrict(crse->get_state(0), fine->get_state(0));
+	    return;
+	  }
+
           auto dnodes = crse->get_nodes();
           auto snodes = fine->get_nodes();
 
@@ -124,7 +146,7 @@ namespace pfasst
         }
 
         virtual void fas(time dt, shared_ptr<ISweeper<time>> dst,
-                                  shared_ptr<const ISweeper<time>> src)
+                         shared_ptr<const ISweeper<time>> src)
         {
           shared_ptr<EncapSweeper<time>> crse = dynamic_pointer_cast<EncapSweeper<time>>(dst);
           assert(crse);

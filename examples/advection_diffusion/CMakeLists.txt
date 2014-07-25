@@ -9,6 +9,7 @@ set(advec_examples
     vanilla_sdc
     serial_mlsdc
     serial_mlsdc_autobuild
+    mpi_pfasst
 )
 
 foreach(example ${advec_examples})
