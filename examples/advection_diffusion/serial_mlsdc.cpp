@@ -1,9 +1,3 @@
-/*
- * Advection/diffusion example using an encapsulated IMEX sweeper.
- *
- * This example uses a (serial) multi-level SDC sweeper.
- */
-
 #include <memory>
 
 #include <fftw3.h>
@@ -18,6 +12,11 @@
 using namespace pfasst;
 using namespace pfasst::encap;
 
+/**
+ * Advection/diffusion example using an encapsulated IMEX sweeper.
+ *
+ * This example uses a (serial) multi-level SDC sweeper.
+ */
 error_map run_serial_mlsdc()
 {
   MLSDC<> mlsdc;

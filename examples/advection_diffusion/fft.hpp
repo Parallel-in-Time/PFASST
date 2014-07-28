@@ -1,9 +1,3 @@
-/*
- * FFT helper class.
- *
- * Please note: side affects galore!  This is not my best work...
- */
-
 #ifndef _FFT_HPP_
 #define _FFT_HPP_
 
@@ -17,6 +11,11 @@
 
 typedef pfasst::encap::VectorEncapsulation<double> DVectorT;
 
+/**
+ * FFT helper class.
+ *
+ * @remark side affects galore! This is not my best work ...
+ */
 class FFT
 {
     struct workspace {

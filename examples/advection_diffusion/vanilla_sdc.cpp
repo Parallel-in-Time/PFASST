@@ -1,9 +1,3 @@
-/*
- * Advection/diffusion example using an encapsulated IMEX sweeper.
- *
- * This example uses a vanilla SDC sweeper.
- */
-
 #include <memory>
 
 #include <fftw3.h>
@@ -14,6 +8,13 @@
 
 #include "advection_diffusion_sweeper.hpp"
 
+/**
+ * Advection/diffusion example using an encapsulated IMEX sweeper.
+ *
+ * This example demonstrates usage of a vanilla SDC sweeper for a simple advection-diffusion 
+ * problem.
+ * A few constants are used to manage the behavior of the sweeper.
+ */
 error_map run_vanilla_sdc()
 {
   pfasst::SDC<> sdc;

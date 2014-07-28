@@ -1,7 +1,3 @@
-/*
- * Spectral (FFT) transfer routines.
- */
-
 #ifndef _SPECTRAL_TRANSFER_1D_HPP_
 #define _SPECTRAL_TRANSFER_1D_HPP_
 
@@ -13,6 +9,9 @@
 
 #include "fft.hpp"
 
+/**
+ * Spectral (FFT) transfer routines.
+ */
 template<typename time = pfasst::time_precision>
 class SpectralTransfer1D
   : public pfasst::encap::PolyInterpMixin<time>

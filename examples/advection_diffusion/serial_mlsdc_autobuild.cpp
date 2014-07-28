@@ -1,12 +1,3 @@
-/*
- * Advection/diffusion example using an encapsulated IMEX sweeper.
- *
- * This example uses a (serial) multi-level SDC sweeper.  It is
- * functionally exactly the same as ex2.cpp, but uses the 'auto
- * builder' to shorten the build and setup stages of the MLSDC
- * controller.
- */
-
 #include <memory>
 #include <cassert>
 
@@ -24,6 +15,14 @@ using namespace std;
 using namespace pfasst;
 using namespace pfasst::encap;
 
+/**
+ * Advection/diffusion example using an encapsulated IMEX sweeper.
+ *
+ * This example uses a (serial) multi-level SDC sweeper.  It is
+ * functionally exactly the same as ex2.cpp, but uses the 'auto
+ * builder' to shorten the build and setup stages of the MLSDC
+ * controller.
+ */
 int main(int /*argc*/, char** /*argv*/)
 {
   MLSDC<> mlsdc;

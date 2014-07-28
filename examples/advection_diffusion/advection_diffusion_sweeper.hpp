@@ -1,7 +1,3 @@
-/*
- * Advection/diffusion sweeper.
- */
-
 #ifndef _ADVECTION_DIFFUSION_SWEEPER_HPP_
 #define _ADVECTION_DIFFUSION_SWEEPER_HPP_
 
@@ -23,9 +19,14 @@ using namespace std;
 using pfasst::encap::Encapsulation;
 using pfasst::encap::as_vector;
 
-
 typedef map<pair<size_t, size_t>, double> error_map;
 
+/**
+ * Advection/Diffusion Sweeper
+ * 
+ * A simple sweeper implementing a one dimensional advection-diffusion problem with a few hard coded
+ * parameters.
+ */
 template<typename time = pfasst::time_precision>
 class AdvectionDiffusionSweeper
   : public pfasst::encap::IMEXSweeper<time>
@@ -35,10 +36,10 @@ class AdvectionDiffusionSweeper
     vector<complex<double>> ddx, lap;
     error_map errors;
 
-    double v  = 1.0;
-    time   t0 = 1.0;
-    double nu = 0.02;
-    size_t nf1evals = 0;
+    double v  = 1.0;  //!< velocity of the advection
+    time   t0 = 1.0;  //!< final time point
+    double nu = 0.02;  //!< diffusion coefficient
+    size_t nf1evals = 0;  //!< helper variable to count evaluations of the right hand side
 
   public:
     AdvectionDiffusionSweeper(size_t nvars)
