@@ -109,22 +109,22 @@ namespace pfasst
        * implementing a `RandomAccessIterator`.
        */
       class LevelIter
-        : iterator<random_access_iterator_tag, shared_ptr<ISweeper<time>>, size_t,
+        : iterator<random_access_iterator_tag, shared_ptr<ISweeper<time>>, int,
                    ISweeper<time>*, ISweeper<time>>
       {
           Controller* ts;
 
         public:
-          typedef size_t                     difference_type;
+          typedef int                        difference_type;
           typedef shared_ptr<ISweeper<time>> value_type;
           typedef ISweeper<time>*            pointer;
           typedef ISweeper<time>             reference;
           typedef random_access_iterator_tag iterator_category;
 
-          size_t level;
+          int level;
 
           //! @{
-          LevelIter(size_t level, Controller* ts)
+          LevelIter(int level, Controller* ts)
             : ts(ts), level(level)
           { }
           //! @}
