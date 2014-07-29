@@ -1,21 +1,19 @@
-PFASST                                                                                  {#mainpage}
+PFASST                                                                                   {#mainpage}
 ======
 
-The PFASST algorithm is a time-parallel algorithm for solving ODEs and
-PDEs.
+The PFASST algorithm is a time-parallel algorithm for solving ODEs and PDEs.
 
-The PFASST project is a C++ implementation of the 'parallel full
-approximation scheme in space and time' (PFASST) algorithm.  It also
-contains basic implementations of the 'spectral deferred correction'
-(SDC) and 'multi-level spectral deferred correction' (MLSDC)
-algorithms.
+The PFASST project is a C++ implementation of the *parallel full approximation scheme in space and 
+time* (PFASST) algorithm.
+It also contains basic implementations of the *spectral deferred correction* (SDC) and 
+*multi-level spectral deferred correction* (MLSDC) algorithms.
 
 
 News
 ----
 
-* July 25, 2014: PFASST v0.1.0 released.  Please see the [release
-  notes](#releases) for more information.
+* July 25, 2014: PFASST v0.1.0 released.  Please see the [release notes](#releases) for more 
+  information.
 
 
 References
@@ -39,11 +37,21 @@ Currently, it features the following content:
 Releases
 --------
 
-* **v0.1.0** Initial release with basic implementations of SDC and MLSDC.
+* **v0.1.0** First Release (2014/07/25)
+
+  Initial release with basic implementations of SDC and MLSDC.  
+  DOI: [10.5281/zenodo.11047][DOI_v010]  
+  See \subpage #page_changelog "the Changelog" for details.
+
+[DOI_v010]: http://dx.doi.org/10.5281/zenodo.11047
+
+Release tags will be signed by one of the following PGP keys:
+
+    0x9CF9601F 2011-07-28 Torbjörn Klatt <t.klatt@fz-juelich.de>
+    Fingerprint DB8D EA65 F6A7 3DE0 E7EA F607 6CE8 B4B1 9CF9 601F
 
 
 Build status
-------------
 
 | Branch      | Status                              |
 |-------------|-------------------------------------|
