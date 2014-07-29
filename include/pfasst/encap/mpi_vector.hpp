@@ -98,6 +98,16 @@ namespace pfasst
           }
         }
 
+        virtual void broadcast(ICommunicator* comm)
+        {
+          auto& mpi = as_mpi(comm);
+          int err = MPI_Bcast(this->data(), sizeof(scalar) * this->size(), MPI_CHAR, comm->size()-1, mpi.comm);
+
+          if (err != MPI_SUCCESS) {
+            throw MPIError();
+          }
+        }
+
     };
 
     template<typename scalar, typename time = time_precision>

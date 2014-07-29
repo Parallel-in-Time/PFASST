@@ -47,10 +47,10 @@ namespace pfasst
       void predictor()
       {
         // restrict fine initial condition
-        for (auto leviter = this->finest() - 1; leviter >= this->coarsest(); --leviter) {
-          auto crse = leviter.current();
-          auto fine = leviter.fine();
-          auto trns = leviter.transfer();
+        for (auto l = this->finest() - 1; l >= this->coarsest(); --l) {
+          auto crse = l.current();
+          auto fine = l.fine();
+          auto trns = l.transfer();
           trns->restrict(crse, fine, false, true);
           crse->save(true);
         }
@@ -59,30 +59,30 @@ namespace pfasst
         predict = true;
         auto crse = this->coarsest().current();
         for (int nstep = 0; nstep < comm->rank() + 1; nstep++) {
-          this->set_step(comm->rank());
+          //          this->set_step(comm->rank());
           // XXX: set iteration?
 
-          initial = nstep == 0;
           perform_sweeps(0);
           crse->advance();
         }
 
         // return to finest level, sweeping as we go
-        for (auto leviter = this->coarsest() + 1; leviter <= this->finest(); ++leviter) {
-          auto crse = leviter.coarse();
-          auto fine = leviter.current();
-          auto trns = leviter.transfer();
+        for (auto l = this->coarsest() + 1; l <= this->finest(); ++l) {
+          auto crse = l.coarse();
+          auto fine = l.current();
+          auto trns = l.transfer();
 
           trns->interpolate(fine, crse, true, true);
-          if (leviter < this->finest())
-          { perform_sweeps(leviter.level); }
+          if (l < this->finest()) {
+            perform_sweeps(l.level);
+          }
         }
       }
 
       void broadcast()
       {
-        throw NotImplementedYet("broadcast");
-        this->get_level(this->nlevels() - 1)->advance();
+        this->get_finest()->broadcast(comm);
+        initial = true;
       }
 
       /**
@@ -109,9 +109,9 @@ namespace pfasst
 
           for (this->set_iteration(0); this->get_iteration() < this->get_max_iterations();
                this->advance_iteration()) {
-            for (auto leviter = this->coarsest() + 1; leviter <= this->finest(); ++leviter) {
-              int tag = leviter.level * 10000 + this->get_iteration() + 10;
-              leviter.current()->post(comm, tag);
+            for (auto l = this->coarsest() + 1; l <= this->finest(); ++l) {
+              int tag = l.level * 10000 + this->get_iteration() + 10;
+              l.current()->post(comm, tag);
             }
 
             perform_sweeps(this->nlevels() - 1);
@@ -134,23 +134,24 @@ namespace pfasst
             // XXX: call interpolate_q0(pf,F, G)
           }
 
-          if (nblock < nblocks - 1)
-          { broadcast(); }
+          if (nblock < nblocks - 1) {
+            broadcast();
+          }
         }
       }
 
       /**
        * Cycle down: sweep on current (fine), restrict to coarse.
        */
-      LevelIter cycle_down(LevelIter leviter)
+      LevelIter cycle_down(LevelIter l)
       {
-        auto fine = leviter.current();
-        auto crse = leviter.coarse();
-        auto trns = leviter.transfer();
+        auto fine = l.current();
+        auto crse = l.coarse();
+        auto trns = l.transfer();
 
-        perform_sweeps(leviter.level);
+        perform_sweeps(l.level);
 
-        int tag = leviter.level * 10000 + this->get_iteration() + 10;
+        int tag = l.level * 10000 + this->get_iteration() + 10;
         fine->send(comm, tag, false);
 
         auto dt = this->get_time_step();
@@ -158,7 +159,7 @@ namespace pfasst
         trns->fas(dt, crse, fine);
         crse->save();
 
-        return leviter - 1;
+        return l - 1;
       }
 
       /**
@@ -169,55 +170,55 @@ namespace pfasst
        * level, we don't perform a sweep.  In this case the only
        * operation that is performed here is interpolation.
        */
-      LevelIter cycle_up(LevelIter leviter)
+      LevelIter cycle_up(LevelIter l)
       {
-        auto fine = leviter.current();
-        auto crse = leviter.coarse();
-        auto trns = leviter.transfer();
+        auto fine = l.current();
+        auto crse = l.coarse();
+        auto trns = l.transfer();
 
         trns->interpolate(fine, crse, false, true, false);
 
-        int tag = leviter.level * 10000 + this->get_iteration() + 10;
+        int tag = l.level * 10000 + this->get_iteration() + 10;
         fine->recv(comm, tag, false);
         // XXX          call interpolate_q0(pf,F, G)
         trns->interpolate(fine, crse, false, false, true);
 
-        if (leviter < this->finest()) {
-          perform_sweeps(leviter.level);
+        if (l < this->finest()) {
+          perform_sweeps(l.level);
         }
 
-        return leviter + 1;
+        return l + 1;
       }
 
       /**
        * Cycle bottom: sweep on the current (coarsest) level.
        */
-      LevelIter cycle_bottom(LevelIter leviter)
+      LevelIter cycle_bottom(LevelIter l)
       {
-        auto crse = leviter.current();
+        auto crse = l.current();
 
-        int tag = leviter.level * 10000 + this->get_iteration() + 10;
+        int tag = l.level * 10000 + this->get_iteration() + 10;
         crse->recv(comm, tag, true);
-        this->perform_sweeps(leviter.level);
+        this->perform_sweeps(l.level);
         crse->send(comm, tag, true);
-        return leviter + 1;
+        return l + 1;
       }
 
       /**
        * Perform an MLSDC V-cycle.
        */
-      LevelIter cycle_v(LevelIter leviter)
+      LevelIter cycle_v(LevelIter l)
       {
         // this v-cycle is a bit different than in mlsdc
 
-        if (leviter.level == 0) {
-          leviter = cycle_bottom(leviter);
+        if (l.level == 0) {
+          l = cycle_bottom(l);
         } else {
-          leviter = cycle_down(leviter);
-          leviter = cycle_v(leviter);
-          leviter = cycle_up(leviter);
+          l = cycle_down(l);
+          l = cycle_v(l);
+          l = cycle_up(l);
         }
-        return leviter;
+        return l;
       }
 
   };

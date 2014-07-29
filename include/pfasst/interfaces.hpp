@@ -138,6 +138,7 @@ namespace pfasst
       virtual void post(ICommunicator* /*comm*/, int /*tag*/) { };
       virtual void send(ICommunicator* /*comm*/, int /*tag*/, bool /*blocking*/) { NotImplementedYet("pfasst"); }
       virtual void recv(ICommunicator* /*comm*/, int /*tag*/, bool /*blocking*/) { NotImplementedYet("pfasst"); }
+      virtual void broadcast(ICommunicator* /*comm*/) { NotImplementedYet("pfasst"); }
 
   };
 

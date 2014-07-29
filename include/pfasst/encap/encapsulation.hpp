@@ -49,6 +49,11 @@ namespace pfasst
         {
           throw NotImplementedYet("pfasst");
         }
+
+        virtual void broadcast(ICommunicator* /*comm*/)
+        {
+          throw NotImplementedYet("pfasst");
+        }
         //! @}
 
         //! @{

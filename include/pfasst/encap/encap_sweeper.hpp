@@ -40,6 +40,14 @@ namespace pfasst
           this->get_state(0)->recv(comm, tag, blocking);
         }
 
+        virtual void broadcast(ICommunicator* comm)
+        {
+	  if (comm->rank() == comm->size() - 1) {
+	    this->get_state(0)->copy(this->get_state(this->get_nodes().size() - 1));
+	  }
+          this->get_state(0)->broadcast(comm);
+        }
+
         void set_nodes(vector<time> nodes)
         {
           this->nodes = nodes;
