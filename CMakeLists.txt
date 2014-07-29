@@ -10,7 +10,7 @@ set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/3rdparty)
 option(pfasst_DISABLE_LIBCXX "Disable use of LLVM's libc++ when compiling with Clang." ON )
 option(pfasst_BUILD_EXAMPLES "Build example programs."                                 ON )
 option(pfasst_BUILD_TESTS    "Build test suite for PFASST."                            ON )
-option(pfasst_WITH_MPIT      "Build with MPI enabled."                                 OFF)
+option(pfasst_WITH_MPI       "Build with MPI enabled."                                 OFF)
 
 # output directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${pfasst_SOURCE_DIR}/dist/bin")
