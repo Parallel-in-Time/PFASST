@@ -55,11 +55,12 @@ namespace pfasst
       }
   };
 
-  class ICommunicator {
-  public:
-    virtual ~ICommunicator() { }
-    virtual int size() = 0;
-    virtual int rank() = 0;
+  class ICommunicator
+  {
+    public:
+      virtual ~ICommunicator() { }
+      virtual int size() = 0;
+      virtual int rank() = 0;
   };
 
   /**
@@ -80,13 +81,13 @@ namespace pfasst
        */
       void set_controller(Controller<time>* ctrl)
       {
-	controller = ctrl;
+        controller = ctrl;
       }
 
       Controller<time>* get_controller()
       {
-	assert(controller);
-	return controller;
+        assert(controller);
+        return controller;
       }
 
       /**
@@ -132,7 +133,7 @@ namespace pfasst
        * This is typically done in MLSDC/PFASST immediately after a call to restrict.
        * The saved states are used to compute deltas during interpolation.
        */
-      virtual void save(bool initial_only=false) { (void) initial_only; NotImplementedYet("mlsdc/pfasst"); }
+      virtual void save(bool initial_only = false) { (void) initial_only; NotImplementedYet("mlsdc/pfasst"); }
 
       virtual void post(ICommunicator* /*comm*/, int /*tag*/) { };
       virtual void send(ICommunicator* /*comm*/, int /*tag*/, bool /*blocking*/) { NotImplementedYet("pfasst"); }
@@ -173,7 +174,7 @@ namespace pfasst
       virtual void restrict(shared_ptr<ISweeper<time>> dst,
                             shared_ptr<const ISweeper<time>> src,
                             bool restrict_initial = false,
-			    bool restrict_initial_only = false) = 0;
+                            bool restrict_initial_only = false) = 0;
 
       /**
        * compute FAS correction between the coarse and fine sweepers.

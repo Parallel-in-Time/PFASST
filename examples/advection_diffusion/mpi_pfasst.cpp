@@ -39,12 +39,6 @@ int main(int argc, char** argv)
 
   vector<size_t> ndofs = { 64, 128 };
 
-  /*
-   * the 'build' function is called once for each level, and returns a
-   * tuple containing a sweeper, encapsulation factory, and transfer
-   * routines.  in this case our builder is a lambda function that
-   * captures the 'ndofs' variable from above.
-   */
   auto build_level = [ndofs](size_t level) {
     auto factory  = make_shared<MPIVectorFactory<double>>(ndofs[level]);
     auto sweeper  = make_shared<AdvectionDiffusionSweeper<>>(ndofs[level]);
@@ -53,10 +47,6 @@ int main(int argc, char** argv)
     return AutoBuildTuple<>(sweeper, transfer, factory);
   };
 
-  /*
-   * the 'initial' function is called once for each level to set the
-   * intial conditions.
-   */
   auto initial = [](shared_ptr<EncapSweeper<>> sweeper, shared_ptr<Encapsulation<>> q0) {
     auto ad = dynamic_pointer_cast<AdvectionDiffusionSweeper<>>(sweeper);
     assert(ad);
@@ -70,7 +60,7 @@ int main(int argc, char** argv)
   auto_setup(pf, initial);
 
   pf.set_comm(&comm);
-  pf.set_duration(0.0, nsteps*dt, dt, niters);
+  pf.set_duration(0.0, nsteps * dt, dt, niters);
   pf.run();
 
   fftw_cleanup();

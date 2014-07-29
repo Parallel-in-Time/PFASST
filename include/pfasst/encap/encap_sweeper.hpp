@@ -32,7 +32,7 @@ namespace pfasst
 
         virtual void send(ICommunicator* comm, int tag, bool blocking)
         {
-          this->get_state(this->get_nodes().size()-1)->send(comm, tag, blocking);
+          this->get_state(this->get_nodes().size() - 1)->send(comm, tag, blocking);
         }
 
         virtual void recv(ICommunicator* comm, int tag, bool blocking)
