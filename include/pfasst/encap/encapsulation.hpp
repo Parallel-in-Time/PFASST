@@ -72,14 +72,28 @@ namespace pfasst
         {
           throw NotImplementedYet("encap");
         }
+
         /**
          * defines matrix-vector multiplication for this data type.
          */
-        virtual void mat_apply(vector<shared_ptr<Encapsulation<time>>> /*dst*/, time /*a*/, matrix<time> /*m*/,
-			       vector<shared_ptr<Encapsulation<time>>> /*src*/, bool zero = true)
+        virtual void mat_apply(vector<shared_ptr<Encapsulation<time>>> dst, time a, matrix<time> mat,
+			       vector<shared_ptr<Encapsulation<time>>> src, bool zero = true)
         {
-	  (void) zero;
-          throw NotImplementedYet("encap");
+          size_t ndst = dst.size();
+          size_t nsrc = src.size();
+
+          if (zero) {
+	    for (auto elem : dst) { elem->zero(); }
+	  }
+
+	  for (size_t n = 0; n < ndst; n++) {
+	    for (size_t m = 0; m < nsrc; m++) {
+	      auto s = mat(n, m);
+	      if (s != 0.0) {
+		dst[n]->saxpy(a*s, src[m]);
+	      }
+            }
+          }
         }
         //! @}
     };
