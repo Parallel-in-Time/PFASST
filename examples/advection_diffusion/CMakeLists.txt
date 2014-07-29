@@ -9,10 +9,21 @@ set(advec_examples
     vanilla_sdc
     serial_mlsdc
     serial_mlsdc_autobuild
-    mpi_pfasst
 )
 
-foreach(example ${advec_examples})
+set(advec_mpi_examples)
+if(${pfasst_WITH_MPI})
+    set(advec_mpi_examples
+        mpi_pfasst
+    )
+endif()
+
+set(all_advec_examples
+    ${advec_examples}
+    ${advec_mpi_examples}
+)
+
+foreach(example ${all_advec_examples})
     add_executable(${example} ${CMAKE_CURRENT_SOURCE_DIR}/${example}.cpp)
     add_dependencies(${example} fftw3)
     target_link_libraries(${example}
