@@ -7,10 +7,10 @@ env:
   matrix:
     - CMAKE_BUILD_TYPE="Release" WITH_MPI=OFF CXX=clang++
     - CMAKE_BUILD_TYPE="Release" WITH_MPI=OFF CXX=g++
-    - CMAKE_BUILD_TYPE="Release" WITH_MPI=ON
+    - CMAKE_BUILD_TYPE="Release" WITH_MPI=ON CXX=g++
     - CMAKE_BUILD_TYPE="Debug" WITH_MPI=OFF CXX=clang++
     - CMAKE_BUILD_TYPE="Debug" WITH_MPI=OFF CXX=g++
-    - CMAKE_BUILD_TYPE="Debug" WITH_MPI=ON
+    - CMAKE_BUILD_TYPE="Debug" WITH_MPI=ON CXX=g++
 
 before_install:
   - sudo add-apt-repository ppa:apokluda/boost1.53 --yes
@@ -21,7 +21,7 @@ before_install:
 install:
   - if [ "${CXX}" == "clang++" ]; then sudo apt-get -qq install clang-3.2; fi
   - if [ "${WITH_MPI}" == "ON" ]; then sudo apt-get -qq install mpich2 libmpich2-dev; fi
-  - if [ "${WITH_MPI}" == "OFF" ]; then sudo apt-get install g++-4.8; fi # clang need it for libstdc++ update
+  - sudo apt-get install g++-4.8 # clang need it for libstdc++ update
   - sudo apt-get install libboost1.53-all-dev
 
 before_script:
