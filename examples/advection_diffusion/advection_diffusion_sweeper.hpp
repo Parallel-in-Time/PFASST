@@ -108,7 +108,7 @@ class AdvectionDiffusionSweeper
       return this->errors;
     }
 
-    void predict(bool initial)
+    void predict(bool initial) override
     {
       pfasst::encap::IMEXSweeper<time>::predict(initial);
       time t  = this->get_controller()->get_time();
@@ -116,7 +116,7 @@ class AdvectionDiffusionSweeper
       this->echo_error(t + dt, true);
     }
 
-    void sweep()
+    void sweep() override
     {
       pfasst::encap::IMEXSweeper<time>::sweep();
       time t  = this->get_controller()->get_time();
@@ -126,7 +126,7 @@ class AdvectionDiffusionSweeper
 
     void f_eval_expl(shared_ptr<Encapsulation<time>> _f,
                      shared_ptr<Encapsulation<time>> _q,
-                     time /*t*/)
+                     time /*t*/) override
     {
       auto& q = as_vector<double, time>(_q);
       auto& f = as_vector<double, time>(_f);
@@ -144,7 +144,7 @@ class AdvectionDiffusionSweeper
 
     void f_eval_impl(shared_ptr<Encapsulation<time>> _f,
                      shared_ptr<Encapsulation<time>> _q,
-                     time /*t*/)
+                     time /*t*/) override
     {
       auto& q = as_vector<double, time>(_q);
       auto& f = as_vector<double, time>(_f);
@@ -159,7 +159,7 @@ class AdvectionDiffusionSweeper
     }
 
     void f_solve(shared_ptr<Encapsulation<time>> _f, shared_ptr<Encapsulation<time>> _q,
-                 time /*t*/, time dt, shared_ptr<Encapsulation<time>> _rhs)
+                 time /*t*/, time dt, shared_ptr<Encapsulation<time>> _rhs) override
     {
       auto& q = as_vector<double, time>(_q);
       auto& f = as_vector<double, time>(_f);

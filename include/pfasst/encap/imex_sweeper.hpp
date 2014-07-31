@@ -36,35 +36,35 @@ namespace pfasst
           this->Q[m]->copy(q0);
         }
 
-        shared_ptr<Encapsulation<time>> get_state(size_t m) const
+        shared_ptr<Encapsulation<time>> get_state(size_t m) const override
         {
           return this->Q[m];
         }
 
-        shared_ptr<Encapsulation<time>> get_tau(size_t m) const
+        shared_ptr<Encapsulation<time>> get_tau(size_t m) const override
         {
           return this->T[m];
         }
 
-        shared_ptr<Encapsulation<time>> get_saved_state(size_t m) const
+        shared_ptr<Encapsulation<time>> get_saved_state(size_t m) const override
         {
           return this->pQ[m];
         }
 
-        virtual void advance()
+        virtual void advance() override
         {
           this->Q[0]->copy(this->Q.back());
           this->Fe[0]->copy(this->Fe.back());
           this->Fi[0]->copy(this->Fi.back());
         }
 
-        virtual void integrate(time dt, vector<shared_ptr<Encapsulation<time>>> dst) const
+        virtual void integrate(time dt, vector<shared_ptr<Encapsulation<time>>> dst) const override
         {
           dst[0]->mat_apply(dst, dt, this->Smat, this->Fe, true);
           dst[0]->mat_apply(dst, dt, this->Smat, this->Fi, false);
         }
 
-        void setup(bool coarse)
+        void setup(bool coarse) override
         {
           auto nodes = this->get_nodes();
           assert(nodes.size() >= 1);
@@ -157,14 +157,14 @@ namespace pfasst
           }
         }
 
-        virtual void save()
+        virtual void save() override
         {
           for (size_t m = 0; m < this->pQ.size(); m++) {
             this->pQ[m]->copy(Q[m]);
           }
         }
 
-        virtual void evaluate(size_t m)
+        virtual void evaluate(size_t m) override
         {
           time t = this->get_nodes()[m]; // XXX
           this->f_eval_expl(this->Fe[m], this->Q[m], t);

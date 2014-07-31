@@ -31,7 +31,7 @@ namespace pfasst
 
     public:
       //! @{
-      void setup()
+      virtual void setup()
       {
         for (auto l = coarsest(); l <= finest(); ++l) {
           l.current()->set_controller(this);

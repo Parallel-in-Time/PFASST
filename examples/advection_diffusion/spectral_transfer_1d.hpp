@@ -27,7 +27,7 @@ class SpectralTransfer1D
 
   public:
 
-    void interpolate(shared_ptr<Encapsulation> dst, shared_ptr<const Encapsulation> src)
+    void interpolate(shared_ptr<Encapsulation> dst, shared_ptr<const Encapsulation> src) override
     {
       auto& fine = pfasst::encap::as_vector<double, time>(dst);
       auto& crse = pfasst::encap::as_vector<double, time>(src);
@@ -52,7 +52,7 @@ class SpectralTransfer1D
       this->fft.backward(fine);
     }
 
-    void restrict(shared_ptr<Encapsulation> dst, shared_ptr<const Encapsulation> src)
+    void restrict(shared_ptr<Encapsulation> dst, shared_ptr<const Encapsulation> src) override
     {
       auto& fine = pfasst::encap::as_vector<double, time>(src);
       auto& crse = pfasst::encap::as_vector<double, time>(dst);
