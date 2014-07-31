@@ -73,13 +73,13 @@ namespace pfasst
        */
       void set_controller(Controller<time>* ctrl)
       {
-	controller = ctrl;
+        controller = ctrl;
       }
 
       Controller<time>* get_controller()
       {
-	assert(controller);
-	return controller;
+        assert(controller);
+        return controller;
       }
 
       /**

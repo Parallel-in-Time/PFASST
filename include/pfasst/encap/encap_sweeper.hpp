@@ -5,7 +5,9 @@
 #ifndef _PFASST_ENCAP_ENCAP_SWEEPER_HPP_
 #define _PFASST_ENCAP_ENCAP_SWEEPER_HPP_
 
+#include <cstdlib>
 #include <vector>
+#include <memory>
 
 #include "../interfaces.hpp"
 #include "../quadrature.hpp"
@@ -73,7 +75,7 @@ namespace pfasst
           return this->get_state(this->get_nodes().size() - 1);
         }
 
-      virtual void evaluate(size_t /*m*/)
+        virtual void evaluate(size_t /*m*/)
         {
           throw NotImplementedYet("sweeper");
         }

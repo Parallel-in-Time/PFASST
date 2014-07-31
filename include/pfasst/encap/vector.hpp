@@ -5,6 +5,7 @@
 #ifndef _PFASST_VECTOR_HPP_
 #define _PFASST_VECTOR_HPP_
 
+#include <cstdlib>
 #include <algorithm>
 #include <memory>
 #include <vector>
