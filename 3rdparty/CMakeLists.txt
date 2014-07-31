@@ -58,10 +58,9 @@ if(pfasst_BUILD_TESTS)
     # Add gmock
     ExternalProject_Add(
       googlemock
-      SVN_REPOSITORY http://googlemock.googlecode.com/svn/trunk/
-      SVN_REVISION -r 449  # release 1.7.0
-      TIMEOUT 10
-      # Disable SVN update
+      URL http://googlemock.googlecode.com/files/gmock-1.7.0.zip
+      URL_MD5 073b984d8798ea1594f5e44d85b20d66
+      TIMEOUT 30
       UPDATE_COMMAND ""
       PATCH_COMMAND ""
       CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release
