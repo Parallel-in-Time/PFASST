@@ -124,7 +124,9 @@ class AdvectionDiffusionSweeper
       this->echo_error(t + dt);
     }
 
-    void f1eval(shared_ptr<Encapsulation<time>> _f, shared_ptr<Encapsulation<time>> _q, time /*t*/)
+    void f_eval_expl(shared_ptr<Encapsulation<time>> _f,
+                     shared_ptr<Encapsulation<time>> _q,
+                     time /*t*/)
     {
       auto& q = as_vector<double, time>(_q);
       auto& f = as_vector<double, time>(_f);
@@ -140,7 +142,9 @@ class AdvectionDiffusionSweeper
       this->nf1evals++;
     }
 
-    void f2eval(shared_ptr<Encapsulation<time>> _f, shared_ptr<Encapsulation<time>> _q, time /*t*/)
+    void f_eval_impl(shared_ptr<Encapsulation<time>> _f,
+                     shared_ptr<Encapsulation<time>> _q,
+                     time /*t*/)
     {
       auto& q = as_vector<double, time>(_q);
       auto& f = as_vector<double, time>(_f);
@@ -154,8 +158,8 @@ class AdvectionDiffusionSweeper
       this->fft.backward(f);
     }
 
-    void f2comp(shared_ptr<Encapsulation<time>> _f, shared_ptr<Encapsulation<time>> _q,
-                time /*t*/, time dt, shared_ptr<Encapsulation<time>> _rhs)
+    void f_solve(shared_ptr<Encapsulation<time>> _f, shared_ptr<Encapsulation<time>> _q,
+                 time /*t*/, time dt, shared_ptr<Encapsulation<time>> _rhs)
     {
       auto& q = as_vector<double, time>(_q);
       auto& f = as_vector<double, time>(_f);

@@ -123,8 +123,8 @@ namespace pfasst
             rhs->copy(this->Q[m]);
             rhs->saxpy(ds, this->Fe[m]);
             rhs->saxpy(1.0, this->S[m]);
-            this->f2comp(this->Fi[m + 1], this->Q[m + 1], t, ds, rhs);
-            this->f1eval(this->Fe[m + 1], this->Q[m + 1], t + ds);
+            this->f_solve(this->Fi[m + 1], this->Q[m + 1], t, ds, rhs);
+            this->f_eval_expl(this->Fe[m + 1], this->Q[m + 1], t + ds);
 
             t += ds;
           }
@@ -140,8 +140,8 @@ namespace pfasst
           time t  = this->get_controller()->get_time();
 
           if (initial) {
-            this->f1eval(this->Fe[0], this->Q[0], t);
-            this->f2eval(this->Fi[0], this->Q[0], t);
+            this->f_eval_expl(this->Fe[0], this->Q[0], t);
+            this->f_eval_impl(this->Fi[0], this->Q[0], t);
           }
 
           shared_ptr<Encapsulation<time>> rhs = this->get_factory()->create(pfasst::encap::solution);
@@ -150,8 +150,8 @@ namespace pfasst
             time ds = dt * (nodes[m + 1] - nodes[m]);
             rhs->copy(this->Q[m]);
             rhs->saxpy(ds, this->Fe[m]);
-            this->f2comp(this->Fi[m + 1], this->Q[m + 1], t, ds, rhs);
-            this->f1eval(this->Fe[m + 1], this->Q[m + 1], t + ds);
+            this->f_solve(this->Fi[m + 1], this->Q[m + 1], t, ds, rhs);
+            this->f_eval_expl(this->Fe[m + 1], this->Q[m + 1], t + ds);
 
             t += ds;
           }
@@ -167,28 +167,28 @@ namespace pfasst
         virtual void evaluate(size_t m)
         {
           time t = this->get_nodes()[m]; // XXX
-          this->f1eval(this->Fe[m], this->Q[m], t);
-          this->f2eval(this->Fi[m], this->Q[m], t);
+          this->f_eval_expl(this->Fe[m], this->Q[m], t);
+          this->f_eval_impl(this->Fi[m], this->Q[m], t);
         }
 
-        virtual void f1eval(shared_ptr<Encapsulation<time>> /*f*/,
-                            shared_ptr<Encapsulation<time>> /*q*/,
-                            time /*t*/)
+        virtual void f_eval_expl(shared_ptr<Encapsulation<time>> /*f*/,
+                                 shared_ptr<Encapsulation<time>> /*q*/,
+                                 time /*t*/)
         {
           throw NotImplementedYet("imex (f1eval)");
         }
 
-        virtual void f2eval(shared_ptr<Encapsulation<time>> /*f*/,
-                            shared_ptr<Encapsulation<time>> /*q*/,
-                            time /*t*/)
+        virtual void f_eval_impl(shared_ptr<Encapsulation<time>> /*f*/,
+                                 shared_ptr<Encapsulation<time>> /*q*/,
+                                 time /*t*/)
         {
           throw NotImplementedYet("imex (f2eval)");
         }
 
-        virtual void f2comp(shared_ptr<Encapsulation<time>> /*f*/,
-                            shared_ptr<Encapsulation<time>> /*q*/,
-                            time /*t*/, time /*dt*/,
-                            shared_ptr<Encapsulation<time>> /*rhs*/)
+        virtual void f_solve(shared_ptr<Encapsulation<time>> /*f*/,
+                             shared_ptr<Encapsulation<time>> /*q*/,
+                             time /*t*/, time /*dt*/,
+                             shared_ptr<Encapsulation<time>> /*rhs*/)
         {
           throw NotImplementedYet("imex (f2comp)");
         }
