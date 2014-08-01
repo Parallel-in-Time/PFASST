@@ -317,9 +317,9 @@ namespace pfasst
 
         /**
          * Evaluates the implicit part of the right hand side at the given time.
-	 *
-	 * This is typically called to compute the implicit part of the right hand side at the first
-	 * collocation node, and on all nodes after restriction or interpolation.
+         *
+         * This is typically called to compute the implicit part of the right hand side at the first
+         * collocation node, and on all nodes after restriction or interpolation.
          *
          * @param[in,out] f_impl Encapsulation to store the evaluated right hand side
          * @param[in] u Encapsulation storing the solution values to use for computing the implicit
@@ -343,7 +343,7 @@ namespace pfasst
          * stepper for the explicit piece, and a backward-Euler stepper for the implicit piece.
          * This routine (implemented by the user) performs the solve required to perform one
          * backward-Euler sub-step, and also returns \\(f_{\\rm impl}(U)\\).
-	 *
+         *
          * @param[in,out] f_impl Encapsulation to store the evaluated right hand side
          * @param[in,out] u Encapsulation to store the solution of the backward-Euler sub-step
          * @param[in] t time point (of \\(RHS\\))
