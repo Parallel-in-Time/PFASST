@@ -4,6 +4,7 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 project(pfasst)
 
+list(APPEND CMAKE_MODULE_PATH ${pfasst_SOURCE_DIR}/cmake)
 include(cmake/utility_functions.cmake)
 include(CheckCXXCompilerFlag)
 include(ExternalProject)
