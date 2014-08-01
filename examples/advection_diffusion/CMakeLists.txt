@@ -66,7 +66,7 @@ if(${pfasst_WITH_MPI})
     message(STATUS "    creating make targets to run MPI examples")
     foreach(example ${advec_mpi_examples})
         add_custom_target(run_example_advec_${example}
-            COMMAND ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} 4 ${MPIEXEC_PREFLAGS} ${example} ${MPIEXEC_POSTFLAGS}
+            COMMAND ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} 4 ${MPIEXEC_PREFLAGS} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/examples/advection_diffusion/${example} ${MPIEXEC_POSTFLAGS}
             DEPENDS ${example}
             WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/examples/advection_diffusion
             COMMENT "Running Advection-Diffusion example: ${example}" VERBATIM

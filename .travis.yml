@@ -35,7 +35,6 @@ script:
   - mkdir build
   - cd build
   - cmake -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -Dpfasst_WITH_MPI=${WITH_MPI} -Dpfasst_DISABLE_LIBCXX=ON -Dpfasst_BUILD_TESTS=ON -Dpfasst_BUILD_EXAMPLES=ON ..
-  - if [ "${WITH_MPI}" == "ON" ]; then mpicxx --version; fi
   - make
   - make test
   - make run_example_all
