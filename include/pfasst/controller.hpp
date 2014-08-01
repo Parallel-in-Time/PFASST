@@ -23,11 +23,15 @@ namespace pfasst
   class Controller
   {
     protected:
+      //! @{
       deque<shared_ptr<ISweeper<time>>>  levels;
       deque<shared_ptr<ITransfer<time>>> transfer;
+      //! @}
 
+      //! @{
       size_t step, iteration, max_iterations;
       time t, dt, tend;
+      //! @}
 
     public:
       //! @{

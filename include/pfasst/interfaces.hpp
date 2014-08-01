@@ -12,6 +12,8 @@
 #include <memory>
 #include <string>
 
+#include "globals.hpp"
+
 using namespace std;
 
 namespace pfasst
@@ -19,6 +21,7 @@ namespace pfasst
 
   using time_precision = double;
 
+  // forward declare for ISweeper
   template<typename time>
   class Controller;
 
@@ -32,12 +35,16 @@ namespace pfasst
   {
       string msg;
     public:
-      NotImplementedYet(string msg) : msg(msg) { }
+      NotImplementedYet(string msg)
+        : msg(msg)
+      {}
+
       const char* what() const throw()
       {
         return (string("Not implemented/supported yet, required for: ") + this->msg).c_str();
       }
   };
+
 
   /**
    * value exception.
@@ -48,12 +55,16 @@ namespace pfasst
   {
       string msg;
     public:
-      ValueError(string msg) : msg(msg) { }
+      ValueError(string msg)
+        : msg(msg)
+      {}
+
       const char* what() const throw()
       {
         return (string("ValueError: ") + this->msg).c_str();
       }
   };
+
 
   /**
    * abstract SDC sweeper.
@@ -63,32 +74,42 @@ namespace pfasst
   template<typename time = time_precision>
   class ISweeper
   {
+    protected:
       Controller<time>* controller;
 
     public:
-      virtual ~ISweeper() { }
+      //! @{
+      virtual ~ISweeper()
+      {}
+      //! @}
 
+      //! @{
       /**
        * set the sweepers controller.
        */
       void set_controller(Controller<time>* ctrl)
       {
-        controller = ctrl;
+        this->controller = ctrl;
       }
 
       Controller<time>* get_controller()
       {
-        assert(controller);
-        return controller;
+        assert(this->controller);
+        return this->controller;
       }
+      //! @}
 
+      //! @{
       /**
        * setup (allocate etc) the sweeper.
        * @param[in] coarse
        *     `true` if this sweeper exists on a coarsened MLSDC or PFASST level.
        *     This implies that space for an FAS correction and "saved" solutions are necessary.
        */
-      virtual void setup(bool coarse = false) { (void) coarse; }
+      virtual void setup(bool coarse = false)
+      {
+        UNUSED(coarse);
+      }
 
       /**
        * perform a predictor sweep.
@@ -124,9 +145,14 @@ namespace pfasst
        *
        * This is typically done in MLSDC/PFASST immediately after a call to restrict.
        * The saved states are used to compute deltas during interpolation.
+       *
+       * @note This method must be implemented in derived sweepers.
        */
-      virtual void save() { NotImplementedYet("mlsdc/pfasst"); }
-
+      virtual void save()
+      {
+        NotImplementedYet("mlsdc/pfasst");
+      }
+      //! @}
   };
 
   /**
@@ -138,9 +164,13 @@ namespace pfasst
   class ITransfer
   {
     public:
+      //! @{
       // XXX: pass level iterator to these routines as well
-      virtual ~ITransfer() { }
+      virtual ~ITransfer()
+      {}
+      //! @}
 
+      //! @{
       /**
        * interpolate, in time and space, from the coarse sweeper to the fine sweeper.
        * @param[in] interp_delta_from_initial
@@ -167,6 +197,7 @@ namespace pfasst
        */
       virtual void fas(time dt, shared_ptr<ISweeper<time>> dst,
                        shared_ptr<const ISweeper<time>> src) = 0;
+      //! @}
 
   };
 
