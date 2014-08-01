@@ -15,6 +15,7 @@ set(advec_examples
 )
 
 set(advec_mpi_examples)
+
 if(${pfasst_WITH_MPI})
     set(advec_mpi_examples
         mpi_pfasst
@@ -52,6 +53,16 @@ foreach(example ${advec_examples})
 endforeach(example)
 
 if(${pfasst_WITH_MPI})
+    include_directories(${MPI_CXX_INCLUDE_PATH})
+    foreach(example ${advec_mpi_examples})
+	if(MPI_COMPILE_FLAGS)
+            set_target_properties(${example} PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
+        endif()
+        if(MPI_LINK_FLAGS)
+            set_target_properties(${example} PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
+        endif()
+        target_link_libraries(${example} ${MPI_CXX_LIBRARIES})
+    endforeach(example)
     message(STATUS "    creating make targets to run MPI examples")
     foreach(example ${advec_mpi_examples})
         add_custom_target(run_example_advec_${example}

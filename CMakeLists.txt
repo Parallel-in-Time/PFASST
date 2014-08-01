@@ -20,8 +20,8 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${pfasst_SOURCE_DIR}/dist/lib")
 
 if(${pfasst_WITH_MPI})
     find_package(MPI REQUIRED)
-    set(CMAKE_C_COMPILER ${MPI_C_COMPILER})
-    set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
+    # set(CMAKE_C_COMPILER ${MPI_C_COMPILER})
+    # set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
     message(STATUS "Using MPI C++ Compiler: ${MPI_CXX_COMPILER}")
 endif()
 
@@ -103,6 +103,6 @@ message(STATUS "****************************************************************
 
 message(STATUS "C++ Compiler ID: ${CMAKE_CXX_COMPILER_ID}")
 message(STATUS "C++ Compiler Names: ${CMAKE_CXX_COMPILER_NAMES}")
-message(STATUS "C++ Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}") 
+message(STATUS "C++ Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}")
 message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS}")
 message(STATUS "C++ link flags: ${CMAKE_CXX_LINK_FLAGS}")
