@@ -101,5 +101,7 @@ endif()
 message(STATUS "********************************************************************************")
 
 message(STATUS "C++ Compiler ID: ${CMAKE_CXX_COMPILER_ID}")
+message(STATUS "C++ Compiler Names: ${CMAKE_CXX_COMPILER_NAMES}")
+message(STATUS "C++ Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}") 
 message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS}")
 message(STATUS "C++ link flags: ${CMAKE_CXX_LINK_FLAGS}")
