@@ -9,6 +9,7 @@
 
 #include <boost/numeric/ublas/matrix.hpp>
 
+#include "../globals.hpp"
 #include "encapsulation.hpp"
 #include "encap_sweeper.hpp"
 
@@ -20,113 +21,183 @@ namespace pfasst
   {
     using pfasst::encap::Encapsulation;
 
+    /**
+     * interface for an semi-implicit sweeper
+     *
+     * Given an ODE \\( \\frac{\\partial}{\\partial t}u(t) = F(t,u) \\) where the function of the 
+     * right hand side \\( F(t,u) \\) can be split into a non-stiff and a stiff part.
+     * To reduce complexity and computational efford one would want to solve the non-stiff part
+     * explicitly and the stiff part implicitly.
+     * Therefore, we define the splitting \\( F(t,u) = F_{expl}(t,u) + F_{impl}(t,u) \\).
+     *
+     * This sweeper provides an interface for such ODEs were the implicit part can be computed by
+     * an external implicit solver without actually evaluating \\( F_{impl}(t,u) \\), which is 
+     * possibly very expensive.
+     * 
+     * @tparam time precision type of the time dimension
+     */
     template<typename time = time_precision>
     class IMEXSweeper
       : public pfasst::encap::EncapSweeper<time>
     {
-        vector<shared_ptr<Encapsulation<time>>> Q, pQ, S, T, Fe, Fi;
-        matrix<time> Smat, SEmat, SImat;
+      protected:
+        //! @{
+        /**
+         * solution values \\( u(\\tau) \\) at all time nodes \\( \\tau \\in [0, M-1] \\) of the 
+         * current iteration
+         */
+        vector<shared_ptr<Encapsulation<time>>> us;
+
+        /**
+         * solution values \\( u(t) \\) at all time nodes \\( t \\in [0, M-1] \\) of the 
+         * previous iteration
+         */
+        vector<shared_ptr<Encapsulation<time>>> previous_us;
+
+        /**
+         * node-to-node integrated values of \\( F(t,u) \\) at all time nodes \\( t \\in 
+         * [0, M-1] \\) of the current iteration
+         */
+        vector<shared_ptr<Encapsulation<time>>> s_integrals;
+
+        /**
+         * FAS corrections \\( \\tau_t \\) at all time nodes \\( t \\in [0, M-1] \\) of the current 
+         * iteration
+         */
+        vector<shared_ptr<Encapsulation<time>>> fas_corrections;
+
+        /**
+         * values of the explicit part of the right hand side \\( F_{expl}(t,u) \\) at all time 
+         * nodes \\( t \\in [0, M-1] \\) of the current iteration
+         */
+        vector<shared_ptr<Encapsulation<time>>> fs_expl;
+
+        /**
+         * values of the explicit part of the right hand side \\( F_{impl}(t,u) \\) at all time 
+         * nodes \\( t \\in [0, M-1] \\) of the current iteration
+         */
+        vector<shared_ptr<Encapsulation<time>>> fs_impl;
+        //! @}
+
+        //! @{
+        /**
+         * quadrature matrix containing weights for node-to-node integration
+         */
+        matrix<time> s_mat;
+
+        /**
+         * quadrature matrix containing weights for node-to-node integration of explicit part
+         *
+         * @see IMEXSweeper::setup(bool) for a short description
+         */
+        matrix<time> s_mat_expl;
+
+        /**
+         * quadrature matrix containing weights for node-to-node integration of implicit part
+         *
+         * @see IMEXSweeper::setup(bool) for a short description
+         */
+        matrix<time> s_mat_impl;
+        //! @}
 
       public:
-        ~IMEXSweeper()
+        //! @{
+        virtual ~IMEXSweeper()
         {}
+        //! @}
 
-        void set_state(shared_ptr<const Encapsulation<time>> q0, size_t m)
+        //! @{
+        virtual void set_state(shared_ptr<const Encapsulation<time>> u0, size_t m) override
         {
-          this->Q[m]->copy(q0);
+          this->us[m]->copy(u0);
         }
 
-        shared_ptr<Encapsulation<time>> get_state(size_t m) const override
+        virtual shared_ptr<Encapsulation<time>> get_state(size_t m) const override
         {
-          return this->Q[m];
+          return this->us[m];
         }
 
-        shared_ptr<Encapsulation<time>> get_tau(size_t m) const override
+        virtual shared_ptr<Encapsulation<time>> get_tau(size_t m) const override
         {
-          return this->T[m];
+          return this->fas_corrections[m];
         }
 
-        shared_ptr<Encapsulation<time>> get_saved_state(size_t m) const override
+        virtual shared_ptr<Encapsulation<time>> get_saved_state(size_t m) const override
         {
-          return this->pQ[m];
+          return this->previous_us[m];
         }
+        //! @}
 
-        virtual void advance() override
-        {
-          this->Q[0]->copy(this->Q.back());
-          this->Fe[0]->copy(this->Fe.back());
-          this->Fi[0]->copy(this->Fi.back());
-        }
-
-        virtual void integrate(time dt, vector<shared_ptr<Encapsulation<time>>> dst) const override
-        {
-          dst[0]->mat_apply(dst, dt, this->Smat, this->Fe, true);
-          dst[0]->mat_apply(dst, dt, this->Smat, this->Fi, false);
-        }
-
-        void setup(bool coarse) override
+        //! @{
+        /**
+         * @copydoc ISweeper::setup(bool)
+         *
+         * To reduce computational overhead, we precompute the partial integration matrices 
+         * IMEXSweeper::s_mat_expl \\( (\\tilde{s}^{expl})_{m,j} \\) and IMEXSweeper::s_mat_impl 
+         * \\( (\\tilde{s}^{impl})_{m,j} \\) by incorporating known values of the SDC sweep
+         * equation.
+         *
+         * Let \\( F = F_{impl} + F_{expl} \\), \\( f = F_{impl} \\), \\( g = F_{expl} \\) and 
+         * \\( \\Delta t_m = t_{m+1} - t_m \\).
+         * @f{eqnarray*}{
+         *   u_{m+1}^{k+1} &=& u_m^k + \Delta t_m \left( f_{m+1}^{k+1} - f_{m+1}^k \right) 
+         *                     + \Delta t_m \left( g_m^{k+1} - g_m^k \right) 
+         *                     + \sum_{j=1}^M s_{m,j} F_j^k \\
+         *                 &=& u_m^k + \Delta t_m f_{m+1}^{k+1} + \Delta t_m g_m^{k+1} 
+         *                     + \sum_{j=1}^M s_{m,j} F_j^k 
+         *                     - \Delta t_m \left( f_{m+1}^k - g_m^k \right) \\
+         *                 &=& u_m^k + \Delta t_m f_{m+1}^{k+1} + \Delta t_m g_m^{k+1} 
+         *                     + \sum_{j=1}^M s_{m,j} f_j^k - \Delta t_m f_{m+1}^k
+         *                     + \sum_{j=1}^M s_{m,j} g_j^k - \Delta t_m g_m^k \\
+         *                 &=& u_m^k + \Delta t_m f_{m+1}^{k+1} + \Delta t_m g_m^{k+1} 
+         *                     + \sum_{j=1}^M \tilde{s}_{m,j}^{impl} f_j^k
+         *                     + \sum_{j=1}^M \tilde{s}_{m,j}^{expl} g_j^k
+         * @f}
+         * with
+         * @f[
+         *  \tilde{s}_{m,j}^{impl} = 
+         *    \begin{cases}
+         *      s_{m,j} - \Delta t_m &\mbox{if } j \equiv m+1 \\
+         *      s_{m,j} &\mbox{else}
+         *    \end{cases} \\
+         *  \tilde{s}_{m,j}^{expl} =
+         *    \begin{cases}
+         *      s_{m,j} - \Delta t_m &\mbox{if } j \equiv m \\
+         *      s_{m,j} &\mbox{else}
+         *    \end{cases} \\
+         * @f]
+         *
+         * This procedure can be derived from the so called \\( Q_{\\Delta} \\) notation.
+         */
+        virtual void setup(bool coarse) override
         {
           auto nodes = this->get_nodes();
           assert(nodes.size() >= 1);
 
-          this->Smat = compute_quadrature(nodes, nodes, 's');
+          this->s_mat = compute_quadrature(nodes, nodes, 's');
 
-          this->SEmat = this->Smat;
-          this->SImat = this->Smat;
+          this->s_mat_expl = this->s_mat;
+          this->s_mat_impl = this->s_mat;
           for (size_t m = 0; m < nodes.size() - 1; m++) {
             time ds = nodes[m + 1] - nodes[m];
-            this->SEmat(m, m)     -= ds;
-            this->SImat(m, m + 1) -= ds;
+            this->s_mat_expl(m, m)     -= ds;
+            this->s_mat_impl(m, m + 1) -= ds;
           }
 
           for (size_t m = 0; m < nodes.size(); m++) {
-            this->Q.push_back(this->get_factory()->create(pfasst::encap::solution));
+            this->us.push_back(this->get_factory()->create(pfasst::encap::solution));
             if (coarse) {
-              this->pQ.push_back(this->get_factory()->create(pfasst::encap::solution));
+              this->previous_us.push_back(this->get_factory()->create(pfasst::encap::solution));
             }
-            this->Fe.push_back(this->get_factory()->create(pfasst::encap::function));
-            this->Fi.push_back(this->get_factory()->create(pfasst::encap::function));
+            this->fs_expl.push_back(this->get_factory()->create(pfasst::encap::function));
+            this->fs_impl.push_back(this->get_factory()->create(pfasst::encap::function));
           }
 
           for (size_t m = 0; m < nodes.size() - 1; m++) {
-            this->S.push_back(this->get_factory()->create(pfasst::encap::solution));
+            this->s_integrals.push_back(this->get_factory()->create(pfasst::encap::solution));
             if (coarse) {
-              this->T.push_back(this->get_factory()->create(pfasst::encap::solution));
+              this->fas_corrections.push_back(this->get_factory()->create(pfasst::encap::solution));
             }
-          }
-        }
-
-        virtual void sweep()
-        {
-          const auto   nodes  = this->get_nodes();
-          const size_t nnodes = nodes.size();
-          assert(nnodes >= 1);
-
-          time dt = this->get_controller()->get_time_step();
-          time t  = this->get_controller()->get_time();
-
-          // integrate
-          this->S[0]->mat_apply(this->S, dt, this->SEmat, this->Fe, true);
-          this->S[0]->mat_apply(this->S, dt, this->SImat, this->Fi, false);
-          if (this->T.size() > 0) {
-            for (size_t m = 0; m < nnodes - 1; m++) {
-              this->S[m]->saxpy(1.0, this->T[m]);
-            }
-          }
-
-          // sweep
-          shared_ptr<Encapsulation<time>> rhs = this->get_factory()->create(pfasst::encap::solution);
-
-          for (size_t m = 0; m < nnodes - 1; m++) {
-            time ds = dt * (nodes[m + 1] - nodes[m]);
-
-            rhs->copy(this->Q[m]);
-            rhs->saxpy(ds, this->Fe[m]);
-            rhs->saxpy(1.0, this->S[m]);
-            this->impl_solve(this->Fi[m + 1], this->Q[m + 1], t, ds, rhs);
-            this->f_eval_expl(this->Fe[m + 1], this->Q[m + 1], t + ds);
-
-            t += ds;
           }
         }
 
@@ -140,58 +211,155 @@ namespace pfasst
           time t  = this->get_controller()->get_time();
 
           if (initial) {
-            this->f_eval_expl(this->Fe[0], this->Q[0], t);
-            this->f_eval_impl(this->Fi[0], this->Q[0], t);
+            this->f_expl_eval(this->fs_expl[0], this->us[0], t);
+            this->f_impl_eval(this->fs_impl[0], this->us[0], t);
           }
 
           shared_ptr<Encapsulation<time>> rhs = this->get_factory()->create(pfasst::encap::solution);
 
           for (size_t m = 0; m < nnodes - 1; m++) {
             time ds = dt * (nodes[m + 1] - nodes[m]);
-            rhs->copy(this->Q[m]);
-            rhs->saxpy(ds, this->Fe[m]);
-            this->impl_solve(this->Fi[m + 1], this->Q[m + 1], t, ds, rhs);
-            this->f_eval_expl(this->Fe[m + 1], this->Q[m + 1], t + ds);
+            rhs->copy(this->us[m]);
+            rhs->saxpy(ds, this->fs_expl[m]);
+            this->impl_solve(this->fs_impl[m + 1], this->us[m + 1], t, ds, rhs);
+            this->f_expl_eval(this->fs_expl[m + 1], this->us[m + 1], t + ds);
 
             t += ds;
           }
         }
 
+        virtual void sweep()
+        {
+          const auto   nodes  = this->get_nodes();
+          const size_t nnodes = nodes.size();
+          assert(nnodes >= 1);
+
+          time dt = this->get_controller()->get_time_step();
+          time t  = this->get_controller()->get_time();
+
+          // integrate
+          this->s_integrals[0]->mat_apply(this->s_integrals, dt, this->s_mat_expl, this->fs_expl, true);
+          this->s_integrals[0]->mat_apply(this->s_integrals, dt, this->s_mat_impl, this->fs_impl, false);
+          if (this->fas_corrections.size() > 0) {
+            for (size_t m = 0; m < nnodes - 1; m++) {
+              this->s_integrals[m]->saxpy(1.0, this->fas_corrections[m]);
+            }
+          }
+
+          // sweep
+          shared_ptr<Encapsulation<time>> rhs = this->get_factory()->create(pfasst::encap::solution);
+
+          for (size_t m = 0; m < nnodes - 1; m++) {
+            time ds = dt * (nodes[m + 1] - nodes[m]);
+
+            rhs->copy(this->us[m]);
+            rhs->saxpy(ds, this->fs_expl[m]);
+            rhs->saxpy(1.0, this->s_integrals[m]);
+            this->impl_solve(this->fs_impl[m + 1], this->us[m + 1], t, ds, rhs);
+            this->f_expl_eval(this->fs_expl[m + 1], this->us[m + 1], t + ds);
+
+            t += ds;
+          }
+        }
+
+        virtual void advance() override
+        {
+          this->us[0]->copy(this->us.back());
+          this->fs_expl[0]->copy(this->fs_expl.back());
+          this->fs_impl[0]->copy(this->fs_impl.back());
+        }
+
         virtual void save() override
         {
-          for (size_t m = 0; m < this->pQ.size(); m++) {
-            this->pQ[m]->copy(Q[m]);
+          for (size_t m = 0; m < this->previous_us.size(); m++) {
+            this->previous_us[m]->copy(us[m]);
           }
         }
 
         virtual void evaluate(size_t m) override
         {
           time t = this->get_nodes()[m]; // XXX
-          this->f_eval_expl(this->Fe[m], this->Q[m], t);
-          this->f_eval_impl(this->Fi[m], this->Q[m], t);
+          this->f_expl_eval(this->fs_expl[m], this->us[m], t);
+          this->f_impl_eval(this->fs_impl[m], this->us[m], t);
         }
 
-        virtual void f_eval_expl(shared_ptr<Encapsulation<time>> /*f*/,
-                                 shared_ptr<Encapsulation<time>> /*q*/,
-                                 time /*t*/)
+        /**
+         * @copybrief EncapSweeper::integrate()
+         *
+         * @param[in] dt width of time interval to integrate over
+         * @param[in,out] dst integrated values; will get zeroed out beforehand
+         */
+        virtual void integrate(time dt, vector<shared_ptr<Encapsulation<time>>> dst) const override
         {
-          throw NotImplementedYet("imex (f1eval)");
+          dst[0]->mat_apply(dst, dt, this->s_mat, this->fs_expl, true);
+          dst[0]->mat_apply(dst, dt, this->s_mat, this->fs_impl, false);
+        }
+        //! @}
+
+        //! @{
+        /**
+         * evaluates the explicit part of the right hand side at given time
+         *
+         * @param[in,out] f_expl Encapsulation to store the evaluated right hand side
+         * @param[in] u Encapsulation storing the solution values to use for computing the explicit 
+         *     part of the right hand side
+         * @param[in] t time point of the evaluation
+         *
+         * @note This method must be implemented in derived sweepers.
+         */
+        virtual void f_expl_eval(shared_ptr<Encapsulation<time>> f_expl,
+                                 shared_ptr<Encapsulation<time>> u,
+                                 time t)
+        {
+          UNUSED(f_expl); UNUSED(u); UNUSED(t);
+          throw NotImplementedYet("imex (f_expl_eval)");
         }
 
-        virtual void f_eval_impl(shared_ptr<Encapsulation<time>> /*f*/,
-                                 shared_ptr<Encapsulation<time>> /*q*/,
-                                 time /*t*/)
+        /**
+         * evaluates the implicit part of the right hand side at given time
+         *
+         * @param[in,out] f_impl Encapsulation to store the evaluated right hand side
+         * @param[in] u Encapsulation storing the solution values to use for computing the implicit 
+         *     part of the right hand side
+         * @param[in] t time point of the evaluation
+         *
+         * @note This method must be implemented in derived sweepers.
+         */
+        virtual void f_impl_eval(shared_ptr<Encapsulation<time>> f_impl,
+                                 shared_ptr<Encapsulation<time>> u,
+                                 time t)
         {
-          throw NotImplementedYet("imex (f2eval)");
+          UNUSED(f_impl); UNUSED(u); UNUSED(t);
+          throw NotImplementedYet("imex (f_impl_eval)");
         }
 
-        virtual void impl_solve(shared_ptr<Encapsulation<time>> /*f*/,
-                                shared_ptr<Encapsulation<time>> /*q*/,
-                                time /*t*/, time /*dt*/,
-                                shared_ptr<Encapsulation<time>> /*rhs*/)
+        /**
+         * solves for the implicit part of the right hand side without evaluating it directly
+         *
+         * This is an alternative to IMEXSweeper::f_impl_eval when the full right hand side of the
+         * previous time node is already known.
+         * Usually one would want to implement an implicit space solver here or some FFT tricks to
+         * compute the implicit part of the right hand side without evaluating it directly:
+         * \\[ u - \\Delta t f_{impl}(t, u) = rhs \\]
+         *
+         * @param[in,out] f_impl Encapsulation to store the evaluated right hand side
+         * @param[in,out] u Encapsulation to store intermediate values for use in computation of
+         *     the implicit part of the right hand side
+         * @param[in] t time point of the evaluation
+         * @param[in] dt distance of `t` to the previous time node (\\( \\Delta t \\))
+         * @param[in] rhs Encapsulation storing the full right hand side of the previous time node
+         *
+         * @note This method must be implemented in derived sweepers.
+         */
+        virtual void impl_solve(shared_ptr<Encapsulation<time>> f,
+                                shared_ptr<Encapsulation<time>> q,
+                                time t, time dt,
+                                shared_ptr<Encapsulation<time>> rhs)
         {
+          UNUSED(f); UNUSED(q); UNUSED(t); UNUSED(dt); UNUSED(rhs);
           throw NotImplementedYet("imex (f2comp)");
         }
+        //! @}
 
     };
 
