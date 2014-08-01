@@ -158,8 +158,8 @@ class AdvectionDiffusionSweeper
       this->fft.backward(f);
     }
 
-    void f_solve(shared_ptr<Encapsulation<time>> _f, shared_ptr<Encapsulation<time>> _q,
-                 time /*t*/, time dt, shared_ptr<Encapsulation<time>> _rhs) override
+    void impl_solve(shared_ptr<Encapsulation<time>> _f, shared_ptr<Encapsulation<time>> _q,
+                    time /*t*/, time dt, shared_ptr<Encapsulation<time>> _rhs) override
     {
       auto& q = as_vector<double, time>(_q);
       auto& f = as_vector<double, time>(_f);

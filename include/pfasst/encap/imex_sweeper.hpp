@@ -123,7 +123,7 @@ namespace pfasst
             rhs->copy(this->Q[m]);
             rhs->saxpy(ds, this->Fe[m]);
             rhs->saxpy(1.0, this->S[m]);
-            this->f_solve(this->Fi[m + 1], this->Q[m + 1], t, ds, rhs);
+            this->impl_solve(this->Fi[m + 1], this->Q[m + 1], t, ds, rhs);
             this->f_eval_expl(this->Fe[m + 1], this->Q[m + 1], t + ds);
 
             t += ds;
@@ -150,7 +150,7 @@ namespace pfasst
             time ds = dt * (nodes[m + 1] - nodes[m]);
             rhs->copy(this->Q[m]);
             rhs->saxpy(ds, this->Fe[m]);
-            this->f_solve(this->Fi[m + 1], this->Q[m + 1], t, ds, rhs);
+            this->impl_solve(this->Fi[m + 1], this->Q[m + 1], t, ds, rhs);
             this->f_eval_expl(this->Fe[m + 1], this->Q[m + 1], t + ds);
 
             t += ds;
@@ -185,10 +185,10 @@ namespace pfasst
           throw NotImplementedYet("imex (f2eval)");
         }
 
-        virtual void f_solve(shared_ptr<Encapsulation<time>> /*f*/,
-                             shared_ptr<Encapsulation<time>> /*q*/,
-                             time /*t*/, time /*dt*/,
-                             shared_ptr<Encapsulation<time>> /*rhs*/)
+        virtual void impl_solve(shared_ptr<Encapsulation<time>> /*f*/,
+                                shared_ptr<Encapsulation<time>> /*q*/,
+                                time /*t*/, time /*dt*/,
+                                shared_ptr<Encapsulation<time>> /*rhs*/)
         {
           throw NotImplementedYet("imex (f2comp)");
         }
