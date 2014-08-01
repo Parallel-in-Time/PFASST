@@ -24,16 +24,16 @@ namespace pfasst
     /**
      * interface for an semi-implicit sweeper
      *
-     * Given an ODE \\( \\frac{\\partial}{\\partial t}u(t) = F(t,u) \\) where the function of the 
+     * Given an ODE \\( \\frac{\\partial}{\\partial t}u(t) = F(t,u) \\) where the function of the
      * right hand side \\( F(t,u) \\) can be split into a non-stiff and a stiff part.
      * To reduce complexity and computational efford one would want to solve the non-stiff part
      * explicitly and the stiff part implicitly.
      * Therefore, we define the splitting \\( F(t,u) = F_{expl}(t,u) + F_{impl}(t,u) \\).
      *
      * This sweeper provides an interface for such ODEs were the implicit part can be computed by
-     * an external implicit solver without actually evaluating \\( F_{impl}(t,u) \\), which is 
+     * an external implicit solver without actually evaluating \\( F_{impl}(t,u) \\), which is
      * possibly very expensive.
-     * 
+     *
      * @tparam time precision type of the time dimension
      */
     template<typename time = time_precision>
@@ -43,37 +43,37 @@ namespace pfasst
       protected:
         //! @{
         /**
-         * solution values \\( u(\\tau) \\) at all time nodes \\( \\tau \\in [0, M-1] \\) of the 
+         * solution values \\( u(\\tau) \\) at all time nodes \\( \\tau \\in [0, M-1] \\) of the
          * current iteration
          */
         vector<shared_ptr<Encapsulation<time>>> us;
 
         /**
-         * solution values \\( u(t) \\) at all time nodes \\( t \\in [0, M-1] \\) of the 
+         * solution values \\( u(t) \\) at all time nodes \\( t \\in [0, M-1] \\) of the
          * previous iteration
          */
         vector<shared_ptr<Encapsulation<time>>> previous_us;
 
         /**
-         * node-to-node integrated values of \\( F(t,u) \\) at all time nodes \\( t \\in 
+         * node-to-node integrated values of \\( F(t,u) \\) at all time nodes \\( t \\in
          * [0, M-1] \\) of the current iteration
          */
         vector<shared_ptr<Encapsulation<time>>> s_integrals;
 
         /**
-         * FAS corrections \\( \\tau_t \\) at all time nodes \\( t \\in [0, M-1] \\) of the current 
+         * FAS corrections \\( \\tau_t \\) at all time nodes \\( t \\in [0, M-1] \\) of the current
          * iteration
          */
         vector<shared_ptr<Encapsulation<time>>> fas_corrections;
 
         /**
-         * values of the explicit part of the right hand side \\( F_{expl}(t,u) \\) at all time 
+         * values of the explicit part of the right hand side \\( F_{expl}(t,u) \\) at all time
          * nodes \\( t \\in [0, M-1] \\) of the current iteration
          */
         vector<shared_ptr<Encapsulation<time>>> fs_expl;
 
         /**
-         * values of the explicit part of the right hand side \\( F_{impl}(t,u) \\) at all time 
+         * values of the explicit part of the right hand side \\( F_{impl}(t,u) \\) at all time
          * nodes \\( t \\in [0, M-1] \\) of the current iteration
          */
         vector<shared_ptr<Encapsulation<time>>> fs_impl;
@@ -132,30 +132,30 @@ namespace pfasst
         /**
          * @copydoc ISweeper::setup(bool)
          *
-         * To reduce computational overhead, we precompute the partial integration matrices 
-         * IMEXSweeper::s_mat_expl \\( (\\tilde{s}^{expl})_{m,j} \\) and IMEXSweeper::s_mat_impl 
+         * To reduce computational overhead, we precompute the partial integration matrices
+         * IMEXSweeper::s_mat_expl \\( (\\tilde{s}^{expl})_{m,j} \\) and IMEXSweeper::s_mat_impl
          * \\( (\\tilde{s}^{impl})_{m,j} \\) by incorporating known values of the SDC sweep
          * equation.
          *
-         * Let \\( F = F_{impl} + F_{expl} \\), \\( f = F_{impl} \\), \\( g = F_{expl} \\) and 
+         * Let \\( F = F_{impl} + F_{expl} \\), \\( f = F_{impl} \\), \\( g = F_{expl} \\) and
          * \\( \\Delta t_m = t_{m+1} - t_m \\).
          * @f{eqnarray*}{
-         *   u_{m+1}^{k+1} &=& u_m^k + \Delta t_m \left( f_{m+1}^{k+1} - f_{m+1}^k \right) 
-         *                     + \Delta t_m \left( g_m^{k+1} - g_m^k \right) 
+         *   u_{m+1}^{k+1} &=& u_m^k + \Delta t_m \left( f_{m+1}^{k+1} - f_{m+1}^k \right)
+         *                     + \Delta t_m \left( g_m^{k+1} - g_m^k \right)
          *                     + \sum_{j=1}^M s_{m,j} F_j^k \\
-         *                 &=& u_m^k + \Delta t_m f_{m+1}^{k+1} + \Delta t_m g_m^{k+1} 
-         *                     + \sum_{j=1}^M s_{m,j} F_j^k 
+         *                 &=& u_m^k + \Delta t_m f_{m+1}^{k+1} + \Delta t_m g_m^{k+1}
+         *                     + \sum_{j=1}^M s_{m,j} F_j^k
          *                     - \Delta t_m \left( f_{m+1}^k - g_m^k \right) \\
-         *                 &=& u_m^k + \Delta t_m f_{m+1}^{k+1} + \Delta t_m g_m^{k+1} 
+         *                 &=& u_m^k + \Delta t_m f_{m+1}^{k+1} + \Delta t_m g_m^{k+1}
          *                     + \sum_{j=1}^M s_{m,j} f_j^k - \Delta t_m f_{m+1}^k
          *                     + \sum_{j=1}^M s_{m,j} g_j^k - \Delta t_m g_m^k \\
-         *                 &=& u_m^k + \Delta t_m f_{m+1}^{k+1} + \Delta t_m g_m^{k+1} 
+         *                 &=& u_m^k + \Delta t_m f_{m+1}^{k+1} + \Delta t_m g_m^{k+1}
          *                     + \sum_{j=1}^M \tilde{s}_{m,j}^{impl} f_j^k
          *                     + \sum_{j=1}^M \tilde{s}_{m,j}^{expl} g_j^k
          * @f}
          * with
          * @f[
-         *  \tilde{s}_{m,j}^{impl} = 
+         *  \tilde{s}_{m,j}^{impl} =
          *    \begin{cases}
          *      s_{m,j} - \Delta t_m &\mbox{if } j \equiv m+1 \\
          *      s_{m,j} &\mbox{else}
@@ -298,10 +298,10 @@ namespace pfasst
 
         //! @{
         /**
-         * evaluates the explicit part of the right hand side at given time
+         * Evaluates the explicit part of the right hand side at the given time.
          *
          * @param[in,out] f_expl Encapsulation to store the evaluated right hand side
-         * @param[in] u Encapsulation storing the solution values to use for computing the explicit 
+         * @param[in] u Encapsulation storing the solution values to use for computing the explicit
          *     part of the right hand side
          * @param[in] t time point of the evaluation
          *
@@ -316,10 +316,13 @@ namespace pfasst
         }
 
         /**
-         * evaluates the implicit part of the right hand side at given time
+         * Evaluates the implicit part of the right hand side at the given time.
+	 *
+	 * This is typically called to compute the implicit part of the right hand side at the first
+	 * collocation node, and on all nodes after restriction or interpolation.
          *
          * @param[in,out] f_impl Encapsulation to store the evaluated right hand side
-         * @param[in] u Encapsulation storing the solution values to use for computing the implicit 
+         * @param[in] u Encapsulation storing the solution values to use for computing the implicit
          *     part of the right hand side
          * @param[in] t time point of the evaluation
          *
@@ -334,20 +337,18 @@ namespace pfasst
         }
 
         /**
-         * solves for the implicit part of the right hand side without evaluating it directly
+         * Solves \\( U - \\Delta t f_{\\rm impl}(U) = RHS \\) for \\(U\\).
          *
-         * This is an alternative to IMEXSweeper::f_impl_eval when the full right hand side of the
-         * previous time node is already known.
-         * Usually one would want to implement an implicit space solver here or some FFT tricks to
-         * compute the implicit part of the right hand side without evaluating it directly:
-         * \\[ u - \\Delta t f_{impl}(t, u) = rhs \\]
-         *
+         * During an IMEX SDC sweep, the correction equation is evolved using a forward-Euler
+         * stepper for the explicit piece, and a backward-Euler stepper for the implicit piece.
+         * This routine (implemented by the user) performs the solve required to perform one
+         * backward-Euler sub-step, and also returns \\(f_{\\rm impl}(U)\\).
+	 *
          * @param[in,out] f_impl Encapsulation to store the evaluated right hand side
-         * @param[in,out] u Encapsulation to store intermediate values for use in computation of
-         *     the implicit part of the right hand side
-         * @param[in] t time point of the evaluation
-         * @param[in] dt distance of `t` to the previous time node (\\( \\Delta t \\))
-         * @param[in] rhs Encapsulation storing the full right hand side of the previous time node
+         * @param[in,out] u Encapsulation to store the solution of the backward-Euler sub-step
+         * @param[in] t time point (of \\(RHS\\))
+         * @param[in] dt sub-step size to the previous time point (\\(\\Delta t \\))
+         * @param[in] rhs Encapsulation storing \\(RHS\\)
          *
          * @note This method must be implemented in derived sweepers.
          */
