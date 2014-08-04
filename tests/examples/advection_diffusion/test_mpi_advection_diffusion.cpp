@@ -19,16 +19,6 @@
 
 using namespace std;
 
-// MATCHER(DoubleNear, "")
-// {
-//   return abs(get<0>(arg) - get<1>(arg)) < 1e-15;
-// }
-
-// MATCHER(DoubleLess, "")
-// {
-//   return get<0>(arg) < get<1>(arg);
-// }
-
 TEST(ErrorTest, MPIPFASST)
 {
   typedef error_map::value_type vtype;
@@ -41,10 +31,10 @@ TEST(ErrorTest, MPIPFASST)
   auto max_iter = get_iter(*std::max_element(errors.begin(), errors.end(),
              [get_iter](const vtype p1, const vtype p2) { return get_iter(p1) < get_iter(p2); }));
 
-  vector<double> ex = { 1.1168843627729075e-13, 4.8849813083506888e-13, 5.3268500721515011e-13, 2.3059332221464501e-12 };
+  vector<double> ex = { 1.1168e-13, 4.8849e-13, 5.3268e-13, 2.3059e-12 };
   for (auto& x: errors) {
     if (get_iter(x) == max_iter) {
-      EXPECT_NEAR(get_error(x), ex[get_step(x)], 1e-15);
+      EXPECT_NEAR(get_error(x), ex[get_step(x)], 1e-14);
     }
   }
 }
