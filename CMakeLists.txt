@@ -1,7 +1,4 @@
 cmake_minimum_required(VERSION 2.8)
-
-set(CMAKE_VERBOSE_MAKEFILE ON)
-
 project(pfasst)
 
 list(APPEND CMAKE_MODULE_PATH ${pfasst_SOURCE_DIR}/cmake)
@@ -11,14 +8,22 @@ include(ExternalProject)
 # Set default ExternalProject root directory
 set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/3rdparty)
 
-option(pfasst_DISABLE_LIBCXX "Disable use of LLVM's libc++ when compiling with Clang." ON)
-option(pfasst_BUILD_EXAMPLES "Build example programs." ON)
-option(pfasst_BUILD_TESTS "Build test suite for PFASST." ON)
+option(pfasst_DISABLE_LIBCXX "Disable use of LLVM's libc++ when compiling with Clang." ON )
+option(pfasst_BUILD_EXAMPLES "Build example programs."                                 ON )
+option(pfasst_BUILD_TESTS    "Build test suite for PFASST."                            ON )
+option(pfasst_WITH_MPI       "Build with MPI enabled."                                 OFF)
 
 # output directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${pfasst_SOURCE_DIR}/dist/bin")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${pfasst_SOURCE_DIR}/dist/lib")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${pfasst_SOURCE_DIR}/dist/lib")
+
+if(${pfasst_WITH_MPI})
+    find_package(MPI REQUIRED)
+    # set(CMAKE_C_COMPILER ${MPI_C_COMPILER})
+    # set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
+    message(STATUS "Using MPI C++ Compiler: ${MPI_CXX_COMPILER}")
+endif()
 
 # check for C++11 support
 if(${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
@@ -97,5 +102,7 @@ endif()
 message(STATUS "********************************************************************************")
 
 message(STATUS "C++ Compiler ID: ${CMAKE_CXX_COMPILER_ID}")
+message(STATUS "C++ Compiler Names: ${CMAKE_CXX_COMPILER_NAMES}")
+message(STATUS "C++ Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}")
 message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS}")
 message(STATUS "C++ link flags: ${CMAKE_CXX_LINK_FLAGS}")

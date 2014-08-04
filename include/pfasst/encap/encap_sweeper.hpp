@@ -25,6 +25,29 @@ namespace pfasst
 
       public:
 
+        virtual void post(ICommunicator* comm, int tag)
+        {
+          this->get_state(0)->post(comm, tag);
+        }
+
+        virtual void send(ICommunicator* comm, int tag, bool blocking)
+        {
+          this->get_state(this->get_nodes().size() - 1)->send(comm, tag, blocking);
+        }
+
+        virtual void recv(ICommunicator* comm, int tag, bool blocking)
+        {
+          this->get_state(0)->recv(comm, tag, blocking);
+        }
+
+        virtual void broadcast(ICommunicator* comm)
+        {
+	  if (comm->rank() == comm->size() - 1) {
+	    this->get_state(0)->copy(this->get_state(this->get_nodes().size() - 1));
+	  }
+          this->get_state(0)->broadcast(comm);
+        }
+
         void set_nodes(vector<time> nodes)
         {
           this->nodes = nodes;
@@ -73,7 +96,7 @@ namespace pfasst
           return this->get_state(this->get_nodes().size() - 1);
         }
 
-      virtual void evaluate(size_t /*m*/)
+        virtual void evaluate(size_t /*m*/)
         {
           throw NotImplementedYet("sweeper");
         }
