@@ -5,7 +5,6 @@ list(APPEND CMAKE_MODULE_PATH ${pfasst_SOURCE_DIR}/cmake)
 include(cmake/utility_functions.cmake)
 include(CheckCXXCompilerFlag)
 include(ExternalProject)
-# Set default ExternalProject root directory
 set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/3rdparty)
 
 option(pfasst_DISABLE_LIBCXX "Disable use of LLVM's libc++ when compiling with Clang." ON )
@@ -13,19 +12,16 @@ option(pfasst_BUILD_EXAMPLES "Build example programs."                          
 option(pfasst_BUILD_TESTS    "Build test suite for PFASST."                            ON )
 option(pfasst_WITH_MPI       "Build with MPI enabled."                                 OFF)
 
-# output directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${pfasst_SOURCE_DIR}/dist/bin")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${pfasst_SOURCE_DIR}/dist/lib")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${pfasst_SOURCE_DIR}/dist/lib")
 
 if(${pfasst_WITH_MPI})
     find_package(MPI REQUIRED)
-    # set(CMAKE_C_COMPILER ${MPI_C_COMPILER})
-    # set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
     message(STATUS "Using MPI C++ Compiler: ${MPI_CXX_COMPILER}")
 endif()
 
-# check for C++11 support
+# Check for C++11 support
 if(${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
     check_cxx_compiler_flag(-std=c++11 HAVE_STD11)
     if(HAVE_STD11)
@@ -63,7 +59,6 @@ else()
 endif()
 message(STATUS "Your compiler has C++11 support. Hurray!")
 
-# enable all compiler warnings
 add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic")
 
 set(3rdparty_INCLUDES)
@@ -75,13 +70,8 @@ if(pfasst_BUILD_TESTS)
     enable_testing()
 endif(pfasst_BUILD_TESTS)
 
-# adding / including 3rd-party libraries
 message(STATUS "********************************************************************************")
 message(STATUS "Configuring 3rd party libraries")
-# makes available:
-#  - fftw3_INCLUDES  (if pfasst_BUILD_EXAMPLES)
-#  - fftw3_LIBS      (if pfasst_BUILD_EXAMPLES)
-# and Boost headers in 3rdparty_INCLUDES
 add_subdirectory(3rdparty)
 
 message(STATUS "********************************************************************************")
