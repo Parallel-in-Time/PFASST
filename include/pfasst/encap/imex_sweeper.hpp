@@ -300,18 +300,18 @@ namespace pfasst
         /**
          * Evaluates the explicit part of the right hand side at the given time.
          *
-         * @param[in,out] f_expl Encapsulation to store the evaluated right hand side
-         * @param[in] u Encapsulation storing the solution values to use for computing the explicit
-         *     part of the right hand side
+         * @param[in,out] f_expl_encap Encapsulation to store the evaluated right hand side
+         * @param[in] u_encap Encapsulation storing the solution values to use for computing the 
+         *     explicit part of the right hand side
          * @param[in] t time point of the evaluation
          *
          * @note This method must be implemented in derived sweepers.
          */
-        virtual void f_expl_eval(shared_ptr<Encapsulation<time>> f_expl,
-                                 shared_ptr<Encapsulation<time>> u,
+        virtual void f_expl_eval(shared_ptr<Encapsulation<time>> f_expl_encap,
+                                 shared_ptr<Encapsulation<time>> u_encap,
                                  time t)
         {
-          UNUSED(f_expl); UNUSED(u); UNUSED(t);
+          UNUSED(f_expl_encap); UNUSED(u_encap); UNUSED(t);
           throw NotImplementedYet("imex (f_expl_eval)");
         }
 
@@ -321,18 +321,18 @@ namespace pfasst
          * This is typically called to compute the implicit part of the right hand side at the first
          * collocation node, and on all nodes after restriction or interpolation.
          *
-         * @param[in,out] f_impl Encapsulation to store the evaluated right hand side
-         * @param[in] u Encapsulation storing the solution values to use for computing the implicit
-         *     part of the right hand side
+         * @param[in,out] f_impl_encap Encapsulation to store the evaluated right hand side
+         * @param[in] u_encap Encapsulation storing the solution values to use for computing the 
+         *     implicit part of the right hand side
          * @param[in] t time point of the evaluation
          *
          * @note This method must be implemented in derived sweepers.
          */
-        virtual void f_impl_eval(shared_ptr<Encapsulation<time>> f_impl,
-                                 shared_ptr<Encapsulation<time>> u,
+        virtual void f_impl_eval(shared_ptr<Encapsulation<time>> f_impl_encap,
+                                 shared_ptr<Encapsulation<time>> u_encap,
                                  time t)
         {
-          UNUSED(f_impl); UNUSED(u); UNUSED(t);
+          UNUSED(f_impl_encap); UNUSED(u_encap); UNUSED(t);
           throw NotImplementedYet("imex (f_impl_eval)");
         }
 
@@ -344,20 +344,20 @@ namespace pfasst
          * This routine (implemented by the user) performs the solve required to perform one
          * backward-Euler sub-step, and also returns \\(f_{\\rm impl}(U)\\).
          *
-         * @param[in,out] f_impl Encapsulation to store the evaluated right hand side
-         * @param[in,out] u Encapsulation to store the solution of the backward-Euler sub-step
+         * @param[in,out] f_encap Encapsulation to store the evaluated right hand side
+         * @param[in,out] u_encap Encapsulation to store the solution of the backward-Euler sub-step
          * @param[in] t time point (of \\(RHS\\))
          * @param[in] dt sub-step size to the previous time point (\\(\\Delta t \\))
-         * @param[in] rhs Encapsulation storing \\(RHS\\)
+         * @param[in] rhs_encap Encapsulation storing \\(RHS\\)
          *
          * @note This method must be implemented in derived sweepers.
          */
-        virtual void impl_solve(shared_ptr<Encapsulation<time>> f,
-                                shared_ptr<Encapsulation<time>> q,
+        virtual void impl_solve(shared_ptr<Encapsulation<time>> f_encap,
+                                shared_ptr<Encapsulation<time>> u_encap,
                                 time t, time dt,
-                                shared_ptr<Encapsulation<time>> rhs)
+                                shared_ptr<Encapsulation<time>> rhs_encap)
         {
-          UNUSED(f); UNUSED(q); UNUSED(t); UNUSED(dt); UNUSED(rhs);
+          UNUSED(f_encap); UNUSED(u_encap); UNUSED(t); UNUSED(dt); UNUSED(rhs_encap);
           throw NotImplementedYet("imex (f2comp)");
         }
         //! @}
