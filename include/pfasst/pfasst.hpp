@@ -19,7 +19,8 @@ namespace pfasst
 
       typedef typename pfasst::Controller<time>::LevelIter LevelIter;
 
-      bool predict, initial;
+      bool predict; //<! whether to use a 'predict' sweep
+      bool initial; //<! whether we're sweeping from a new initial condition
 
       void perform_sweeps(size_t level)
       {
@@ -46,13 +47,16 @@ namespace pfasst
        */
       void predictor()
       {
+        this->get_finest()->spread();
+
         // restrict fine initial condition
         for (auto l = this->finest() - 1; l >= this->coarsest(); --l) {
           auto crse = l.current();
           auto fine = l.fine();
           auto trns = l.transfer();
-          trns->restrict(crse, fine, false, true);
-          crse->save(true);
+          trns->restrict(crse, fine, true, true);
+          crse->spread();
+          crse->save();
         }
 
         // perform sweeps on the coarse level based on rank
@@ -63,7 +67,9 @@ namespace pfasst
           // XXX: set iteration?
 
           perform_sweeps(0);
-          crse->advance();
+          if (nstep < comm->rank()) {
+            crse->advance();
+          }
         }
 
         // return to finest level, sweeping as we go
@@ -72,7 +78,7 @@ namespace pfasst
           auto fine = l.current();
           auto trns = l.transfer();
 
-          trns->interpolate(fine, crse, true, true);
+          trns->interpolate(fine, crse, true);
           if (l < this->finest()) {
             perform_sweeps(l.level);
           }
@@ -128,9 +134,9 @@ namespace pfasst
 
             cycle_v(this->finest() - 1);
 
-            trns->interpolate(fine, crse, false, true, false);
+            trns->interpolate(fine, crse, true);
             fine->recv(comm, tag, false);
-            trns->interpolate(fine, crse, false, false, true);
+            trns->interpolate_initial(fine, crse);
             // XXX: call interpolate_q0(pf,F, G)
           }
 
@@ -176,12 +182,12 @@ namespace pfasst
         auto crse = l.coarse();
         auto trns = l.transfer();
 
-        trns->interpolate(fine, crse, false, true, false);
+        trns->interpolate(fine, crse, true);
 
         int tag = l.level * 10000 + this->get_iteration() + 10;
         fine->recv(comm, tag, false);
         // XXX          call interpolate_q0(pf,F, G)
-        trns->interpolate(fine, crse, false, false, true);
+        trns->interpolate_initial(fine, crse);
 
         if (l < this->finest()) {
           perform_sweeps(l.level);

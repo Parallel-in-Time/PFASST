@@ -46,9 +46,14 @@ namespace pfasst
         nsweeps.resize(this->nlevels());
         fill(nsweeps.begin(), nsweeps.end(), 1);
         for (auto leviter = this->coarsest(); leviter <= this->finest(); ++leviter) {
-	  leviter.current()->set_controller(this);
+          leviter.current()->set_controller(this);
           leviter.current()->setup(leviter != this->finest());
         }
+      }
+
+      void set_nsweeps(vector<size_t> nsweeps)
+      {
+        this->nsweeps = nsweeps;
       }
 
       /**
@@ -64,7 +69,7 @@ namespace pfasst
           initial = this->get_step() == 0; // only evaluate node 0 functions on first step
 
           // iterate by performing v-cycles
-	  for (this->set_iteration(0); this->get_iteration() < this->get_max_iterations(); this->advance_iteration()) {
+          for (this->set_iteration(0); this->get_iteration() < this->get_max_iterations(); this->advance_iteration()) {
             cycle_v(this->finest());
           }
 
