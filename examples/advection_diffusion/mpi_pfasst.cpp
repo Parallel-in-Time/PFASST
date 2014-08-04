@@ -24,10 +24,8 @@ using namespace pfasst;
 using namespace pfasst::encap;
 using namespace pfasst::mpi;
 
-int main(int argc, char** argv)
+error_map run_mpi_pfasst()
 {
-  MPI_Init(&argc, &argv);
-
   const size_t nsteps = 4;
   const double dt     = 0.01;
   const size_t niters = 4;
@@ -63,7 +61,16 @@ int main(int argc, char** argv)
   pf.set_duration(0.0, nsteps * dt, dt, niters);
   pf.run();
 
-  fftw_cleanup();
+  auto fine = pf.get_finest<AdvectionDiffusionSweeper<>>();
+  return fine->get_errors();
+}
 
+#ifndef PFASST_UNIT_TESTING
+int main(int argc, char** argv)
+{
+  MPI_Init(&argc, &argv);
+  run_mpi_pfasst();
+  fftw_cleanup();
   MPI_Finalize();
 }
+#endif
