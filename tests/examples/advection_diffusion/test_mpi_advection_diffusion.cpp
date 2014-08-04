@@ -41,10 +41,10 @@ TEST(ErrorTest, MPIPFASST)
   auto max_iter = get_iter(*std::max_element(errors.begin(), errors.end(),
              [get_iter](const vtype p1, const vtype p2) { return get_iter(p1) < get_iter(p2); }));
 
-  vector<double> ex = { 1.224103e-10, 5.145808e-10, 3.389905e-9, 1.920198e-7 };
+  vector<double> ex = { 1.1168843627729075e-13, 4.8849813083506888e-13, 5.3268500721515011e-13, 2.3059332221464501e-12 };
   for (auto& x: errors) {
     if (get_iter(x) == max_iter) {
-      EXPECT_NEAR(get_error(x), ex[get_step(x)], 1e-12);
+      EXPECT_NEAR(get_error(x), ex[get_step(x)], 1e-15);
     }
   }
 }
