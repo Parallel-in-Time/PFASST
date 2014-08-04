@@ -89,6 +89,24 @@ namespace pfasst
         initial = true;
       }
 
+      int tag (int level)
+      {
+        return level * 10000 + this->get_iteration() + 10;
+      }
+
+      int tag(LevelIter l)
+      {
+        return tag(l.level);
+      }
+
+      void post()
+      {
+        for (auto l = this->coarsest() + 1; l <= this->finest(); ++l) {
+          l.current()->post(comm, tag(l));
+        }
+      }
+
+
       /**
        * Evolve ODE using PFASST.
        *
@@ -113,30 +131,8 @@ namespace pfasst
 
           for (this->set_iteration(0); this->get_iteration() < this->get_max_iterations();
                this->advance_iteration()) {
-            for (auto l = this->coarsest() + 1; l <= this->finest(); ++l) {
-              int tag = l.level * 10000 + this->get_iteration() + 10;
-              l.current()->post(comm, tag);
-            }
-
-            perform_sweeps(this->nlevels() - 1);
-
-            // note: convergence checks belong here...
-
-            auto fine = this->get_level(this->nlevels() - 1);
-            auto crse = this->get_level(this->nlevels() - 2);
-            auto trns = this->get_transfer(this->nlevels() - 1);
-
-            int tag = (this->nlevels() - 1) * 10000 + this->get_iteration() + 10;
-            fine->send(comm, tag, false);
-            trns->restrict(crse, fine, true);
-            trns->fas(this->get_time_step(), crse, fine);
-            crse->save();
-
-            cycle_v(this->finest() - 1);
-
-            trns->interpolate(fine, crse, true);
-            fine->recv(comm, tag, false);
-            trns->interpolate_initial(fine, crse);
+            post();
+            cycle_v(this->finest());
           }
 
           if (nblock < nblocks - 1) {
@@ -156,8 +152,11 @@ namespace pfasst
 
         perform_sweeps(l.level);
 
-        int tag = l.level * 10000 + this->get_iteration() + 10;
-        fine->send(comm, tag, false);
+        if (l == this->finest()) {
+          // note: convergence tests belong here
+        }
+
+        fine->send(comm, tag(l), false);
 
         auto dt = this->get_time_step();
         trns->restrict(crse, fine, true);
@@ -183,8 +182,7 @@ namespace pfasst
 
         trns->interpolate(fine, crse, true);
 
-        int tag = l.level * 10000 + this->get_iteration() + 10;
-        fine->recv(comm, tag, false);
+        fine->recv(comm, tag(l), false);
         trns->interpolate_initial(fine, crse);
 
         if (l < this->finest()) {
@@ -201,10 +199,9 @@ namespace pfasst
       {
         auto crse = l.current();
 
-        int tag = l.level * 10000 + this->get_iteration() + 10;
-        crse->recv(comm, tag, true);
+        crse->recv(comm, tag(l), true);
         this->perform_sweeps(l.level);
-        crse->send(comm, tag, true);
+        crse->send(comm, tag(l), true);
         return l + 1;
       }
 
