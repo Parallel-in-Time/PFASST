@@ -59,6 +59,7 @@ error_map run_mpi_pfasst()
 
   pf.set_comm(&comm);
   pf.set_duration(0.0, nsteps * dt, dt, niters);
+  pf.set_nsweeps({2, 1});
   pf.run();
 
   auto fine = pf.get_finest<AdvectionDiffusionSweeper<>>();

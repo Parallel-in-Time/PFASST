@@ -112,15 +112,16 @@ namespace pfasst
       virtual void predict(bool initial) = 0;
 
       /**
-       * perform one SDC sweep/iteration.
-       * Compute a correction and update solution values.
-       * Note that this function can assume that valid function values exist from a previous
-       * pfasst::ISweeper::sweep() or pfasst::ISweeper::predict().
+       * Perform one SDC sweep/iteration.
+       *
+       * Compute a correction and update solution values.  Note that this function can assume that
+       * valid function values exist from a previous pfasst::ISweeper::sweep() or
+       * pfasst::ISweeper::predict().
        */
       virtual void sweep() = 0;
 
       /**
-       * advance from one time step to the next.
+       * Advance from one time step to the next.
        *
        * Essentially this means copying the solution and function values from the last node to the
        * first node.
@@ -128,12 +129,14 @@ namespace pfasst
       virtual void advance() = 0;
 
       /**
-       * save solutions (and/or function values) at all nodes.
+       * Save states (and/or function values) at all nodes.
        *
-       * This is typically done in MLSDC/PFASST immediately after a call to restrict.
-       * The saved states are used to compute deltas during interpolation.
+       * This is typically done in MLSDC/PFASST immediately after a call to restrict.  The saved
+       * states are used to compute deltas during interpolation.
        */
       virtual void save(bool initial_only = false) { (void) initial_only; NotImplementedYet("mlsdc/pfasst"); }
+
+      virtual void spread() { NotImplementedYet("pfasst"); }
 
       virtual void post(ICommunicator* /*comm*/, int /*tag*/) { };
       virtual void send(ICommunicator* /*comm*/, int /*tag*/, bool /*blocking*/) { NotImplementedYet("pfasst"); }
@@ -151,24 +154,31 @@ namespace pfasst
   class ITransfer
   {
     public:
-      // XXX: pass level iterator to these routines as well
       virtual ~ITransfer() { }
 
+
       /**
-       * interpolate, in time and space, from the coarse sweeper to the fine sweeper.
-       * @param[in] interp_delta_from_initial
-       *     `true` if the delta computed at each node should be relative to the initial condition.
+       * Interpolate initial condition (in space) from the coarse sweeper to the fine sweeper.
+       */
+      virtual void interpolate_initial(shared_ptr<ISweeper<time>> dst,
+                                       shared_ptr<const ISweeper<time>> src)
+      {
+        NotImplementedYet("pfasst");
+      }
+
+
+      /**
+       * Interpolate, in time and space, from the coarse sweeper to the fine sweeper.
        * @param[in] interp_initial
        *     `true` if a delta for the initial condtion should also be computed (PFASST).
        */
       virtual void interpolate(shared_ptr<ISweeper<time>> dst,
                                shared_ptr<const ISweeper<time>> src,
-                               bool interp_delta_from_initial = false,
-                               bool interp_initial = false,
-                               bool interp_initial_only = false) = 0;
+                               bool interp_initial = false) = 0;
+
 
       /**
-       * restrict, in time and space, from the fine sweeper to the coarse sweeper.
+       * Restrict, in time and space, from the fine sweeper to the coarse sweeper.
        * @param[in] restrict_initial
        *     `true` if the initial condition should also be restricted.
        */
@@ -178,7 +188,7 @@ namespace pfasst
                             bool restrict_initial_only = false) = 0;
 
       /**
-       * compute FAS correction between the coarse and fine sweepers.
+       * Compute FAS correction between the coarse and fine sweepers.
        */
       virtual void fas(time dt, shared_ptr<ISweeper<time>> dst,
                        shared_ptr<const ISweeper<time>> src) = 0;
