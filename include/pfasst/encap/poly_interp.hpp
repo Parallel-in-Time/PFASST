@@ -27,69 +27,64 @@ namespace pfasst
       public:
         virtual ~PolyInterpMixin() { }
 
-        virtual void interpolate(shared_ptr<ISweeper<time>> dst,
-                                 shared_ptr<const ISweeper<time>> src,
-                                 bool interp_delta_from_initial,
-                                 bool interp_initial,
-                                 bool interp_initial_only)
+        virtual void interpolate_initial(shared_ptr<ISweeper<time>> dst,
+                                         shared_ptr<const ISweeper<time>> src)
         {
-          shared_ptr<EncapSweeper<time>> fine = dynamic_pointer_cast<EncapSweeper<time>>(dst);
-          assert(fine);
-          shared_ptr<const EncapSweeper<time>> crse = dynamic_pointer_cast<const EncapSweeper<time>>(src);
-          assert(crse);
+          auto& fine = as_encap_sweeper(dst);
+          auto& crse = as_encap_sweeper(src);
 
-          this->interpolate(fine, crse, interp_delta_from_initial, interp_initial, interp_initial_only);
+          auto crse_factory = crse.get_factory();
+          auto fine_factory = fine.get_factory();
+
+          auto crse_delta = crse_factory->create(solution);
+          this->restrict(crse_delta, fine.get_state(0));
+          crse_delta->saxpy(-1.0, crse.get_state(0));
+
+          auto fine_delta = fine_factory->create(solution);
+          this->interpolate(fine_delta, crse_delta);
+          fine.get_state(0)->saxpy(-1.0, fine_delta);
+
+          fine.evaluate(0);
         }
 
-        virtual void interpolate(shared_ptr<EncapSweeper<time>> fine,
-                                 shared_ptr<const EncapSweeper<time>> crse,
-                                 bool interp_delta_from_initial,
-                                 bool interp_initial,
-                                 bool interp_initial_only)
+        virtual void interpolate(shared_ptr<ISweeper<time>> dst,
+                                 shared_ptr<const ISweeper<time>> src,
+                                 bool interp_initial)
         {
+          auto& fine = as_encap_sweeper(dst);
+          auto& crse = as_encap_sweeper(src);
+
           if (tmat.size1() == 0) {
-            tmat = pfasst::compute_interp<time>(fine->get_nodes(), crse->get_nodes());
+            tmat = pfasst::compute_interp<time>(fine.get_nodes(), crse.get_nodes());
           }
 
-          size_t nfine = fine->get_nodes().size();
-          size_t ncrse = crse->get_nodes().size();
+          size_t nfine = fine.get_nodes().size();
+          size_t ncrse = crse.get_nodes().size();
 
-          auto crse_factory = crse->get_factory();
-          auto fine_factory = fine->get_factory();
-
-          if (interp_initial_only) {
-            auto crse_delta = crse_factory->create(solution);
-            this->restrict(crse_delta, fine->get_state(0));
-            crse_delta->saxpy(-1.0, crse->get_state(0));
-
-            auto fine_delta = fine_factory->create(solution);
-            this->interpolate(fine_delta, crse_delta);
-            fine->get_state(0)->saxpy(-1.0, fine_delta);
-
-            fine->evaluate(0);
-            return;
-          }
+          auto crse_factory = crse.get_factory();
+          auto fine_factory = fine.get_factory();
 
           EncapVecT fine_state(nfine), fine_delta(ncrse);
 
-          for (size_t m = 0; m < nfine; m++) { fine_state[m] = fine->get_state(m); }
+          for (size_t m = 0; m < nfine; m++) { fine_state[m] = fine.get_state(m); }
           for (size_t m = 0; m < ncrse; m++) { fine_delta[m] = fine_factory->create(solution); }
 
-          if (interp_delta_from_initial) {
-            for (size_t m = 1; m < nfine; m++) {
-              fine_state[m]->copy(fine_state[0]);
-            }
-          }
+          // if (interp_delta_from_initial) {
+          //   for (size_t m = 1; m < nfine; m++) {
+          //     fine_state[m]->copy(fine_state[0]);
+          //   }
+          // }
 
           auto crse_delta = crse_factory->create(solution);
           size_t m0 = interp_initial ? 0 : 1;
           for (size_t m = m0; m < ncrse; m++) {
-            crse_delta->copy(crse->get_state(m));
-            if (interp_delta_from_initial) {
-              crse_delta->saxpy(-1.0, crse->get_state(0));
-            } else {
-              crse_delta->saxpy(-1.0, crse->get_saved_state(m));
-            }
+            crse_delta->copy(crse.get_state(m));
+            // if (interp_delta_from_initial) {
+            //   crse_delta->saxpy(-1.0, crse->get_saved_state(0));
+            //   // crse_delta->saxpy(-1.0, crse->get_state(0));
+            // } else {
+              crse_delta->saxpy(-1.0, crse.get_saved_state(m));
+            // }
             interpolate(fine_delta[m], crse_delta);
           }
 
@@ -97,9 +92,9 @@ namespace pfasst
             fine_delta[0]->zero();
           }
 
-          fine->get_state(0)->mat_apply(fine_state, 1.0, tmat, fine_delta, false);
+          fine.get_state(0)->mat_apply(fine_state, 1.0, tmat, fine_delta, false);
 
-          for (size_t m = m0; m < nfine; m++) { fine->evaluate(m); }
+          for (size_t m = m0; m < nfine; m++) { fine.evaluate(m); }
         }
 
         virtual void restrict(shared_ptr<ISweeper<time>> dst,
