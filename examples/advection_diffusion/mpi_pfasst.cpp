@@ -61,6 +61,7 @@ int main(int argc, char** argv)
 
   pf.set_comm(&comm);
   pf.set_duration(0.0, nsteps * dt, dt, niters);
+  pf.set_nsweeps({2, 1});
   pf.run();
 
   fftw_cleanup();
