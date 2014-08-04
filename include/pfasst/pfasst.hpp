@@ -54,7 +54,7 @@ namespace pfasst
           auto crse = l.current();
           auto fine = l.fine();
           auto trns = l.transfer();
-          trns->restrict(crse, fine, true, true);
+          trns->restrict_initial(crse, fine);
           crse->spread();
           crse->save();
         }
@@ -63,9 +63,7 @@ namespace pfasst
         predict = true;
         auto crse = this->coarsest().current();
         for (int nstep = 0; nstep < comm->rank() + 1; nstep++) {
-          //          this->set_step(comm->rank());
-          // XXX: set iteration?
-
+          // XXX: set iteration and step?
           perform_sweeps(0);
           if (nstep < comm->rank()) {
             crse->advance();
@@ -121,14 +119,16 @@ namespace pfasst
             }
 
             perform_sweeps(this->nlevels() - 1);
-            // XXX check convergence
+
+            // note: convergence checks belong here...
+
             auto fine = this->get_level(this->nlevels() - 1);
             auto crse = this->get_level(this->nlevels() - 2);
             auto trns = this->get_transfer(this->nlevels() - 1);
 
             int tag = (this->nlevels() - 1) * 10000 + this->get_iteration() + 10;
             fine->send(comm, tag, false);
-            trns->restrict(crse, fine, true, false);
+            trns->restrict(crse, fine, true);
             trns->fas(this->get_time_step(), crse, fine);
             crse->save();
 
@@ -137,7 +137,6 @@ namespace pfasst
             trns->interpolate(fine, crse, true);
             fine->recv(comm, tag, false);
             trns->interpolate_initial(fine, crse);
-            // XXX: call interpolate_q0(pf,F, G)
           }
 
           if (nblock < nblocks - 1) {
@@ -161,7 +160,7 @@ namespace pfasst
         fine->send(comm, tag, false);
 
         auto dt = this->get_time_step();
-        trns->restrict(crse, fine, true, false);
+        trns->restrict(crse, fine, true);
         trns->fas(dt, crse, fine);
         crse->save();
 
@@ -186,7 +185,6 @@ namespace pfasst
 
         int tag = l.level * 10000 + this->get_iteration() + 10;
         fine->recv(comm, tag, false);
-        // XXX          call interpolate_q0(pf,F, G)
         trns->interpolate_initial(fine, crse);
 
         if (l < this->finest()) {

@@ -158,10 +158,10 @@ namespace pfasst
 
 
       /**
-       * Interpolate initial condition (in space) from the coarse sweeper to the fine sweeper.
+       * Interpolate initial condition from the coarse sweeper to the fine sweeper.
        */
-      virtual void interpolate_initial(shared_ptr<ISweeper<time>> dst,
-                                       shared_ptr<const ISweeper<time>> src)
+      virtual void interpolate_initial(shared_ptr<ISweeper<time>> /*dst*/,
+                                       shared_ptr<const ISweeper<time>> /*src*/)
       {
         NotImplementedYet("pfasst");
       }
@@ -178,14 +178,26 @@ namespace pfasst
 
 
       /**
+       * Restrict initial condition from the fine sweeper to the coarse sweeper.
+       * @param[in] restrict_initial
+       *     `true` if the initial condition should also be restricted.
+       */
+      virtual void restrict_initial(shared_ptr<ISweeper<time>> /*dst*/,
+                                    shared_ptr<const ISweeper<time>> /*src*/)
+      {
+        NotImplementedYet("pfasst");
+      }
+
+
+      /**
        * Restrict, in time and space, from the fine sweeper to the coarse sweeper.
        * @param[in] restrict_initial
        *     `true` if the initial condition should also be restricted.
        */
       virtual void restrict(shared_ptr<ISweeper<time>> dst,
                             shared_ptr<const ISweeper<time>> src,
-                            bool restrict_initial = false,
-                            bool restrict_initial_only = false) = 0;
+                            bool restrict_initial = false) = 0;
+
 
       /**
        * Compute FAS correction between the coarse and fine sweepers.
