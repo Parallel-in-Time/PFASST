@@ -33,8 +33,6 @@ namespace pfasst
     {
       public:
         //! @{
-        /**
-         */
         VectorEncapsulation(int size)
           : vector<scalar>(size)
         {
@@ -82,7 +80,8 @@ namespace pfasst
 
         void copy(shared_ptr<const Encapsulation<time>> x) override
         {
-          shared_ptr<const VectorEncapsulation<scalar, time>> x_cast = dynamic_pointer_cast<const VectorEncapsulation<scalar, time>>(x);
+          shared_ptr<const VectorEncapsulation<scalar, time>> x_cast = \
+            dynamic_pointer_cast<const VectorEncapsulation<scalar, time>>(x);
           assert(x_cast);
           this->copy(x_cast);
         }
@@ -96,7 +95,8 @@ namespace pfasst
         //! @{
         void saxpy(time a, shared_ptr<const Encapsulation<time>> x) override
         {
-          shared_ptr<const VectorEncapsulation<scalar, time>> x_cast = dynamic_pointer_cast<const VectorEncapsulation<scalar, time>>(x);
+          shared_ptr<const VectorEncapsulation<scalar, time>> x_cast = \
+            dynamic_pointer_cast<const VectorEncapsulation<scalar, time>>(x);
           assert(x_cast);
 
           this->saxpy(a, x_cast);
@@ -132,7 +132,8 @@ namespace pfasst
           dst_cast[0]->mat_apply(dst_cast, a, mat, src_cast, zero);
         }
 
-        void mat_apply(vector<shared_ptr<VectorEncapsulation<scalar, time>>> dst, time a, matrix<time> mat,
+        void mat_apply(vector<shared_ptr<VectorEncapsulation<scalar, time>>> dst,
+                       time a, matrix<time> mat,
                        vector<shared_ptr<VectorEncapsulation<scalar, time>>> src, bool zero = true)
         {
           size_t ndst = dst.size();
@@ -172,7 +173,8 @@ namespace pfasst
      *     precision of the time points; defaults to pfasst::time_precision
      */
     template<typename scalar, typename time = time_precision>
-    class VectorFactory : public EncapFactory<time>
+    class VectorFactory
+      : public EncapFactory<time>
     {
         int size;
       public:
@@ -202,7 +204,7 @@ namespace pfasst
       return *y.get();
     }
 
-  }
-}
+  }  // ::pfasst::encap
+}  // ::pfasst
 
 #endif

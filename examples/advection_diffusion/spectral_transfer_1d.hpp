@@ -26,7 +26,6 @@ class SpectralTransfer1D
     FFT fft;
 
   public:
-
     void interpolate(shared_ptr<Encapsulation> dst, shared_ptr<const Encapsulation> src) override
     {
       auto& fine = pfasst::encap::as_vector<double, time>(dst);
@@ -63,7 +62,6 @@ class SpectralTransfer1D
         crse[i] = fine[xrat*i];
       }
     }
-
 };
 
 #endif

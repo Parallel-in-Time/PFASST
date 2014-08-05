@@ -220,7 +220,6 @@ class AdvectionDiffusionSweeper
       }
     }
     //! @}
-
 };
 
 #endif

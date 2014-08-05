@@ -161,14 +161,14 @@ namespace pfasst
         UNUSED(initial_only);
         NotImplementedYet("mlsdc/pfasst");
       }
-      //! @}
 
       virtual void spread()
       {
         NotImplementedYet("pfasst");
       }
+      //! @}
 
-      //! {@
+      //! @{
       virtual void post(ICommunicator* comm, int tag)
       {
         UNUSED(comm); UNUSED(tag);
@@ -220,7 +220,6 @@ namespace pfasst
         NotImplementedYet("pfasst");
       }
 
-
       /**
        * Interpolate, in time and space, from the coarse sweeper to the fine sweeper.
        * @param[in] interp_initial
@@ -229,7 +228,6 @@ namespace pfasst
       virtual void interpolate(shared_ptr<ISweeper<time>> dst,
                                shared_ptr<const ISweeper<time>> src,
                                bool interp_initial = false) = 0;
-
 
       /**
        * Restrict, in time and space, from the fine sweeper to the coarse sweeper.
@@ -247,9 +245,8 @@ namespace pfasst
       virtual void fas(time dt, shared_ptr<ISweeper<time>> dst,
                        shared_ptr<const ISweeper<time>> src) = 0;
       //! @}
-
   };
 
-}
+}  // ::pfasst
 
 #endif

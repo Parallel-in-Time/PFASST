@@ -119,13 +119,17 @@ namespace pfasst
           Controller* ts;
 
         public:
+          //! @{
           typedef int                        difference_type;
           typedef shared_ptr<ISweeper<time>> value_type;
           typedef ISweeper<time>*            pointer;
           typedef ISweeper<time>             reference;
           typedef random_access_iterator_tag iterator_category;
+          //! @}
 
+          //! @{
           int level;
+          //! @}
 
           //! @{
           LevelIter(int level, Controller* ts)
@@ -183,7 +187,7 @@ namespace pfasst
       LevelIter coarsest() { return LevelIter(0, this); }
       //! @}
 
-
+      //! @{
       /**
        * Get current time step number.
        */
@@ -238,8 +242,9 @@ namespace pfasst
       {
         return max_iterations;
       }
-
+      //! @}
   };
-}
+
+}  // ::pfasst
 
 #endif

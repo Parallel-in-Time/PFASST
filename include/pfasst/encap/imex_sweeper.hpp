@@ -365,10 +365,9 @@ namespace pfasst
           throw NotImplementedYet("imex (f2comp)");
         }
         //! @}
-
     };
 
-  }
-}
+  }  // ::pfasst::encap
+}  // ::pfasst
 
 #endif
