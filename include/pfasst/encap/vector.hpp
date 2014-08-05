@@ -5,6 +5,7 @@
 #ifndef _PFASST_VECTOR_HPP_
 #define _PFASST_VECTOR_HPP_
 
+#include <cstdlib>
 #include <algorithm>
 #include <memory>
 #include <vector>
@@ -74,12 +75,12 @@ namespace pfasst
         //! @}
 
         //! @{
-        void zero()
+        void zero() override
         {
           this->assign(this->size(), scalar(0.0));
         }
 
-        void copy(shared_ptr<const Encapsulation<time>> x)
+        void copy(shared_ptr<const Encapsulation<time>> x) override
         {
           shared_ptr<const VectorEncapsulation<scalar, time>> x_cast = dynamic_pointer_cast<const VectorEncapsulation<scalar, time>>(x);
           assert(x_cast);
@@ -93,7 +94,7 @@ namespace pfasst
         //! @}
 
         //! @{
-        void saxpy(time a, shared_ptr<const Encapsulation<time>> x)
+        void saxpy(time a, shared_ptr<const Encapsulation<time>> x) override
         {
           shared_ptr<const VectorEncapsulation<scalar, time>> x_cast = dynamic_pointer_cast<const VectorEncapsulation<scalar, time>>(x);
           assert(x_cast);
@@ -113,7 +114,7 @@ namespace pfasst
          *     `dynamic_cast` into pfasst::encap::VectorEncapsulation std::abort is called.
          */
         void mat_apply(vector<shared_ptr<Encapsulation<time>>> dst, time a, matrix<time> mat,
-                       vector<shared_ptr<Encapsulation<time>>> src, bool zero = true)
+                       vector<shared_ptr<Encapsulation<time>>> src, bool zero = true) override
         {
           size_t ndst = dst.size();
           size_t nsrc = src.size();

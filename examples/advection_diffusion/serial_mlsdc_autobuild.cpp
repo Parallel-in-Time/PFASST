@@ -7,8 +7,11 @@
  * controller.
  */
 
-#include <memory>
+#include <cstdlib>
 #include <cassert>
+#include <memory>
+#include <vector>
+#include <string>
 
 #include <fftw3.h>
 
@@ -23,6 +26,7 @@
 using namespace std;
 using namespace pfasst;
 using namespace pfasst::encap;
+
 
 int main(int /*argc*/, char** /*argv*/)
 {

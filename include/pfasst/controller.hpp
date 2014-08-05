@@ -24,18 +24,22 @@ namespace pfasst
   class Controller
   {
     protected:
+      //! @{
       deque<shared_ptr<ISweeper<time>>>  levels;
       deque<shared_ptr<ITransfer<time>>> transfer;
+      //! @}
 
+      //! @{
       size_t step, iteration, max_iterations;
       time t, dt, tend;
+      //! @}
 
     public:
       //! @{
       virtual void setup()
       {
         for (auto l = coarsest(); l <= finest(); ++l) {
-	  l.current()->set_controller(this);
+          l.current()->set_controller(this);
           l.current()->setup();
         }
       }
@@ -75,13 +79,13 @@ namespace pfasst
       template<typename R = ISweeper<time>>
       shared_ptr<R> get_finest()
       {
-	return get_level<R>(nlevels()-1);
+        return get_level<R>(nlevels()-1);
       }
 
       template<typename R = ISweeper<time>>
       shared_ptr<R> get_coarsest()
       {
-	return get_level<R>(0);
+        return get_level<R>(0);
       }
 
       template<typename R = ITransfer<time>>

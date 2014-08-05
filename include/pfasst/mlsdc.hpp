@@ -41,7 +41,7 @@ namespace pfasst
       }
 
     public:
-      void setup()
+      void setup() override
       {
         nsweeps.resize(this->nlevels());
         fill(nsweeps.begin(), nsweeps.end(), 1);

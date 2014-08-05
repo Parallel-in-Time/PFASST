@@ -6,12 +6,16 @@
 #define _SPECTRAL_TRANSFER_1D_HPP_
 
 #include <cassert>
+#include <cstdlib>
 #include <memory>
 
 #include <pfasst/encap/vector.hpp>
 #include <pfasst/encap/poly_interp.hpp>
 
 #include "fft.hpp"
+
+using namespace std;
+
 
 template<typename time = pfasst::time_precision>
 class SpectralTransfer1D
@@ -23,13 +27,13 @@ class SpectralTransfer1D
 
   public:
 
-    void interpolate(shared_ptr<Encapsulation> dst, shared_ptr<const Encapsulation> src)
+    void interpolate(shared_ptr<Encapsulation> dst, shared_ptr<const Encapsulation> src) override
     {
-      auto& fine = as_vector<double,time>(dst);
-      auto& crse = as_vector<double,time>(src);
+      auto& fine = pfasst::encap::as_vector<double, time>(dst);
+      auto& crse = pfasst::encap::as_vector<double, time>(src);
 
-      auto* crse_z = fft.forward(crse);
-      auto* fine_z = fft.get_workspace(fine.size())->z;
+      auto* crse_z = this->fft.forward(crse);
+      auto* fine_z = this->fft.get_workspace(fine.size())->z;
 
       for (size_t i = 0; i < fine.size(); i++) {
         fine_z[i] = 0.0;
@@ -45,13 +49,13 @@ class SpectralTransfer1D
         fine_z[fine.size() - crse.size() / 2 + i] = c * crse_z[crse.size() / 2 + i];
       }
 
-      fft.backward(fine);
+      this->fft.backward(fine);
     }
 
-    void restrict(shared_ptr<Encapsulation> dst, shared_ptr<const Encapsulation> src)
+    void restrict(shared_ptr<Encapsulation> dst, shared_ptr<const Encapsulation> src) override
     {
-      auto& fine = as_vector<double,time>(src);
-      auto& crse = as_vector<double,time>(dst);
+      auto& fine = pfasst::encap::as_vector<double, time>(src);
+      auto& crse = pfasst::encap::as_vector<double, time>(dst);
 
       size_t xrat = fine.size() / crse.size();
 

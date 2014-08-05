@@ -282,8 +282,8 @@ namespace pfasst
         if (abs(num) > 1e-32) {
           mat(i, j) = num / den;
         } else {
-	  mat(i, j) = 0.0;
-	}
+          mat(i, j) = 0.0;
+        }
       }
     }
 
