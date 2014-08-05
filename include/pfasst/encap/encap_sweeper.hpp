@@ -33,6 +33,38 @@ namespace pfasst
         //! @}
 
         //! @{
+        virtual void spread()
+        {
+          for (size_t m = 1; m < nodes.size(); m++) {
+            this->get_state(m)->copy(this->get_state(0));
+          }
+        }
+
+        virtual void post(ICommunicator* comm, int tag)
+        {
+          this->get_state(0)->post(comm, tag);
+        }
+
+        virtual void send(ICommunicator* comm, int tag, bool blocking)
+        {
+          this->get_state(this->get_nodes().size() - 1)->send(comm, tag, blocking);
+        }
+
+        virtual void recv(ICommunicator* comm, int tag, bool blocking)
+        {
+          this->get_state(0)->recv(comm, tag, blocking);
+        }
+
+        virtual void broadcast(ICommunicator* comm)
+        {
+          if (comm->rank() == comm->size() - 1) {
+            this->get_state(0)->copy(this->get_state(this->get_nodes().size() - 1));
+          }
+          this->get_state(0)->broadcast(comm);
+        }
+        //! @}
+
+        //! @{
         void set_nodes(vector<time> nodes)
         {
           this->nodes = nodes;
@@ -55,7 +87,7 @@ namespace pfasst
 
         /**
          * sets solution values at time node index `m`
-         * 
+         *
          * @param[in] u0 values to set
          * @param[in] m 0-based node index
          *
@@ -143,9 +175,9 @@ namespace pfasst
         }
 
         /**
-         * integrates values of right hand side at all time nodes \\( t \\in [0,M-1] \\) 
+         * integrates values of right hand side at all time nodes \\( t \\in [0,M-1] \\)
          * simultaneously
-         * 
+         *
          * @param[in] dt width of the time interval to integrate
          * @param[in,out] dst integrated values
          *
@@ -158,6 +190,23 @@ namespace pfasst
         }
         //! @}
     };
+
+
+    template<typename time>
+    EncapSweeper<time>& as_encap_sweeper(shared_ptr<ISweeper<time>> x)
+    {
+      shared_ptr<EncapSweeper<time>> y = dynamic_pointer_cast<EncapSweeper<time>>(x);
+      assert(y);
+      return *y.get();
+    }
+
+    template<typename time>
+    const EncapSweeper<time>& as_encap_sweeper(shared_ptr<const ISweeper<time>> x)
+    {
+      shared_ptr<const EncapSweeper<time>> y = dynamic_pointer_cast<const EncapSweeper<time>>(x);
+      assert(y);
+      return *y.get();
+    }
 
   }
 

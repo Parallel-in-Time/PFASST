@@ -269,10 +269,14 @@ namespace pfasst
           this->fs_impl[0]->copy(this->fs_impl.back());
         }
 
-        virtual void save() override
+        virtual void save(bool initial_only) override
         {
-          for (size_t m = 0; m < this->previous_us.size(); m++) {
-            this->previous_us[m]->copy(us[m]);
+          if (initial_only) {
+            this->previous_us[0]->copy(us[0]);
+          } else {
+            for (size_t m = 0; m < this->previous_us.size(); m++) {
+              this->previous_us[m]->copy(us[m]);
+            }
           }
         }
 
@@ -301,7 +305,7 @@ namespace pfasst
          * Evaluates the explicit part of the right hand side at the given time.
          *
          * @param[in,out] f_expl_encap Encapsulation to store the evaluated right hand side
-         * @param[in] u_encap Encapsulation storing the solution values to use for computing the 
+         * @param[in] u_encap Encapsulation storing the solution values to use for computing the
          *     explicit part of the right hand side
          * @param[in] t time point of the evaluation
          *
@@ -322,7 +326,7 @@ namespace pfasst
          * collocation node, and on all nodes after restriction or interpolation.
          *
          * @param[in,out] f_impl_encap Encapsulation to store the evaluated right hand side
-         * @param[in] u_encap Encapsulation storing the solution values to use for computing the 
+         * @param[in] u_encap Encapsulation storing the solution values to use for computing the
          *     implicit part of the right hand side
          * @param[in] t time point of the evaluation
          *

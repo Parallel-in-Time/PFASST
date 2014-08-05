@@ -21,6 +21,7 @@ namespace pfasst
   class MLSDC
     : public Controller<time>
   {
+    protected:
       vector<size_t> nsweeps;
       bool predict, initial;
 
@@ -48,6 +49,11 @@ namespace pfasst
           leviter.current()->set_controller(this);
           leviter.current()->setup(leviter != this->finest());
         }
+      }
+
+      void set_nsweeps(vector<size_t> nsweeps)
+      {
+        this->nsweeps = nsweeps;
       }
 
       /**
