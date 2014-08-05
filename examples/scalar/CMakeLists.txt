@@ -1,6 +1,5 @@
 message(STATUS "  scalar")
 include_directories(
-    ${3rdparty_INCLUDES}
     ${pfasst_INCLUDES}
 )
 
