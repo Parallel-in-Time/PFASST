@@ -233,6 +233,15 @@ namespace pfasst
           }
         }
 
+        /**
+         * Spreading initial value to all time nodes.
+         *
+         * This does not simply copy the initial value to all time nodes but carries out a
+         * Crank-Nicolson step, i.e. a SDC sweep without the integral term.
+         * 
+         * @param[in] initial if `true` the explicit and implicit part of the right hand side of the
+         *     ODE get evaluated with the initial value
+         */
         virtual void predict(bool initial)
         {
           const auto   nodes  = this->get_nodes();
