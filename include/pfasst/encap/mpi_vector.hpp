@@ -22,23 +22,35 @@ namespace pfasst
     using namespace pfasst::mpi;
 
     template<typename scalar, typename time = time_precision>
-    class MPIVectorEncapsulation : public VectorEncapsulation<scalar, time>
+    class MPIVectorEncapsulation
+      : public VectorEncapsulation<scalar, time>
     {
-
+        //! @{
         MPI_Request recv_request = MPI_REQUEST_NULL;
         MPI_Request send_request = MPI_REQUEST_NULL;
+        //! @}
 
+        //! @{
         inline MPICommunicator& as_mpi(ICommunicator* comm)
         {
-          auto mpi = dynamic_cast<MPICommunicator*>(comm); assert(mpi);
+          auto mpi = dynamic_cast<MPICommunicator*>(comm);
+          assert(mpi);
           return *mpi;
         }
+        //! @}
 
       public:
+        //! @{
+        MPIVectorEncapsulation(int size)
+          : VectorEncapsulation<scalar, time>(size)
+        {}
 
-        MPIVectorEncapsulation(int size) : VectorEncapsulation<scalar, time>(size) { }
+        virtual ~MPIVectorEncapsulation()
+        {}
+        //! @}
 
-        void post(ICommunicator* comm, int tag)
+        //! @{
+        void post(ICommunicator* comm, int tag) override
         {
           auto& mpi = as_mpi(comm);
           if (mpi.size() == 1) { return; }
@@ -51,7 +63,7 @@ namespace pfasst
           }
         }
 
-        virtual void recv(ICommunicator* comm, int tag, bool blocking)
+        virtual void recv(ICommunicator* comm, int tag, bool blocking) override
         {
           auto& mpi = as_mpi(comm);
           if (mpi.size() == 1) { return; }
@@ -72,7 +84,7 @@ namespace pfasst
           }
         }
 
-        virtual void send(ICommunicator* comm, int tag, bool blocking)
+        virtual void send(ICommunicator* comm, int tag, bool blocking) override
         {
           auto& mpi = as_mpi(comm);
           if (mpi.size() == 1) { return; }
@@ -98,20 +110,22 @@ namespace pfasst
           }
         }
 
-        virtual void broadcast(ICommunicator* comm)
+        virtual void broadcast(ICommunicator* comm) override
         {
           auto& mpi = as_mpi(comm);
-          int err = MPI_Bcast(this->data(), sizeof(scalar) * this->size(), MPI_CHAR, comm->size()-1, mpi.comm);
+          int err = MPI_Bcast(this->data(), sizeof(scalar) * this->size(), MPI_CHAR,
+                              comm->size()-1, mpi.comm);
 
           if (err != MPI_SUCCESS) {
             throw MPIError();
           }
         }
-
+        //! @}
     };
 
     template<typename scalar, typename time = time_precision>
-    class MPIVectorFactory : public EncapFactory<time>
+    class MPIVectorFactory
+      : public EncapFactory<time>
     {
         int size;
       public:
@@ -123,9 +137,7 @@ namespace pfasst
         }
     };
 
-
-
-  }
-}
+  }  // ::pfasst::encap
+}  // ::pfasst
 
 #endif

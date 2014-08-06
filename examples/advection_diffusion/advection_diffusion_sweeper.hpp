@@ -5,12 +5,15 @@
 #ifndef _ADVECTION_DIFFUSION_SWEEPER_HPP_
 #define _ADVECTION_DIFFUSION_SWEEPER_HPP_
 
+#include <cstdlib>
 #include <cassert>
 #include <complex>
 #include <map>
 #include <ostream>
 #include <vector>
+#include <utility>
 
+#include <pfasst/globals.hpp>
 #include <pfasst/encap/imex_sweeper.hpp>
 
 #include "fft.hpp"
@@ -24,42 +27,56 @@ using pfasst::encap::Encapsulation;
 using pfasst::encap::as_vector;
 
 
+/**
+ * errors at different iterations and time nodes
+ * 
+ * Mapping a pair of step/iteration indices onto the error of the solution.
+ */
 typedef map<pair<size_t, size_t>, double> error_map;
 
 template<typename time = pfasst::time_precision>
 class AdvectionDiffusionSweeper
   : public pfasst::encap::IMEXSweeper<time>
 {
+    //! @{
     FFT fft;
-
     vector<complex<double>> ddx, lap;
-    error_map errors;
+    //! @}
 
+    //! @{
+    error_map errors;
+    //! @}
+
+    //! @{
     double v  = 1.0;
     time   t0 = 1.0;
     double nu = 0.02;
     size_t nf1evals = 0;
+    //! @}
 
   public:
+    //! @{
     AdvectionDiffusionSweeper(size_t nvars)
     {
-      ddx.resize(nvars);
-      lap.resize(nvars);
+      this->ddx.resize(nvars);
+      this->lap.resize(nvars);
       for (size_t i = 0; i < nvars; i++) {
         double kx = 2 * PI * ((i <= nvars / 2) ? int(i) : int(i) - int(nvars));
-        ddx[i] = complex<double>(0.0, 1.0) * kx;
-        lap[i] = (kx * kx < 1e-13) ? 0.0 : -kx * kx;
+        this->ddx[i] = complex<double>(0.0, 1.0) * kx;
+        this->lap[i] = (kx * kx < 1e-13) ? 0.0 : -kx * kx;
       }
     }
 
-    ~AdvectionDiffusionSweeper()
+    virtual ~AdvectionDiffusionSweeper()
     {
-      cout << "number of f1 evals: " << nf1evals << endl;
+      cout << "number of f1 evals: " << this->nf1evals << endl;
     }
+    //! @}
 
+    //! @{
     void exact(shared_ptr<Encapsulation<time>> q, time t)
     {
-      this->exact(as_vector<double,time>(q), t);
+      this->exact(as_vector<double, time>(q), t);
     }
 
     void exact(DVectorT& q, time t)
@@ -81,10 +98,10 @@ class AdvectionDiffusionSweeper
 
     void echo_error(time t, bool predict = false)
     {
-      auto& qend = as_vector<double,time>(this->get_end_state());
+      auto& qend = as_vector<double, time>(this->get_end_state());
       DVectorT qex(qend.size());
 
-      exact(qex, t);
+      this->exact(qex, t);
 
       double max = 0.0;
       for (size_t i = 0; i < qend.size(); i++) {
@@ -98,80 +115,111 @@ class AdvectionDiffusionSweeper
            << " (" << qend.size() << ", " << predict << ")"
            << endl;
 
-      errors.insert(pair<pair<size_t, size_t>, double>
-		    (pair<size_t, size_t>(n, k), max));
+      this->errors.insert(pair<pair<size_t, size_t>, double>(pair<size_t, size_t>(n, k), max));
     }
 
+    /**
+     * retrieve errors at iterations and time nodes
+     */
     error_map get_errors()
     {
-      return errors;
+      return this->errors;
     }
+    //! @}
 
-    void predict(bool initial)
+    //! @{
+    /**
+     * @copybrief pfasst::encap::IMEXSweeper::predict()
+     */
+    void predict(bool initial) override
     {
       pfasst::encap::IMEXSweeper<time>::predict(initial);
       time t  = this->get_controller()->get_time();
       time dt = this->get_controller()->get_time_step();
-      echo_error(t + dt, true);
+      this->echo_error(t + dt, true);
     }
 
-    void sweep()
+    /**
+     * @copybrief pfasst::encap::IMEXSweeper::sweep()
+     */
+    void sweep() override
     {
       pfasst::encap::IMEXSweeper<time>::sweep();
       time t  = this->get_controller()->get_time();
       time dt = this->get_controller()->get_time_step();
-      echo_error(t + dt);
+      this->echo_error(t + dt);
     }
+    //! @}
 
-    void f1eval(shared_ptr<Encapsulation<time>> _f, shared_ptr<Encapsulation<time>> _q, time /*t*/)
+    //! @{
+    /**
+     * @copybrief pfasst::encap::IMEXSweeper::f_expl_eval()
+     */
+    void f_expl_eval(shared_ptr<Encapsulation<time>> f_expl_encap,
+                     shared_ptr<Encapsulation<time>> u_encap,
+                     time t) override
     {
-      auto& q = as_vector<double,time>(_q);
-      auto& f = as_vector<double,time>(_f);
+      UNUSED(t);
+      auto& u = as_vector<double, time>(u_encap);
+      auto& f_expl = as_vector<double, time>(f_expl_encap);
 
-      double c = -v / double(q.size());
+      double c = -v / double(u.size());
 
-      auto* z = fft.forward(q);
-      for (size_t i = 0; i < q.size(); i++) {
-        z[i] *= c * ddx[i];
+      auto* z = this->fft.forward(u);
+      for (size_t i = 0; i < u.size(); i++) {
+        z[i] *= c * this->ddx[i];
       }
-      fft.backward(f);
+      this->fft.backward(f_expl);
 
-      nf1evals++;
+      this->nf1evals++;
     }
 
-    void f2eval(shared_ptr<Encapsulation<time>> _f, shared_ptr<Encapsulation<time>> _q, time /*t*/)
+    /**
+     * @copybrief pfasst::encap::IMEXSweeper::f_impl_eval()
+     */
+    void f_impl_eval(shared_ptr<Encapsulation<time>> f_impl_encap,
+                     shared_ptr<Encapsulation<time>> u_encap,
+                     time t) override
     {
-      auto& q = as_vector<double,time>(_q);
-      auto& f = as_vector<double,time>(_f);
+      UNUSED(t);
+      auto& u = as_vector<double, time>(u_encap);
+      auto& f_impl = as_vector<double, time>(f_impl_encap);
 
-      double c = nu / double(q.size());
+      double c = nu / double(u.size());
 
-      auto* z = fft.forward(q);
-      for (size_t i = 0; i < q.size(); i++) {
-        z[i] *= c * lap[i];
+      auto* z = this->fft.forward(u);
+      for (size_t i = 0; i < u.size(); i++) {
+        z[i] *= c * this->lap[i];
       }
-      fft.backward(f);
+      this->fft.backward(f_impl);
     }
 
-    void f2comp(shared_ptr<Encapsulation<time>> _f, shared_ptr<Encapsulation<time>> _q, time /*t*/, time dt,
-                shared_ptr<Encapsulation<time>> _rhs)
+    /**
+     * @copybrief pfasst::encap::IMEXSweeper::impl_solve()
+     */
+    void impl_solve(shared_ptr<Encapsulation<time>> f_impl_encap,
+                    shared_ptr<Encapsulation<time>> u_encap,
+                    time t, time dt,
+                    shared_ptr<Encapsulation<time>> rhs_encap) override
     {
-      auto& q = as_vector<double,time>(_q);
-      auto& f = as_vector<double,time>(_f);
-      auto& rhs = as_vector<double,time>(_rhs);
+      UNUSED(t);
+      auto& u = as_vector<double, time>(u_encap);
+      auto& f_impl = as_vector<double, time>(f_impl_encap);
+      auto& rhs = as_vector<double, time>(rhs_encap);
 
-      auto* z = fft.forward(rhs);
-      for (size_t i = 0; i < q.size(); i++) {
-        z[i] /= (1.0 - nu * double(dt) * lap[i]) * double(q.size());
+      double c = nu * double(dt);
+
+      auto* z = this->fft.forward(rhs);
+      for (size_t i = 0; i < u.size(); i++) {
+        z[i] /= (1.0 - c * this->lap[i]) * double(u.size());
       }
-      fft.backward(q);
+      this->fft.backward(u);
 
-      for (size_t i = 0; i < q.size(); i++) {
-        f[i] = (q[i] - rhs[i]) / double(dt);
+      for (size_t i = 0; i < u.size(); i++) {
+        f_impl[i] = (u[i] - rhs[i]) / double(dt);
       }
-
     }
-
+    //! @}
 };
 
 #endif

@@ -4,6 +4,7 @@
  * This example uses a vanilla SDC sweeper.
  */
 
+#include <cstdlib>
 #include <memory>
 
 #include <fftw3.h>

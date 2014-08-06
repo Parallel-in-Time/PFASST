@@ -9,6 +9,7 @@
 #include <cassert>
 #include <memory>
 
+#include "../globals.hpp"
 #include "../interfaces.hpp"
 #include "encap_sweeper.hpp"
 
@@ -21,14 +22,21 @@ namespace pfasst
     class PolyInterpMixin
       : public pfasst::ITransfer<time>
     {
-        using EncapVecT = vector<shared_ptr<Encapsulation<time>>>;
-        matrix<time> tmat, fmat;
+        //! @{
+        typedef vector<shared_ptr<Encapsulation<time>>> EncapVecT;
+        matrix<time> tmat;
+        matrix<time> fmat;
+        //! @}
 
       public:
-        virtual ~PolyInterpMixin() { }
+        //! @{
+        virtual ~PolyInterpMixin()
+        {}
+        //! @}
 
+        //! @{
         virtual void interpolate_initial(shared_ptr<ISweeper<time>> dst,
-                                         shared_ptr<const ISweeper<time>> src)
+                                         shared_ptr<const ISweeper<time>> src) override
         {
           auto& fine = as_encap_sweeper(dst);
           auto& crse = as_encap_sweeper(src);
@@ -49,7 +57,7 @@ namespace pfasst
 
         virtual void interpolate(shared_ptr<ISweeper<time>> dst,
                                  shared_ptr<const ISweeper<time>> src,
-                                 bool interp_initial)
+                                 bool interp_initial) override
         {
           auto& fine = as_encap_sweeper(dst);
           auto& crse = as_encap_sweeper(src);
@@ -97,14 +105,22 @@ namespace pfasst
           for (size_t m = m0; m < nfine; m++) { fine.evaluate(m); }
         }
 
+        // required for interp/restrict helpers
+        virtual void interpolate(shared_ptr<Encapsulation<time>> /*dst*/,
+                                 shared_ptr<const Encapsulation<time>> /*src*/)
+        {
+          throw NotImplementedYet("mlsdc/pfasst");
+        }
+
         virtual void restrict(shared_ptr<ISweeper<time>> dst,
                               shared_ptr<const ISweeper<time>> src,
                               bool restrict_initial,
-                              bool restrict_initial_only)
+                              bool restrict_initial_only) override
         {
           shared_ptr<EncapSweeper<time>> crse = dynamic_pointer_cast<EncapSweeper<time>>(dst);
           assert(crse);
-          shared_ptr<const EncapSweeper<time>> fine = dynamic_pointer_cast<const EncapSweeper<time>>(src);
+          shared_ptr<const EncapSweeper<time>> fine = \
+            dynamic_pointer_cast<const EncapSweeper<time>>(src);
           assert(fine);
 
           this->restrict(crse, fine, restrict_initial, restrict_initial_only);
@@ -140,12 +156,20 @@ namespace pfasst
           for (size_t m = m0; m < ncrse; m++) { crse->evaluate(m); }
         }
 
+        virtual void restrict(shared_ptr<Encapsulation<time>> dst,
+                              shared_ptr<const Encapsulation<time>> src)
+        {
+          UNUSED(dst); UNUSED(src);
+          throw NotImplementedYet("mlsdc/pfasst");
+        }
+
         virtual void fas(time dt, shared_ptr<ISweeper<time>> dst,
-                         shared_ptr<const ISweeper<time>> src)
+                         shared_ptr<const ISweeper<time>> src) override
         {
           shared_ptr<EncapSweeper<time>> crse = dynamic_pointer_cast<EncapSweeper<time>>(dst);
           assert(crse);
-          shared_ptr<const EncapSweeper<time>> fine = dynamic_pointer_cast<const EncapSweeper<time>>(src);
+          shared_ptr<const EncapSweeper<time>> fine = \
+            dynamic_pointer_cast<const EncapSweeper<time>>(src);
           assert(fine);
 
           this->fas(dt, crse, fine);
@@ -207,23 +231,10 @@ namespace pfasst
 
           tau[0]->mat_apply(tau, 1.0, fmat, rstr_and_crse, true);
         }
-
-        // required for interp/restrict helpers
-        virtual void interpolate(shared_ptr<Encapsulation<time>> /*dst*/,
-                                 shared_ptr<const Encapsulation<time>> /*src*/)
-        {
-          throw NotImplementedYet("mlsdc/pfasst");
-        }
-
-        virtual void restrict(shared_ptr<Encapsulation<time>> /*dst*/,
-                              shared_ptr<const Encapsulation<time>> /*src*/)
-        {
-          throw NotImplementedYet("mlsdc/pfasst");
-        }
-
+        //! @}
     };
 
-  }
-}
+  }  // ::pfasst::encap
+}  // ::pfasst
 
 #endif
