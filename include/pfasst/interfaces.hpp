@@ -12,6 +12,8 @@
 #include <memory>
 #include <string>
 
+#include "globals.hpp"
+
 using namespace std;
 
 namespace pfasst
@@ -19,6 +21,7 @@ namespace pfasst
 
   using time_precision = double;
 
+  // forward declare for ISweeper
   template<typename time>
   class Controller;
 
@@ -32,12 +35,16 @@ namespace pfasst
   {
       string msg;
     public:
-      NotImplementedYet(string msg) : msg(msg) { }
+      NotImplementedYet(string msg)
+        : msg(msg)
+      {}
+
       const char* what() const throw()
       {
         return (string("Not implemented/supported yet, required for: ") + this->msg).c_str();
       }
   };
+
 
   /**
    * value exception.
@@ -48,7 +55,10 @@ namespace pfasst
   {
       string msg;
     public:
-      ValueError(string msg) : msg(msg) { }
+      ValueError(string msg)
+        : msg(msg)
+      {}
+
       const char* what() const throw()
       {
         return (string("ValueError: ") + this->msg).c_str();
@@ -71,32 +81,42 @@ namespace pfasst
   template<typename time = time_precision>
   class ISweeper
   {
+    protected:
       Controller<time>* controller;
 
     public:
-      virtual ~ISweeper() { }
+      //! @{
+      virtual ~ISweeper()
+      {}
+      //! @}
 
+      //! @{
       /**
        * set the sweepers controller.
        */
       void set_controller(Controller<time>* ctrl)
       {
-        controller = ctrl;
+        this->controller = ctrl;
       }
 
       Controller<time>* get_controller()
       {
-        assert(controller);
-        return controller;
+        assert(this->controller);
+        return this->controller;
       }
+      //! @}
 
+      //! @{
       /**
        * setup (allocate etc) the sweeper.
        * @param[in] coarse
        *     `true` if this sweeper exists on a coarsened MLSDC or PFASST level.
        *     This implies that space for an FAS correction and "saved" solutions are necessary.
        */
-      virtual void setup(bool coarse = false) { (void) coarse; }
+      virtual void setup(bool coarse = false)
+      {
+        UNUSED(coarse);
+      }
 
       /**
        * perform a predictor sweep.
@@ -131,17 +151,47 @@ namespace pfasst
       /**
        * Save states (and/or function values) at all nodes.
        *
-       * This is typically done in MLSDC/PFASST immediately after a call to restrict.  The saved
-       * states are used to compute deltas during interpolation.
+       * This is typically done in MLSDC/PFASST immediately after a call to restrict.
+       * The saved states are used to compute deltas during interpolation.
+       *
+       * @note This method must be implemented in derived sweepers.
        */
-      virtual void save(bool initial_only = false) { (void) initial_only; NotImplementedYet("mlsdc/pfasst"); }
+      virtual void save(bool initial_only=false)
+      {
+        UNUSED(initial_only);
+        NotImplementedYet("mlsdc/pfasst");
+      }
 
-      virtual void spread() { NotImplementedYet("pfasst"); }
+      virtual void spread()
+      {
+        NotImplementedYet("pfasst");
+      }
+      //! @}
 
-      virtual void post(ICommunicator* /*comm*/, int /*tag*/) { };
-      virtual void send(ICommunicator* /*comm*/, int /*tag*/, bool /*blocking*/) { NotImplementedYet("pfasst"); }
-      virtual void recv(ICommunicator* /*comm*/, int /*tag*/, bool /*blocking*/) { NotImplementedYet("pfasst"); }
-      virtual void broadcast(ICommunicator* /*comm*/) { NotImplementedYet("pfasst"); }
+      //! @{
+      virtual void post(ICommunicator* comm, int tag)
+      {
+        UNUSED(comm); UNUSED(tag);
+      };
+
+      virtual void send(ICommunicator* comm, int tag, bool blocking)
+      {
+        UNUSED(comm); UNUSED(tag); UNUSED(blocking);
+        NotImplementedYet("pfasst");
+      }
+
+      virtual void recv(ICommunicator* comm, int tag, bool blocking)
+      {
+        UNUSED(comm); UNUSED(tag); UNUSED(blocking);
+        NotImplementedYet("pfasst");
+      }
+
+      virtual void broadcast(ICommunicator* comm)
+      {
+        UNUSED(comm);
+        NotImplementedYet("pfasst");
+      }
+      //! @}
 
   };
 
@@ -154,18 +204,21 @@ namespace pfasst
   class ITransfer
   {
     public:
-      virtual ~ITransfer() { }
+      //! @{
+      virtual ~ITransfer()
+      {}
+      //! @}
 
-
+      //! @{
       /**
        * Interpolate initial condition from the coarse sweeper to the fine sweeper.
        */
-      virtual void interpolate_initial(shared_ptr<ISweeper<time>> /*dst*/,
-                                       shared_ptr<const ISweeper<time>> /*src*/)
+      virtual void interpolate_initial(shared_ptr<ISweeper<time>> dst,
+                                       shared_ptr<const ISweeper<time>> src)
       {
+        UNUSED(dst); UNUSED(src);
         NotImplementedYet("pfasst");
       }
-
 
       /**
        * Interpolate, in time and space, from the coarse sweeper to the fine sweeper.
@@ -176,15 +229,15 @@ namespace pfasst
                                shared_ptr<const ISweeper<time>> src,
                                bool interp_initial = false) = 0;
 
-
       /**
        * Restrict initial condition from the fine sweeper to the coarse sweeper.
        * @param[in] restrict_initial
        *     `true` if the initial condition should also be restricted.
        */
-      virtual void restrict_initial(shared_ptr<ISweeper<time>> /*dst*/,
-                                    shared_ptr<const ISweeper<time>> /*src*/)
+      virtual void restrict_initial(shared_ptr<ISweeper<time>> dst,
+                                    shared_ptr<const ISweeper<time>> src)
       {
+        UNUSED(dst); UNUSED(src);
         NotImplementedYet("pfasst");
       }
 
@@ -204,9 +257,9 @@ namespace pfasst
        */
       virtual void fas(time dt, shared_ptr<ISweeper<time>> dst,
                        shared_ptr<const ISweeper<time>> src) = 0;
-
+      //! @}
   };
 
-}
+}  // ::pfasst
 
 #endif

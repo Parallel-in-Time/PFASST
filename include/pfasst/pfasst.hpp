@@ -13,7 +13,8 @@ namespace pfasst
 {
 
   template<typename time = pfasst::time_precision>
-  class PFASST : public MLSDC<time>
+  class PFASST
+    : public MLSDC<time>
   {
       ICommunicator* comm;
 
@@ -36,7 +37,6 @@ namespace pfasst
       }
 
     public:
-
       void set_comm(ICommunicator* comm)
       {
         this->comm = comm;
@@ -221,9 +221,8 @@ namespace pfasst
         }
         return l;
       }
-
   };
 
-}
+}  // ::pfasst
 
 #endif

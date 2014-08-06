@@ -8,6 +8,7 @@
 #include <vector>
 #include <memory>
 
+#include "../globals.hpp"
 #include "../interfaces.hpp"
 #include "../quadrature.hpp"
 
@@ -33,25 +34,32 @@ namespace pfasst
     {
       public:
         //! @{
-        virtual ~Encapsulation() { }
+        virtual ~Encapsulation()
+        {}
         //! @}
 
         //! @{
         // required for time-parallel communications
-        virtual void post(ICommunicator* /*comm*/, int /*tag*/) { }
-
-        virtual void send(ICommunicator* /*comm*/, int /*tag*/, bool /*blocking*/)
+        virtual void post(ICommunicator* comm, int tag)
         {
+          UNUSED(comm); UNUSED(tag);
+        }
+
+        virtual void send(ICommunicator* comm, int tag, bool blocking)
+        {
+          UNUSED(comm); UNUSED(tag); UNUSED(blocking);
           throw NotImplementedYet("pfasst");
         }
 
-        virtual void recv(ICommunicator* /*comm*/, int /*tag*/, bool /*blocking*/)
+        virtual void recv(ICommunicator* comm, int tag, bool blocking)
         {
+          UNUSED(comm); UNUSED(tag); UNUSED(blocking);
           throw NotImplementedYet("pfasst");
         }
 
-        virtual void broadcast(ICommunicator* /*comm*/)
+        virtual void broadcast(ICommunicator* comm)
         {
+          UNUSED(comm);
           throw NotImplementedYet("pfasst");
         }
         //! @}
@@ -76,8 +84,9 @@ namespace pfasst
          * Here, \\(a\\) is a time point and \\(x\\) another data structure (usually of the
          * same type).
          */
-        virtual void saxpy(time /*a*/, shared_ptr<const Encapsulation<time>> /*x*/)
+        virtual void saxpy(time a, shared_ptr<const Encapsulation<time>> x)
         {
+          UNUSED(a); UNUSED(x);
           throw NotImplementedYet("encap");
         }
 
@@ -113,7 +122,7 @@ namespace pfasst
         virtual shared_ptr<Encapsulation<time>> create(const EncapType) = 0;
     };
 
-  }
-}
+  }  // ::pfasst::encap
+} // ::pfasst
 
 #endif

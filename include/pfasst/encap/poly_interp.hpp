@@ -9,6 +9,7 @@
 #include <cassert>
 #include <memory>
 
+#include "../globals.hpp"
 #include "../interfaces.hpp"
 #include "encap_sweeper.hpp"
 
@@ -21,13 +22,19 @@ namespace pfasst
     class PolyInterpMixin
       : public pfasst::ITransfer<time>
     {
-        using EncapVecT = vector<shared_ptr<Encapsulation<time>>>;
-        matrix<time> tmat, fmat;
+        //! @{
+        typedef vector<shared_ptr<Encapsulation<time>>> EncapVecT;
+        matrix<time> tmat;
+        matrix<time> fmat;
+        //! @}
 
       public:
-        virtual ~PolyInterpMixin() { }
+        //! @{
+        virtual ~PolyInterpMixin()
+        {}
+        //! @}
 
-
+        //! @{
         virtual void interpolate_initial(shared_ptr<ISweeper<time>> dst,
                                          shared_ptr<const ISweeper<time>> src) override
         {
@@ -89,6 +96,16 @@ namespace pfasst
         }
 
 
+        virtual void interpolate(shared_ptr<Encapsulation<time>> dst,
+                                 shared_ptr<const Encapsulation<time>> src)
+        {
+          UNUSED(dst); UNUSED(src);
+          throw NotImplementedYet("mlsdc/pfasst");
+        }
+        //! @}
+
+
+        //! @{
         virtual void restrict_initial(shared_ptr<ISweeper<time>> dst,
                                       shared_ptr<const ISweeper<time>> src) override
         {
@@ -126,11 +143,19 @@ namespace pfasst
         }
 
 
+        virtual void restrict(shared_ptr<Encapsulation<time>> dst,
+                              shared_ptr<const Encapsulation<time>> src)
+        {
+          UNUSED(dst); UNUSED(src);
+          throw NotImplementedYet("mlsdc/pfasst");
+        }
+        //! @}
+
         virtual void fas(time dt, shared_ptr<ISweeper<time>> dst,
                          shared_ptr<const ISweeper<time>> src) override
         {
-          auto& crse = as_encap_sweeper(dst);
-          auto& fine = as_encap_sweeper(src);
+          auto& crse = pfasst::encap::as_encap_sweeper(dst);
+          auto& fine = pfasst::encap::as_encap_sweeper(src);
 
           size_t ncrse = crse.get_nodes().size(); assert(ncrse >= 1);
           size_t nfine = fine.get_nodes().size(); assert(nfine >= 1);
@@ -186,22 +211,9 @@ namespace pfasst
           tau[0]->mat_apply(tau, 1.0, fmat, rstr_and_crse, true);
         }
 
-        // required for interp/restrict helpers
-        virtual void interpolate(shared_ptr<Encapsulation<time>> /*dst*/,
-                                 shared_ptr<const Encapsulation<time>> /*src*/)
-        {
-          throw NotImplementedYet("mlsdc/pfasst");
-        }
-
-        virtual void restrict(shared_ptr<Encapsulation<time>> /*dst*/,
-                              shared_ptr<const Encapsulation<time>> /*src*/)
-        {
-          throw NotImplementedYet("mlsdc/pfasst");
-        }
-
     };
 
-  }
-}
+  }  // ::pfasst::encap
+}  // ::pfasst
 
 #endif
