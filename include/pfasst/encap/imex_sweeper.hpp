@@ -26,13 +26,14 @@ namespace pfasst
      *
      * Given an ODE \\( \\frac{\\partial}{\\partial t}u(t) = F(t,u) \\) where the function of the
      * right hand side \\( F(t,u) \\) can be split into a non-stiff and a stiff part.
-     * To reduce complexity and computational efford one would want to solve the non-stiff part
+     * To reduce complexity and computational effort one would want to solve the non-stiff part
      * explicitly and the stiff part implicitly.
      * Therefore, we define the splitting \\( F(t,u) = F_{expl}(t,u) + F_{impl}(t,u) \\).
      *
-     * This sweeper provides an interface for such ODEs were the implicit part can be computed by
-     * an external implicit solver without actually evaluating \\( F_{impl}(t,u) \\), which is
-     * possibly very expensive.
+     * This sweeper requires three interfaces to be implement for such ODEs: two routines to 
+     * evaluate the explicit \\( F_{\\rm expl} \\) and implicit \\( F_{\\rm impl} \\) pieces for a 
+     * given state, and one that solves (perhaps with an external solver) the backward-Euler 
+     * equation \\( U^{n+1} - \\Delta t F_{\\rm impl}(U^{n+1}) = RHS \\) for \\( U^{n+1} \\).
      *
      * @tparam time precision type of the time dimension
      */
@@ -46,13 +47,13 @@ namespace pfasst
          * solution values \\( u(\\tau) \\) at all time nodes \\( \\tau \\in [0, M-1] \\) of the
          * current iteration
          */
-        vector<shared_ptr<Encapsulation<time>>> us;
+        vector<shared_ptr<Encapsulation<time>>> u_state;
 
         /**
          * solution values \\( u(t) \\) at all time nodes \\( t \\in [0, M-1] \\) of the
          * previous iteration
          */
-        vector<shared_ptr<Encapsulation<time>>> previous_us;
+        vector<shared_ptr<Encapsulation<time>>> previous_u_state;
 
         /**
          * node-to-node integrated values of \\( F(t,u) \\) at all time nodes \\( t \\in
@@ -109,12 +110,12 @@ namespace pfasst
         //! @{
         virtual void set_state(shared_ptr<const Encapsulation<time>> u0, size_t m) override
         {
-          this->us[m]->copy(u0);
+          this->u_state[m]->copy(u0);
         }
 
         virtual shared_ptr<Encapsulation<time>> get_state(size_t m) const override
         {
-          return this->us[m];
+          return this->u_state[m];
         }
 
         virtual shared_ptr<Encapsulation<time>> get_tau(size_t m) const override
@@ -124,7 +125,7 @@ namespace pfasst
 
         virtual shared_ptr<Encapsulation<time>> get_saved_state(size_t m) const override
         {
-          return this->previous_us[m];
+          return this->previous_u_state[m];
         }
         //! @}
 
@@ -185,9 +186,9 @@ namespace pfasst
           }
 
           for (size_t m = 0; m < nodes.size(); m++) {
-            this->us.push_back(this->get_factory()->create(pfasst::encap::solution));
+            this->u_state.push_back(this->get_factory()->create(pfasst::encap::solution));
             if (coarse) {
-              this->previous_us.push_back(this->get_factory()->create(pfasst::encap::solution));
+              this->previous_u_state.push_back(this->get_factory()->create(pfasst::encap::solution));
             }
             this->fs_expl.push_back(this->get_factory()->create(pfasst::encap::function));
             this->fs_impl.push_back(this->get_factory()->create(pfasst::encap::function));
@@ -211,18 +212,18 @@ namespace pfasst
           time t  = this->get_controller()->get_time();
 
           if (initial) {
-            this->f_expl_eval(this->fs_expl[0], this->us[0], t);
-            this->f_impl_eval(this->fs_impl[0], this->us[0], t);
+            this->f_expl_eval(this->fs_expl[0], this->u_state[0], t);
+            this->f_impl_eval(this->fs_impl[0], this->u_state[0], t);
           }
 
           shared_ptr<Encapsulation<time>> rhs = this->get_factory()->create(pfasst::encap::solution);
 
           for (size_t m = 0; m < nnodes - 1; m++) {
             time ds = dt * (nodes[m + 1] - nodes[m]);
-            rhs->copy(this->us[m]);
+            rhs->copy(this->u_state[m]);
             rhs->saxpy(ds, this->fs_expl[m]);
-            this->impl_solve(this->fs_impl[m + 1], this->us[m + 1], t, ds, rhs);
-            this->f_expl_eval(this->fs_expl[m + 1], this->us[m + 1], t + ds);
+            this->impl_solve(this->fs_impl[m + 1], this->u_state[m + 1], t, ds, rhs);
+            this->f_expl_eval(this->fs_expl[m + 1], this->u_state[m + 1], t + ds);
 
             t += ds;
           }
@@ -252,11 +253,11 @@ namespace pfasst
           for (size_t m = 0; m < nnodes - 1; m++) {
             time ds = dt * (nodes[m + 1] - nodes[m]);
 
-            rhs->copy(this->us[m]);
+            rhs->copy(this->u_state[m]);
             rhs->saxpy(ds, this->fs_expl[m]);
             rhs->saxpy(1.0, this->s_integrals[m]);
-            this->impl_solve(this->fs_impl[m + 1], this->us[m + 1], t, ds, rhs);
-            this->f_expl_eval(this->fs_expl[m + 1], this->us[m + 1], t + ds);
+            this->impl_solve(this->fs_impl[m + 1], this->u_state[m + 1], t, ds, rhs);
+            this->f_expl_eval(this->fs_expl[m + 1], this->u_state[m + 1], t + ds);
 
             t += ds;
           }
@@ -264,7 +265,7 @@ namespace pfasst
 
         virtual void advance() override
         {
-          this->us[0]->copy(this->us.back());
+          this->u_state[0]->copy(this->u_state.back());
           this->fs_expl[0]->copy(this->fs_expl.back());
           this->fs_impl[0]->copy(this->fs_impl.back());
         }
@@ -272,10 +273,10 @@ namespace pfasst
         virtual void save(bool initial_only) override
         {
           if (initial_only) {
-            this->previous_us[0]->copy(us[0]);
+            this->previous_u_state[0]->copy(u_state[0]);
           } else {
-            for (size_t m = 0; m < this->previous_us.size(); m++) {
-              this->previous_us[m]->copy(us[m]);
+            for (size_t m = 0; m < this->previous_u_state.size(); m++) {
+              this->previous_u_state[m]->copy(u_state[m]);
             }
           }
         }
@@ -283,8 +284,8 @@ namespace pfasst
         virtual void evaluate(size_t m) override
         {
           time t = this->get_nodes()[m]; // XXX
-          this->f_expl_eval(this->fs_expl[m], this->us[m], t);
-          this->f_impl_eval(this->fs_impl[m], this->us[m], t);
+          this->f_expl_eval(this->fs_expl[m], this->u_state[m], t);
+          this->f_impl_eval(this->fs_impl[m], this->u_state[m], t);
         }
 
         /**
@@ -302,11 +303,11 @@ namespace pfasst
 
         //! @{
         /**
-         * Evaluates the explicit part of the right hand side at the given time.
+         * Evaluates the explicit part of the right hand side of the ODE at the given time.
          *
          * @param[in,out] f_expl_encap Encapsulation to store the evaluated right hand side
          * @param[in] u_encap Encapsulation storing the solution values to use for computing the
-         *     explicit part of the right hand side
+         *     explicit part of the right hand side of the ODE
          * @param[in] t time point of the evaluation
          *
          * @note This method must be implemented in derived sweepers.
@@ -320,14 +321,14 @@ namespace pfasst
         }
 
         /**
-         * Evaluates the implicit part of the right hand side at the given time.
+         * Evaluates the implicit part of the right hand side of the ODE at the given time.
          *
          * This is typically called to compute the implicit part of the right hand side at the first
          * collocation node, and on all nodes after restriction or interpolation.
          *
          * @param[in,out] f_impl_encap Encapsulation to store the evaluated right hand side
          * @param[in] u_encap Encapsulation storing the solution values to use for computing the
-         *     implicit part of the right hand side
+         *     implicit part of the right hand side of the ODE
          * @param[in] t time point of the evaluation
          *
          * @note This method must be implemented in derived sweepers.
@@ -341,18 +342,18 @@ namespace pfasst
         }
 
         /**
-         * Solves \\( U - \\Delta t f_{\\rm impl}(U) = RHS \\) for \\(U\\).
+         * Solves \\( U - \\Delta t f_{\\rm impl}(U) = RHS \\) for \\( U \\).
          *
          * During an IMEX SDC sweep, the correction equation is evolved using a forward-Euler
          * stepper for the explicit piece, and a backward-Euler stepper for the implicit piece.
          * This routine (implemented by the user) performs the solve required to perform one
-         * backward-Euler sub-step, and also returns \\(f_{\\rm impl}(U)\\).
+         * backward-Euler sub-step, and also returns \\( f_{\\rm impl}(U) \\).
          *
          * @param[in,out] f_encap Encapsulation to store the evaluated right hand side
          * @param[in,out] u_encap Encapsulation to store the solution of the backward-Euler sub-step
-         * @param[in] t time point (of \\(RHS\\))
-         * @param[in] dt sub-step size to the previous time point (\\(\\Delta t \\))
-         * @param[in] rhs_encap Encapsulation storing \\(RHS\\)
+         * @param[in] t time point (of \\( RHS \\))
+         * @param[in] dt sub-step size to the previous time point (\\( \\Delta t \\))
+         * @param[in] rhs_encap Encapsulation storing \\( RHS \\)
          *
          * @note This method must be implemented in derived sweepers.
          */
