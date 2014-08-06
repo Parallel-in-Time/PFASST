@@ -72,7 +72,6 @@ class FFT
         x[i] = real(wk->z[i]);
       }
     }
-
 };
 
 #endif

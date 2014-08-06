@@ -9,6 +9,8 @@
 
 #include <mpi.h>
 
+#include "interfaces.hpp"
+
 using namespace std;
 
 namespace pfasst
@@ -16,7 +18,8 @@ namespace pfasst
   namespace mpi
   {
 
-    class MPIError : public exception
+    class MPIError
+      : public exception
     {
       public:
         const char* what() const throw()
@@ -26,29 +29,46 @@ namespace pfasst
     };
 
 
-    class MPICommunicator : public ICommunicator
+    class MPICommunicator
+      : public ICommunicator
     {
-        int _rank, _size;
+        //! @{
+        int _rank;
+        int _size;
+        //! @}
+
       public:
+        //! @{
         MPI_Comm comm;
+        //! @}
 
-        MPICommunicator(MPI_Comm comm) { set_comm(comm); }
-        MPICommunicator() { }
+        //! @{
+        MPICommunicator()
+        {}
 
+        MPICommunicator(MPI_Comm comm)
+        {
+          set_comm(comm);
+        }
+
+        virtual ~MPICommunicator()
+        {}
+        //! @}
+
+        //! @{
         void set_comm(MPI_Comm comm)
         {
           this->comm = comm;
-          MPI_Comm_size(this->comm, &_size);
-          MPI_Comm_rank(this->comm, &_rank);
+          MPI_Comm_size(this->comm, &(this->_size));
+          MPI_Comm_rank(this->comm, &(this->_rank));
         }
 
-        int size() { return _size; }
-        int rank() { return _rank; }
-
+        int size() { return this->_size; }
+        int rank() { return this->_rank; }
+        //! @
     };
 
-  }
-
-}
+  }  // ::pfasst::mpi
+}  // ::pfasst
 
 #endif

@@ -29,7 +29,8 @@ namespace pfasst
       vector<CoeffT> c;
 
     public:
-      Polynomial(size_t n) : c(n)
+      Polynomial(size_t n)
+        : c(n)
       {
         fill(c.begin(), c.end(), 0.0);
       }
@@ -166,14 +167,12 @@ namespace pfasst
     vector<node> nodes(nnodes);
 
     if (qtype == "gauss-legendre") {
-
       auto roots = Polynomial<node>::legendre(nnodes).roots();
       for (size_t j = 0; j < nnodes; j++) {
         nodes[j] = 0.5 * (1.0 + roots[j]);
       }
 
     } else if (qtype == "gauss-lobatto") {
-
       auto roots = Polynomial<node>::legendre(nnodes - 1).differentiate().roots();
       assert(nnodes >= 2);
       for (size_t j = 0; j < nnodes - 2; j++) {
@@ -183,7 +182,6 @@ namespace pfasst
       nodes.back() = 1.0;
 
     } else if (qtype == "gauss-radau") {
-
       auto l   = Polynomial<node>::legendre(nnodes);
       auto lm1 = Polynomial<node>::legendre(nnodes - 1);
       for (size_t i = 0; i < nnodes; i++) {
@@ -196,21 +194,17 @@ namespace pfasst
       nodes.back() = 1.0;
 
     } else if (qtype == "clenshaw-curtis") {
-
       for (size_t j = 0; j < nnodes; j++) {
         nodes[j] = 0.5 * (1.0 - cos(j * PI / (nnodes-1)));
       }
 
     } else if (qtype == "uniform") {
-
       for (size_t j = 0; j < nnodes; j++) {
         nodes[j] = node(j) / (nnodes-1);
       }
 
     } else {
-
       throw ValueError("invalid node type passed to compute_nodes.");
-
     }
 
     return nodes;
@@ -228,7 +222,6 @@ namespace pfasst
     Polynomial<node> p(nsrc + 1), p1(nsrc + 1);
 
     for (size_t i = 0; i < nsrc; i++) {
-
       // construct interpolating polynomial coefficients
       p[0] = 1.0;
       for (size_t j = 1; j < nsrc + 1; j++) { p[j] = 0.0; }
@@ -282,14 +275,14 @@ namespace pfasst
         if (abs(num) > 1e-32) {
           mat(i, j) = num / den;
         } else {
-	  mat(i, j) = 0.0;
-	}
+          mat(i, j) = 0.0;
+        }
       }
     }
 
     return mat;
   }
 
-}
+}  // ::pfasst
 
 #endif
