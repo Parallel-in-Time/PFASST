@@ -43,38 +43,6 @@ namespace pfasst
         //! @}
 
         //! @{
-        virtual void spread() override
-        {
-          for (size_t m = 1; m < nodes.size(); m++) {
-            this->get_state(m)->copy(this->get_state(0));
-          }
-        }
-
-        virtual void post(ICommunicator* comm, int tag) override
-        {
-          this->get_state(0)->post(comm, tag);
-        }
-
-        virtual void send(ICommunicator* comm, int tag, bool blocking) override
-        {
-          this->get_state(this->get_nodes().size() - 1)->send(comm, tag, blocking);
-        }
-
-        virtual void recv(ICommunicator* comm, int tag, bool blocking) override
-        {
-          this->get_state(0)->recv(comm, tag, blocking);
-        }
-
-        virtual void broadcast(ICommunicator* comm) override
-        {
-          if (comm->rank() == comm->size() - 1) {
-            this->get_state(0)->copy(this->get_state(this->get_nodes().size() - 1));
-          }
-          this->get_state(0)->broadcast(comm);
-        }
-        //! @}
-
-        //! @{
         virtual void set_nodes(vector<time> nodes)
         {
           auto augmented = pfasst::augment_nodes(nodes);
@@ -175,6 +143,13 @@ namespace pfasst
           throw NotImplementedYet("sweeper");
         }
 
+        virtual void spread() override
+        {
+          for (size_t m = 1; m < nodes.size(); m++) {
+            this->get_state(m)->copy(this->get_state(0));
+          }
+        }
+
         /**
          * evaluates the right hand side at given time node
          *
@@ -204,6 +179,31 @@ namespace pfasst
         {
           UNUSED(dt); UNUSED(dst);
           throw NotImplementedYet("sweeper");
+        }
+        //! @}
+
+        //! @{
+        virtual void post(ICommunicator* comm, int tag) override
+        {
+          this->get_state(0)->post(comm, tag);
+        }
+
+        virtual void send(ICommunicator* comm, int tag, bool blocking) override
+        {
+          this->get_state(this->get_nodes().size() - 1)->send(comm, tag, blocking);
+        }
+
+        virtual void recv(ICommunicator* comm, int tag, bool blocking) override
+        {
+          this->get_state(0)->recv(comm, tag, blocking);
+        }
+
+        virtual void broadcast(ICommunicator* comm) override
+        {
+          if (comm->rank() == comm->size() - 1) {
+            this->get_state(0)->copy(this->get_state(this->get_nodes().size() - 1));
+          }
+          this->get_state(0)->broadcast(comm);
         }
         //! @}
     };

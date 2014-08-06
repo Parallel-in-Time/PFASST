@@ -31,7 +31,8 @@ namespace pfasst
    * Used by PFASST to mark methods that are required for a particular algorithm (SDC/MLSDC/PFASST)
    * that may not be necessary for all others.
    */
-  class NotImplementedYet : public exception
+  class NotImplementedYet
+    : public exception
   {
       string msg;
     public:
@@ -51,7 +52,8 @@ namespace pfasst
    *
    * Thrown when a PFASST routine is passed an invalid value.
    */
-  class ValueError : public exception
+  class ValueError
+    : public exception
   {
       string msg;
     public:

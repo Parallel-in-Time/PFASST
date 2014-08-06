@@ -242,7 +242,7 @@ namespace pfasst
          * @param[in] initial if `true` the explicit and implicit part of the right hand side of the
          *     ODE get evaluated with the initial value
          */
-        virtual void predict(bool initial)
+        virtual void predict(bool initial) override
         {
           const auto   nodes  = this->get_nodes();
           const size_t nnodes = nodes.size();
@@ -268,7 +268,7 @@ namespace pfasst
           if (this->last_node_is_virtual()) { this->integrate_end_state(dt); }
         }
 
-        virtual void sweep()
+        virtual void sweep() override
         {
           const auto   nodes  = this->get_nodes();
           const size_t nnodes = nodes.size();
