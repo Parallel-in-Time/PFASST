@@ -30,9 +30,9 @@ namespace pfasst
      * explicitly and the stiff part implicitly.
      * Therefore, we define the splitting \\( F(t,u) = F_{expl}(t,u) + F_{impl}(t,u) \\).
      *
-     * This sweeper requires three interfaces to be implement for such ODEs: two routines to 
-     * evaluate the explicit \\( F_{\\rm expl} \\) and implicit \\( F_{\\rm impl} \\) pieces for a 
-     * given state, and one that solves (perhaps with an external solver) the backward-Euler 
+     * This sweeper requires three interfaces to be implement for such ODEs: two routines to
+     * evaluate the explicit \\( F_{\\rm expl} \\) and implicit \\( F_{\\rm impl} \\) pieces for a
+     * given state, and one that solves (perhaps with an external solver) the backward-Euler
      * equation \\( U^{n+1} - \\Delta t F_{\\rm impl}(U^{n+1}) = RHS \\) for \\( U^{n+1} \\).
      *
      * @tparam time precision type of the time dimension
@@ -173,9 +173,10 @@ namespace pfasst
         virtual void setup(bool coarse) override
         {
           auto nodes = this->get_nodes();
+          auto is_proper = this->get_is_proper();
           assert(nodes.size() >= 1);
 
-          this->s_mat = compute_quadrature(nodes, nodes, 's');
+          this->s_mat = compute_quadrature(nodes, nodes, is_proper, 's');
 
           this->s_mat_expl = this->s_mat;
           this->s_mat_impl = this->s_mat;

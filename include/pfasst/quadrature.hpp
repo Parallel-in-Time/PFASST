@@ -210,8 +210,27 @@ namespace pfasst
     return nodes;
   }
 
+  template<typename node>
+  auto augment_nodes(vector<node> const orig) -> pair<vector<node>,vector<bool>>
+  {
+    vector<node> nodes = orig;
+
+    bool left = nodes.front() == node(0.0);
+    bool right = nodes.back() == node(1.0);
+
+    if (!left)  { nodes.insert(nodes.begin(), node(0.0)); }
+    if (!right) { nodes.insert(nodes.end(),   node(1.0)); }
+
+    vector<bool> is_proper(nodes.size(), true);
+    is_proper.front() = left;
+    is_proper.back() = right;
+
+    return pair<vector<node>,vector<bool>>(nodes, is_proper);
+  }
+
+
   template<typename node = time_precision>
-  matrix<node> compute_quadrature(vector<node> dst, vector<node> src, char type)
+  matrix<node> compute_quadrature(vector<node> dst, vector<node> src, vector<bool> is_proper, char type)
   {
     const size_t ndst = dst.size();
     const size_t nsrc = src.size();
@@ -222,11 +241,13 @@ namespace pfasst
     Polynomial<node> p(nsrc + 1), p1(nsrc + 1);
 
     for (size_t i = 0; i < nsrc; i++) {
+      if (!is_proper[i]) { continue; }
+
       // construct interpolating polynomial coefficients
       p[0] = 1.0;
       for (size_t j = 1; j < nsrc + 1; j++) { p[j] = 0.0; }
       for (size_t m = 0; m < nsrc; m++) {
-        if (m == i) { continue; }
+        if ((!is_proper[m]) || (m == i)) { continue; }
 
         // p_{m+1}(x) = (x - x_j) * p_m(x)
         p1[0] = 0.0;
