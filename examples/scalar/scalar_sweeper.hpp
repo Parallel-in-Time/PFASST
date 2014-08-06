@@ -75,8 +75,10 @@ class ScalarSweeper : public pfasst::encap::IMEXSweeper<time>
       exact(q, t);
     }
 
-    void f1eval(shared_ptr<Encapsulation> f_encap, shared_ptr<Encapsulation> q_encap, time) override
+    void f_expl_eval(shared_ptr<Encapsulation> f_encap,
+                     shared_ptr<Encapsulation> q_encap, time t) override
     {
+      UNUSED(t);
       auto& f = pfasst::encap::as_vector<complex<double>,time>(f_encap);
       auto& q = pfasst::encap::as_vector<complex<double>,time>(q_encap);
 
@@ -85,8 +87,10 @@ class ScalarSweeper : public pfasst::encap::IMEXSweeper<time>
       this->_nf1eval++;
     }
 
-    void f2eval(shared_ptr<Encapsulation> f_encap, shared_ptr<Encapsulation> q_encap, time) override
+    void f_impl_eval(shared_ptr<Encapsulation> f_encap,
+                     shared_ptr<Encapsulation> q_encap, time t) override
     {
+      UNUSED(t);
       auto& f = pfasst::encap::as_vector<complex<double>,time>(f_encap);
       auto& q = pfasst::encap::as_vector<complex<double>,time>(q_encap);
 
@@ -95,9 +99,11 @@ class ScalarSweeper : public pfasst::encap::IMEXSweeper<time>
       this->_nf2eval++;
     }
 
-    void f2comp(shared_ptr<Encapsulation> f_encap, shared_ptr<Encapsulation> q_encap, time, time dt,
-                shared_ptr<Encapsulation> rhs_encap) override
+    void impl_solve(shared_ptr<Encapsulation> f_encap,
+                    shared_ptr<Encapsulation> q_encap, time t, time dt,
+                    shared_ptr<Encapsulation> rhs_encap) override
     {
+      UNUSED(t);
       auto& f = pfasst::encap::as_vector<complex<double>,time>(f_encap);
       auto& q = pfasst::encap::as_vector<complex<double>,time>(q_encap);
       auto& rhs = pfasst::encap::as_vector<complex<double>,time>(rhs_encap);
