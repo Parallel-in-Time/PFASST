@@ -1,6 +1,7 @@
 message(STATUS "  scalar")
 include_directories(
     ${pfasst_INCLUDES}
+    ${3rdparty_INCLUDES}
 )
 
 set(scalar_examples
