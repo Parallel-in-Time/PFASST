@@ -2,46 +2,51 @@
  * Sweeper for scalar test equation
  */
 
-#ifndef _SCALAR_SWEEPER_HPP_
-#define _SCALAR_SWEEPER_HPP_
+#ifndef _EXAMPLES__SCALAR__SCALAR_SWEEPER_HPP_
+#define _EXAMPLES__SCALAR__SCALAR_SWEEPER_HPP_
 
 #include <complex>
 #include <vector>
+
 #include <pfasst/encap/imex_sweeper.hpp>
 #include <pfasst/encap/vector.hpp>
 
 using namespace std;
 
 template<typename time = pfasst::time_precision>
-class ScalarSweeper : public pfasst::encap::IMEXSweeper<time>
+class ScalarSweeper
+  : public pfasst::encap::IMEXSweeper<time>
 {
+  private:
+    typedef pfasst::encap::Encapsulation<time> encap_type;
+    typedef pfasst::encap::VectorEncapsulation<complex<double>> complex_vector_type;
 
-    typedef pfasst::encap::Encapsulation<time> Encapsulation;
-    typedef pfasst::encap::VectorEncapsulation<complex<double>> CVectorT;
+    complex<double> _lambda, _u0;
+    int _n_f_expl_eval, _n_f_impl_eval, _n_impl_solve;
+    const complex<double> i_complex = complex<double>(0, 1);
 
   public:
 
-    ScalarSweeper(complex<double> lambda, complex<double> y0)
-    {
-      this->_lambda  = lambda;
-      this->_y0      = y0;
-      this->_nf1eval = 0;
-      this->_nf2eval = 0;
-      this->_nf2comp = 0;
-    }
+    ScalarSweeper(complex<double> lambda, complex<double> u0)
+      :   _lambda(lambda)
+        , _u0(u0)
+        , _n_f_expl_eval(0)
+        , _n_f_impl_eval(0)
+        , _n_impl_solve(0)
+    {}
 
     virtual ~ScalarSweeper()
     {
-      cout << "Number of calls to f1eval: " << this->_nf1eval << endl;
-      cout << "Number of calls to f2eval: " << this->_nf2eval << endl;
-      cout << "Number of calls to f2comp: " << this->_nf2comp << endl;
+      cout << "Number of explicit evaluations: " << this->_n_f_expl_eval << endl;
+      cout << "Number of implicit evaluations: " << this->_n_f_impl_eval << endl;
+      cout << "Number of implicit solves: " << this->_n_impl_solve << endl;
     }
 
     void echo_error(time t)
     {
-      auto& qend = pfasst::encap::as_vector<complex<double>,time>(this->get_end_state());
+      auto& qend = pfasst::encap::as_vector<complex<double>, time>(this->get_end_state());
 
-      CVectorT qex(qend.size());
+      complex_vector_type qex(qend.size());
 
       this->exact(qex, t);
       double max_err = abs(qend[0] - qex[0]) / abs(qex[0]);
@@ -64,63 +69,59 @@ class ScalarSweeper : public pfasst::encap::IMEXSweeper<time>
       this->echo_error(t + dt);
     }
 
-    void exact(CVectorT& q, time t)
+    void exact(complex_vector_type& q, time t)
     {
-      q[0] = _y0 * exp(_lambda * t);
+      q[0] = this->_u0 * exp(this->_lambda * t);
     }
 
-    void exact(shared_ptr<Encapsulation> q_encap, time t)
+    void exact(shared_ptr<encap_type> q_encap, time t)
     {
-      auto& q = pfasst::encap::as_vector<complex<double>,time>(q_encap);
-      exact(q, t);
+      auto& q = pfasst::encap::as_vector<complex<double>, time>(q_encap);
+      this->exact(q, t);
     }
 
-    void f_expl_eval(shared_ptr<Encapsulation> f_encap,
-                     shared_ptr<Encapsulation> q_encap, time t) override
+    void f_expl_eval(shared_ptr<encap_type> f_encap,
+                     shared_ptr<encap_type> q_encap, time t) override
     {
       UNUSED(t);
-      auto& f = pfasst::encap::as_vector<complex<double>,time>(f_encap);
-      auto& q = pfasst::encap::as_vector<complex<double>,time>(q_encap);
+      auto& f = pfasst::encap::as_vector<complex<double>, time>(f_encap);
+      auto& q = pfasst::encap::as_vector<complex<double>, time>(q_encap);
 
-      // f1 = multiply with imaginary part of lambda
-      f[0] = i_complex * imag(this->_lambda) * q[0];
-      this->_nf1eval++;
+      // f_expl = multiply with imaginary part of lambda
+      f[0] = this->i_complex * imag(this->_lambda) * q[0];
+
+      this->_n_f_expl_eval++;
     }
 
-    void f_impl_eval(shared_ptr<Encapsulation> f_encap,
-                     shared_ptr<Encapsulation> q_encap, time t) override
+    void f_impl_eval(shared_ptr<encap_type> f_encap,
+                     shared_ptr<encap_type> q_encap, time t) override
     {
       UNUSED(t);
-      auto& f = pfasst::encap::as_vector<complex<double>,time>(f_encap);
-      auto& q = pfasst::encap::as_vector<complex<double>,time>(q_encap);
+      auto& f = pfasst::encap::as_vector<complex<double>, time>(f_encap);
+      auto& q = pfasst::encap::as_vector<complex<double>, time>(q_encap);
 
-      // f2 = multiply with real part of lambda
+      // f_impl = multiply with real part of lambda
       f[0] = real(this->_lambda) * q[0];
-      this->_nf2eval++;
+
+      this->_n_f_impl_eval++;
     }
 
-    void impl_solve(shared_ptr<Encapsulation> f_encap,
-                    shared_ptr<Encapsulation> q_encap, time t, time dt,
-                    shared_ptr<Encapsulation> rhs_encap) override
+    void impl_solve(shared_ptr<encap_type> f_encap,
+                    shared_ptr<encap_type> q_encap, time t, time dt,
+                    shared_ptr<encap_type> rhs_encap) override
     {
       UNUSED(t);
-      auto& f = pfasst::encap::as_vector<complex<double>,time>(f_encap);
-      auto& q = pfasst::encap::as_vector<complex<double>,time>(q_encap);
-      auto& rhs = pfasst::encap::as_vector<complex<double>,time>(rhs_encap);
+      auto& f = pfasst::encap::as_vector<complex<double>, time>(f_encap);
+      auto& q = pfasst::encap::as_vector<complex<double>, time>(q_encap);
+      auto& rhs = pfasst::encap::as_vector<complex<double>, time>(rhs_encap);
 
-      // invert f2=multiply with inverse of real part of lambda
-      double inv = 1 / (1 - double(dt) * real(this->_lambda));
+      // invert f_impl = multiply with inverse of real part of lambda
+      double inv = 1.0 / (1.0 - double(dt) * real(this->_lambda));
       q[0] = inv * rhs[0];
       f[0] = real(this->_lambda) * q[0];
-      this->_nf2comp++;
+
+      this->_n_impl_solve++;
     }
-
-
-  private:
-
-    complex<double> _lambda, _y0;
-    int _nf1eval, _nf2eval, _nf2comp;
-    const complex<double> i_complex = complex<double>(0, 1);
-
 };
-#endif
+
+#endif  // _EXAMPLES__SCALAR__SCALAR_SWEEPER_HPP_
