@@ -29,7 +29,7 @@ TEST(BorisParticle, Instantiation)
 }
 
 
-TEST(BorisParticleComponents2D, Position)
+TEST(BorisParticlePosition2D, Initialization)
 {
   Position2D default_pos;
   EXPECT_THAT(default_pos.DIM, 2);
@@ -39,14 +39,38 @@ TEST(BorisParticleComponents2D, Position)
   shared_ptr<const Position2D> pos2 = make_shared<const Position2D>(0.5, 1.0);
   EXPECT_THAT(pos2->x, DoubleEq(0.5));
   EXPECT_THAT(pos2->y, DoubleEq(1.0));
+}
 
+TEST(BorisParticlePosition2D, Copyable)
+{
   shared_ptr<Position2D> pos_copy = make_shared<Position2D>();
+  shared_ptr<const Position2D> pos2 = make_shared<const Position2D>(0.5, 1.0);
   pos_copy->copy(pos2);
   EXPECT_THAT(pos_copy->x, DoubleEq(0.5));
   EXPECT_THAT(pos_copy->y, DoubleEq(1.0));
 }
 
-TEST(BorisParticleComponents2D, Velocity)
+TEST(BorisParticlePosition2D, axpy)
+{
+  shared_ptr<Position2D> pos_2 = make_shared<Position2D>(0.5, 1.0);
+  shared_ptr<const Position2D> pos2 = make_shared<const Position2D>(0.5, 1.0);
+  pos_2->saxpy(1.0, pos2);
+  EXPECT_THAT(pos_2->x, DoubleEq(1.0));
+  EXPECT_THAT(pos_2->y, DoubleEq(2.0));
+
+  shared_ptr<Position2D> pos_1 = make_shared<Position2D>(0.5, 1.0);
+  pos_1->saxpy(0.0, pos2);
+  EXPECT_THAT(pos_1->x, DoubleEq(0.5));
+  EXPECT_THAT(pos_1->y, DoubleEq(1.0));
+
+  shared_ptr<Position2D> pos_0 = make_shared<Position2D>(0.5, 1.0);
+  pos_0->saxpy(-1.0, pos2);
+  EXPECT_THAT(pos_0->x, DoubleEq(0.0));
+  EXPECT_THAT(pos_0->y, DoubleEq(0.0));
+}
+
+
+TEST(BorisParticleVelocity2D, Initialization)
 {
   Velocity2D default_vel;
   EXPECT_THAT(default_vel.DIM, 2);
@@ -56,14 +80,38 @@ TEST(BorisParticleComponents2D, Velocity)
   shared_ptr<const Velocity2D> vel2 = make_shared<const Velocity2D>(0.5, 1.0);
   EXPECT_THAT(vel2->u, DoubleEq(0.5));
   EXPECT_THAT(vel2->v, DoubleEq(1.0));
+}
 
+TEST(BorisParticleVelocity2D, Copyable)
+{
   shared_ptr<Velocity2D> vel_copy = make_shared<Velocity2D>();
+  shared_ptr<const Velocity2D> vel2 = make_shared<const Velocity2D>(0.5, 1.0);
   vel_copy->copy(vel2);
   EXPECT_THAT(vel_copy->u, DoubleEq(0.5));
   EXPECT_THAT(vel_copy->v, DoubleEq(1.0));
 }
 
-TEST(BorisParticleComponents2D, Acceleration)
+TEST(BorisParticleVelocity2D, axpy)
+{
+  shared_ptr<Velocity2D> vel_2 = make_shared<Velocity2D>(0.5, 1.0);
+  shared_ptr<const Velocity2D> vel2 = make_shared<const Velocity2D>(0.5, 1.0);
+  vel_2->saxpy(1.0, vel2);
+  EXPECT_THAT(vel_2->u, DoubleEq(1.0));
+  EXPECT_THAT(vel_2->v, DoubleEq(2.0));
+
+  shared_ptr<Velocity2D> vel_1 = make_shared<Velocity2D>(0.5, 1.0);
+  vel_1->saxpy(0.0, vel2);
+  EXPECT_THAT(vel_1->u, DoubleEq(0.5));
+  EXPECT_THAT(vel_1->v, DoubleEq(1.0));
+
+  shared_ptr<Velocity2D> vel_0 = make_shared<Velocity2D>(0.5, 1.0);
+  vel_0->saxpy(-1.0, vel2);
+  EXPECT_THAT(vel_0->u, DoubleEq(0.0));
+  EXPECT_THAT(vel_0->v, DoubleEq(0.0));
+}
+
+
+TEST(BorisParticleAcceleration2D, Initialization)
 {
   Acceleration2D default_accel;
   EXPECT_THAT(default_accel.DIM, 2);
@@ -73,11 +121,34 @@ TEST(BorisParticleComponents2D, Acceleration)
   shared_ptr<const Acceleration2D> accel2 = make_shared<const Acceleration2D>(0.5, 1.0);
   EXPECT_THAT(accel2->a, DoubleEq(0.5));
   EXPECT_THAT(accel2->b, DoubleEq(1.0));
+}
 
+TEST(BorisParticleAcceleration2D, Copyable)
+{
   shared_ptr<Acceleration2D> accel_copy = make_shared<Acceleration2D>();
+  shared_ptr<const Acceleration2D> accel2 = make_shared<const Acceleration2D>(0.5, 1.0);
   accel_copy->copy(accel2);
   EXPECT_THAT(accel_copy->a, DoubleEq(0.5));
   EXPECT_THAT(accel_copy->b, DoubleEq(1.0));
+}
+
+TEST(BorisParticleAcceleration2D, axpy)
+{
+  shared_ptr<Acceleration2D> accel_2 = make_shared<Acceleration2D>(0.5, 1.0);
+  shared_ptr<const Acceleration2D> accel2 = make_shared<const Acceleration2D>(0.5, 1.0);
+  accel_2->saxpy(1.0, accel2);
+  EXPECT_THAT(accel_2->a, DoubleEq(1.0));
+  EXPECT_THAT(accel_2->b, DoubleEq(2.0));
+
+  shared_ptr<Acceleration2D> accel_1 = make_shared<Acceleration2D>(0.5, 1.0);
+  accel_1->saxpy(0.0, accel2);
+  EXPECT_THAT(accel_1->a, DoubleEq(0.5));
+  EXPECT_THAT(accel_1->b, DoubleEq(1.0));
+
+  shared_ptr<Acceleration2D> accel_0 = make_shared<Acceleration2D>(0.5, 1.0);
+  accel_0->saxpy(-1.0, accel2);
+  EXPECT_THAT(accel_0->a, DoubleEq(0.0));
+  EXPECT_THAT(accel_0->b, DoubleEq(0.0));
 }
 
 
@@ -112,12 +183,12 @@ TEST(BorisParticle2D, Copyable)
   EXPECT_THAT(original_ptr->pos->x, DoubleEq(0.3));
   original_ptr->pos->y = 0.4;
   EXPECT_THAT(original_ptr->pos->y, DoubleEq(0.4));
-  
+
   original_ptr->vel->u = 0.5;
   EXPECT_THAT(original_ptr->vel->u, DoubleEq(0.5));
   original_ptr->vel->v = 0.6;
   EXPECT_THAT(original_ptr->vel->v, DoubleEq(0.6));
-  
+
   original_ptr->accel->a = 0.7;
   EXPECT_THAT(original_ptr->accel->a, DoubleEq(0.7));
   original_ptr->accel->b = 0.8;

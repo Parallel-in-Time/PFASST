@@ -72,8 +72,8 @@ class Position2DEncapsulation
 
     virtual void saxpy(time a, shared_ptr<const Position2DEncapsulation<scalar, time>> x)
     {
-      UNUSED(a); UNUSED(x);
-      // TODO: implement ax+y for 2D-Position
+      this->x += a * x->x;
+      this->y += a * x->y;
     }
 
     virtual void mat_apply(vector<shared_ptr<Encapsulation<time>>> dst, 
@@ -169,8 +169,8 @@ class Velocity2DEncapsulation
 
     virtual void saxpy(time a, shared_ptr<const Velocity2DEncapsulation<scalar, time>> x)
     {
-      UNUSED(a); UNUSED(x);
-      // TODO: implement ax+y for 2D-Velocity
+      this->u += a * x->u;
+      this->v += a * x->v;
     }
 
     virtual void mat_apply(vector<shared_ptr<Encapsulation<time>>> dst, 
@@ -266,8 +266,8 @@ class Acceleration2DEncapsulation
 
     virtual void saxpy(time a, shared_ptr<const Acceleration2DEncapsulation<scalar, time>> x)
     {
-      UNUSED(a); UNUSED(x);
-      // TODO: implement ax+y for 2D-Acceleration
+      this->a += a * x->a;
+      this->b += a * x->b;
     }
 
     virtual void mat_apply(vector<shared_ptr<Encapsulation<time>>> dst, 
