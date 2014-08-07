@@ -161,12 +161,12 @@ namespace pfasst
       virtual void save(bool initial_only=false)
       {
         UNUSED(initial_only);
-        NotImplementedYet("mlsdc/pfasst");
+        throw NotImplementedYet("mlsdc/pfasst");
       }
 
       virtual void spread()
       {
-        NotImplementedYet("pfasst");
+        throw NotImplementedYet("pfasst");
       }
       //! @}
 
@@ -179,19 +179,19 @@ namespace pfasst
       virtual void send(ICommunicator* comm, int tag, bool blocking)
       {
         UNUSED(comm); UNUSED(tag); UNUSED(blocking);
-        NotImplementedYet("pfasst");
+        throw NotImplementedYet("pfasst");
       }
 
       virtual void recv(ICommunicator* comm, int tag, bool blocking)
       {
         UNUSED(comm); UNUSED(tag); UNUSED(blocking);
-        NotImplementedYet("pfasst");
+        throw NotImplementedYet("pfasst");
       }
 
       virtual void broadcast(ICommunicator* comm)
       {
         UNUSED(comm);
-        NotImplementedYet("pfasst");
+        throw NotImplementedYet("pfasst");
       }
       //! @}
 
@@ -219,7 +219,7 @@ namespace pfasst
                                        shared_ptr<const ISweeper<time>> src)
       {
         UNUSED(dst); UNUSED(src);
-        NotImplementedYet("pfasst");
+        throw NotImplementedYet("pfasst");
       }
 
       /**
@@ -240,7 +240,7 @@ namespace pfasst
                                     shared_ptr<const ISweeper<time>> src)
       {
         UNUSED(dst); UNUSED(src);
-        NotImplementedYet("pfasst");
+        throw NotImplementedYet("pfasst");
       }
 
 
