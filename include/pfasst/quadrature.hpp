@@ -236,7 +236,7 @@ namespace pfasst
     const size_t nsrc = src.size();
 
     assert(ndst >= 1);
-    matrix<node> mat(ndst - 1, nsrc);
+    matrix<node> mat(ndst - 1, nsrc, node(0.0));
 
     Polynomial<node> p(nsrc + 1), p1(nsrc + 1);
 
