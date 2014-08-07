@@ -1,3 +1,10 @@
+/*
+ * Scalar test equation example using an encapsulated IMEX sweeper.
+ * Solves Dahlquist's test equation
+ * y' = a y + i b y
+ * treating the real part implicitly and the imaginary part explicitly.
+ */
+ 
 #include<complex>
 
 #include<pfasst.hpp>
@@ -6,7 +13,7 @@
 
 #include "scalar_sweeper.hpp"
 
-int main(int, char**)
+double run_scalar_sdc()
 {
   pfasst::SDC<> sdc;
 
@@ -34,4 +41,12 @@ int main(int, char**)
 
   sdc.run();
 
+  return sweeper->get_errors();
 }
+
+#ifndef PFASST_UNIT_TESTING
+int main(int /*argc*/, char** /*argv*/)
+{
+  run_scalar_sdc();
+}
+#endif
