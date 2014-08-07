@@ -32,6 +32,7 @@ class ScalarSweeper : public pfasst::encap::IMEXSweeper<time>
 
     virtual ~ScalarSweeper()
     {
+      cout << "Final error:               " << scientific << this->_error << endl;
       cout << "Number of calls to f1eval: " << this->_nf1eval << endl;
       cout << "Number of calls to f2eval: " << this->_nf2eval << endl;
       cout << "Number of calls to f2comp: " << this->_nf2comp << endl;
