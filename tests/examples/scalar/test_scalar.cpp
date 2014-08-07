@@ -15,6 +15,7 @@ MATCHER (DoubleMore, "")
   return get<0>(arg) > get<1>(arg);
 }
 
+
 /*
  * For Lobatto nodes, the resulting method should of order 2*M-2 with M=number of nodes
  * The test below verifies that the code approximately (up to a safety factor) reproduces
@@ -30,7 +31,6 @@ TEST(ConvergenceTest, ScalarSDC)
 
   vector<double> err(nsteps.size());
   vector<double> convrate(nsteps.size()-1);
-  vector<double> expected_cr(nsteps.size()-1); 
     
   double dt;
     
@@ -52,15 +52,14 @@ TEST(ConvergenceTest, ScalarSDC)
     for ( size_t i = 0; i<=nsteps_l-2; ++i)
     {
       convrate[i] = log10(err[i+1]/err[i])/log10(double(nsteps[i])/double(nsteps[i+1]));
-      // The expected convergence rate for Lobatto nodes is 2*nnodes-2, but because
-      // it will typically be not matched exactly, put in a security factor
-      expected_cr[i] = 0.9*double(2*nnodes-2);
+      
+      EXPECT_THAT(convrate[i], testing::DoubleNear(double(2*nnodes-2), 0.99)) << "Convergence rate at node " << i << " not within expected range";
     }
   
     // NOTE: There is probably a much more elegant way to test this, because
     // expected_cr contains the same value in all entries. But I could not so far figure
     // out how to build a more clever MATCHER here so far....
-    EXPECT_THAT(convrate, testing::Pointwise(DoubleMore(), expected_cr ));
+    // EXPECT_THAT(convrate, testing::Pointwise(DoubleMore(), expected_cr ));
   
   }
 }
