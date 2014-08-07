@@ -195,12 +195,12 @@ namespace pfasst
 
     } else if (qtype == "clenshaw-curtis") {
       for (size_t j = 0; j < nnodes; j++) {
-        nodes[j] = 0.5 * (1.0 - cos(j * PI / (nnodes-1)));
+        nodes[j] = 0.5 * (1.0 - cos(j * PI / (nnodes - 1)));
       }
 
     } else if (qtype == "uniform") {
       for (size_t j = 0; j < nnodes; j++) {
-        nodes[j] = node(j) / (nnodes-1);
+        nodes[j] = node(j) / (nnodes - 1);
       }
 
     } else {
@@ -211,8 +211,7 @@ namespace pfasst
   }
 
   template<typename node>
-  auto augment_nodes(vector<node> const orig) -> pair<vector<node>,vector<bool>>
-  {
+  auto augment_nodes(vector<node> const orig) -> pair<vector<node>, vector<bool>> {
     vector<node> nodes = orig;
 
     bool left = nodes.front() == node(0.0);
@@ -225,12 +224,13 @@ namespace pfasst
     is_proper.front() = left;
     is_proper.back() = right;
 
-    return pair<vector<node>,vector<bool>>(nodes, is_proper);
+    return pair<vector<node>, vector<bool>>(nodes, is_proper);
   }
 
 
   template<typename node = time_precision>
-  matrix<node> compute_quadrature(vector<node> dst, vector<node> src, vector<bool> is_proper, char type)
+  matrix<node> compute_quadrature(vector<node> dst, vector<node> src, vector<bool> is_proper,
+                                  char type)
   {
     const size_t ndst = dst.size();
     const size_t nsrc = src.size();

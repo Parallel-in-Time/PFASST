@@ -108,20 +108,20 @@ namespace pfasst
 
 
         /**
-	 * Set end state to \\( U_0 + \\int F_{expl} + F_{expl} \\).
-	 */
+        * Set end state to \\( U_0 + \\int F_{expl} + F_{expl} \\).
+        */
         void integrate_end_state(time dt)
         {
-	  vector<shared_ptr<Encapsulation<time>>> dst = { this->u_state.back() };
-	  dst[0]->copy(this->u_state.front());
-	  dst[0]->mat_apply(dst, dt, this->b_mat, this->fs_expl, false);
-	  dst[0]->mat_apply(dst, dt, this->b_mat, this->fs_impl, false);
-	}
+          vector<shared_ptr<Encapsulation<time>>> dst = { this->u_state.back() };
+          dst[0]->copy(this->u_state.front());
+          dst[0]->mat_apply(dst, dt, this->b_mat, this->fs_expl, false);
+          dst[0]->mat_apply(dst, dt, this->b_mat, this->fs_impl, false);
+        }
 
         inline bool last_node_is_virtual()
         {
-  	  return !this->get_is_proper().back();
-	}
+          return !this->get_is_proper().back();
+        }
 
 
       public:
@@ -202,10 +202,10 @@ namespace pfasst
           this->s_mat = compute_quadrature(nodes, nodes, is_proper, 's');
 
           auto q_mat = compute_quadrature(nodes, nodes, is_proper, 'q');
-	  this->b_mat = matrix<time>(1, nodes.size());
-	  for (size_t m = 0; m < nodes.size(); m++) {
-	    this->b_mat(0,m) = q_mat(nodes.size()-2, m);
-	  }
+          this->b_mat = matrix<time>(1, nodes.size());
+          for (size_t m = 0; m < nodes.size(); m++) {
+            this->b_mat(0, m) = q_mat(nodes.size() - 2, m);
+          }
 
           this->s_mat_expl = this->s_mat;
           this->s_mat_impl = this->s_mat;
@@ -220,12 +220,8 @@ namespace pfasst
             if (coarse) {
               this->previous_u_state.push_back(this->get_factory()->create(pfasst::encap::solution));
             }
-	    // XXX: can prolly save some f's here...
-	    // if ((m == 0) || this->get_is_proper()[m]) {
-	    this->fs_expl.push_back(this->get_factory()->create(pfasst::encap::function));
-	    // } else {
-	    //   this->fs_expl.push_back(nullptr);
-	    // }
+            // XXX: can prolly save some f's here for virtual nodes...
+            this->fs_expl.push_back(this->get_factory()->create(pfasst::encap::function));
             this->fs_impl.push_back(this->get_factory()->create(pfasst::encap::function));
           }
 
@@ -260,7 +256,7 @@ namespace pfasst
             t += ds;
           }
 
-	  if (this->last_node_is_virtual()) { this->integrate_end_state(dt); }
+          if (this->last_node_is_virtual()) { this->integrate_end_state(dt); }
         }
 
         virtual void sweep()
@@ -296,7 +292,7 @@ namespace pfasst
             t += ds;
           }
 
-	  if (this->last_node_is_virtual()) { this->integrate_end_state(dt); }
+          if (this->last_node_is_virtual()) { this->integrate_end_state(dt); }
         }
 
         virtual void advance() override
@@ -320,20 +316,20 @@ namespace pfasst
         /**
          * @copybrief EncapSweeper::evaluate()
          *
-	 * If the node `m` is virtual (not proper), we can save some
-	 * implicit/explicit evaluations.
-	 */
+        * If the node `m` is virtual (not proper), we can save some
+        * implicit/explicit evaluations.
+        */
         virtual void evaluate(size_t m) override
         {
-	  time t0 = this->get_controller()->get_time();
-	  time dt = this->get_controller()->get_time_step();
+          time t0 = this->get_controller()->get_time();
+          time dt = this->get_controller()->get_time_step();
           time t =  t0 + dt * this->get_nodes()[m];
-	  if ((m == 0) || this->get_is_proper()[m]) {
-	    this->f_expl_eval(this->fs_expl[m], this->u_state[m], t);
-	  }
-	  if (this->get_is_proper()[m]) {
-	    this->f_impl_eval(this->fs_impl[m], this->u_state[m], t);
-	  }
+          if ((m == 0) || this->get_is_proper()[m]) {
+            this->f_expl_eval(this->fs_expl[m], this->u_state[m], t);
+          }
+          if (this->get_is_proper()[m]) {
+            this->f_impl_eval(this->fs_impl[m], this->u_state[m], t);
+          }
         }
 
         /**

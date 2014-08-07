@@ -195,19 +195,19 @@ TEST(NodesTest, UniformNodes)
 {
   const long double u2e[2] = { 0.0,
                                1.0
-                              };
+                             };
 
   const long double u3e[3] = { 0.0,
                                0.5,
                                1.0
-                              };
+                             };
 
   const long double u5e[5] = { 0.0,
                                0.25,
                                0.5,
                                0.75,
                                1.0
-                              };
+                             };
 
   auto u2 = pfasst::compute_nodes<long double>(2, "uniform");
   EXPECT_THAT(u2, testing::Pointwise(DoubleNear(), u2e));
@@ -257,7 +257,7 @@ TEST(QuadratureTest, GaussLobattoNodes)
                               -0.021735721866558113665511351745074289,
                               0.11974476934341168251615379970493965,
                               0.067728432186156897969267419174073482
-                             };
+                            };
   EXPECT_THAT(s5.data(), testing::Pointwise(DoubleNear(), s5e));
 }
 
@@ -267,7 +267,7 @@ TEST(QuadratureTest, ClenshawCurtisNodes)
   auto a4 = pfasst::augment_nodes(c4);
   auto s4 = pfasst::compute_quadrature(get<0>(a4), get<0>(a4), get<1>(a4), 's');
   const long double s4e[] = { 0.10243055555555555555555555555555556,
-                               0.16319444444444444444444444444444444,
+                              0.16319444444444444444444444444444444,
                               -0.024305555555555555555555555555555556,
                               0.0086805555555555555555555555555555557,
                               -0.055555555555555555555555555555555556,
@@ -278,7 +278,7 @@ TEST(QuadratureTest, ClenshawCurtisNodes)
                               -0.024305555555555555555555555555555554,
                               0.16319444444444444444444444444444444,
                               0.10243055555555555555555555555555556
-                             };
+                            };
   EXPECT_THAT(s4.data(), testing::Pointwise(DoubleNear(), s4e));
 }
 
