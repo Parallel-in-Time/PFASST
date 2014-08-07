@@ -32,6 +32,7 @@ class ScalarSweeper : public pfasst::encap::IMEXSweeper<time>
 
     virtual ~ScalarSweeper()
     {
+      cout << "Final error:               " << scientific << this->_error << endl;
       cout << "Number of calls to f1eval: " << this->_nf1eval << endl;
       cout << "Number of calls to f2eval: " << this->_nf2eval << endl;
       cout << "Number of calls to f2comp: " << this->_nf2comp << endl;
@@ -46,6 +47,12 @@ class ScalarSweeper : public pfasst::encap::IMEXSweeper<time>
       this->exact(qex, t);
       double max_err = abs(qend[0] - qex[0]) / abs(qex[0]);
       cout << "err: " << scientific << max_err << endl;
+      this->_error = max_err;
+    }
+    
+    double get_errors()
+    {
+      return this->_error;    
     }
 
     void predict(bool initial) override
@@ -121,6 +128,7 @@ class ScalarSweeper : public pfasst::encap::IMEXSweeper<time>
     complex<double> _lambda, _y0;
     int _nf1eval, _nf2eval, _nf2comp;
     const complex<double> i_complex = complex<double>(0, 1);
+    double _error;
 
 };
 #endif
