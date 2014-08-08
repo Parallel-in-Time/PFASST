@@ -10,6 +10,8 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+using namespace ::testing;
+
 #include <mpi.h>
 
 #define PFASST_UNIT_TESTING
