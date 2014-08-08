@@ -30,7 +30,7 @@ set(all_advec_examples
 foreach(example ${all_advec_examples})
     add_executable(${example} ${CMAKE_CURRENT_SOURCE_DIR}/${example}.cpp)
     if(NOT FFTW_FOUND)
-      add_dependencies(${example} fftw3)
+        add_dependencies(${example} fftw3)
     endif()
     target_link_libraries(${example}
         ${FFTW_LIBRARIES}
@@ -55,7 +55,7 @@ endforeach(example)
 if(${pfasst_WITH_MPI})
     include_directories(${MPI_CXX_INCLUDE_PATH})
     foreach(example ${advec_mpi_examples})
-	if(MPI_COMPILE_FLAGS)
+        if(MPI_COMPILE_FLAGS)
             set_target_properties(${example} PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
         endif()
         if(MPI_LINK_FLAGS)
@@ -77,9 +77,9 @@ if(${pfasst_WITH_MPI})
 endif()
 
 add_custom_target(run_example_advec_all
-  DEPENDS ${all_advec_example_runs}
-  COMMENT "Running all Advection-Diffusion examples" VERBATIM
+    DEPENDS ${all_advec_example_runs}
+    COMMENT "Running all Advection-Diffusion examples" VERBATIM
 )
 message(STATUS "    - run_example_advec_all")
 
-set(all_example_runs ${all_advec_example_runs} PARENT_SCOPE)
+set(all_example_runs ${all_example_runs} ${all_advec_example_runs} PARENT_SCOPE)
