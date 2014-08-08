@@ -21,27 +21,27 @@ class ScalarSweeper
     typedef pfasst::encap::Encapsulation<time> encap_type;
     typedef pfasst::encap::VectorEncapsulation<complex<double>> complex_vector_type;
 
-    complex<double> _lambda, _u0;
-    int _n_f_expl_eval, _n_f_impl_eval, _n_impl_solve;
+    complex<double> lambda, u0;
+    size_t n_f_expl_eval, n_f_impl_eval, n_impl_solve;
     const complex<double> i_complex = complex<double>(0, 1);
-    double _error;
+    double error;
 
   public:
     ScalarSweeper(complex<double> lambda, complex<double> u0)
-      :   _lambda(lambda)
-        , _u0(u0)
-        , _n_f_expl_eval(0)
-        , _n_f_impl_eval(0)
-        , _n_impl_solve(0)
-        , _error(0.0)
+      :   lambda(lambda)
+        , u0(u0)
+        , n_f_expl_eval(0)
+        , n_f_impl_eval(0)
+        , n_impl_solve(0)
+        , error(0.0)
     {}
 
     virtual ~ScalarSweeper()
     {
-      cout << "Final error:               " << scientific << this->_error << endl;
-      cout << "Number of explicit evaluations: " << this->_n_f_expl_eval << endl;
-      cout << "Number of implicit evaluations: " << this->_n_f_impl_eval << endl;
-      cout << "Number of implicit solves: " << this->_n_impl_solve << endl;
+      cout << "Final error:                    " << scientific << this->error << endl;
+      cout << "Number of explicit evaluations: " << this->n_f_expl_eval << endl;
+      cout << "Number of implicit evaluations: " << this->n_f_impl_eval << endl;
+      cout << "Number of implicit solves:      " << this->n_impl_solve << endl;
     }
 
     void echo_error(time t)
@@ -53,12 +53,12 @@ class ScalarSweeper
       this->exact(qex, t);
       double max_err = abs(qend[0] - qex[0]) / abs(qex[0]);
       cout << "err: " << scientific << max_err << endl;
-      this->_error = max_err;
+      this->error = max_err;
     }
-    
+
     double get_errors()
     {
-      return this->_error;    
+      return this->error;
     }
 
     void predict(bool initial) override
@@ -79,7 +79,7 @@ class ScalarSweeper
 
     void exact(complex_vector_type& q, time t)
     {
-      q[0] = this->_u0 * exp(this->_lambda * t);
+      q[0] = this->u0 * exp(this->lambda * t);
     }
 
     void exact(shared_ptr<encap_type> q_encap, time t)
@@ -96,9 +96,9 @@ class ScalarSweeper
       auto& q = pfasst::encap::as_vector<complex<double>, time>(q_encap);
 
       // f_expl = multiply with imaginary part of lambda
-      f[0] = this->i_complex * imag(this->_lambda) * q[0];
+      f[0] = this->i_complex * imag(this->lambda) * q[0];
 
-      this->_n_f_expl_eval++;
+      this->n_f_expl_eval++;
     }
 
     void f_impl_eval(shared_ptr<encap_type> f_encap,
@@ -109,9 +109,9 @@ class ScalarSweeper
       auto& q = pfasst::encap::as_vector<complex<double>, time>(q_encap);
 
       // f_impl = multiply with real part of lambda
-      f[0] = real(this->_lambda) * q[0];
+      f[0] = real(this->lambda) * q[0];
 
-      this->_n_f_impl_eval++;
+      this->n_f_impl_eval++;
     }
 
     void impl_solve(shared_ptr<encap_type> f_encap,
@@ -124,11 +124,11 @@ class ScalarSweeper
       auto& rhs = pfasst::encap::as_vector<complex<double>, time>(rhs_encap);
 
       // invert f_impl = multiply with inverse of real part of lambda
-      double inv = 1.0 / (1.0 - double(dt) * real(this->_lambda));
+      double inv = 1.0 / (1.0 - double(dt) * real(this->lambda));
       q[0] = inv * rhs[0];
-      f[0] = real(this->_lambda) * q[0];
+      f[0] = real(this->lambda) * q[0];
 
-      this->_n_impl_solve++;
+      this->n_impl_solve++;
     }
 };
 
