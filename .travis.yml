@@ -19,11 +19,14 @@ env:
     - CMAKE_BUILD_TYPE="Debug" WITH_MPI=ON CXX=g++ BOOST_VERSION=1.55
 
 before_install:
-  - sudo add-apt-repository ppa:boost-latest/ppa --yes  # boost packages
-  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test --yes  # libstdc++-4.8
-  - if [ "${CXX}" == "clang++" ]; then sudo add-apt-repository --yes ppa:h-rayflood/llvm; fi  # clang++-3.2
+  # boost packages
+  - if [ "${BOOST_VERSION}" == "1.53" ]; then sudo add-apt-repository ppa:apokluda/boost1.53 --yes; fi
+  - if [ "${BOOST_VERSION}" == "1.55" ]; then sudo add-apt-repository ppa:boost-latest/ppa --yes; fi
+  # libstdc++-4.8
+  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test --yes
+  # clang++-3.2
+  - if [ "${CXX}" == "clang++" ]; then sudo add-apt-repository --yes ppa:h-rayflood/llvm; fi
   - sudo apt-get update
-
 
 install:
   # note: clang needs g++-4.8 it for libstdc++ update
