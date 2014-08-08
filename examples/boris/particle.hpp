@@ -95,6 +95,24 @@ class VelocityEncapsulation
     virtual ~VelocityEncapsulation()
     {}
     //! @}
+
+    //! @{
+    /**
+     * Converts this velocity to a position by multiplying a scalar time.
+     * 
+     * Remember:
+     * @f{eqnarray*}{
+     *   \left[ position \right] &=& \left[ time \right] * \left[ velocity \right] \\
+     *   m                       &=& s * \frac{m}{s}
+     * @f}
+     */
+    virtual shared_ptr<PositionEncapsulation<scalar, time>> convert(const time unit_factor) const
+    {
+      UNUSED(unit_factor);
+      throw NotImplementedYet("convertion of Velocity to Position");
+      return NULL;
+    }
+    //! @}
 };
 
 
@@ -115,6 +133,24 @@ class AccelerationEncapsulation
 
     virtual ~AccelerationEncapsulation()
     {}
+    //! @}
+
+    //! @{
+    /**
+     * Converts this acceleration to a velocity by multiplying a scalar time.
+     * 
+     * Remember:
+     * @f{eqnarray*}{
+     *   \left[ velocity \right] &=& \left[ time \right] * \left[ acceleration \right] \\
+     *   \frac{m}{s}             &=& s * \frac{m}{s^2}
+     * @f}
+     */
+    virtual shared_ptr<VelocityEncapsulation<scalar, time>> convert(const time unit_factor) const
+    {
+      UNUSED(unit_factor);
+      throw NotImplementedYet("convertion of Acceleration to Velocity");
+      return NULL;
+    }
     //! @}
 };
 
@@ -184,19 +220,19 @@ class ParticleEncapsulation
     //! @}
 
     //! @{
-    virtual void saxpy(time a, shared_ptr<const Encapsulation<time>> x) override
+    virtual void saxpy(time a, shared_ptr<const Encapsulation<time>> x) override final
     {
       UNUSED(a); UNUSED(x);
-      throw NotImplementedYet("ax+y for Encapsulation onto Particle");
+      throw NotImplementedYet("ax+y not viable for a Particle.");
     }
 
     virtual void mat_apply(vector<shared_ptr<Encapsulation<time>>> dst, 
                            time a, matrix<time> mat,
                            vector<shared_ptr<Encapsulation<time>>> src, 
-                           bool zero = true) override
+                           bool zero = true) override final
     {
       UNUSED(dst); UNUSED(a); UNUSED(mat); UNUSED(src); UNUSED(zero);
-      throw NotImplementedYet("aA*x for Encapsulation onto Particle");
+      throw NotImplementedYet("aA*x not viable for a Particle.");
     }
     //! @}
 

@@ -159,6 +159,14 @@ class Velocity2DEncapsulation
     //! @}
 
     //! @{
+    virtual shared_ptr<PositionEncapsulation<scalar, time>> convert(const time unit_factor) const override
+    {
+      return make_shared<Position2DEncapsulation<scalar, time>>(unit_factor * this->u,
+                                                                unit_factor * this->v);
+    }
+    //! @}
+
+    //! @{
     virtual void saxpy(time a, shared_ptr<const Encapsulation<time>> x) override
     {
       shared_ptr<const Velocity2DEncapsulation<scalar, time>> x_cast = \
@@ -252,6 +260,14 @@ class Acceleration2DEncapsulation
       assert(this->DIM == other->DIM);
       this->a = other->a;
       this->b = other->b;
+    }
+    //! @}
+
+    //! @{
+    virtual shared_ptr<VelocityEncapsulation<scalar, time>> convert(const time unit_factor) const override
+    {
+      return make_shared<Velocity2DEncapsulation<scalar, time>>(unit_factor * this->a,
+                                                                unit_factor * this->b);
     }
     //! @}
 
@@ -369,55 +385,14 @@ class Particle2DEncapsulation
     //! @}
 
     //! @{
-    virtual void saxpy(time a, shared_ptr<const Encapsulation<time>> x)
-    {
-      shared_ptr<const Particle2DEncapsulation<scalar, time>> x_cast = \
-        dynamic_pointer_cast<const Particle2DEncapsulation<scalar, time>>(x);
-      assert(x_cast);
-      this->saxpy(a, x_cast);
-    }
-    virtual void saxpy(time a, shared_ptr<const Particle2DEncapsulation<scalar, time>> x)
-    {
-      UNUSED(a); UNUSED(x);
-      // TODO: implement ax+y for 2D-Particle
-    }
-
-    virtual void mat_apply(vector<shared_ptr<Encapsulation<time>>> dst, 
-                           time a, matrix<time> mat,
-                           vector<shared_ptr<Encapsulation<time>>> src, 
-                           bool zero = true)
-    {
-      size_t ndst = dst.size();
-      size_t nsrc = src.size();
-
-      vector<shared_ptr<Particle2DEncapsulation<scalar, time>>> dst_cast(ndst), src_cast(nsrc);
-      for (size_t n = 0; n < ndst; n++) {
-        dst_cast[n] = dynamic_pointer_cast<Particle2DEncapsulation<scalar, time>>(dst[n]);
-        assert(dst_cast[n]);
-      }
-      for (size_t m = 0; m < nsrc; m++) {
-        src_cast[m] = dynamic_pointer_cast<Particle2DEncapsulation<scalar, time>>(src[m]);
-        assert(src_cast[m]);
-      }
-
-      dst_cast[0]->mat_apply(dst_cast, a, mat, src_cast, zero);
-    }
-
-    virtual void mat_apply(vector<shared_ptr<Particle2DEncapsulation<scalar, time>>> dst, 
-                           time a, matrix<time> mat,
-                           vector<shared_ptr<Particle2DEncapsulation<scalar, time>>> src, 
-                           bool zero = true)
-    {
-      UNUSED(dst); UNUSED(a); UNUSED(mat); UNUSED(src); UNUSED(zero);
-      // TODO: implement aA*x for 2D-Particle
-    }
-
     /**
      * gives the particle's energy as its maximum norm
      */
-    scalar norm0() const
+    virtual scalar norm0() const
     {
       // TODO: implement maximum norm for 2D-Particle
+      throw NotImplementedYet("how to compute a norm of a Particle?");
+      return scalar(-1.0);
     }
     //! @}
 };
