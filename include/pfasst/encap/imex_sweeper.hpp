@@ -30,9 +30,9 @@ namespace pfasst
      * explicitly and the stiff part implicitly.
      * Therefore, we define the splitting \\( F(t,u) = F_{expl}(t,u) + F_{impl}(t,u) \\).
      *
-     * This sweeper requires three interfaces to be implement for such ODEs: two routines to 
-     * evaluate the explicit \\( F_{\\rm expl} \\) and implicit \\( F_{\\rm impl} \\) pieces for a 
-     * given state, and one that solves (perhaps with an external solver) the backward-Euler 
+     * This sweeper requires three interfaces to be implement for such ODEs: two routines to
+     * evaluate the explicit \\( F_{\\rm expl} \\) and implicit \\( F_{\\rm impl} \\) pieces for a
+     * given state, and one that solves (perhaps with an external solver) the backward-Euler
      * equation \\( U^{n+1} - \\Delta t F_{\\rm impl}(U^{n+1}) = RHS \\) for \\( U^{n+1} \\).
      *
      * @tparam time precision type of the time dimension
@@ -87,6 +87,11 @@ namespace pfasst
         matrix<time> s_mat;
 
         /**
+         * quadrature matrix containing weights for 0-to-last node integration
+         */
+        matrix<time> b_mat;
+
+        /**
          * quadrature matrix containing weights for node-to-node integration of explicit part
          *
          * @see IMEXSweeper::setup(bool) for a short description
@@ -100,6 +105,24 @@ namespace pfasst
          */
         matrix<time> s_mat_impl;
         //! @}
+
+
+        /**
+        * Set end state to \\( U_0 + \\int F_{expl} + F_{expl} \\).
+        */
+        void integrate_end_state(time dt)
+        {
+          vector<shared_ptr<Encapsulation<time>>> dst = { this->u_state.back() };
+          dst[0]->copy(this->u_state.front());
+          dst[0]->mat_apply(dst, dt, this->b_mat, this->fs_expl, false);
+          dst[0]->mat_apply(dst, dt, this->b_mat, this->fs_impl, false);
+        }
+
+        inline bool last_node_is_virtual()
+        {
+          return !this->get_is_proper().back();
+        }
+
 
       public:
         //! @{
@@ -173,9 +196,16 @@ namespace pfasst
         virtual void setup(bool coarse) override
         {
           auto nodes = this->get_nodes();
+          auto is_proper = this->get_is_proper();
           assert(nodes.size() >= 1);
 
-          this->s_mat = compute_quadrature(nodes, nodes, 's');
+          this->s_mat = compute_quadrature(nodes, nodes, is_proper, 's');
+
+          auto q_mat = compute_quadrature(nodes, nodes, is_proper, 'q');
+          this->b_mat = matrix<time>(1, nodes.size());
+          for (size_t m = 0; m < nodes.size(); m++) {
+            this->b_mat(0, m) = q_mat(nodes.size() - 2, m);
+          }
 
           this->s_mat_expl = this->s_mat;
           this->s_mat_impl = this->s_mat;
@@ -190,6 +220,7 @@ namespace pfasst
             if (coarse) {
               this->previous_u_state.push_back(this->get_factory()->create(pfasst::encap::solution));
             }
+            // XXX: can prolly save some f's here for virtual nodes...
             this->fs_expl.push_back(this->get_factory()->create(pfasst::encap::function));
             this->fs_impl.push_back(this->get_factory()->create(pfasst::encap::function));
           }
@@ -211,14 +242,11 @@ namespace pfasst
           time dt = this->get_controller()->get_time_step();
           time t  = this->get_controller()->get_time();
 
-          if (initial) {
-            this->f_expl_eval(this->fs_expl[0], this->u_state[0], t);
-            this->f_impl_eval(this->fs_impl[0], this->u_state[0], t);
-          }
+          if (initial) { this->evaluate(0); }
 
           shared_ptr<Encapsulation<time>> rhs = this->get_factory()->create(pfasst::encap::solution);
 
-          for (size_t m = 0; m < nnodes - 1; m++) {
+          for (size_t m = 0; m < nnodes - (this->last_node_is_virtual() ? 2 : 1); m++) {
             time ds = dt * (nodes[m + 1] - nodes[m]);
             rhs->copy(this->u_state[m]);
             rhs->saxpy(ds, this->fs_expl[m]);
@@ -227,6 +255,8 @@ namespace pfasst
 
             t += ds;
           }
+
+          if (this->last_node_is_virtual()) { this->integrate_end_state(dt); }
         }
 
         virtual void sweep()
@@ -250,7 +280,7 @@ namespace pfasst
           // sweep
           shared_ptr<Encapsulation<time>> rhs = this->get_factory()->create(pfasst::encap::solution);
 
-          for (size_t m = 0; m < nnodes - 1; m++) {
+          for (size_t m = 0; m < nnodes - (this->last_node_is_virtual() ? 2 : 1); m++) {
             time ds = dt * (nodes[m + 1] - nodes[m]);
 
             rhs->copy(this->u_state[m]);
@@ -261,6 +291,8 @@ namespace pfasst
 
             t += ds;
           }
+
+          if (this->last_node_is_virtual()) { this->integrate_end_state(dt); }
         }
 
         virtual void advance() override
@@ -281,11 +313,23 @@ namespace pfasst
           }
         }
 
+        /**
+         * @copybrief EncapSweeper::evaluate()
+         *
+        * If the node `m` is virtual (not proper), we can save some
+        * implicit/explicit evaluations.
+        */
         virtual void evaluate(size_t m) override
         {
-          time t = this->get_nodes()[m]; // XXX
-          this->f_expl_eval(this->fs_expl[m], this->u_state[m], t);
-          this->f_impl_eval(this->fs_impl[m], this->u_state[m], t);
+          time t0 = this->get_controller()->get_time();
+          time dt = this->get_controller()->get_time_step();
+          time t =  t0 + dt * this->get_nodes()[m];
+          if ((m == 0) || this->get_is_proper()[m]) {
+            this->f_expl_eval(this->fs_expl[m], this->u_state[m], t);
+          }
+          if (this->get_is_proper()[m]) {
+            this->f_impl_eval(this->fs_impl[m], this->u_state[m], t);
+          }
         }
 
         /**

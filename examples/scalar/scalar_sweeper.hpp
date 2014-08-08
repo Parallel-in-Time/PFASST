@@ -24,19 +24,21 @@ class ScalarSweeper
     complex<double> _lambda, _u0;
     int _n_f_expl_eval, _n_f_impl_eval, _n_impl_solve;
     const complex<double> i_complex = complex<double>(0, 1);
+    double _error;
 
   public:
-
     ScalarSweeper(complex<double> lambda, complex<double> u0)
       :   _lambda(lambda)
         , _u0(u0)
         , _n_f_expl_eval(0)
         , _n_f_impl_eval(0)
         , _n_impl_solve(0)
+        , _error(0.0)
     {}
 
     virtual ~ScalarSweeper()
     {
+      cout << "Final error:               " << scientific << this->_error << endl;
       cout << "Number of explicit evaluations: " << this->_n_f_expl_eval << endl;
       cout << "Number of implicit evaluations: " << this->_n_f_impl_eval << endl;
       cout << "Number of implicit solves: " << this->_n_impl_solve << endl;
@@ -51,6 +53,12 @@ class ScalarSweeper
       this->exact(qex, t);
       double max_err = abs(qend[0] - qex[0]) / abs(qex[0]);
       cout << "err: " << scientific << max_err << endl;
+      this->_error = max_err;
+    }
+    
+    double get_errors()
+    {
+      return this->_error;    
     }
 
     void predict(bool initial) override

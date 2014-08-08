@@ -25,6 +25,7 @@ namespace pfasst
     {
         //! @{
         vector<time> nodes;
+        vector<bool> is_proper;
         shared_ptr<EncapFactory<time>> factory;
         //! @}
 
@@ -69,12 +70,19 @@ namespace pfasst
         //! @{
         void set_nodes(vector<time> nodes)
         {
-          this->nodes = nodes;
+          auto augmented = pfasst::augment_nodes(nodes);
+          this->nodes = get<0>(augmented);
+          this->is_proper = get<1>(augmented);
         }
 
         const vector<time> get_nodes() const
         {
           return nodes;
+        }
+
+        const vector<bool> get_is_proper() const
+        {
+          return is_proper;
         }
 
         void set_factory(shared_ptr<EncapFactory<time>> factory)
