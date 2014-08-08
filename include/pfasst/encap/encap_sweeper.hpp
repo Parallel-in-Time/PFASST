@@ -23,10 +23,17 @@ namespace pfasst
     class EncapSweeper
       : public ISweeper<time>
     {
+      public:
+        //! @{
+        typedef Encapsulation<time> encap_type;
+        typedef EncapFactory<time> factory_type;
+        //! @}
+
+      private:
         //! @{
         vector<time> nodes;
         vector<bool> is_proper;
-        shared_ptr<EncapFactory<time>> factory;
+        shared_ptr<factory_type> factory;
         //! @}
 
       public:
@@ -68,14 +75,14 @@ namespace pfasst
         //! @}
 
         //! @{
-        void set_nodes(vector<time> nodes)
+        virtual void set_nodes(vector<time> nodes)
         {
           auto augmented = pfasst::augment_nodes(nodes);
           this->nodes = get<0>(augmented);
           this->is_proper = get<1>(augmented);
         }
 
-        const vector<time> get_nodes() const
+        virtual const vector<time> get_nodes() const
         {
           return nodes;
         }
@@ -85,12 +92,12 @@ namespace pfasst
           return is_proper;
         }
 
-        void set_factory(shared_ptr<EncapFactory<time>> factory)
+        virtual void set_factory(shared_ptr<factory_type> factory)
         {
-          this->factory = shared_ptr<EncapFactory<time>>(factory);
+          this->factory = factory;
         }
 
-        shared_ptr<EncapFactory<time>> get_factory() const
+        virtual shared_ptr<factory_type> get_factory() const
         {
           return factory;
         }
@@ -103,7 +110,7 @@ namespace pfasst
          *
          * @note This method must be implemented in derived sweepers.
          */
-        virtual void set_state(shared_ptr<const Encapsulation<time>> u0, size_t m)
+        virtual void set_state(shared_ptr<const encap_type> u0, size_t m)
         {
           UNUSED(u0); UNUSED(m);
           throw NotImplementedYet("sweeper");
@@ -193,7 +200,7 @@ namespace pfasst
          *
          * @note This method must be implemented in derived sweepers.
          */
-        virtual void integrate(time dt, vector<shared_ptr<Encapsulation<time>>> dst) const
+        virtual void integrate(time dt, vector<shared_ptr<encap_type>> dst) const
         {
           UNUSED(dt); UNUSED(dst);
           throw NotImplementedYet("sweeper");
