@@ -282,6 +282,19 @@ TEST(QuadratureTest, ClenshawCurtisNodes)
   EXPECT_THAT(s4.data(), testing::Pointwise(DoubleNear(), s4e));
 }
 
+
+TEST_P(QmatTest)
+{
+  time_t 
+  for (size_t m = 1; m < nnodes; ++m) {
+    qsum = 0;
+    for (size_t j = 1; j < nnodes; ++j) {
+      qsum += q[m,i];
+    }
+    EXPECT_THAT(qsum-nodes[m], testing::DoubleNear(0, 1E-04))
+  
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
