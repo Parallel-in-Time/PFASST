@@ -31,8 +31,8 @@ error_map run_mpi_pfasst()
   const size_t niters = 4;
 
   vector<pair<size_t, string>> nodes = {
-    { 3, "gauss-lobatto" },
-    { 5, "gauss-lobatto" }
+    { 3, pfasst::QuadratureType::GaussLobatto },
+    { 5, pfasst::QuadratureType::GaussLobatto }
   };
 
   vector<size_t> ndofs = { 64, 128 };
