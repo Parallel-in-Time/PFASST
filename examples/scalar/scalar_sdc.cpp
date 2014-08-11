@@ -23,7 +23,7 @@ double run_scalar_sdc(const size_t nsteps, const double dt, const size_t nnodes,
   pfasst::SDC<> sdc;
 
   const complex<double> y0 = complex<double>(1.0, 0.0);
-  auto nodes = pfasst::compute_nodes(nnodes, "gauss-lobatto");
+  auto nodes = pfasst::compute_nodes(nnodes, pfasst::QuadratureType::GaussLobatto);
   auto factory = make_shared<pfasst::encap::VectorFactory<complex<double>>>(1);
   auto sweeper = make_shared<ScalarSweeper<>>(lambda, y0);
 

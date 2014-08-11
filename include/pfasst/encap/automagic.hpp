@@ -23,7 +23,7 @@ namespace pfasst
                            >;
 
     template<typename ControllerT, typename BuildT, typename time = time_precision>
-    void auto_build(ControllerT& c, vector<pair<size_t, string>> nodes, BuildT build)
+    void auto_build(ControllerT& c, vector<pair<size_t, pfasst::QuadratureType>> nodes, BuildT build)
     {
       for (size_t l = 0; l < nodes.size(); l++) {
         auto nds = pfasst::compute_nodes<time>(get<0>(nodes[l]), get<1>(nodes[l]));

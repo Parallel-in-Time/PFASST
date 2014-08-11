@@ -160,19 +160,20 @@ namespace pfasst
         return p2;
       }
   };
-
+  
+  enum class QuadratureType { GaussLegendre, GaussLobatto, GaussRadau, ClenshawCurtis, uniform };
   template<typename node = time_precision>
-  vector<node> compute_nodes(size_t nnodes, string qtype)
+  vector<node> compute_nodes(size_t nnodes, QuadratureType qtype)
   {
     vector<node> nodes(nnodes);
 
-    if (qtype == "gauss-legendre") {
+    if (qtype == QuadratureType::GaussLegendre) {
       auto roots = Polynomial<node>::legendre(nnodes).roots();
       for (size_t j = 0; j < nnodes; j++) {
         nodes[j] = 0.5 * (1.0 + roots[j]);
       }
 
-    } else if (qtype == "gauss-lobatto") {
+    } else if (qtype == QuadratureType::GaussLobatto) {
       auto roots = Polynomial<node>::legendre(nnodes - 1).differentiate().roots();
       assert(nnodes >= 2);
       for (size_t j = 0; j < nnodes - 2; j++) {
@@ -181,7 +182,7 @@ namespace pfasst
       nodes.front() = 0.0;
       nodes.back() = 1.0;
 
-    } else if (qtype == "gauss-radau") {
+    } else if (qtype == QuadratureType::GaussRadau) {
       auto l   = Polynomial<node>::legendre(nnodes);
       auto lm1 = Polynomial<node>::legendre(nnodes - 1);
       for (size_t i = 0; i < nnodes; i++) {
@@ -193,12 +194,12 @@ namespace pfasst
       }
       nodes.back() = 1.0;
 
-    } else if (qtype == "clenshaw-curtis") {
+    } else if (qtype == QuadratureType::ClenshawCurtis) {
       for (size_t j = 0; j < nnodes; j++) {
         nodes[j] = 0.5 * (1.0 - cos(j * PI / (nnodes - 1)));
       }
 
-    } else if (qtype == "uniform") {
+    } else if (qtype == QuadratureType::uniform) {
       for (size_t j = 0; j < nnodes; j++) {
         nodes[j] = node(j) / (nnodes - 1);
       }
@@ -227,8 +228,9 @@ namespace pfasst
     return pair<vector<node>, vector<bool>>(nodes, is_proper);
   }
 
-//  enum class QuadratureMatrix {S, Q, QQ}; // returning QQ might be cool for 2nd-order stuff
-    enum class QuadratureMatrix {S,Q};
+//  enum class QuadratureMatrix { S, Q, QQ }; // returning QQ might be cool for 2nd-order stuff
+  enum class QuadratureMatrix { S, Q };
+  
   template<typename node = time_precision>
   matrix<node> compute_quadrature(vector<node> dst, vector<node> src, vector<bool> is_proper,
                                   QuadratureMatrix type)
@@ -248,7 +250,7 @@ namespace pfasst
       p[0] = 1.0;
       for (size_t j = 1; j < nsrc + 1; j++) { p[j] = 0.0; }
       for (size_t m = 0; m < nsrc; m++) {
-      if ((!is_proper[m]) || (m == i)) { continue; }
+        if ((!is_proper[m]) || (m == i)) { continue; }
 
         // p_{m+1}(x) = (x - x_j) * p_m(x)
         p1[0] = 0.0;
@@ -263,11 +265,11 @@ namespace pfasst
       for (size_t j = 1; j < ndst; j++) {
         node q = 0.0;
         if (type == QuadratureMatrix::S) {
-            q = P.evaluate(dst[j]) - P.evaluate(dst[j - 1]);
+          q = P.evaluate(dst[j]) - P.evaluate(dst[j - 1]);
         } else if (type == QuadratureMatrix::Q) {
-            q = P.evaluate(dst[j]) - P.evaluate(0.0);
+          q = P.evaluate(dst[j]) - P.evaluate(0.0);
         } else {
-            throw ValueError("Further matrix types are not implemented yet");
+          throw ValueError("Further matrix types are not implemented yet");
         }
           
         mat(j - 1, i) = q / den;
