@@ -199,9 +199,9 @@ namespace pfasst
           auto is_proper = this->get_is_proper();
           assert(nodes.size() >= 1);
 
-          this->s_mat = compute_quadrature(nodes, nodes, is_proper, 's');
+          this->s_mat = compute_quadrature(nodes, nodes, is_proper, QuadratureMatrix::S);
 
-          auto q_mat = compute_quadrature(nodes, nodes, is_proper, 'q');
+          auto q_mat = compute_quadrature(nodes, nodes, is_proper, QuadratureMatrix::Q);
           this->b_mat = matrix<time>(1, nodes.size());
           for (size_t m = 0; m < nodes.size(); m++) {
             this->b_mat(0, m) = q_mat(nodes.size() - 2, m);

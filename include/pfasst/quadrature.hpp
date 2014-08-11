@@ -227,10 +227,11 @@ namespace pfasst
     return pair<vector<node>, vector<bool>>(nodes, is_proper);
   }
 
-
+//  enum class QuadratureMatrix {S, Q, QQ}; // returning QQ might be cool for 2nd-order stuff
+    enum class QuadratureMatrix {S,Q};
   template<typename node = time_precision>
   matrix<node> compute_quadrature(vector<node> dst, vector<node> src, vector<bool> is_proper,
-                                  char type)
+                                  QuadratureMatrix type)
   {
     const size_t ndst = dst.size();
     const size_t nsrc = src.size();
@@ -247,7 +248,7 @@ namespace pfasst
       p[0] = 1.0;
       for (size_t j = 1; j < nsrc + 1; j++) { p[j] = 0.0; }
       for (size_t m = 0; m < nsrc; m++) {
-        if ((!is_proper[m]) || (m == i)) { continue; }
+      if ((!is_proper[m]) || (m == i)) { continue; }
 
         // p_{m+1}(x) = (x - x_j) * p_m(x)
         p1[0] = 0.0;
@@ -261,12 +262,14 @@ namespace pfasst
       auto P = p.integrate();
       for (size_t j = 1; j < ndst; j++) {
         node q = 0.0;
-        if (type == 's') {
-          q = P.evaluate(dst[j]) - P.evaluate(dst[j - 1]);
+        if (type == QuadratureMatrix::S) {
+            q = P.evaluate(dst[j]) - P.evaluate(dst[j - 1]);
+        } else if (type == QuadratureMatrix::Q) {
+            q = P.evaluate(dst[j]) - P.evaluate(0.0);
         } else {
-          q = P.evaluate(dst[j]) - P.evaluate(0.0);
+            throw ValueError("Further matrix types are not implemented yet");
         }
-
+          
         mat(j - 1, i) = q / den;
       }
     }
