@@ -73,13 +73,13 @@ TEST(NodesTest, GaussLegendreNodes)
                                0.9745539561713793
                              };
 
-  auto l3 = pfasst::compute_nodes<long double>(3, "gauss-legendre");
+  auto l3 = pfasst::compute_nodes<long double>(3, pfasst::QuadratureType::GaussLegendre);
   EXPECT_THAT(l3, testing::Pointwise(DoubleNear(), l3e));
 
-  auto l5 = pfasst::compute_nodes<long double>(5, "gauss-legendre");
+  auto l5 = pfasst::compute_nodes<long double>(5, pfasst::QuadratureType::GaussLegendre);
   EXPECT_THAT(l5, testing::Pointwise(DoubleNear(), l5e));
 
-  auto l7 = pfasst::compute_nodes<long double>(7, "gauss-legendre");
+  auto l7 = pfasst::compute_nodes<long double>(7, pfasst::QuadratureType::GaussLegendre);
   EXPECT_THAT(l7, testing::Pointwise(DoubleNear(), l7e));
 }
 
@@ -121,19 +121,19 @@ TEST(NodesTest, GaussLobattoNodes)
                                1.0
                              };
 
-  auto l2 = pfasst::compute_nodes<long double>(2, "gauss-lobatto");
+  auto l2 = pfasst::compute_nodes<long double>(2, pfasst::QuadratureType::GaussLobatto);
   EXPECT_THAT(l2, testing::Pointwise(DoubleNear(), l2e));
 
-  auto l3 = pfasst::compute_nodes<long double>(3, "gauss-lobatto");
+  auto l3 = pfasst::compute_nodes<long double>(3, pfasst::QuadratureType::GaussLobatto);
   EXPECT_THAT(l3, testing::Pointwise(DoubleNear(), l3e));
 
-  auto l5 = pfasst::compute_nodes<long double>(5, "gauss-lobatto");
+  auto l5 = pfasst::compute_nodes<long double>(5, pfasst::QuadratureType::GaussLobatto);
   EXPECT_THAT(l5, testing::Pointwise(DoubleNear(), l5e));
 
-  auto l7 = pfasst::compute_nodes<long double>(7, "gauss-lobatto");
+  auto l7 = pfasst::compute_nodes<long double>(7, pfasst::QuadratureType::GaussLobatto);
   EXPECT_THAT(l7, testing::Pointwise(DoubleNear(), l7e));
 
-  auto l9 = pfasst::compute_nodes<long double>(9, "gauss-lobatto");
+  auto l9 = pfasst::compute_nodes<long double>(9, pfasst::QuadratureType::GaussLobatto);
   EXPECT_THAT(l9, testing::Pointwise(DoubleNear(), l9e));
 }
 
@@ -175,19 +175,19 @@ TEST(NodesTest, ClenshawCurtisNodes)
                                 1.0
                               };
 
-  auto cc2 = pfasst::compute_nodes<long double>(2, "clenshaw-curtis");
+  auto cc2 = pfasst::compute_nodes<long double>(2, pfasst::QuadratureType::ClenshawCurtis);
   EXPECT_THAT(cc2, testing::Pointwise(DoubleNear(), cc2e));
 
-  auto cc3 = pfasst::compute_nodes<long double>(3, "clenshaw-curtis");
+  auto cc3 = pfasst::compute_nodes<long double>(3, pfasst::QuadratureType::ClenshawCurtis);
   EXPECT_THAT(cc3, testing::Pointwise(DoubleNear(), cc3e));
 
-  auto cc5 = pfasst::compute_nodes<long double>(5, "clenshaw-curtis");
+  auto cc5 = pfasst::compute_nodes<long double>(5, pfasst::QuadratureType::ClenshawCurtis);
   EXPECT_THAT(cc5, testing::Pointwise(DoubleNear(), cc5e));
 
-  auto cc7 = pfasst::compute_nodes<long double>(7, "clenshaw-curtis");
+  auto cc7 = pfasst::compute_nodes<long double>(7, pfasst::QuadratureType::ClenshawCurtis);
   EXPECT_THAT(cc7, testing::Pointwise(DoubleNear(), cc7e));
 
-  auto cc9 = pfasst::compute_nodes<long double>(9, "clenshaw-curtis");
+  auto cc9 = pfasst::compute_nodes<long double>(9, pfasst::QuadratureType::ClenshawCurtis);
   EXPECT_THAT(cc9, testing::Pointwise(DoubleNear(), cc9e));
 }
 
@@ -209,19 +209,19 @@ TEST(NodesTest, UniformNodes)
                                1.0
                              };
 
-  auto u2 = pfasst::compute_nodes<long double>(2, "uniform");
+  auto u2 = pfasst::compute_nodes<long double>(2, pfasst::QuadratureType::uniform);
   EXPECT_THAT(u2, testing::Pointwise(DoubleNear(), u2e));
 
-  auto u3 = pfasst::compute_nodes<long double>(3, "uniform");
+  auto u3 = pfasst::compute_nodes<long double>(3, pfasst::QuadratureType::uniform);
   EXPECT_THAT(u3, testing::Pointwise(DoubleNear(), u3e));
 
-  auto u5 = pfasst::compute_nodes<long double>(5, "uniform");
+  auto u5 = pfasst::compute_nodes<long double>(5, pfasst::QuadratureType::uniform);
   EXPECT_THAT(u5, testing::Pointwise(DoubleNear(), u5e));
 }
 
 TEST(QuadratureTest, GaussLobattoNodes)
 {
-  auto l3 = pfasst::compute_nodes<long double>(3, "gauss-lobatto");
+  auto l3 = pfasst::compute_nodes<long double>(3, pfasst::QuadratureType::GaussLobatto);
   auto a3 = pfasst::augment_nodes(l3);
   auto s3 = pfasst::compute_quadrature(get<0>(a3), get<0>(a3), get<1>(a3), pfasst::QuadratureMatrix::S);
   const long double s3e[6] = { 0.20833333333333333,
@@ -234,7 +234,7 @@ TEST(QuadratureTest, GaussLobattoNodes)
     
   EXPECT_THAT(s3.data(), testing::Pointwise(DoubleNear(), s3e));
 
-  auto l5 = pfasst::compute_nodes<long double>(5, "gauss-lobatto");
+  auto l5 = pfasst::compute_nodes<long double>(5, pfasst::QuadratureType::GaussLobatto);
   auto a5 = pfasst::augment_nodes(l5);
   auto s5 = pfasst::compute_quadrature(get<0>(a5), get<0>(a5), get<1>(a5), pfasst::QuadratureMatrix::S);
   const long double s5e[] = { 0.067728432186156897969267419174073482,
@@ -263,7 +263,7 @@ TEST(QuadratureTest, GaussLobattoNodes)
 
 TEST(QuadratureTest, ClenshawCurtisNodes)
 {
-  auto c4 = pfasst::compute_nodes<long double>(4, "clenshaw-curtis");
+  auto c4 = pfasst::compute_nodes<long double>(4, pfasst::QuadratureType::ClenshawCurtis);
   auto a4 = pfasst::augment_nodes(c4);
   auto s4 = pfasst::compute_quadrature(get<0>(a4), get<0>(a4), get<1>(a4), pfasst::QuadratureMatrix::S);
   const long double s4e[] = { 0.10243055555555555555555555555555556,

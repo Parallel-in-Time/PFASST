@@ -36,9 +36,9 @@ int main(int /*argc*/, char** /*argv*/)
   const double dt     = 0.01;
   const size_t niters = 4;
 
-  vector<pair<size_t, string>> nodes = {
-    { 3, "gauss-lobatto" },
-    { 5, "gauss-lobatto" }
+  vector<pair<size_t, pfasst::QuadratureType>> nodes = {
+    { 3, pfasst::QuadratureType::GaussLobatto },
+    { 5, pfasst::QuadratureType::GaussLegendre }
   };
 
   vector<size_t> ndofs = { 64, 128 };
