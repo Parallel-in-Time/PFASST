@@ -54,11 +54,15 @@ class ConvergenceTest
           this->nsteps = { 2, 4, 6, 8, 10 };
           this->nnodes_in_call = this->nnodes + 2;
           break;
-
-        /*
+        
         case pfasst::QuadratureType::GaussRadau:
+          this->niters = 2 * this->nnodes - 1;
+          this->Tend = 5.0;
+          this->lambda = complex<double>(-1.0, 2.0);
+          this->nsteps = { 4, 6, 8, 10, 12 };
+          this->nnodes_in_call = this->nnodes + 1;
           break;
-
+         /*
         case pfasst::QuadratureType::ClenshawCurtis:
           break;
 
@@ -129,10 +133,18 @@ TEST_P(ConvergenceTest, GaussNodes)
                                                                << " not within expected range.";
         break;
 
-      /*
+      
       case pfasst::QuadratureType::GaussRadau:
+        // convergence rate for Radau nodes should be 2*nodes-1
+        // For some case, the convergence rate is ALMOST that value, hence put in the 0.99
+        EXPECT_THAT(convrate[i], Ge<double>(0.99* 2 * this->nnodes - 1)) << "Convergence rate for " 
+                                                                   << this->nnodes
+                                                                   << " Gauss-Radu nodes "
+                                                                   << " at node " << i 
+                                                                   << " not within expected range.";
         break;
-
+      
+      /*
       case pfasst::QuadratureType::ClenshawCurtis:
         break;
 
@@ -151,8 +163,8 @@ TEST_P(ConvergenceTest, GaussNodes)
 INSTANTIATE_TEST_CASE_P(ScalarSDC, ConvergenceTest,
                         Combine(Range<size_t>(2, 7),
                                 Values(pfasst::QuadratureType::GaussLobatto,
-                                       pfasst::QuadratureType::GaussLegendre/*,
-                                       pfasst::QuadratureType::GaussRadau,
+                                       pfasst::QuadratureType::GaussLegendre,
+                                       pfasst::QuadratureType::GaussRadau/*,
                                        pfasst::QuadratureType::ClenshawCurtis,
                                        pfasst::QuadratureType::Uniform*/))
 );
