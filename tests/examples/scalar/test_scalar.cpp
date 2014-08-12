@@ -29,6 +29,7 @@ class ConvergenceTest
     vector<double> convrate;
     double dt;
     size_t niters;
+    const pfasst::QuadratureType nodetype = pfasst::QuadratureType::GaussLobatto;
 
   public:
     virtual void SetUp()
@@ -45,7 +46,7 @@ class ConvergenceTest
 
       for (size_t i = 0; i <= nsteps_l - 1; ++i) {
         dt = Tend / double(nsteps[i]);
-        err[i] = run_scalar_sdc(nsteps[i], dt, nnodes, niters, lambda);
+        err[i] = run_scalar_sdc(nsteps[i], dt, nnodes, niters, lambda, nodetype);
       }
     }
 
