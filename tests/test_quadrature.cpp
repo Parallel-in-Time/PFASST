@@ -8,6 +8,8 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+using namespace ::testing;
+
 #include <pfasst/quadrature.hpp>
 
 using namespace std;
@@ -74,13 +76,13 @@ TEST(NodesTest, GaussLegendreNodes)
                              };
 
   auto l3 = pfasst::compute_nodes<long double>(3, pfasst::QuadratureType::GaussLegendre);
-  EXPECT_THAT(l3, testing::Pointwise(DoubleNear(), l3e));
+  EXPECT_THAT(l3, Pointwise(DoubleNear(), l3e));
 
   auto l5 = pfasst::compute_nodes<long double>(5, pfasst::QuadratureType::GaussLegendre);
-  EXPECT_THAT(l5, testing::Pointwise(DoubleNear(), l5e));
+  EXPECT_THAT(l5, Pointwise(DoubleNear(), l5e));
 
   auto l7 = pfasst::compute_nodes<long double>(7, pfasst::QuadratureType::GaussLegendre);
-  EXPECT_THAT(l7, testing::Pointwise(DoubleNear(), l7e));
+  EXPECT_THAT(l7, Pointwise(DoubleNear(), l7e));
 }
 
 TEST(NodesTest, GaussLobattoNodes)
@@ -122,19 +124,19 @@ TEST(NodesTest, GaussLobattoNodes)
                              };
 
   auto l2 = pfasst::compute_nodes<long double>(2, pfasst::QuadratureType::GaussLobatto);
-  EXPECT_THAT(l2, testing::Pointwise(DoubleNear(), l2e));
+  EXPECT_THAT(l2, Pointwise(DoubleNear(), l2e));
 
   auto l3 = pfasst::compute_nodes<long double>(3, pfasst::QuadratureType::GaussLobatto);
-  EXPECT_THAT(l3, testing::Pointwise(DoubleNear(), l3e));
+  EXPECT_THAT(l3, Pointwise(DoubleNear(), l3e));
 
   auto l5 = pfasst::compute_nodes<long double>(5, pfasst::QuadratureType::GaussLobatto);
-  EXPECT_THAT(l5, testing::Pointwise(DoubleNear(), l5e));
+  EXPECT_THAT(l5, Pointwise(DoubleNear(), l5e));
 
   auto l7 = pfasst::compute_nodes<long double>(7, pfasst::QuadratureType::GaussLobatto);
-  EXPECT_THAT(l7, testing::Pointwise(DoubleNear(), l7e));
+  EXPECT_THAT(l7, Pointwise(DoubleNear(), l7e));
 
   auto l9 = pfasst::compute_nodes<long double>(9, pfasst::QuadratureType::GaussLobatto);
-  EXPECT_THAT(l9, testing::Pointwise(DoubleNear(), l9e));
+  EXPECT_THAT(l9, Pointwise(DoubleNear(), l9e));
 }
 
 TEST(NodesTest, ClenshawCurtisNodes)
@@ -176,19 +178,19 @@ TEST(NodesTest, ClenshawCurtisNodes)
                               };
 
   auto cc2 = pfasst::compute_nodes<long double>(2, pfasst::QuadratureType::ClenshawCurtis);
-  EXPECT_THAT(cc2, testing::Pointwise(DoubleNear(), cc2e));
+  EXPECT_THAT(cc2, Pointwise(DoubleNear(), cc2e));
 
   auto cc3 = pfasst::compute_nodes<long double>(3, pfasst::QuadratureType::ClenshawCurtis);
-  EXPECT_THAT(cc3, testing::Pointwise(DoubleNear(), cc3e));
+  EXPECT_THAT(cc3, Pointwise(DoubleNear(), cc3e));
 
   auto cc5 = pfasst::compute_nodes<long double>(5, pfasst::QuadratureType::ClenshawCurtis);
-  EXPECT_THAT(cc5, testing::Pointwise(DoubleNear(), cc5e));
+  EXPECT_THAT(cc5, Pointwise(DoubleNear(), cc5e));
 
   auto cc7 = pfasst::compute_nodes<long double>(7, pfasst::QuadratureType::ClenshawCurtis);
-  EXPECT_THAT(cc7, testing::Pointwise(DoubleNear(), cc7e));
+  EXPECT_THAT(cc7, Pointwise(DoubleNear(), cc7e));
 
   auto cc9 = pfasst::compute_nodes<long double>(9, pfasst::QuadratureType::ClenshawCurtis);
-  EXPECT_THAT(cc9, testing::Pointwise(DoubleNear(), cc9e));
+  EXPECT_THAT(cc9, Pointwise(DoubleNear(), cc9e));
 }
 
 TEST(NodesTest, UniformNodes)
@@ -210,13 +212,13 @@ TEST(NodesTest, UniformNodes)
                              };
 
   auto u2 = pfasst::compute_nodes<long double>(2, pfasst::QuadratureType::Uniform);
-  EXPECT_THAT(u2, testing::Pointwise(DoubleNear(), u2e));
+  EXPECT_THAT(u2, Pointwise(DoubleNear(), u2e));
 
   auto u3 = pfasst::compute_nodes<long double>(3, pfasst::QuadratureType::Uniform);
-  EXPECT_THAT(u3, testing::Pointwise(DoubleNear(), u3e));
+  EXPECT_THAT(u3, Pointwise(DoubleNear(), u3e));
 
   auto u5 = pfasst::compute_nodes<long double>(5, pfasst::QuadratureType::Uniform);
-  EXPECT_THAT(u5, testing::Pointwise(DoubleNear(), u5e));
+  EXPECT_THAT(u5, Pointwise(DoubleNear(), u5e));
 }
 
 TEST(QuadratureTest, GaussLobattoNodes)
@@ -232,7 +234,7 @@ TEST(QuadratureTest, GaussLobattoNodes)
                                0.20833333333333333
                              };
     
-  EXPECT_THAT(s3.data(), testing::Pointwise(DoubleNear(), s3e));
+  EXPECT_THAT(s3.data(), Pointwise(DoubleNear(), s3e));
 
   auto l5 = pfasst::compute_nodes<long double>(5, pfasst::QuadratureType::GaussLobatto);
   auto a5 = pfasst::augment_nodes(l5);
@@ -258,7 +260,7 @@ TEST(QuadratureTest, GaussLobattoNodes)
                               0.11974476934341168251615379970493965,
                               0.067728432186156897969267419174073482
                             };
-  EXPECT_THAT(s5.data(), testing::Pointwise(DoubleNear(), s5e));
+  EXPECT_THAT(s5.data(), Pointwise(DoubleNear(), s5e));
 }
 
 TEST(QuadratureTest, ClenshawCurtisNodes)
@@ -279,11 +281,61 @@ TEST(QuadratureTest, ClenshawCurtisNodes)
                               0.16319444444444444444444444444444444,
                               0.10243055555555555555555555555555556
                             };
-  EXPECT_THAT(s4.data(), testing::Pointwise(DoubleNear(), s4e));
+  EXPECT_THAT(s4.data(), Pointwise(DoubleNear(), s4e));
 }
+
+class QmatTest
+  : public ::TestWithParam<tuple<size_t, pfasst::QuadratureType>>
+{
+  protected:
+    size_t nnodes;
+    pfasst::QuadratureType qtype;
+    vector<long double> nodes;
+    matrix<long double> q;
+
+  public:
+    virtual void SetUp()
+    {
+      nnodes = get<0>(GetParam());
+      qtype = get<1>(GetParam());
+      
+      auto cnodes = pfasst::compute_nodes<long double>(nnodes, qtype);
+      auto n1 = pfasst::augment_nodes(cnodes);
+      nodes = get<0>(n1);
+      q = pfasst::compute_quadrature(nodes, nodes, get<1>(n1), pfasst::QuadratureMatrix::Q);
+      
+      cout << "Quadrature type no. " << int(qtype) << " -- Number of nodes " << nnodes << endl;
+      
+    }
+  
+    virtual void TearDown()
+    {}
+};
+
+TEST_P(QmatTest, AllNodes)
+{
+  long double qsum;
+  for (size_t m = 0; m < q.size1(); ++m) {
+    qsum = 0;
+    for (size_t j = 0; j < q.size2(); ++j) {
+      qsum += q(m,j);
+    }
+    EXPECT_NEAR(qsum, nodes[m+1],
+                (qtype != pfasst::QuadratureType::Uniform) ? (long double)(1E-12) : (long double)(3E-12));
+  }
+}
+
+INSTANTIATE_TEST_CASE_P(Quadrature, QmatTest,
+                        ::Combine(::Range<size_t>(2, 14),
+                                  Values<pfasst::QuadratureType>(pfasst::QuadratureType::GaussLegendre,
+                                                                 pfasst::QuadratureType::GaussLobatto,
+                                                                 pfasst::QuadratureType::GaussRadau,
+                                                                 pfasst::QuadratureType::ClenshawCurtis,
+                                                                 pfasst::QuadratureType::Uniform)));
+
 
 int main(int argc, char** argv)
 {
-  testing::InitGoogleTest(&argc, argv);
+  InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
