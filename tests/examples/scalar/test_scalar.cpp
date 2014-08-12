@@ -12,6 +12,12 @@ using namespace ::testing;
 #include "../examples/scalar/scalar_sdc.cpp"
 #undef PFASST_UNIT_TESTING
 
+MATCHER(MyDoubleMore, "")
+{
+  return get<0>(arg) > get<1>(arg);
+}
+
+
 /*
  * parameterized test fixture with number of nodes as parameter
  */
@@ -21,12 +27,12 @@ class ConvergenceTest
   protected:
     size_t nnodes; // parameter
 
-    const complex<double> lambda = complex<double>(-1.0, 1.0);
-    const double Tend = 4.0;
-    const vector<size_t> nsteps = { 2, 5, 10, 15, 20 };
+    complex<double> lambda = complex<double>(-1.0, 1.0);
+    double Tend = 4.0;
+    vector<size_t> nsteps = { 2, 5, 10, 15, 20 };
     size_t nsteps_l;
     vector<double> err;
-    vector<double> convrate;
+    vector<double> convrate_lobatto;
     vector<double> convrate_legendre;
     double dt;
     size_t niters;
@@ -38,10 +44,9 @@ class ConvergenceTest
       this->nnodes = this->GetParam();
       this->nsteps_l = this->nsteps.size();
       this->err.resize(this->nsteps.size());
-      this->convrate.resize(this->nsteps.size());
+      this->convrate_lobatto.resize(this->nsteps.size());
     
-      // Run first for Lobatto nodes
-
+      // Run first for Lobatto nodes which is the default nodetype
 
       // Expect convergence rate of 2*nodes-2 from collocation formula,
       // doing an identical number of iteration should suffice to reach this as each
@@ -56,17 +61,33 @@ class ConvergenceTest
 
       // compute convergence rates
       for (size_t i = 0; i <= nsteps_l - 2; ++i) {
-        convrate[i] = log10(err[i+1] / err[i]) / log10(double(nsteps[i]) / double(nsteps[i + 1]));
+        convrate_lobatto[i] = log10(err[i+1] / err[i]) / log10(double(nsteps[i]) / double(nsteps[i + 1]));
       }
           
       // Run for Legendre nodes
       nodetype = pfasst::QuadratureType::GaussLegendre;
       this->convrate_legendre.resize(this->nsteps.size());
       
-      // NOTE: Setting M for Legendre nodes actually only results in M-2 "real" nodes,
-      // because the first and the last are used for initial and final value.
-      this->niters = 2*(nnodes-2);
+      // refine parameter
+      complex<double> lambda = complex<double>(-1.0, 4.0);      
+      this->Tend = 5.0;
+      this->nsteps = { 5, 7, 9, 11, 13 };
+      this->niters = 2*nnodes;
       
+      // run to compute errors
+      for (size_t i = 0; i <= nsteps_l - 1; ++i) {
+        dt = Tend / double(nsteps[i]);
+        
+      // NOTE: Setting M for Legendre nodes actually only results in M-2 "real" nodes,
+      // because the first and the last are used for initial and final value.      
+      // Hence us nnodes+2 as argument  
+        err[i] = run_scalar_sdc(nsteps[i], dt, nnodes+2, niters, lambda, nodetype);
+      }
+      
+      for (size_t i = 0; i <= nsteps_l - 2; ++i) {
+        convrate_legendre[i] = log10(err[i+1] / err[i]) / log10(double(nsteps[i]) / double(nsteps[i + 1]));
+      }
+            
     }
 
     virtual void TearDown()
@@ -78,14 +99,19 @@ class ConvergenceTest
  * The test below verifies that the code approximately (up to a safety factor) reproduces
  * the theoretically expected rate of convergence 
  */
-TEST_P(ConvergenceTest, GaussLobattoNodes)
+TEST_P(ConvergenceTest, GaussNodes)
 {
   for (size_t i = 0; i <= nsteps_l - 2; ++i) {
 
-    EXPECT_THAT(convrate[i],
+    EXPECT_THAT(convrate_lobatto[i],
                 testing::DoubleNear(double(2 * nnodes - 2), 0.99)) << "Convergence rate at node "
                                                                    << i
                                                                    << " not within expected range";
+    EXPECT_THAT(convrate_legendre[i],
+                testing::DoubleNear(double(2 * nnodes ), 0.9)) << "Convergence rate at node "
+                                                               << i
+                                                               << " not within expected range";                                                                
+
   }
 }
 
