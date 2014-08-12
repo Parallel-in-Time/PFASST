@@ -17,6 +17,44 @@ using namespace pfasst;
 using namespace pfasst::encap;
 
 
+/**
+ * Type to denote a scalar with physical unit \\( t \\).
+ *
+ * This is used where we use a plain scalar to be multiplied with a unit of \\( \\frac{\cdot}{t^p} \\)
+ * to be *converted* into a value with unit \\( \\frac{\cdot}{t^{p-1}} \\).
+ *
+ * @tparam scalar underlying fundamental type
+ */
+template<typename scalar>
+struct dt
+{
+  scalar v;
+
+  dt() : dt(scalar(0.0)) {}
+  dt(const scalar value) : v(value) {}
+  virtual ~dt() {}
+};
+
+
+/**
+ * Type to denote a scalar with physical unit \\( t^2 \\).
+ *
+ * This is used where we use a plain scalar to be multiplied with a unit of \\( \\frac{\cdot}{t^p} \\)
+ * to be *converted* into a value with unit \\( \\frac{\cdot}{t^{p-2}} \\).
+ *
+ * @tparam scalar underlying fundamental type
+ */
+template<typename scalar>
+struct dtdt
+{
+  scalar v;
+
+  dtdt() : dtdt(scalar(0.0)) {}
+  dtdt(const scalar value) : v(value) {}
+  virtual ~dtdt() {}
+};
+
+
 template<
   typename scalar,
   typename time = time_precision
@@ -95,24 +133,6 @@ class VelocityEncapsulation
     virtual ~VelocityEncapsulation()
     {}
     //! @}
-
-    //! @{
-    /**
-     * Converts this velocity to a position by multiplying a scalar time.
-     * 
-     * Remember:
-     * @f{eqnarray*}{
-     *   \left[ position \right] &=& \left[ time \right] * \left[ velocity \right] \\
-     *   m                       &=& s * \frac{m}{s}
-     * @f}
-     */
-    virtual shared_ptr<PositionEncapsulation<scalar, time>> convert(const time unit_factor) const
-    {
-      UNUSED(unit_factor);
-      throw NotImplementedYet("convertion of Velocity to Position");
-      return NULL;
-    }
-    //! @}
 };
 
 
@@ -133,24 +153,6 @@ class AccelerationEncapsulation
 
     virtual ~AccelerationEncapsulation()
     {}
-    //! @}
-
-    //! @{
-    /**
-     * Converts this acceleration to a velocity by multiplying a scalar time.
-     * 
-     * Remember:
-     * @f{eqnarray*}{
-     *   \left[ velocity \right] &=& \left[ time \right] * \left[ acceleration \right] \\
-     *   \frac{m}{s}             &=& s * \frac{m}{s^2}
-     * @f}
-     */
-    virtual shared_ptr<VelocityEncapsulation<scalar, time>> convert(const time unit_factor) const
-    {
-      UNUSED(unit_factor);
-      throw NotImplementedYet("convertion of Acceleration to Velocity");
-      return NULL;
-    }
     //! @}
 };
 

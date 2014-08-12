@@ -19,12 +19,16 @@ template<
 class Position2DEncapsulation
   : public PositionEncapsulation<scalar, time>
 {
+  private:
+    typedef Position2DEncapsulation<scalar, time> this_type;
+
   public:
     const size_t DIM = 2;
     scalar x;
     scalar y;
 
     //! @{
+    //! Default CTor
     Position2DEncapsulation()
       : Position2DEncapsulation(scalar(0.0), scalar(0.0))
     {}
@@ -32,6 +36,24 @@ class Position2DEncapsulation
     Position2DEncapsulation(const scalar x, const scalar y)
       :   x(x)
         , y(y)
+    {}
+
+    //! Copy CTor
+    Position2DEncapsulation(const this_type& other)
+      :   x(other.x)
+        , y(other.y)
+    {}
+
+    //! Move CTor
+    Position2DEncapsulation(this_type&& other)
+      :   x(std::move(other.x))
+        , y(std::move(other.y))
+    {}
+
+    //! Copy CTor for shared_ptr
+    Position2DEncapsulation(const shared_ptr<const this_type> other)
+      :   x(other->x)
+        , y(other->y)
     {}
 
     virtual ~Position2DEncapsulation()
@@ -72,8 +94,7 @@ class Position2DEncapsulation
 
     virtual void saxpy(time a, shared_ptr<const Position2DEncapsulation<scalar, time>> x)
     {
-      this->x += a * x->x;
-      this->y += a * x->y;
+      *this += a * x;
     }
 
     virtual void mat_apply(vector<shared_ptr<Encapsulation<time>>> dst, 
@@ -106,6 +127,144 @@ class Position2DEncapsulation
       // TODO: implement aA*x for 2D-Position
     }
     //! @}
+
+    //! @{
+    this_type& operator=(const this_type& other)
+    {
+      if (this != &other) {
+        assert(this->DIM == other.DIM);
+        this->x = other.x;
+        this->y = other.y;
+      }
+      return *this;
+    }
+
+    this_type& operator=(this_type&& other)
+    {
+      assert(this != &other);
+      assert(this->DIM == other.DIM);
+      this->x = other.x;
+      this->y = other.y;
+      return *this;
+    }
+
+    this_type& operator=(shared_ptr<const this_type> other)
+    {
+      if (this != other.get()) {
+        assert(this->DIM == other->DIM);
+        this->x = other->x;
+        this->y = other->y;
+      }
+      return *this;
+    }
+
+    template<typename value_type>
+    this_type& operator*=(const value_type value)
+    {
+      static_assert(is_arithmetic<value_type>::value,
+                    "Position can only be multiplied by arithmetic types.");
+      this->x *= value;
+      this->y *= value;
+      return *this;
+    }
+
+    template<typename value_type>
+    friend this_type operator*(const value_type value, const this_type& first)
+    {
+      static_assert(is_arithmetic<value_type>::value,
+                    "Position can only be multiplied by arithmetic types.");
+      return this_type(first.x * value, first.y * value);
+    }
+
+    template<typename value_type>
+    friend this_type operator*(const this_type& first, const value_type value)
+    {
+      return value * first;
+    }
+
+    template<typename value_type>
+    friend this_type operator*(const value_type value, const shared_ptr<const this_type> first)
+    {
+      return value * *(first.get());
+    }
+
+    template<typename value_type>
+    friend this_type operator*(const shared_ptr<const this_type> first, const value_type value)
+    {
+      return value * *(first.get());
+    }
+
+    this_type& operator+=(const shared_ptr<const this_type> second)
+    {
+      return this += second.get();
+    }
+
+    this_type& operator+=(const this_type& second)
+    {
+      assert(this->DIM == second.DIM);
+      this->x += second.x;
+      this->y += second.y;
+      return *this;
+    }
+
+    template<typename value_type>
+    this_type& operator+=(const value_type value)
+    {
+      static_assert(is_arithmetic<value_type>::value,
+                    "Only arithmetic types can be added to Position.");
+      this->x += value;
+      this->y += value;
+      return *this;
+    }
+
+    friend this_type operator+(const this_type& first, const this_type& second)
+    {
+      assert(first.DIM == second.DIM);
+      return this_type(first.x + second.x, first.y + second.y);
+    }
+
+    friend this_type operator+(const shared_ptr<const this_type> first,
+                               const shared_ptr<const this_type> second)
+    {
+      return first.get() + second.get();
+    }
+
+    friend this_type operator+(const this_type& first, const shared_ptr<const this_type> second)
+    {
+      return first + second.get();
+    }
+
+    friend this_type operator+(const shared_ptr<const this_type> first, const this_type& second)
+    {
+      return second + first.get();
+    }
+
+    template<typename value_type>
+    friend this_type operator+(const value_type value, const this_type& first)
+    {
+      static_assert(is_arithmetic<value_type>::value,
+                    "Only arithmetic types can be added to Position.");
+      return this_type(first.x + value, first.y + value);
+    }
+
+    template<typename value_type>
+    friend this_type operator+(const this_type& first, const value_type value)
+    {
+      return value + first;
+    }
+
+    template<typename value_type>
+    friend this_type operator+(const value_type value, const shared_ptr<const this_type> first)
+    {
+      return value + first.get();
+    }
+
+    template<typename value_type>
+    friend this_type operator+(const shared_ptr<const this_type> first, const value_type value)
+    {
+      return value + first.get();
+    }
+    //! @}
 };
 
 
@@ -116,12 +275,16 @@ template<
 class Velocity2DEncapsulation
   : public VelocityEncapsulation<scalar, time>
 {
+  private:
+    typedef Velocity2DEncapsulation<scalar, time> this_type;
+
   public:
     const size_t DIM = 2;
     scalar u;
     scalar v;
 
     //! @{
+    //! Default CTor
     Velocity2DEncapsulation()
       : Velocity2DEncapsulation(scalar(0.0), scalar(0.0))
     {}
@@ -129,6 +292,24 @@ class Velocity2DEncapsulation
     Velocity2DEncapsulation(const scalar u, const scalar v)
       :   u(u)
         , v(v)
+    {}
+
+    //! Copy CTor
+    Velocity2DEncapsulation(const this_type& other)
+      :   u(other.u)
+        , v(other.v)
+    {}
+
+    //! Move CTor
+    Velocity2DEncapsulation(this_type&& other)
+      :   u(std::move(other.u))
+        , v(std::move(other.v))
+    {}
+
+    //! Copy CTor for shared_ptr
+    Velocity2DEncapsulation(const shared_ptr<const this_type> other)
+      :   u(other->v)
+        , v(other->u)
     {}
 
     virtual ~Velocity2DEncapsulation()
@@ -155,14 +336,6 @@ class Velocity2DEncapsulation
       assert(this->DIM == other->DIM);
       this->u = other->u;
       this->v = other->v;
-    }
-    //! @}
-
-    //! @{
-    virtual shared_ptr<PositionEncapsulation<scalar, time>> convert(const time unit_factor) const override
-    {
-      return make_shared<Position2DEncapsulation<scalar, time>>(unit_factor * this->u,
-                                                                unit_factor * this->v);
     }
     //! @}
 
@@ -211,6 +384,152 @@ class Velocity2DEncapsulation
       // TODO: implement aA*x for 2D-Velocity
     }
     //! @}
+
+    //! @{
+    template<typename dt_precision>
+    Position2DEncapsulation<scalar, time> convert(const dt<dt_precision> dt)
+    {
+      return Position2DEncapsulation<scalar, time>(this->u * dt.v, this->v * dt.v);
+    }
+    //! @}
+
+    //! @{
+    this_type& operator=(const this_type& other)
+    {
+      if (this != &other) {
+        assert(this->DIM == other.DIM);
+        this->u = other.u;
+        this->v = other.v;
+      }
+      return *this;
+    }
+
+    this_type& operator=(this_type&& other)
+    {
+      assert(this != &other);
+      assert(this->DIM == other.DIM);
+      this->u = other.u;
+      this->v = other.v;
+      return *this;
+    }
+
+    this_type& operator=(shared_ptr<const this_type> other)
+    {
+      if (this != other.get()) {
+        assert(this->DIM == other->DIM);
+        this->u = other->u;
+        this->v = other->v;
+      }
+      return *this;
+    }
+
+    template<typename value_type>
+    this_type& operator*=(const value_type value)
+    {
+      static_assert(is_arithmetic<value_type>::value,
+                    "Velocity can only be multiplied by arithmetic types.");
+      this->u *= value;
+      this->v *= value;
+      return *this;
+    }
+
+    template<typename value_type>
+    friend this_type operator*(const value_type value, const this_type& first)
+    {
+      static_assert(is_arithmetic<value_type>::value,
+                    "Velocity can only be multiplied by arithmetic types.");
+      return this_type(first.u * value, first.v * value);
+    }
+
+    template<typename value_type>
+    friend this_type operator*(const this_type& first, const value_type value)
+    {
+      return value * first;
+    }
+
+    template<typename value_type>
+    friend this_type operator*(const value_type value, const shared_ptr<const this_type> first)
+    {
+      return value * *(first.get());
+    }
+
+    template<typename value_type>
+    friend this_type operator*(const shared_ptr<const this_type> first, const value_type value)
+    {
+      return value * *(first.get());
+    }
+
+    this_type& operator+=(const shared_ptr<const this_type> second)
+    {
+      return this += second.get();
+    }
+
+    this_type& operator+=(const this_type& second)
+    {
+      assert(this->DIM == second.DIM);
+      this->u += second.u;
+      this->v += second.v;
+      return *this;
+    }
+
+    template<typename value_type>
+    this_type& operator+=(const value_type value)
+    {
+      static_assert(is_arithmetic<value_type>::value,
+                    "Only arithmetic types can be added to Velocity.");
+      this->u += value;
+      this->v += value;
+      return *this;
+    }
+
+    friend this_type operator+(const this_type& first, const this_type& second)
+    {
+      assert(first.DIM == second.DIM);
+      return this_type(first.u + second.u, first.v + second.v);
+    }
+
+    friend this_type operator+(const shared_ptr<const this_type> first,
+                               const shared_ptr<const this_type> second)
+    {
+      return first.get() + second.get();
+    }
+
+    friend this_type operator+(const this_type& first, const shared_ptr<const this_type> second)
+    {
+      return first + second.get();
+    }
+
+    friend this_type operator+(const shared_ptr<const this_type> first, const this_type& second)
+    {
+      return second + first.get();
+    }
+
+    template<typename value_type>
+    friend this_type operator+(const value_type value, const this_type& first)
+    {
+      static_assert(is_arithmetic<value_type>::value,
+                    "Only arithmetic types can be added to Velocity.");
+      return this_type(first.u + value, first.v + value);
+    }
+
+    template<typename value_type>
+    friend this_type operator+(const this_type& first, const value_type value)
+    {
+      return value + first;
+    }
+
+    template<typename value_type>
+    friend this_type operator+(const value_type value, const shared_ptr<const this_type> first)
+    {
+      return value + first.get();
+    }
+
+    template<typename value_type>
+    friend this_type operator+(const shared_ptr<const this_type> first, const value_type value)
+    {
+      return value + first.get();
+    }
+    //! @}
 };
 
 
@@ -221,6 +540,9 @@ template<
 class Acceleration2DEncapsulation
   : public AccelerationEncapsulation<scalar, time>
 {
+  private:
+    typedef Acceleration2DEncapsulation<scalar, time> this_type;
+
   public:
     const size_t DIM = 2;
     scalar a;
@@ -234,6 +556,24 @@ class Acceleration2DEncapsulation
     Acceleration2DEncapsulation(const scalar a, const scalar b)
       :   a(a)
         , b(b)
+    {}
+
+    //! Copy CTor
+    Acceleration2DEncapsulation(const this_type& other)
+      :   a(other.a)
+        , b(other.b)
+    {}
+
+    //! Move CTor
+    Acceleration2DEncapsulation(this_type&& other)
+      :   a(std::move(other.a))
+        , b(std::move(other.b))
+    {}
+
+    //! Copy CTor for shared_ptr
+    Acceleration2DEncapsulation(const shared_ptr<const this_type> other)
+      :   a(other->a)
+        , b(other->b)
     {}
 
     virtual ~Acceleration2DEncapsulation()
@@ -264,14 +604,6 @@ class Acceleration2DEncapsulation
     //! @}
 
     //! @{
-    virtual shared_ptr<VelocityEncapsulation<scalar, time>> convert(const time unit_factor) const override
-    {
-      return make_shared<Velocity2DEncapsulation<scalar, time>>(unit_factor * this->a,
-                                                                unit_factor * this->b);
-    }
-    //! @}
-
-    //! @{
     virtual void saxpy(time a, shared_ptr<const Encapsulation<time>> x) override
     {
       shared_ptr<const Acceleration2DEncapsulation<scalar, time>> x_cast = \
@@ -282,8 +614,7 @@ class Acceleration2DEncapsulation
 
     virtual void saxpy(time a, shared_ptr<const Acceleration2DEncapsulation<scalar, time>> x)
     {
-      this->a += a * x->a;
-      this->b += a * x->b;
+      *this += a * x;
     }
 
     virtual void mat_apply(vector<shared_ptr<Encapsulation<time>>> dst, 
@@ -314,6 +645,158 @@ class Acceleration2DEncapsulation
     {
       UNUSED(dst); UNUSED(a); UNUSED(mat); UNUSED(src); UNUSED(zero);
       // TODO: implement aA*x for 2D-Acceleration
+    }
+    //! @}
+
+    //! @{
+    template<typename dtdt_precision>
+    Position2DEncapsulation<scalar, time> convert(const dtdt<dtdt_precision> dtdt)
+    {
+      return Position2DEncapsulation<scalar, time>(this->a * dtdt.v, this->b * dtdt.v);
+    }
+
+    template<typename dt_precision>
+    Velocity2DEncapsulation<scalar, time> convert(const dt<dt_precision> dt)
+    {
+      return Velocity2DEncapsulation<scalar, time>(this->a * dt.v, this->b * dt.v);
+    }
+    //! @}
+
+    //! @{
+    this_type& operator=(const this_type& other)
+    {
+      if (this != &other) {
+        assert(this->DIM == other.DIM);
+        this->a = other.a;
+        this->b = other.b;
+      }
+      return *this;
+    }
+
+    this_type& operator=(this_type&& other)
+    {
+      assert(this != &other);
+      assert(this->DIM == other.DIM);
+      this->a = other.a;
+      this->b = other.b;
+      return *this;
+    }
+
+    this_type& operator=(shared_ptr<const this_type> other)
+    {
+      if (this != other.get()) {
+        assert(this->DIM == other->DIM);
+        this->a = other->a;
+        this->b = other->b;
+      }
+      return *this;
+    }
+
+    template<typename value_type>
+    this_type& operator*=(const value_type value)
+    {
+      static_assert(is_arithmetic<value_type>::value,
+                    "Acceleration can only be multiplied by arithmetic types.");
+      this->a *= value;
+      this->b *= value;
+      return *this;
+    }
+
+    template<typename value_type>
+    friend this_type operator*(const value_type value, const this_type& first)
+    {
+      static_assert(is_arithmetic<value_type>::value,
+                    "Acceleration can only be multiplied by arithmetic types.");
+      return this_type(first.a * value, first.b * value);
+    }
+
+    template<typename value_type>
+    friend this_type operator*(const this_type& first, const value_type value)
+    {
+      return value * first;
+    }
+
+    template<typename value_type>
+    friend this_type operator*(const value_type value, const shared_ptr<const this_type> first)
+    {
+      return value * *(first.get());
+    }
+
+    template<typename value_type>
+    friend this_type operator*(const shared_ptr<const this_type> first, const value_type value)
+    {
+      return value * *(first.get());
+    }
+
+    this_type& operator+=(const shared_ptr<const this_type> second)
+    {
+      return this += second.get();
+    }
+
+    this_type& operator+=(const this_type& second)
+    {
+      assert(this->DIM == second.DIM);
+      this->a += second.a;
+      this->b += second.b;
+      return *this;
+    }
+
+    template<typename value_type>
+    this_type& operator+=(const value_type value)
+    {
+      static_assert(is_arithmetic<value_type>::value,
+                    "Only arithmetic types can be added to Acceleration.");
+      this->a += value;
+      this->b += value;
+      return *this;
+    }
+
+    friend this_type operator+(const this_type& first, const this_type& second)
+    {
+      assert(first.DIM == second.DIM);
+      return this_type(first.a + second.a, first.b + second.b);
+    }
+
+    friend this_type operator+(const shared_ptr<const this_type> first,
+                               const shared_ptr<const this_type> second)
+    {
+      return first.get() + second.get();
+    }
+
+    friend this_type operator+(const this_type& first, const shared_ptr<const this_type> second)
+    {
+      return first + second.get();
+    }
+
+    friend this_type operator+(const shared_ptr<const this_type> first, const this_type& second)
+    {
+      return second + first.get();
+    }
+
+    template<typename value_type>
+    friend this_type operator+(const value_type value, const this_type& first)
+    {
+      static_assert(is_arithmetic<value_type>::value,
+                    "Only arithmetic types can be added to Acceleration.");
+      return this_type(first.a + value, first.b + value);
+    }
+
+    template<typename value_type>
+    friend this_type operator+(const this_type& first, const value_type value)
+    {
+      return value + first;
+    }
+
+    template<typename value_type>
+    friend this_type operator+(const value_type value, const shared_ptr<const this_type> first)
+    {
+      return value + first.get();
+    }
+
+    template<typename value_type>
+    friend this_type operator+(const shared_ptr<const this_type> first, const value_type value)
+    {
+      return value + first.get();
     }
     //! @}
 };
