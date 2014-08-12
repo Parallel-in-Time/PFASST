@@ -209,13 +209,13 @@ TEST(NodesTest, UniformNodes)
                                1.0
                              };
 
-  auto u2 = pfasst::compute_nodes<long double>(2, pfasst::QuadratureType::uniform);
+  auto u2 = pfasst::compute_nodes<long double>(2, pfasst::QuadratureType::Uniform);
   EXPECT_THAT(u2, testing::Pointwise(DoubleNear(), u2e));
 
-  auto u3 = pfasst::compute_nodes<long double>(3, pfasst::QuadratureType::uniform);
+  auto u3 = pfasst::compute_nodes<long double>(3, pfasst::QuadratureType::Uniform);
   EXPECT_THAT(u3, testing::Pointwise(DoubleNear(), u3e));
 
-  auto u5 = pfasst::compute_nodes<long double>(5, pfasst::QuadratureType::uniform);
+  auto u5 = pfasst::compute_nodes<long double>(5, pfasst::QuadratureType::Uniform);
   EXPECT_THAT(u5, testing::Pointwise(DoubleNear(), u5e));
 }
 
@@ -281,19 +281,6 @@ TEST(QuadratureTest, ClenshawCurtisNodes)
                             };
   EXPECT_THAT(s4.data(), testing::Pointwise(DoubleNear(), s4e));
 }
-
-
-//TEST_P(QmatTest)
-//{
-//  time_t
-//  for (size_t m = 1; m < nnodes; ++m) {
-//    qsum = 0;
-//    for (size_t j = 1; j < nnodes; ++j) {
-//      qsum += q[m,i];
-//    }
-//    EXPECT_THAT(qsum-nodes[m], testing::DoubleNear(0, 1E-04))
-//  
-//}
 
 int main(int argc, char** argv)
 {

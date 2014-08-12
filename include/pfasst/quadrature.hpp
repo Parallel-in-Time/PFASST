@@ -161,7 +161,7 @@ namespace pfasst
       }
   };
   
-  enum class QuadratureType { GaussLegendre, GaussLobatto, GaussRadau, ClenshawCurtis, uniform };
+  enum class QuadratureType { GaussLegendre, GaussLobatto, GaussRadau, ClenshawCurtis, Uniform };
   template<typename node = time_precision>
   vector<node> compute_nodes(size_t nnodes, QuadratureType qtype)
   {
@@ -199,7 +199,7 @@ namespace pfasst
         nodes[j] = 0.5 * (1.0 - cos(j * PI / (nnodes - 1)));
       }
 
-    } else if (qtype == QuadratureType::uniform) {
+    } else if (qtype == QuadratureType::Uniform) {
       for (size_t j = 0; j < nnodes; j++) {
         nodes[j] = node(j) / (nnodes - 1);
       }
