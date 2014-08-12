@@ -12,6 +12,7 @@ using namespace ::testing;
 #include "../examples/scalar/scalar_sdc.cpp"
 #undef PFASST_UNIT_TESTING
 
+// I could not get this matcher to do what I want...
 MATCHER(MyDoubleMore, "")
 {
   return get<0>(arg) > get<1>(arg);
@@ -107,6 +108,9 @@ TEST_P(ConvergenceTest, GaussNodes)
                 testing::DoubleNear(double(2 * nnodes - 2), 0.99)) << "Convergence rate at node "
                                                                    << i
                                                                    << " not within expected range";
+                                                                   
+    // convergence rates for legendre nodes should be 2*nodes but is actually better and
+    // this is why DoubleNear fails. Need something like DoubleMore ...                                                                   
     EXPECT_THAT(convrate_legendre[i],
                 testing::DoubleNear(double(2 * nnodes ), 0.9)) << "Convergence rate at node "
                                                                << i
