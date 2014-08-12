@@ -39,7 +39,7 @@ error_map run_serial_mlsdc()
    * (according to 'xrat').
    */
   for (size_t l = 0; l < nlevs; l++) {
-    auto nodes    = compute_nodes<double>(nnodes, "gauss-lobatto");
+    auto nodes    = compute_nodes<double>(nnodes, pfasst::QuadratureType::GaussLobatto);
     auto factory  = make_shared<VectorFactory<double>>(ndofs);
     auto sweeper  = make_shared<AdvectionDiffusionSweeper<>>(ndofs);
     auto transfer = make_shared<SpectralTransfer1D<>>();
