@@ -12,13 +12,6 @@ using namespace ::testing;
 #include "../examples/scalar/scalar_sdc.cpp"
 #undef PFASST_UNIT_TESTING
 
-// I could not get this matcher to do what I want...
-MATCHER(MyDoubleMore, "")
-{
-  return get<0>(arg) > get<1>(arg);
-}
-
-
 /*
  * parameterized test fixture with number of nodes as parameter
  */
@@ -64,15 +57,19 @@ class ConvergenceTest
       for (size_t i = 0; i <= nsteps_l - 2; ++i) {
         convrate_lobatto[i] = log10(err[i+1] / err[i]) / log10(double(nsteps[i]) / double(nsteps[i + 1]));
       }
-          
-      // Run for Legendre nodes
+       
+      /*    
+       * Compute convergence rates for Legendre nodes. 
+       * Note that this is not a particularly nice way to do the test, because both types 
+       * of nodes are tested in the same test. Having separate tests would be nicer...
+       */ 
       nodetype = pfasst::QuadratureType::GaussLegendre;
       this->convrate_legendre.resize(this->nsteps.size());
       
       // refine parameter
-      complex<double> lambda = complex<double>(-1.0, 4.0);      
-      this->Tend = 5.0;
-      this->nsteps = { 5, 7, 9, 11, 13 };
+      complex<double> lambda = complex<double>(-1.0, 2.0);      
+      this->Tend = 6.0;
+      this->nsteps = { 2, 4, 6, 8, 10 };
       this->niters = 2*nnodes;
       
       // run to compute errors
@@ -96,25 +93,25 @@ class ConvergenceTest
 };
 
 /*
- * For Lobatto nodes, the resulting method should of order 2*M-2 with M=number of nodes
  * The test below verifies that the code approximately (up to a safety factor) reproduces
- * the theoretically expected rate of convergence 
+ * the theoretically expected rate of convergence for Lobatto and Legendre nodes
  */
 TEST_P(ConvergenceTest, GaussNodes)
 {
   for (size_t i = 0; i <= nsteps_l - 2; ++i) {
 
+    // Lobatto nodes reproduce the convergence rate quite accurately, so use DoubleNear
     EXPECT_THAT(convrate_lobatto[i],
                 testing::DoubleNear(double(2 * nnodes - 2), 0.99)) << "Convergence rate at node "
                                                                    << i
                                                                    << " not within expected range";
                                                                    
-    // convergence rates for legendre nodes should be 2*nodes but is actually better and
-    // this is why DoubleNear fails. Need something like DoubleMore ...                                                                   
+    // convergence rates for Legendre nodes should be 2*nodes but are actually better, so
+    // use Ge here
     EXPECT_THAT(convrate_legendre[i],
-                testing::DoubleNear(double(2 * nnodes ), 0.9)) << "Convergence rate at node "
-                                                               << i
-                                                               << " not within expected range";                                                                
+                testing::Ge(double(2 * nnodes))) << "Convergence rate at node "
+                                                 << i
+                                                 << " not within expected range";                                                                
 
   }
 }
