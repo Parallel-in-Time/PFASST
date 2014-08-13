@@ -62,13 +62,28 @@ class ConvergenceTest
           this->nsteps = { 4, 6, 8, 10, 12 };
           this->nnodes_in_call = this->nnodes + 1;
           break;
-         /*
+         
+        // NOTE: At the moment, both Clenshaw Curtis and equidistant nodes do not
+        // reproduce the expected convergence rate... something is wrong, either with
+        // the test or with the nodes
+        
+        // Also: What is the ACTUAL number of quadrature nodes in both cases?
         case pfasst::QuadratureType::ClenshawCurtis:
-          break;
-
+          this->niters = this->nnodes;
+          this->Tend = 1.0;
+          this->lambda = complex<double>(-1.0, 1.0);
+          this->nsteps = {3, 5, 7, 9, 11};
+          this->nnodes_in_call = this->nnodes + 1;
+          break;        
+              
         case pfasst::QuadratureType::Uniform:
+          this->niters = this->nnodes;
+          this->Tend = 5.0;
+          this->lambda = complex<double>(-1.0, 1.0);
+          this->nsteps = {3, 5, 7, 9, 11};
+          this->nnodes_in_call = this->nnodes;
           break;
-         */
+         
 
         default:
           break;
@@ -138,19 +153,30 @@ TEST_P(ConvergenceTest, GaussNodes)
         // convergence rate for Radau nodes should be 2*nodes-1
         // For some case, the convergence rate is ALMOST that value, hence put in the 0.99
         EXPECT_THAT(convrate[i], Ge<double>(0.99* 2 * this->nnodes - 1)) << "Convergence rate for " 
-                                                                   << this->nnodes
-                                                                   << " Gauss-Radu nodes "
-                                                                   << " at node " << i 
-                                                                   << " not within expected range.";
+                                                                         << this->nnodes
+                                                                         << " Gauss-Radu nodes "
+                                                                         << " at node " << i 
+                                                                         << " not within expected range.";
         break;
       
-      /*
       case pfasst::QuadratureType::ClenshawCurtis:
+        // Clenshaw Curtis should be of order nnodes
+        EXPECT_THAT(convrate[i], Ge<double>(this->nnodes))  << "Convergence rate for " 
+                                                            << this->nnodes
+                                                            << " Clenshaw-Curtis nodes "
+                                                            << " at node " << i 
+                                                            << " not within expected range.";
         break;
-
+       
       case pfasst::QuadratureType::Uniform:
+        // Equidistant nodes should be of order nnodes
+        EXPECT_THAT(convrate[i], Ge<double>(this->nnodes)) << "Convergence rate for " 
+                                                           << this->nnodes
+                                                           << " equidistant nodes "
+                                                           << " at node " << i 
+                                                           << " not within expected range.";
         break;
-       */
+       
 
       default:
         EXPECT_TRUE(false);
@@ -162,11 +188,11 @@ TEST_P(ConvergenceTest, GaussNodes)
 
 INSTANTIATE_TEST_CASE_P(ScalarSDC, ConvergenceTest,
                         Combine(Range<size_t>(2, 7),
-                                Values(pfasst::QuadratureType::GaussLobatto,
+                                Values(/*pfasst::QuadratureType::GaussLobatto,
                                        pfasst::QuadratureType::GaussLegendre,
-                                       pfasst::QuadratureType::GaussRadau/*,
-                                       pfasst::QuadratureType::ClenshawCurtis,
-                                       pfasst::QuadratureType::Uniform*/))
+                                       pfasst::QuadratureType::GaussRadau,
+                                       pfasst::QuadratureType::ClenshawCurtis,*/
+                                       pfasst::QuadratureType::Uniform))
 );
 
 
