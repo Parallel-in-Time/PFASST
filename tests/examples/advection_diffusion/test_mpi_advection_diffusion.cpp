@@ -45,7 +45,12 @@ int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
   MPI_Init(&argc, &argv);
-  auto result = RUN_ALL_TESTS();
+  int rank = 0;
+  int result = 1;  // GTest return value 1 (failure), 0 (success)
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  if (rank == 0) {
+    result = RUN_ALL_TESTS();
+  }
   MPI_Finalize();
   return result;
 }
