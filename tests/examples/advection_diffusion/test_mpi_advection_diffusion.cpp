@@ -36,7 +36,7 @@ TEST(ErrorTest, MPIPFASST)
   vector<double> ex = { 1.1168e-13, 4.8849e-13, 5.3268e-13, 2.3059e-12 };
   for (auto& x: errors) {
     if (get_iter(x) == max_iter) {
-      EXPECT_THAT(get_error(x), DoubleNear(ex[get_step(x)], 1e-14));
+      EXPECT_NEAR(get_error(x), ex[get_step(x)], 1e-14);
     }
   }
 }
