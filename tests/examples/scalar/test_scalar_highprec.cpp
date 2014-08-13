@@ -24,20 +24,38 @@ class HighPrecisionTest
   protected:
     pfasst::QuadratureType nodetype; // parameter
     
-    complex<double> lambda;
-    double Tend = 0.5;
-    size_t nsteps = 1;
-    size_t niters = 30;
-    size_t nnodes = 8; 
+    const complex<double> lambda = complex<double>(-1.0,1.0);
+    const double dt = 0.2; // = Tend for single step
+    const size_t nsteps = 1;
+    const size_t niters = 30;
+    const size_t nnodes = 8; 
     size_t nnodes_in_call;
+    double err;
     
     void set_parameters()
     {
       switch (this->nodetype)
       {
         case pfasst::QuadratureType::GaussLobatto:
+          this->nnodes_in_call = this->nnodes;
+          break;
+        
+        case pfasst::QuadratureType::GaussLegendre:
+          this->nnodes_in_call = this->nnodes + 2;
           break;
           
+        case pfasst::QuadratureType::GaussRadau:
+          this->nnodes_in_call = this->nnodes + 1;
+          break;
+        
+        case pfasst::QuadratureType::ClenshawCurtis:
+          this->nnodes_in_call = this->nnodes + 1;
+          break;
+        
+        case pfasst::QuadratureType::Uniform:
+          this->nnodes_in_call = this->nnodes + 1;
+          break;  
+        
         default:
           break;
       }
@@ -49,6 +67,8 @@ class HighPrecisionTest
     {
       this->nodetype = GetParam();
       this->set_parameters();
+      this->err = run_scalar_sdc(this->nsteps, this->dt, this->nnodes_in_call,
+                                 this->niters, this->lambda, this->nodetype);
     }
     
     virtual void TearDown()
@@ -57,6 +77,7 @@ class HighPrecisionTest
 
 TEST_P(HighPrecisionTest, AllNodes)
 {
+  EXPECT_THAT(err, Le<double>(5e-12)) << "Failed to bring relative error below 5e-12";
 }
 
 INSTANTIATE_TEST_CASE_P(ScalarSDC, HighPrecisionTest,
