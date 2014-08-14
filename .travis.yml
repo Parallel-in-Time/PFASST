@@ -1,6 +1,11 @@
 language:
   - cpp
 
+notifications:
+  email:
+    on_success: change  # default: change
+    on_failure: always  # default: always
+
 # why does Travis not allow for multi-dimensional build matrices?!?
 #  -> https://github.com/travis-ci/travis-ci/issues/1519
 env:
