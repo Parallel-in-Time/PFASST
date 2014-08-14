@@ -320,8 +320,7 @@ TEST_P(QmatTest, AllNodes)
     for (size_t j = 0; j < q.size2(); ++j) {
       qsum += q(m,j);
     }
-    EXPECT_NEAR(qsum, nodes[m+1],
-                (qtype != pfasst::QuadratureType::Uniform) ? (long double)(1E-12) : (long double)(3E-12));
+    EXPECT_NEAR(qsum, nodes[m+1], (long double)(3E-12));
   }
 }
 
