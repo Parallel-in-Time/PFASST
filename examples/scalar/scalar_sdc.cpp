@@ -18,12 +18,14 @@
  */
 
 double run_scalar_sdc(const size_t nsteps, const double dt, const size_t nnodes,
-                      const size_t niters, const complex<double> lambda)
+                      const size_t niters, const complex<double> lambda, 
+                      const pfasst::QuadratureType nodetype)
 {
   pfasst::SDC<> sdc;
 
   const complex<double> y0 = complex<double>(1.0, 0.0);
-  auto nodes = pfasst::compute_nodes(nnodes, pfasst::QuadratureType::GaussLobatto);
+
+  auto nodes = pfasst::compute_nodes(nnodes, nodetype);
   auto factory = make_shared<pfasst::encap::VectorFactory<complex<double>>>(1);
   auto sweeper = make_shared<ScalarSweeper<>>(lambda, y0);
 
@@ -50,7 +52,8 @@ int main(int /*argc*/, char** /*argv*/)
   const size_t nnodes = 4;
   const size_t niters = 6;
   const complex<double> lambda = complex<double>(-1.0, 1.0);
-
-  run_scalar_sdc(nsteps, dt, nnodes, niters, lambda);
+  const pfasst::QuadratureType nodetype = pfasst::QuadratureType::GaussLobatto;
+  
+  run_scalar_sdc(nsteps, dt, nnodes, niters, lambda, nodetype);
 }
 #endif

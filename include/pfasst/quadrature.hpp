@@ -160,8 +160,17 @@ namespace pfasst
         return p2;
       }
   };
-  
-  enum class QuadratureType { GaussLegendre, GaussLobatto, GaussRadau, ClenshawCurtis, Uniform };
+
+
+  enum class QuadratureType {
+      GaussLegendre
+    , GaussLobatto
+    , GaussRadau
+    , ClenshawCurtis
+    , Uniform
+  };
+
+
   template<typename node = time_precision>
   vector<node> compute_nodes(size_t nnodes, QuadratureType qtype)
   {

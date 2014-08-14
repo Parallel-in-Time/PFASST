@@ -14,8 +14,8 @@ XXX: DOI: [10.5281/zenodo.11047](http://dx.doi.org/10.5281/zenodo.11047)
   stage in a block mode with fixed iterations.
   ([#46][], [#57][], [#59][])
 
-* Addition of a simple scalar example.
-  ([#61][])
+* Addition of a simple scalar example and appropriate tests.
+  ([#61][], [#76][])
 
 * Various tidying
   ()
@@ -24,16 +24,19 @@ XXX: DOI: [10.5281/zenodo.11047](http://dx.doi.org/10.5281/zenodo.11047)
 [#57]: https://github.com/Parallel-in-Time/PFASST/pull/56
 [#59]: https://github.com/Parallel-in-Time/PFASST/pull/59
 [#61]: https://github.com/Parallel-in-Time/PFASST/pull/61
+[#76]: https://github.com/Parallel-in-Time/PFASST/pull/76
 
 ### Contributors
 
 * Matthew Emmett, Lawrence Berkeley National Laboratory ([memmett][])
 * Torbjörn Klatt, Jülich Supercomputing Centre ([torbjoernk][])
 * Daniel Ruprecht, Institute of Computational Science, University of Lugano ([danielru][])
+* Robert Speck, Jülich Supercomputing Centre ([pancetta][])
 
 [memmett]: https://github.com/memmett
 [torbjoernk]: https://github.com/torbjoernk
 [danielru]: https://github.com/danielru
+[pancetta]: https://github.com/pancetta
 
 ## v0.1.0 -- First Release (2014/07/25)
 
