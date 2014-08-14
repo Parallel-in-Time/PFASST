@@ -33,12 +33,13 @@ template<
   typename time
 >
 class MockParticle
-  : ParticleEncapsulation<scalar, time,
-                          MockPositionEncap,
-                          MockVelocityEncap,
-                          MockAccelerationEncap>
+  : public ParticleEncapsulation<scalar,
+                                 time,
+                                 MockPositionEncap,
+                                 MockVelocityEncap,
+                                 MockAccelerationEncap>
 {
-  private:
+  protected:
     typedef ParticleEncapsulation<scalar,
                                   time,
                                   MockPositionEncap,
@@ -55,12 +56,13 @@ template<
 class MockEField
   : public ElectricField<scalar, time, ParticleT>
 {
-  private:
+  protected:
     typedef ElectricField<scalar, time, MockParticle> parent_type;
 
   public:
     using parent_type::evaluate;
-    MOCK_METHOD2_T(evaluate, scalar(shared_ptr<typename parent_type::particle_type>, time));
+    MOCK_METHOD2_T(evaluate,
+                   typename parent_type::particle_type::velocity_type(shared_ptr<typename parent_type::particle_type>, time));
 };
 
 
@@ -72,12 +74,13 @@ template<
 class MockBField
   : public MagneticField<scalar, time, MockParticle>
 {
-  private:
+  protected:
     typedef MagneticField<scalar, time, MockParticle> parent_type;
 
   public:
     using parent_type::evaluate;
-    MOCK_METHOD2_T(evaluate, scalar(shared_ptr<typename parent_type::particle_type>, time));
+    MOCK_METHOD2_T(evaluate,
+                   typename parent_type::particle_type::position_type(shared_ptr<typename parent_type::particle_type>, time));
 };
 
 
@@ -92,7 +95,7 @@ class MockEOperator
                           MockBField<scalar, time, MockParticle>
                          >
 {
-  private:
+  protected:
     typedef EnergyOperator<scalar, time,
                            MockParticle<scalar, time>,
                            MockEField<scalar, time, MockParticle>,
