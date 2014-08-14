@@ -3,7 +3,8 @@
 #include <pfasst.hpp>
 #include <pfasst/sdc.hpp>
 
-#include "particle_2d.hpp"
+#include "particle_3d.hpp"
+#include "simple_physics.hpp"
 #include "boris_sweeper.hpp"
 
 error_map run_boris_sdc()
@@ -19,8 +20,8 @@ error_map run_boris_sdc()
   const double mass = 1.0;
   const double charge = 1.0;
 
-  auto nodes   = pfasst::compute_nodes(nnodes, "gauss-lobatto");
-  auto factory = make_shared<Particle2DFactory<double, double>>(mass, charge);
+  auto nodes   = pfasst::compute_nodes(nnodes, pfasst::QuadratureType::GaussLobatto);
+  auto factory = make_shared<Particle3DFactory<double, double>>(mass, charge);
   auto sweeper = make_shared<BorisSweeper<double, double>>();
 
   sweeper->set_nodes(nodes);

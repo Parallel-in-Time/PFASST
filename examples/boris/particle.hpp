@@ -107,7 +107,7 @@ template<
 class PositionEncapsulation
   : public ParticleComponentEncapsulation<scalar, time>
 {
-  private:
+  protected:
     typedef ParticleComponentEncapsulation<scalar, time> parent_type;
 
   public:
@@ -125,7 +125,7 @@ template<
 class VelocityEncapsulation
   : public ParticleComponentEncapsulation<scalar, time>
 {
-  private:
+  protected:
     typedef ParticleComponentEncapsulation<scalar, time> parent_type;
 
   public:
@@ -143,7 +143,7 @@ template<
 class AccelerationEncapsulation
   : public ParticleComponentEncapsulation<scalar, time>
 {
-  private:
+  protected:
     typedef ParticleComponentEncapsulation<scalar, time> parent_type;
 
   public:
