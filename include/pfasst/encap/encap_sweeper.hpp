@@ -29,7 +29,7 @@ namespace pfasst
         typedef EncapFactory<time> factory_type;
         //! @}
 
-      private:
+      protected:
         //! @{
         vector<time> nodes;
         vector<bool> is_proper;
