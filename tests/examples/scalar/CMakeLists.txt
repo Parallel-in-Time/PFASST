@@ -5,7 +5,8 @@ include_directories(
 )
 
 set(TESTS
-    test_scalar
+    test_scalar_conv
+    test_scalar_highprec
 )
 
 foreach(test ${TESTS})
