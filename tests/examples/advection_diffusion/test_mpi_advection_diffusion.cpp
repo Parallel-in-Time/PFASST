@@ -18,7 +18,6 @@ using namespace ::testing;
 #include "../examples/advection_diffusion/mpi_pfasst.cpp"
 #undef PFASST_UNIT_TESTING
 
-
 using namespace std;
 
 TEST(ErrorTest, MPIPFASST)
@@ -36,7 +35,7 @@ TEST(ErrorTest, MPIPFASST)
   vector<double> ex = { 1.1168e-13, 4.8849e-13, 5.3268e-13, 2.3059e-12 };
   for (auto& x: errors) {
     if (get_iter(x) == max_iter) {
-      EXPECT_NEAR(get_error(x), ex[get_step(x)], 1e-14);
+      EXPECT_NEAR(get_error(x), ex[get_step(x)], *max_element(ex.cbegin(), ex.cend()));
     }
   }
 }
@@ -45,13 +44,9 @@ int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
   MPI_Init(&argc, &argv);
-  int rank = 0;
-  int result = 1;  // GTest return value 1 (failure), 0 (success)
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  if (rank == 0) {
-    result = RUN_ALL_TESTS();
-  }
-  MPI_Bcast(&result, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  int result = 1, max_result;  // GTest return value 1 (failure), 0 (success)
+  result = RUN_ALL_TESTS();
+  MPI_Allreduce(&result, &max_result, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
   MPI_Finalize();
-  return result;
+  return max_result;
 }
