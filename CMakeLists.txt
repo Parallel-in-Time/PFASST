@@ -76,9 +76,6 @@ set(pfasst_DEPENDEND_LIBS)
 
 if(pfasst_BUILD_TESTS)
     enable_testing()
-    if(pfasst_WITH_GCC_PROF)
-        add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-ftest-coverage")
-    endif(pfasst_WITH_GCC_PROF)
 endif(pfasst_BUILD_TESTS)
 
 # Add / include 3rd-party libraries
@@ -108,6 +105,7 @@ if(pfasst_BUILD_TESTS)
 endif()
 message(STATUS "********************************************************************************")
 
+message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 message(STATUS "C++ Compiler ID: ${CMAKE_CXX_COMPILER_ID}")
 message(STATUS "C++ Compiler Names: ${CMAKE_CXX_COMPILER_NAMES}")
 message(STATUS "C++ Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}")
