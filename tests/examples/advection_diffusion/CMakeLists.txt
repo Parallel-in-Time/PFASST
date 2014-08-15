@@ -30,6 +30,12 @@ foreach(test ${TESTS})
     set_target_properties(${test}
         PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/tests/examples/advection_diffusion
     )
+    if(pfasst_WITH_GCC_PROF AND ${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
+        set_target_properties(${test}
+            PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -ftest-coverage -fprofile-arcs"
+                       LINK_FLAGS "-fprofile-arcs"
+        )
+    endif()
     add_test(NAME ${test}
         COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/tests/examples/advection_diffusion/${test} --gtest_output=xml:${test}_out.xml
     )
@@ -44,8 +50,15 @@ if(${pfasst_WITH_MPI})
         if(NOT FFTW_FOUND)
           add_dependencies(${test} googlemock fftw3)
         endif()
-	if(MPI_COMPILE_FLAGS)
-            set_target_properties(${test} PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
+        if(MPI_COMPILE_FLAGS)
+            if(pfasst_WITH_GCC_PROF AND ${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
+                set_target_properties(${test}
+                    PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS} -ftest-coverage -fprofile-arcs"
+                               LINK_FLAGS "-fprofile-arcs"
+                )
+            else()
+                set_target_properties(${test} PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
+            endif()
         endif()
         if(MPI_LINK_FLAGS)
             set_target_properties(${test} PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
