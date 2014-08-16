@@ -45,7 +45,12 @@ do
   lcov --extract ${testname}.info.tmp "*${basepath}/include/**/*" --output-file ${testname}.info
   rm ${testname}.info.tmp
   cd ${basepath}/${builddir}
-  lcov --add-tracefile ${testdir}/${testname}.info --output-file all_tests.info
+  if [[ -e all_tests.info ]]
+  then
+    lcov --add-tracefile all_tests.info --add-tracefile ${testdir}/${testname}.info --output-file all_tests.info
+  else
+    lcov --add-tracefile ${testdir}/${testname}.info --output-file all_tests.info
+  fi
 done
 
 cd ${basepath}
