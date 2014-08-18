@@ -30,6 +30,7 @@ Currently, it features the following content:
 * \subpage #page_examples
 * \subpage #page_contributing
 * \subpage #page_style_guide
+* \subpage #page_troubleshooting
 
 
 Releases
@@ -58,8 +59,11 @@ Build status
 
 For details see [Travis][pfasst-travis].
 
+A test coverage report is generated and published by [Jenkins][coverage-report].
 
-[documentation]: https://pint.fz-juelich.de/ci/view/PFASST/job/PFASST%20%28Docu%29/doxygen/
-[pfasst-travis]: https://travis-ci.org/Parallel-in-Time/PFASST
-[master-status]: https://travis-ci.org/Parallel-in-Time/PFASST.svg?branch=master
-[dev-status]:    https://travis-ci.org/Parallel-in-Time/PFASST.svg?branch=development
+
+[documentation]:   https://pint.fz-juelich.de/ci/view/PFASST/job/PFASST%20%28Docu%29/doxygen/
+[pfasst-travis]:   https://travis-ci.org/Parallel-in-Time/PFASST
+[master-status]:   https://travis-ci.org/Parallel-in-Time/PFASST.svg?branch=master
+[dev-status]:      https://travis-ci.org/Parallel-in-Time/PFASST.svg?branch=development
+[coverage-report]: https://pint.fz-juelich.de/ci/job/PFASST_GCC_4-8_Coverage/Test_Coverage
