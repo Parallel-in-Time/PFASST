@@ -2,6 +2,7 @@
  * Tests for quadrature related routines: polynomials, nodes, and matrices.
  */
 
+#include <algorithm>
 #include <iostream>
 #include <tuple>
 
@@ -233,8 +234,10 @@ TEST(QuadratureTest, GaussLobattoNodes)
                                0.33333333333333333,
                                0.20833333333333333
                              };
-    
-  EXPECT_THAT(s3.data(), Pointwise(DoubleNear(), s3e));
+
+  long double s3p[6];
+  copy(s3.data(), s3.data() + s3.size(), s3p);
+  EXPECT_THAT(s3p, Pointwise(DoubleNear(), s3e));
 
   auto l5 = pfasst::compute_nodes<long double>(5, pfasst::QuadratureType::GaussLobatto);
   auto a5 = pfasst::augment_nodes(l5);
@@ -260,7 +263,9 @@ TEST(QuadratureTest, GaussLobattoNodes)
                               0.11974476934341168251615379970493965,
                               0.067728432186156897969267419174073482
                             };
-  EXPECT_THAT(s5.data(), Pointwise(DoubleNear(), s5e));
+  long double s5p[20];
+  copy(s5.data(), s5.data() + s5.size(), s5p);
+  EXPECT_THAT(s5p, Pointwise(DoubleNear(), s5e));
 }
 
 TEST(QuadratureTest, ClenshawCurtisNodes)
@@ -281,7 +286,9 @@ TEST(QuadratureTest, ClenshawCurtisNodes)
                               0.16319444444444444444444444444444444,
                               0.10243055555555555555555555555555556
                             };
-  EXPECT_THAT(s4.data(), Pointwise(DoubleNear(), s4e));
+  long double s4p[12];
+  copy(s4.data(), s4.data() + s4.size(), s4p);
+  EXPECT_THAT(s4p, Pointwise(DoubleNear(), s4e));
 }
 
 class QmatTest
@@ -298,16 +305,16 @@ class QmatTest
     {
       nnodes = get<0>(GetParam());
       qtype = get<1>(GetParam());
-      
+
       auto cnodes = pfasst::compute_nodes<long double>(nnodes, qtype);
       auto n1 = pfasst::augment_nodes(cnodes);
       nodes = get<0>(n1);
       q = pfasst::compute_quadrature(nodes, nodes, get<1>(n1), pfasst::QuadratureMatrix::Q);
-      
+
       cout << "Quadrature type no. " << int(qtype) << " -- Number of nodes " << nnodes << endl;
-      
+
     }
-  
+
     virtual void TearDown()
     {}
 };
@@ -315,9 +322,9 @@ class QmatTest
 TEST_P(QmatTest, AllNodes)
 {
   long double qsum;
-  for (size_t m = 0; m < q.size1(); ++m) {
+  for (int m = 0; m < q.rows(); ++m) {
     qsum = 0;
-    for (size_t j = 0; j < q.size2(); ++j) {
+    for (int j = 0; j < q.cols(); ++j) {
       qsum += q(m,j);
     }
     EXPECT_NEAR(qsum, nodes[m+1], (long double)(3E-12));

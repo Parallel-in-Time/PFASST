@@ -63,7 +63,7 @@ namespace pfasst
           auto& fine = as_encap_sweeper(dst);
           auto& crse = as_encap_sweeper(src);
 
-          if (tmat.size1() == 0) {
+          if (tmat.rows() == 0) {
             tmat = pfasst::compute_interp<time>(fine.get_nodes(), crse.get_nodes());
           }
 
@@ -193,9 +193,9 @@ namespace pfasst
           for (size_t m = 0; m < ncrse - 1; m++) { rstr_and_crse[m] = rstr_z2n[m]; }
           for (size_t m = 0; m < ncrse - 1; m++) { rstr_and_crse[ncrse - 1 + m] = crse_z2n[m]; }
 
-          if (fmat.size1() == 0) {
+          if (fmat.rows() == 0) {
             fmat.resize(ncrse - 1, 2 * (ncrse - 1));
-            fmat.clear();
+            fmat.fill(0.0);
 
             for (size_t m = 0; m < ncrse - 1; m++) {
               fmat(m, m) = 1.0;

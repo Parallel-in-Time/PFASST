@@ -8,14 +8,14 @@
 #include <limits>
 #include <vector>
 
-#include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/io.hpp>
+#include <Eigen/Dense>
 
 using std::complex;
 using std::string;
 using std::vector;
 
-using boost::numeric::ublas::matrix;
+template<typename coeff>
+using matrix = Eigen::Matrix<coeff, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
 #include "interfaces.hpp"
 
@@ -239,7 +239,7 @@ namespace pfasst
 
 //  enum class QuadratureMatrix { S, Q, QQ }; // returning QQ might be cool for 2nd-order stuff
   enum class QuadratureMatrix { S, Q };
-  
+
   template<typename node = time_precision>
   matrix<node> compute_quadrature(vector<node> dst, vector<node> src, vector<bool> is_proper,
                                   QuadratureMatrix type)
@@ -248,7 +248,8 @@ namespace pfasst
     const size_t nsrc = src.size();
 
     assert(ndst >= 1);
-    matrix<node> mat(ndst - 1, nsrc, node(0.0));
+    matrix<node> mat(ndst - 1, nsrc);
+    mat.fill(0.0);
 
     Polynomial<node> p(nsrc + 1), p1(nsrc + 1);
 
@@ -280,7 +281,7 @@ namespace pfasst
         } else {
           throw ValueError("Further matrix types are not implemented yet");
         }
-          
+
         mat(j - 1, i) = q / den;
       }
     }
