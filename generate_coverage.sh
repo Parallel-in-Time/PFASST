@@ -1,5 +1,5 @@
 #!/bin/sh
-basepath=`pwd`
+basepath="`pwd`"
 
 function print_help {
   echo "#######################################################################"
@@ -26,35 +26,73 @@ then
   exit -1
 fi
 
-builddir=${1}
-cd ${builddir}
+builddir="${basepath}/${1}"
+if [[ ! -d "${builddir}" ]]
+then
+  echo "ERROR: Given build directory '${bilddir}' does not exist."
+  exit -1
+fi
+cd "${builddir}"
 
-rm -rf ${basepath}/coverage
-mkdir -p ${basepath}/coverage
+coveragedir="${basepath}/coverage"
+rm -rf "${coveragedir}"
+mkdir -p "${coveragedir}"
 
-for testdir in `find ${basepath}/${builddir} -type d | grep -o 'tests/.*/.*\dir'`
+for testdir in `find ${builddir} -type d | grep -o 'tests/.*/.*\dir'`
 do
-  testname=`expr "$testdir" : '.*\(test_[a-zA-Z\-_]*\)\.dir'`
-  echo "Gathering Coverage for ${testname}"
-  cd $testdir
-  lcov --zerocounters  --directory .
-  cd ${basepath}/${builddir}
-  ctest -R $testname
-  cd $testdir
-  lcov --directory . --capture --output-file ${testname}.info.tmp
-  lcov --extract ${testname}.info.tmp "*${basepath}/include/**/*" --output-file ${testname}.info
-  rm ${testname}.info.tmp
-  cd ${basepath}/${builddir}
-  if [[ -e all_tests.info ]]
+  testname=`expr "${testdir}" : '.*\(test_[a-zA-Z\-_]*\)\.dir'`
+  echo "# ${testname}"
+  cd "${testdir}"
+  echo "    Deleting old tracing data"
+  lcov --zerocounters  --directory . \
+       > "${coveragedir}/log_${testname}_zero.log" 2&>1
+
+  cd "${builddir}"
+  echo "    Running test and generating tracing data"
+  ctest -R ${testname} \
+        > "${coveragedir}/log_${testname}_test.log"
+  if [[ $? -ne 0 ]]
   then
-    lcov --add-tracefile all_tests.info --add-tracefile ${testdir}/${testname}.info --output-file all_tests.info
+    echo "ERROR: test '${testname}' failed."
+    echo "       See '${coveragedir}/log_${testname}_test.log' for details."
+    cd ${basepath}
+    exit -1
+  fi
+
+  cd "${testdir}"
+  echo "    Capturing all tracing data"
+  lcov --directory . --capture --output-file "${testname}.info.tmp" \
+       > "${coveragedir}/log_${testname}_capture.log"
+
+  echo "    Extracting interesting tracing data"
+  lcov --extract "${testname}.info.tmp" "*${basepath}/include/**/*" \
+       --output-file "${testname}.info" \
+       > "${coveragedir}/log_${testname}_extract.log"
+  rm "${testname}.info.tmp"
+
+  cd "${builddir}"
+  echo "    Aggegrating coverage data"
+  if [[ -e "${coveragedir}/all_tests.info" ]]
+  then
+    lcov --add-tracefile "${coveragedir}/all_tests.info" \
+         --add-tracefile "${testdir}/${testname}.info" \
+         --output-file "${coveragedir}/all_tests.info" \
+         > "${coveragedir}/log_${testname}_aggregate.log"
   else
-    lcov --add-tracefile ${testdir}/${testname}.info --output-file all_tests.info
+    lcov --add-tracefile "${testdir}/${testname}.info" \
+         --output-file "${coveragedir}/all_tests.info" \
+         > "${coveragedir}/log_${testname}_aggregate.log"
   fi
 done
 
 cd ${basepath}
-genhtml --output-directory ./coverage \
-  --demangle-cpp --num-spaces 2 --sort \
-  --title "PFASST++ Test Coverage" --prefix ${basepath}/include \
-  --function-coverage --branch-coverage --legend ${basepath}/${builddir}/all_tests.info
+echo "# Generating HTML report"
+genhtml --output-directory "${coveragedir}" \
+        --demangle-cpp --num-spaces 2 --sort \
+        --title "PFASST++ Test Coverage" --prefix "${basepath}/include" \
+        --function-coverage --branch-coverage --legend \
+        "${coveragedir}/all_tests.info" \
+        > "${coveragedir}/log_generate.log"
+
+echo "# Coverage report can be found in ${coveragedir}/index.html"
+echo "# Everything done."
