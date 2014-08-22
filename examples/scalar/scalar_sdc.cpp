@@ -1,4 +1,4 @@
-/*
+/**
  * Scalar test equation example using an encapsulated IMEX sweeper.
  *
  * Solves Dahlquist's test equation with single level SDC
@@ -30,6 +30,7 @@ double run_scalar_sdc(const size_t nsteps, const double dt, const size_t nnodes,
   const complex<double> y0 = complex<double>(1.0, 0.0);
 
   auto nodes = pfasst::compute_nodes(nnodes, nodetype);
+  
   /*
    * This is a scalar example, so we use the encap::VectorFactory with fixed
    * length of 1 and complex type.
@@ -41,9 +42,8 @@ double run_scalar_sdc(const size_t nsteps, const double dt, const size_t nnodes,
   sweeper->set_factory(factory);
 
   sdc.add_level(sweeper);
-  /*
-   * Final time Tend = dt*nsteps
-   */
+  
+  // Final time Tend = dt*nsteps
   sdc.set_duration(0.0, dt*nsteps, dt, niters);
   sdc.setup();
 
@@ -56,7 +56,7 @@ double run_scalar_sdc(const size_t nsteps, const double dt, const size_t nnodes,
 }
 
 #ifndef PFASST_UNIT_TESTING
-/*
+/**
  * Main routine running the scalar example with a preset parameters
  */
 int main(int /*argc*/, char** /*argv*/)

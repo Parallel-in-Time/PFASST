@@ -1,12 +1,3 @@
-/*
- * Sweeper for scalar test equation
- *
- * u' = lambda*u, u(0) = u0
- *
- * with complex lambda using an IMEX scheme. Derived from the generic imex_sweeper
- *
- */
-
 #ifndef _EXAMPLES__SCALAR__SCALAR_SWEEPER_HPP_
 #define _EXAMPLES__SCALAR__SCALAR_SWEEPER_HPP_
 
@@ -20,7 +11,13 @@ using namespace std;
 
 template<typename time = pfasst::time_precision>
 
-/*
+/**
+ * Sweeper for scalar test equation
+ *
+ * u' = lambda*u, u(0) = u0
+ *
+ * with complex lambda using an IMEX scheme. Derived from the generic imex_sweeper
+ *
  * ScalarSweeper is derived from the generic IMEXSweeper
  */
 class ScalarSweeper
@@ -30,35 +27,27 @@ class ScalarSweeper
   private:
     typedef pfasst::encap::Encapsulation<time> encap_type;
     
-    /*
-     * Define a type for a complex PFASST vector encapsulation.
-     */
+    //! Define a type for a complex PFASST vector encapsulation.
     typedef pfasst::encap::VectorEncapsulation<complex<double>> complex_vector_type;
     
-    /*
-     * Parameter lambda and initial value u0
-     */ 
+     //! Parameter lambda and initial value u0 
     complex<double> lambda, u0;
     
-    /*
-     * The complex unit i = sqrt(-1)
-     */
+    //! The complex unit i = sqrt(-1)
     const complex<double> i_complex = complex<double>(0, 1);
     
-    /*
-     * Error at the final time. For the scalar example, an analytical solution is known.
-     */
+     //! Error at the final time. For the scalar example, an analytical solution is known.
     double error;
     
-    /*
-     * Counters for how often f_expl_eval, f_impl_eval and impl_solve are called.
-     */
+     //! Counters for how often f_expl_eval, f_impl_eval and impl_solve are called.
     size_t n_f_expl_eval, n_f_impl_eval, n_impl_solve;
 
   public:
   
-    /*
+    /**
      * Generic constructor; initialize all function call counters with zero.
+     * lambda = coefficient in test equation
+     * u0     = initial value at t=0
      */ 
     ScalarSweeper(complex<double> lambda, complex<double> u0)
       :   lambda(lambda)
@@ -69,7 +58,7 @@ class ScalarSweeper
         , error(0.0)
     {}
 
-    /*
+    /**
      * Upon destruction, report final error and number of function calls
      */
     virtual ~ScalarSweeper()
@@ -80,7 +69,7 @@ class ScalarSweeper
       cout << "Number of implicit solves:      " << this->n_impl_solve << endl;
     }
 
-    /*
+    /**
      * Compute error and print it to cout
      */
     void echo_error(time t)
@@ -95,7 +84,7 @@ class ScalarSweeper
       this->error = max_err;
     }
 
-    /*
+    /**
      * Returns error, but does not update it!
      */
     double get_errors()
@@ -103,7 +92,7 @@ class ScalarSweeper
       return this->error;
     }
 
-    /*
+    /**
      * Prediction step and update of error. Uses predictor as provided by IMEXSweeper.
      */
     void predict(bool initial) override
@@ -114,7 +103,7 @@ class ScalarSweeper
       this->echo_error(t + dt);
     }
 
-    /*
+    /**
      * Perform a sweep and update error. Uses sweep as provided by IMEXSweeper.
      */
     void sweep() override
@@ -125,7 +114,7 @@ class ScalarSweeper
       this->echo_error(t + dt);
     }
 
-    /*
+    /**
      * Computes the exact solution u0*exp(lambda*t) at a given time t.
      */
     void exact(complex_vector_type& q, time t)
@@ -139,7 +128,7 @@ class ScalarSweeper
       this->exact(q, t);
     }
 
-    /*
+    /**
      * Evaluate the explicit part of the right hand side: Multiply with imag(lambda)
      */
     void f_expl_eval(shared_ptr<encap_type> f_encap,
@@ -155,7 +144,7 @@ class ScalarSweeper
       this->n_f_expl_eval++;
     }
 
-    /*
+    /**
      * Evaluate the implicit part of the right hand side: Multiply with real(lambda)
      */
     void f_impl_eval(shared_ptr<encap_type> f_encap,
@@ -171,7 +160,7 @@ class ScalarSweeper
       this->n_f_impl_eval++;
     }
 
-    /*
+    /**
      * For given b, solve (Id - dt*real(lambda))*u = b for u
      */
     void impl_solve(shared_ptr<encap_type> f_encap,
