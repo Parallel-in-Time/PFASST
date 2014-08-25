@@ -79,6 +79,8 @@ message(STATUS "****************************************************************
 message(STATUS "Configuring 3rd party libraries")
 # makes available:
 #  - Boost headers in 3rdparty_INCLUDES
+#  - Boost libraries in Boost_LIBRARY_DIRS
+#  - Eigen headers in 3rdparty_INCLUDES
 #  - Google test and mock headers in 3rdparty_INCLUDES (if pfasst_BUILD_TESTS)
 #  - FFTW_INCLUDE_PATH (if pfasst_BUILD_EXAMPLES)
 #  - FFTW_LIBRARIES (if pfasst_BUILD_EXAMPLES)
