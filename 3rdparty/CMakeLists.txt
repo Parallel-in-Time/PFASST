@@ -23,34 +23,41 @@ list(APPEND 3rdparty_INCLUDES ${Boost_INCLUDE_DIRS})
 
 
 message(STATUS "--------------------------------------------------------------------------------")
-set(EIGEN_SOURCE_URL "http://bitbucket.org/eigen/eigen/get/3.2.2.tar.bz2")
-message(STATUS "Eigen")
-message(STATUS "  going to download sources")
-message(STATUS "    download URL: ${EIGEN_SOURCE_URL}")
-set(Eigen_SOURCE_DIR "${pfasst_BINARY_DIR}/3rdparty/src/Eigen")
+message(STATUS "Eigen3")
 
-ExternalProject_Add(
-    Eigen
-    LIST_SEPARATOR " "
-    URL ${EIGEN_SOURCE_URL}
-    URL_MD5 fc2e814ae449d16b331f7e1f4e272bd3
-    TIMEOUT 30
-    UPDATE_COMMAND ""
-    PATCH_COMMAND ""
-    BUILD_IN_SOURCE ON
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ""
-    TEST_COMMAND ""
-    INSTALL_DIR ""
-    INSTALL_COMMAND ""
-    LOG_DOWNLOAD ON
-    LOG_CONFIGURE OFF
-    LOG_BUILD OFF
-)
+find_package(Eigen3)
 
-# Specify include dir
-list(APPEND 3rdparty_INCLUDES "${Eigen_SOURCE_DIR}")
+if(NOT Eigen3_FOUND)
+    set(EIGEN3_SOURCE_URL "http://bitbucket.org/eigen/eigen/get/3.2.2.tar.bz2")
+    message(STATUS "Eigen3 not found on your system")
+    message(STATUS "  going to download sources")
+    message(STATUS "    download URL: ${EIGEN3_SOURCE_URL}")
+    set(Eigen3_SOURCE_DIR "${pfasst_BINARY_DIR}/3rdparty/src/Eigen3")
 
+    ExternalProject_Add(
+        Eigen3
+        LIST_SEPARATOR " "
+        URL ${EIGEN3_SOURCE_URL}
+        URL_MD5 fc2e814ae449d16b331f7e1f4e272bd3
+        TIMEOUT 30
+        UPDATE_COMMAND ""
+        PATCH_COMMAND ""
+        BUILD_IN_SOURCE ON
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ""
+        TEST_COMMAND ""
+        INSTALL_DIR ""
+        INSTALL_COMMAND ""
+        LOG_DOWNLOAD ON
+        LOG_CONFIGURE OFF
+        LOG_BUILD OFF
+    )
+
+    # Specify include dir
+    set(Eigen3_INCLUDE_PATH "${Eigen3_SOURCE_DIR}")
+endif()
+
+list(APPEND 3rdparty_INCLUDES "${Eigen3_INCLUDE_PATH}")
 
 if(pfasst_BUILD_EXAMPLES)
     message(STATUS "--------------------------------------------------------------------------------")
@@ -60,7 +67,7 @@ if(pfasst_BUILD_EXAMPLES)
 
     if(NOT FFTW_FOUND)
         set(FFTW3_SOURCE_URL "http://fftw.org/fftw-3.3.4.tar.gz")
-        message(STATUS "FFTW3 not found on your system.")
+        message(STATUS "FFTW3 not found on your system")
         message(STATUS "  going to download and compile it from sources")
         message(STATUS "    download URL: ${FFTW3_SOURCE_URL}")
         set(fftw3_SOURCE_DIR "${pfasst_BINARY_DIR}/3rdparty/src/fftw3")
