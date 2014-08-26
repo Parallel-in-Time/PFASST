@@ -298,7 +298,7 @@ class QmatTest
     size_t nnodes;
     pfasst::QuadratureType qtype;
     vector<long double> nodes;
-    matrix<long double> q;
+    MatrixT<long double> q;
 
   public:
     virtual void SetUp()

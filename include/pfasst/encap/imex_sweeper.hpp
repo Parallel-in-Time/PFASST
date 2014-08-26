@@ -7,8 +7,6 @@
 #include <vector>
 #include <memory>
 
-#include <boost/numeric/ublas/matrix.hpp>
-
 #include "../globals.hpp"
 #include "encapsulation.hpp"
 #include "encap_sweeper.hpp"
@@ -84,26 +82,26 @@ namespace pfasst
         /**
          * quadrature matrix containing weights for node-to-node integration
          */
-        matrix<time> s_mat;
+        MatrixT<time> s_mat;
 
         /**
          * quadrature matrix containing weights for 0-to-last node integration
          */
-        matrix<time> b_mat;
+        MatrixT<time> b_mat;
 
         /**
          * quadrature matrix containing weights for node-to-node integration of explicit part
          *
          * @see IMEXSweeper::setup(bool) for a short description
          */
-        matrix<time> s_mat_expl;
+        MatrixT<time> s_mat_expl;
 
         /**
          * quadrature matrix containing weights for node-to-node integration of implicit part
          *
          * @see IMEXSweeper::setup(bool) for a short description
          */
-        matrix<time> s_mat_impl;
+        MatrixT<time> s_mat_impl;
         //! @}
 
 
@@ -202,7 +200,7 @@ namespace pfasst
           this->s_mat = compute_quadrature(nodes, nodes, is_proper, QuadratureMatrix::S);
 
           auto q_mat = compute_quadrature(nodes, nodes, is_proper, QuadratureMatrix::Q);
-          this->b_mat = matrix<time>(1, nodes.size());
+          this->b_mat = MatrixT<time>(1, nodes.size());
           for (size_t m = 0; m < nodes.size(); m++) {
             this->b_mat(0, m) = q_mat(nodes.size() - 2, m);
           }

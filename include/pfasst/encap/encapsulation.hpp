@@ -93,7 +93,7 @@ namespace pfasst
         /**
          * defines matrix-vector multiplication for this data type.
          */
-        virtual void mat_apply(vector<shared_ptr<Encapsulation<time>>> dst, time a, matrix<time> mat,
+        virtual void mat_apply(vector<shared_ptr<Encapsulation<time>>> dst, time a, MatrixT<time> mat,
                                vector<shared_ptr<Encapsulation<time>>> src, bool zero = true)
         {
           size_t ndst = dst.size();

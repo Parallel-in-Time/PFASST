@@ -11,7 +11,10 @@
 #include <Eigen/Dense>
 
 template<typename coeff>
-using matrix = Eigen::Matrix<coeff, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+using MatrixT = Eigen::Matrix<coeff, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+
+template<typename coeff>
+using ArrayT = Eigen::Array<coeff, Eigen::Dynamic, 1>;
 
 #include <boost/math/constants/constants.hpp>
 using namespace boost::math::constants;
@@ -242,14 +245,14 @@ namespace pfasst
   enum class QuadratureMatrix { S, Q };
 
   template<typename node = time_precision>
-  matrix<node> compute_quadrature(vector<node> dst, vector<node> src, vector<bool> is_proper,
+  MatrixT<node> compute_quadrature(vector<node> dst, vector<node> src, vector<bool> is_proper,
                                   QuadratureMatrix type)
   {
     const size_t ndst = dst.size();
     const size_t nsrc = src.size();
 
     assert(ndst >= 1);
-    matrix<node> mat(ndst - 1, nsrc);
+    MatrixT<node> mat(ndst - 1, nsrc);
     mat.fill(0.0);
 
     Polynomial<node> p(nsrc + 1), p1(nsrc + 1);
@@ -291,12 +294,12 @@ namespace pfasst
   }
 
   template<typename node = time_precision>
-  matrix<node> compute_interp(vector<node> dst, vector<node> src)
+  MatrixT<node> compute_interp(vector<node> dst, vector<node> src)
   {
     const size_t ndst = dst.size();
     const size_t nsrc = src.size();
 
-    matrix<node> mat(ndst, nsrc);
+    MatrixT<node> mat(ndst, nsrc);
 
     for (size_t i = 0; i < ndst; i++) {
       for (size_t j = 0; j < nsrc; j++) {
