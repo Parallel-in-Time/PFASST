@@ -9,7 +9,10 @@ if(Eigen3_INCLUDE_PATH)
     set(Eigen3_FIND_QUIETLY TRUE)
 endif(Eigen3_INCLUDE_PATH)
 
-find_path(Eigen3_INCLUDE_PATH signature_of_eigen3_matrix_library)
+find_path(Eigen3_INCLUDE_PATH
+    signature_of_eigen3_matrix_library
+    PATH_SUFFIXES eigen3 Eigen3 Eigen
+)
 
 # handle the QUIETLY and REQUIRED arguments and set FFTW_FOUND to TRUE if
 # all listed variables are TRUE
