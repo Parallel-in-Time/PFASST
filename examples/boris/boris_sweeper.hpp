@@ -48,8 +48,8 @@ class BorisSweeper
     vector<shared_ptr<encap_type>> previous_particles;
     vector<shared_ptr<encap_type>> tau_corrections;
 
-    vector<shared_ptr<velocity_type>> s_integrals;
-    vector<shared_ptr<position_type>> ss_integrals;
+    vector<velocity_type> s_integrals;
+    vector<position_type> ss_integrals;
 
     //! delta_nodes[m] = nodes[m] - nodes[m-1]
     vector<time> delta_nodes;
@@ -116,9 +116,9 @@ class BorisSweeper
     //! @}
 
     //! @{
-    virtual void set_e_field(shared_ptr<const e_field_type> e_field)
+    virtual void set_e_field(shared_ptr<e_field_type> e_field)
     {
-      this->e_field = const_pointer_cast<e_field_type>(e_field);
+      this->e_field = e_field;
     }
 
     virtual shared_ptr<e_field_type> get_e_field()
@@ -126,7 +126,7 @@ class BorisSweeper
       return this->e_field;
     }
 
-    virtual void set_b_field(shared_ptr<const b_field_type> b_field)
+    virtual void set_b_field(shared_ptr<b_field_type> b_field)
     {
       this->b_field = const_pointer_cast<b_field_type>(b_field);
     }
@@ -238,13 +238,13 @@ class BorisSweeper
 
       // compute integrals
       for (size_t m = 1; m < nnodes; m++) {
-        this->s_integrals[m]->zero();
-        this->ss_integrals[m]->zero();
+        this->s_integrals[m].zero();
+        this->ss_integrals[m].zero();
         for (size_t l = 1; l < nnodes; l++) {
-          *(this->s_integrals[l].get()) += this->previous_particles[l]
-                                               ->accel->convert(dt<time>(this->s_mat(m, l)));
-          *(this->ss_integrals[l].get()) += this->previous_particles[l]
-                                               ->accel->convert(dtdt<time>(this->ss_mat(m, l)));
+          this->s_integrals[l] += this->previous_particles[l]
+                                      ->accel().convert(dt<time>(this->s_mat(m, l)));
+          this->ss_integrals[l] += this->previous_particles[l]
+                                       ->accel().convert(dtdt<time>(this->ss_mat(m, l)));
         }
       }
 
@@ -254,29 +254,28 @@ class BorisSweeper
         //// Update Position (explicit)
         //
         // x_{m+1}^{k+1} = x_{m}^{k}
-        this->particles[m+1]->pos->copy(this->particles[m]->const_pos());
+        this->particles[m+1]->pos() = position_type(this->particles[m]->pos());
         //               + delta_nodes_{m} * v_{0}
-        *(this->particles[m+1]->pos.get()) += this->particles[0]->vel->convert(dt);
+        this->particles[m+1]->pos() += this->particles[0]->vel().convert(dt);
         //               + \sum_{l=1}^{m} s_{m+1,l}^{x} (f_{l}^{k+1} - f_{l}^{k})
         for (size_t l = 1; l < m; l++) {
-          *(this->particles[m+1]->pos.get()) += this->particles[l]->accel
-                                                    ->convert(dtdt<time>(this->qx_mat(m+1, l)));
-          this->particles[m+1]->pos->saxpy(-1.0,
-                                           this->previous_particles[l]->accel
-                                               ->convert(dtdt<time>(this->qx_mat(m+1,l))));
+          this->particles[m+1]->pos() += this->particles[l]
+                                           ->accel().convert(dtdt<time>(this->qx_mat(m+1, l)));
+          this->particles[m+1]->pos() -= this->previous_particles[l]
+                                           ->accel().convert(dtdt<time>(this->qx_mat(m+1,l)));
         }
         //               + ss_integral[m]
         for (size_t l = 1; l < nnodes; l++) {
-          *(this->particles[m+1]->pos.get()) += this->ss_integrals[l];
+          this->particles[m+1]->pos() += this->ss_integrals[l];
         }
 
         //// Update Velocity (semi-implicit)
         //
         c_k_term.zero();  // reset
         //                 - delta_nodes_{m} / 2 * f_{m+1}^{k}
-        c_k_term.saxpy(-0.5, this->previous_particles[m+1]->accel->convert(dt));
+        c_k_term.saxpy(-0.5, this->previous_particles[m+1]->accel().convert(dt));
         //                 - delta_nodes_{m} / 2 * f_{m}^{k}
-        c_k_term.saxpy(-0.5, this->previous_particles[m]->accel->convert(dt));
+        c_k_term.saxpy(-0.5, this->previous_particles[m]->accel().convert(dt));
         //                 + s_integral[m]
         for (size_t l = 1; l < nnodes; l++) {
           c_k_term += this->s_integrals[l];
@@ -290,10 +289,10 @@ class BorisSweeper
     virtual void save(bool initial_only=false) override
     {
       if (initial_only) {
-        this->previous_particles[0]->copy(const_pointer_cast<const encap_type>(this->particles[0]));
+        this->previous_particles[0] = make_shared<encap_type>(this->particles[0]);
       } else {
         for (size_t m = 0; m < this->previous_particles.size(); m++) {
-          this->previous_particles[m]->copy(const_pointer_cast<const encap_type>(this->particles[m]));
+          this->previous_particles[m] = make_shared<encap_type>(this->particles[m]);
         }
       }
     }
@@ -333,14 +332,13 @@ class BorisSweeper
     virtual void boris_solve(const time tm, const time t_next, const ::dt<time> dt, const size_t m,
                              const velocity_type& c_k_term)
     {
-      velocity_type c_k_term_half(scalar(0.5) * c_k_term);
-      ::dt<time> beta(this->particles[m]->charge * dt.v / (scalar(2.0) * this->particles[m]->mass));
-      acceleration_type e_mean = (this->e_field->evaluate(this->particles[m], tm)
-                                  - this->e_field->evaluate(this->particles[m+1], tm))
-                                 * scalar(0.5);
+      velocity_type c_k_term_half = scalar(0.5) * c_k_term;
+      ::dt<time> beta(this->particles[m]->charge() * dt.v / (scalar(2.0) * this->particles[m]->mass()));
+      acceleration_type e_mean = \
+        (this->e_field->evaluate(this->particles[m], tm) - this->e_field->evaluate(this->particles[m+1], tm)) * scalar(0.5);
 
       // v^{-} = v^{k}
-      velocity_type v_minus(this->particles[m]->const_vel());
+      velocity_type v_minus = this->particles[m]->vel();
 
       // first Boris' drift
       //         + \beta * E_{mean} + c^{k} / 2
@@ -348,13 +346,16 @@ class BorisSweeper
 
       // Boris' kick
       velocity_type boris_t = this->b_field->evaluate(this->particles[m], t_next).convert(beta);
-      velocity_type boris_s = (scalar(2.0) * boris_t) / (scalar(1.0) + (boris_t * boris_t));
-      velocity_type v_prime(v_minus + boris_t * v_minus);
+      velocity_type boris_t_sqr = dot(boris_t, boris_t);
+      velocity_type boris_s = velocity_type((scalar(2.0) * boris_t.u) / (scalar(1.0) + boris_t_sqr.u),
+                                            (scalar(2.0) * boris_t.v) / (scalar(1.0) + boris_t_sqr.v),
+                                            (scalar(2.0) * boris_t.w) / (scalar(1.0) + boris_t_sqr.w));
+      velocity_type v_prime = v_minus + dot(boris_t, v_minus);
 
       // final Boris' drift
-      velocity_type v_plus(v_minus + v_prime * boris_s);
+      velocity_type v_plus = v_minus + dot(v_prime, boris_s);
 
-      this->particles[m+1]->vel->copy(v_plus + e_mean.convert(beta) + c_k_term_half);
+      this->particles[m+1]->vel() = v_plus + e_mean.convert(beta) + c_k_term_half;
     }
     //! @}
 };

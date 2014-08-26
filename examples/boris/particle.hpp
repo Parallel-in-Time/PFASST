@@ -17,6 +17,9 @@ using namespace pfasst;
 using namespace pfasst::encap;
 
 
+typedef false_type deactivated_function;
+
+
 /**
  * Type to denote a scalar with physical unit \\( t \\).
  *
@@ -77,7 +80,7 @@ class ParticleComponentEncapsulation
     virtual void copy(shared_ptr<const Encapsulation<time>> other) override
     {
       UNUSED(other);
-      throw NotImplementedYet("copy of Encapsulation into ParticleComponent");
+      assert(deactivated_function::value);
     }
     //! @}
 
@@ -148,9 +151,6 @@ class AccelerationEncapsulation
 
   public:
     //! @{
-    AccelerationEncapsulation()
-    {}
-
     virtual ~AccelerationEncapsulation()
     {}
     //! @}
@@ -173,14 +173,16 @@ class ParticleEncapsulation
     typedef PositionT<scalar, time> position_type;
     typedef VelocityT<scalar, time> velocity_type;
     typedef AccelerationT<scalar, time> acceleration_type;
+    typedef ParticleEncapsulation<scalar, time, PositionT, VelocityT, AccelerationT> this_type;
     //! @}
 
+  protected:
     //! @{
-    scalar mass;
-    scalar charge;
-    shared_ptr<position_type> pos;
-    shared_ptr<velocity_type> vel;
-    shared_ptr<acceleration_type> accel;
+    scalar m_mass;
+    scalar m_charge;
+    position_type m_pos;
+    velocity_type m_vel;
+    acceleration_type m_accel;
     //! @}
 
   public:
@@ -189,12 +191,30 @@ class ParticleEncapsulation
       : ParticleEncapsulation(scalar(1.0), scalar(1.0))
     {}
 
-    ParticleEncapsulation(scalar mass, scalar charge)
-      :   mass(mass)
-        , charge(charge)
-        , pos(make_shared<position_type>())
-        , vel(make_shared<velocity_type>())
-        , accel(make_shared<acceleration_type>())
+    ParticleEncapsulation(const scalar mass, const scalar charge)
+      :   m_mass(mass)
+        , m_charge(charge)
+    {}
+
+    ParticleEncapsulation(const scalar mass, const scalar charge,
+                          const position_type& pos, const velocity_type& vel,
+                          const acceleration_type& accel)
+      :   m_mass(mass)
+        , m_charge(charge)
+        , m_pos(pos)
+        , m_vel(vel)
+        , m_accel(accel)
+    {}
+
+    ParticleEncapsulation(const this_type& other)
+      : ParticleEncapsulation(other.mass(), other.charge(),
+                              other.pos(), other.vel(), other.accel())
+    {}
+
+    ParticleEncapsulation(this_type&& other)
+      : ParticleEncapsulation(std::move(other.m_mass), std::move(other.m_charge),
+                              std::move(other.m_pos), std::move(other.m_vel),
+                              std::move(other.m_accel))
     {}
 
     virtual ~ParticleEncapsulation()
@@ -202,22 +222,33 @@ class ParticleEncapsulation
     //! @}
 
     //! @{
-    virtual void copy(shared_ptr<const Encapsulation<time>> other) override
+    this_type& operator=(const this_type& other)
     {
-      shared_ptr<const ParticleEncapsulation<scalar, time>> other_cast = \
-        dynamic_pointer_cast<const ParticleEncapsulation<scalar, time>>(other);
-      assert(other_cast);
-      this->copy(other_cast);
+      assert(this != &other);
+      this_type tmp(other);
+      std::swap(this->m_mass, tmp.m_mass);
+      std::swap(this->m_charge, tmp.m_charge);
+      std::swap(this->m_pos, tmp.m_pos);
+      std::swap(this->m_vel, tmp.m_vel);
+      std::swap(this->m_accel, tmp.m_accel);
+      return *this;
     }
 
-    virtual void copy(shared_ptr<const ParticleEncapsulation<scalar, time>> other)
+    this_type& operator=(this_type&& other)
     {
-      assert(other->DIM == this->DIM);
-      this->mass = other->mass;
-      this->charge = other->charge;
-      this->pos->copy(other->const_pos());
-      this->vel->copy(other->const_vel());
-      this->accel->copy(other->const_accel());
+      std::swap(this->m_mass, other.m_mass);
+      std::swap(this->m_charge, other.m_charge);
+      std::swap(this->m_pos, other.m_pos);
+      std::swap(this->m_vel, other.m_vel);
+      std::swap(this->m_accel, other.m_accel);
+    }
+    //! @}
+
+    //! @{
+    virtual void copy(shared_ptr<const Encapsulation<time>> other) override
+    {
+      UNUSED(other);
+      assert(deactivated_function::value);
     }
     //! @}
 
@@ -239,18 +270,16 @@ class ParticleEncapsulation
     //! @}
 
     //! @{
-    virtual shared_ptr<const position_type> const_pos() const
-    {
-      return const_pointer_cast<const position_type>(this->pos);
-    }
-    virtual shared_ptr<const velocity_type> const_vel() const
-    {
-      return const_pointer_cast<const velocity_type>(this->vel);
-    }
-    virtual shared_ptr<const acceleration_type> const_accel() const
-    {
-      return const_pointer_cast<const acceleration_type>(this->accel);
-    }
+          scalar&            mass()         { return this->m_mass; }
+    const scalar&            mass() const   { return this->m_mass; }
+          scalar&            charge()       { return this->m_charge; }
+    const scalar&            charge() const { return this->m_charge; }
+          position_type&     pos()          { return this->m_pos; }
+    const position_type&     pos() const    { return this->m_pos; }
+          velocity_type&     vel()          { return this->m_vel; }
+    const velocity_type&     vel() const    { return this->m_vel; }
+          acceleration_type& accel()        { return this->m_accel; }
+    const acceleration_type& accel() const  { return this->m_accel; }
     //! @}
 };
 
