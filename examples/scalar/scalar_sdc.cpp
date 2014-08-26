@@ -3,7 +3,7 @@
  *
  * Solves Dahlquist's test equation with single level SDC
  *
- *    y' = lambda y = a y + i b y, y(0) = 1.0
+ * \\( u' = \\lambda*u \\quad\\text{ , } u(0) = u_0 \\)
  *
  * with complex lambda, treating the real part implicitly and the imaginary part 
  * explicitly.
@@ -25,7 +25,7 @@ double run_scalar_sdc(const size_t nsteps, const double dt, const size_t nnodes,
   pfasst::SDC<> sdc;
   
   /*
-   * For test equation, set initial value to 1+i0
+   * For test equation, set initial value to \\( 1+0i )\\
    */
   const complex<double> y0 = complex<double>(1.0, 0.0);
 

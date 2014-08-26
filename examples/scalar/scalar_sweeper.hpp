@@ -14,11 +14,10 @@ template<typename time = pfasst::time_precision>
 /**
  * Sweeper for scalar test equation
  *
- * u' = lambda*u, u(0) = u0
+ * \\( u' = \\lambda*u \\quad\\text{ , } u(0) = u_0 \\)
  *
- * with complex lambda using an IMEX scheme. Derived from the generic imex_sweeper
+ * with complex lambda using an IMEX scheme. Derived from the generic imex_sweeper.
  *
- * ScalarSweeper is derived from the generic IMEXSweeper
  */
 class ScalarSweeper
   : public pfasst::encap::IMEXSweeper<time>
@@ -31,7 +30,7 @@ class ScalarSweeper
     typedef pfasst::encap::VectorEncapsulation<complex<double>> complex_vector_type;
     
      //! Parameter lambda and initial value u0 
-    complex<double> lambda, u0;
+    const complex<double> lambda, u0;
     
     //! The complex unit i = sqrt(-1)
     const complex<double> i_complex = complex<double>(0, 1);
@@ -46,10 +45,10 @@ class ScalarSweeper
   
     /**
      * Generic constructor; initialize all function call counters with zero.
-     * lambda = coefficient in test equation
-     * u0     = initial value at t=0
+     * @param[in] lambda coefficient in test equation
+     * @param[in] u0initial value at \\( t=0 \\)
      */ 
-    ScalarSweeper(complex<double> lambda, complex<double> u0)
+    ScalarSweeper(const complex<double> lambda, const complex<double> u0)
       :   lambda(lambda)
         , u0(u0)
         , n_f_expl_eval(0)
@@ -70,7 +69,8 @@ class ScalarSweeper
     }
 
     /**
-     * Compute error and print it to cout
+     * Compute error between last state and exact solution at time tand print it to cout
+     * @param[in] Time t
      */
     void echo_error(time t)
     {
@@ -115,7 +115,10 @@ class ScalarSweeper
     }
 
     /**
-     * Computes the exact solution u0*exp(lambda*t) at a given time t.
+     * Computes the exact solution \\( u_0 \\exp \\left( \\lambda*t \\right) \\) 
+     * at a given time t.
+     * @param[in] ???
+     * @param[in] Time t
      */
     void exact(complex_vector_type& q, time t)
     {
@@ -129,7 +132,8 @@ class ScalarSweeper
     }
 
     /**
-     * Evaluate the explicit part of the right hand side: Multiply with imag(lambda)
+     * Evaluate the explicit part of the right hand side: Multiply with 
+     * \\( \\text{imag}(\\lambda) \\)
      */
     void f_expl_eval(shared_ptr<encap_type> f_encap,
                      shared_ptr<encap_type> q_encap, time t) override
@@ -145,7 +149,8 @@ class ScalarSweeper
     }
 
     /**
-     * Evaluate the implicit part of the right hand side: Multiply with real(lambda)
+     * Evaluate the implicit part of the right hand side: Multiply with 
+     * \\( \\text{real}(\\lambda) \\)
      */
     void f_impl_eval(shared_ptr<encap_type> f_encap,
                      shared_ptr<encap_type> q_encap, time t) override
@@ -161,7 +166,9 @@ class ScalarSweeper
     }
 
     /**
-     * For given b, solve (Id - dt*real(lambda))*u = b for u
+     * For given \\( b \\), solve 
+     * \\( \\left( \\mathbb{I}_d - \\Delta t \\text{real}(\\lambda) \\right) u = b \\) 
+     * for \\( u \\) and set f_encap to \\( \\text{real}(\\lambda) u \\)
      */
     void impl_solve(shared_ptr<encap_type> f_encap,
                     shared_ptr<encap_type> q_encap, time t, time dt,
