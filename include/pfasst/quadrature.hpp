@@ -10,16 +10,17 @@
 
 #include <Eigen/Dense>
 
+template<typename coeff>
+using matrix = Eigen::Matrix<coeff, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+
+#include <boost/math/constants/constants.hpp>
+using namespace boost::math::constants;
+
 using std::complex;
 using std::string;
 using std::vector;
 
-template<typename coeff>
-using matrix = Eigen::Matrix<coeff, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
-
 #include "interfaces.hpp"
-
-#define PI 3.1415926535897932384626433832795028841971693993751
 
 namespace pfasst
 {
@@ -205,7 +206,7 @@ namespace pfasst
 
     } else if (qtype == QuadratureType::ClenshawCurtis) {
       for (size_t j = 0; j < nnodes; j++) {
-        nodes[j] = 0.5 * (1.0 - cos(j * PI / (nnodes - 1)));
+        nodes[j] = 0.5 * (1.0 - cos(j * pi<node>() / (nnodes - 1)));
       }
 
     } else if (qtype == QuadratureType::Uniform) {
