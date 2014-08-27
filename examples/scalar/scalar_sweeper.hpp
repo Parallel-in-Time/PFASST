@@ -30,10 +30,10 @@ class ScalarSweeper
     typedef pfasst::encap::VectorEncapsulation<complex<double>> complex_vector_type;
     
      //! Parameter lambda and initial value u0 
-    const complex<double> lambda, u0;
+    complex<double> lambda, u0;
     
     //! The complex unit i = sqrt(-1)
-    const complex<double> i_complex = complex<double>(0, 1);
+    complex<double> i_complex = complex<double>(0, 1);
     
      //! Error at the final time. For the scalar example, an analytical solution is known.
     double error;
@@ -117,7 +117,6 @@ class ScalarSweeper
     /**
      * Computes the exact solution \\( u_0 \\exp \\left( \\lambda*t \\right) \\) 
      * at a given time t.
-     * @param[in] ???
      * @param[in] Time t
      */
     void exact(complex_vector_type& q, time t)
