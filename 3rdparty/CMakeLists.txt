@@ -27,7 +27,7 @@ message(STATUS "Eigen3")
 
 find_package(Eigen3)
 
-if(NOT Eigen3_FOUND)
+if(NOT EIGEN3_FOUND)
     set(EIGEN3_SOURCE_URL "http://bitbucket.org/eigen/eigen/get/3.2.2.tar.bz2")
     message(STATUS "Eigen3 not found on your system")
     message(STATUS "  going to download sources")
