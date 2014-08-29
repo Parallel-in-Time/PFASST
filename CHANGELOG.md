@@ -2,7 +2,7 @@
 
 ## v0.2.0 -- MPI PFASST (2014/08/XX)
 
-XXX: DOI: [10.5281/zenodo.11047](http://dx.doi.org/10.5281/zenodo.11047)
+DOI: [10.5281/zenodo.11047](http://dx.doi.org/10.5281/zenodo.11047)
 
 ### Notable Features
 
@@ -15,7 +15,7 @@ XXX: DOI: [10.5281/zenodo.11047](http://dx.doi.org/10.5281/zenodo.11047)
   ([#46][], [#57][], [#59][])
 
 * Addition of a simple scalar example and appropriate tests.
-  ([#61][], [#63][], [#76][])
+  ([#61][], [#63][], [#76][], [#81][])
 
 * Further tests on proper calculation of quadrature nodes and weights
   ([#74][])
@@ -42,6 +42,7 @@ XXX: DOI: [10.5281/zenodo.11047](http://dx.doi.org/10.5281/zenodo.11047)
 [#76]: https://github.com/Parallel-in-Time/PFASST/pull/76
 [#77]: https://github.com/Parallel-in-Time/PFASST/pull/77
 [#78]: https://github.com/Parallel-in-Time/PFASST/pull/78
+[#78]: https://github.com/Parallel-in-Time/PFASST/pull/81
 
 ### Contributors
 
