@@ -42,7 +42,7 @@ Releases
 * **v0.2.0** MPI-PFASST Release (2014/08/29)
 
   Implementation of PFASST with MPI.
-  DOI: [10.5281/zenodo.11047][DOI_v010]
+  DOI: [10.5281/zenodo.11517][DOI_v020]
   See \subpage #page_changelog "the Changelog" for details.
 
 * **v0.1.0** First Release (2014/07/25)
@@ -52,6 +52,7 @@ Releases
   See \subpage #page_changelog "the Changelog" for details.
 
 [DOI_v010]: http://dx.doi.org/10.5281/zenodo.11047
+[DOI_v020]: http://dx.doi.org/10.5281/zenodo.11517
 
 Release tags will be signed by one of the following PGP keys:
 
