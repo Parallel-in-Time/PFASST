@@ -2,7 +2,7 @@
 
 ## v0.2.0 -- MPI PFASST (2014/08/XX)
 
-DOI: [10.5281/zenodo.11047](http://dx.doi.org/10.5281/zenodo.11047)
+DOI: [10.5281/zenodo.11517](http://dx.doi.org/10.5281/zenodo.11517)
 
 ### Notable Features
 
