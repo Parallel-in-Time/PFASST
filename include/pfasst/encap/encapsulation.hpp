@@ -8,6 +8,7 @@
 #include <vector>
 #include <memory>
 
+#include "../globals.hpp"
 #include "../interfaces.hpp"
 #include "../quadrature.hpp"
 
@@ -21,7 +22,7 @@ namespace pfasst
     typedef enum EncapType { solution, function } EncapType;
 
     /**
-     * basic encapsulation.
+     * Data/solution encapsulation.
      *
      * An Encapsulation provides basic functionality of the user data used by PFASST such as
      * mathematical operation @em axpy \\(y=ax+y\\) and packing/unpacking for message passing.
@@ -33,17 +34,32 @@ namespace pfasst
     {
       public:
         //! @{
-        virtual ~Encapsulation() { }
+        virtual ~Encapsulation()
+        {}
         //! @}
 
         //! @{
         // required for time-parallel communications
-        virtual void send()
+        virtual void post(ICommunicator* comm, int tag)
         {
+          UNUSED(comm); UNUSED(tag);
+        }
+
+        virtual void send(ICommunicator* comm, int tag, bool blocking)
+        {
+          UNUSED(comm); UNUSED(tag); UNUSED(blocking);
           throw NotImplementedYet("pfasst");
         }
-        virtual void recv()
+
+        virtual void recv(ICommunicator* comm, int tag, bool blocking)
         {
+          UNUSED(comm); UNUSED(tag); UNUSED(blocking);
+          throw NotImplementedYet("pfasst");
+        }
+
+        virtual void broadcast(ICommunicator* comm)
+        {
+          UNUSED(comm);
           throw NotImplementedYet("pfasst");
         }
         //! @}
@@ -68,18 +84,33 @@ namespace pfasst
          * Here, \\(a\\) is a time point and \\(x\\) another data structure (usually of the
          * same type).
          */
-        virtual void saxpy(time /*a*/, shared_ptr<const Encapsulation<time>> /*x*/)
+        virtual void saxpy(time a, shared_ptr<const Encapsulation<time>> x)
         {
+          UNUSED(a); UNUSED(x);
           throw NotImplementedYet("encap");
         }
+
         /**
          * defines matrix-vector multiplication for this data type.
          */
-        virtual void mat_apply(vector<shared_ptr<Encapsulation<time>>> /*dst*/, time /*a*/, matrix<time> /*m*/,
-			       vector<shared_ptr<Encapsulation<time>>> /*src*/, bool zero = true)
+        virtual void mat_apply(vector<shared_ptr<Encapsulation<time>>> dst, time a, matrix<time> mat,
+                               vector<shared_ptr<Encapsulation<time>>> src, bool zero = true)
         {
-	  (void) zero;
-          throw NotImplementedYet("encap");
+          size_t ndst = dst.size();
+          size_t nsrc = src.size();
+
+          if (zero) {
+            for (auto elem : dst) { elem->zero(); }
+          }
+
+          for (size_t n = 0; n < ndst; n++) {
+            for (size_t m = 0; m < nsrc; m++) {
+              auto s = mat(n, m);
+              if (s != 0.0) {
+                dst[n]->saxpy(a*s, src[m]);
+              }
+            }
+          }
         }
         //! @}
     };
@@ -91,7 +122,7 @@ namespace pfasst
         virtual shared_ptr<Encapsulation<time>> create(const EncapType) = 0;
     };
 
-  }
-}
+  }  // ::pfasst::encap
+} // ::pfasst
 
 #endif

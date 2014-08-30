@@ -1,25 +1,31 @@
 cmake_minimum_required(VERSION 2.8)
-
-set(CMAKE_VERBOSE_MAKEFILE ON)
-
 project(pfasst)
 
+list(APPEND CMAKE_MODULE_PATH ${pfasst_SOURCE_DIR}/cmake)
 include(cmake/utility_functions.cmake)
 include(CheckCXXCompilerFlag)
 include(ExternalProject)
+
 # Set default ExternalProject root directory
 set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/3rdparty)
 
-option(pfasst_DISABLE_LIBCXX "Disable use of LLVM's libc++ when compiling with Clang." ON)
-option(pfasst_BUILD_EXAMPLES "Build example programs." ON)
-option(pfasst_BUILD_TESTS "Build test suite for PFASST." ON)
+option(pfasst_DISABLE_LIBCXX "Disable use of LLVM's libc++ when compiling with Clang." ON )
+option(pfasst_BUILD_EXAMPLES "Build example programs."                                 ON )
+option(pfasst_BUILD_TESTS    "Build test suite for PFASST."                            ON )
+option(pfasst_WITH_MPI       "Build with MPI enabled."                                 OFF)
+option(pfasst_WITH_GCC_PROF  "Enable excessive debugging & profiling output with GCC." OFF)
 
-# output directories
+# Set output directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${pfasst_SOURCE_DIR}/dist/bin")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${pfasst_SOURCE_DIR}/dist/lib")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${pfasst_SOURCE_DIR}/dist/lib")
 
-# check for C++11 support
+if(${pfasst_WITH_MPI})
+    find_package(MPI REQUIRED)
+    message(STATUS "Using MPI C++ Compiler: ${MPI_CXX_COMPILER}")
+endif()
+
+# Check for C++11 support
 if(${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
     check_cxx_compiler_flag(-std=c++11 HAVE_STD11)
     if(HAVE_STD11)
@@ -27,6 +33,9 @@ if(${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
     else()
         message(FATAL_ERROR "No advanced standard C++ support of your GCC (-std=c++11 not defined).")
     endif()
+    if(pfasst_WITH_GCC_PROF)
+        add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-ggdb3 -pg")
+    endif(pfasst_WITH_GCC_PROF)
 elseif(${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
     check_cxx_compiler_flag(-std=c++11 HAVE_STD11)
     if(HAVE_STD11)
@@ -57,7 +66,7 @@ else()
 endif()
 message(STATUS "Your compiler has C++11 support. Hurray!")
 
-# enable all compiler warnings
+# Enable all compiler warnings
 add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic")
 
 set(3rdparty_INCLUDES)
@@ -69,13 +78,14 @@ if(pfasst_BUILD_TESTS)
     enable_testing()
 endif(pfasst_BUILD_TESTS)
 
-# adding / including 3rd-party libraries
+# Add / include 3rd-party libraries
 message(STATUS "********************************************************************************")
 message(STATUS "Configuring 3rd party libraries")
 # makes available:
-#  - fftw3_INCLUDES  (if pfasst_BUILD_EXAMPLES)
-#  - fftw3_LIBS      (if pfasst_BUILD_EXAMPLES)
-# and Boost headers in 3rdparty_INCLUDES
+#  - Boost headers in 3rdparty_INCLUDES
+#  - Google test and mock headers in 3rdparty_INCLUDES (if pfasst_BUILD_TESTS)
+#  - FFTW_INCLUDE_PATH (if pfasst_BUILD_EXAMPLES)
+#  - FFTW_LIBRARIES (if pfasst_BUILD_EXAMPLES)
 add_subdirectory(3rdparty)
 
 message(STATUS "********************************************************************************")
@@ -95,6 +105,9 @@ if(pfasst_BUILD_TESTS)
 endif()
 message(STATUS "********************************************************************************")
 
+message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 message(STATUS "C++ Compiler ID: ${CMAKE_CXX_COMPILER_ID}")
+message(STATUS "C++ Compiler Names: ${CMAKE_CXX_COMPILER_NAMES}")
+message(STATUS "C++ Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}")
 message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS}")
 message(STATUS "C++ link flags: ${CMAKE_CXX_LINK_FLAGS}")

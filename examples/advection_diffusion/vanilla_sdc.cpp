@@ -4,6 +4,7 @@
  * This example uses a vanilla SDC sweeper.
  */
 
+#include <cstdlib>
 #include <memory>
 
 #include <fftw3.h>
@@ -24,7 +25,7 @@ error_map run_vanilla_sdc()
   const size_t ndofs  = 64;
   const size_t niters = 4;
 
-  auto nodes   = pfasst::compute_nodes(nnodes, "gauss-lobatto");
+  auto nodes   = pfasst::compute_nodes(nnodes, pfasst::QuadratureType::GaussLobatto);
   auto factory = make_shared<pfasst::encap::VectorFactory<double>>(ndofs);
   auto sweeper = make_shared<AdvectionDiffusionSweeper<>>(ndofs);
 

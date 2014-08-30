@@ -21,8 +21,10 @@ namespace pfasst
   class MLSDC
     : public Controller<time>
   {
+    protected:
       vector<size_t> nsweeps;
-      bool predict, initial;
+      bool predict;
+      bool initial;
 
       typedef typename pfasst::Controller<time>::LevelIter LevelIter;
 
@@ -40,14 +42,19 @@ namespace pfasst
       }
 
     public:
-      void setup()
+      void setup() override
       {
         nsweeps.resize(this->nlevels());
         fill(nsweeps.begin(), nsweeps.end(), 1);
         for (auto leviter = this->coarsest(); leviter <= this->finest(); ++leviter) {
-	  leviter.current()->set_controller(this);
+          leviter.current()->set_controller(this);
           leviter.current()->setup(leviter != this->finest());
         }
+      }
+
+      void set_nsweeps(vector<size_t> nsweeps)
+      {
+        this->nsweeps = nsweeps;
       }
 
       /**
@@ -59,11 +66,13 @@ namespace pfasst
       void run()
       {
         for (; this->get_time() < this->get_end_time(); this->advance_time()) {
-          predict = true;   // use predictor for first fine sweep of each step
-          initial = this->get_step() == 0; // only evaluate node 0 functions on first step
+          predict = true;  // use predictor for first fine sweep of each step
+          initial = this->get_step() == 0;  // only evaluate node 0 functions on first step
 
           // iterate by performing v-cycles
-	  for (this->set_iteration(0); this->get_iteration() < this->get_max_iterations(); this->advance_iteration()) {
+          for (this->set_iteration(0);
+               this->get_iteration() < this->get_max_iterations();
+               this->advance_iteration()) {
             cycle_v(this->finest());
           }
 
@@ -140,6 +149,6 @@ namespace pfasst
 
   };
 
-}
+}  // ::pfasst
 
 #endif

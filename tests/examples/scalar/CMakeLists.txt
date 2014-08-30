@@ -5,7 +5,8 @@ include_directories(
 )
 
 set(TESTS
-    test_quadrature
+    test_scalar_conv
+    test_scalar_highprec
 )
 
 foreach(test ${TESTS})
@@ -17,7 +18,7 @@ foreach(test ${TESTS})
         ${pfasst_DEPENDED_LIBS}
     )
     set_target_properties(${test}
-        PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/tests
+        PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/tests/examples/scalar
     )
     if(pfasst_WITH_GCC_PROF AND ${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
         set_target_properties(${test}
@@ -26,8 +27,6 @@ foreach(test ${TESTS})
         )
     endif()
     add_test(NAME ${test}
-        COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/tests/${test} --gtest_output=xml:${test}_out.xml
+        COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/tests/examples/scalar/${test} --gtest_output=xml:${test}_out.xml
     )
 endforeach(test)
-
-add_subdirectory(examples)

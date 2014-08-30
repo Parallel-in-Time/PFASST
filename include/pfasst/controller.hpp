@@ -9,6 +9,7 @@
 #include <memory>
 #include <cassert>
 #include <iterator>
+#include <iostream>
 
 #include "interfaces.hpp"
 
@@ -23,18 +24,22 @@ namespace pfasst
   class Controller
   {
     protected:
+      //! @{
       deque<shared_ptr<ISweeper<time>>>  levels;
       deque<shared_ptr<ITransfer<time>>> transfer;
+      //! @}
 
+      //! @{
       size_t step, iteration, max_iterations;
       time t, dt, tend;
+      //! @}
 
     public:
       //! @{
-      void setup()
+      virtual void setup()
       {
         for (auto l = coarsest(); l <= finest(); ++l) {
-	  l.current()->set_controller(this);
+          l.current()->set_controller(this);
           l.current()->setup();
         }
       }
@@ -74,13 +79,13 @@ namespace pfasst
       template<typename R = ISweeper<time>>
       shared_ptr<R> get_finest()
       {
-	return get_level<R>(nlevels()-1);
+        return get_level<R>(nlevels()-1);
       }
 
       template<typename R = ISweeper<time>>
       shared_ptr<R> get_coarsest()
       {
-	return get_level<R>(0);
+        return get_level<R>(0);
       }
 
       template<typename R = ITransfer<time>>
@@ -108,24 +113,28 @@ namespace pfasst
        * implementing a `RandomAccessIterator`.
        */
       class LevelIter
-        : iterator<random_access_iterator_tag, shared_ptr<ISweeper<time>>, size_t,
+        : iterator<random_access_iterator_tag, shared_ptr<ISweeper<time>>, int,
                    ISweeper<time>*, ISweeper<time>>
       {
           Controller* ts;
 
         public:
-          typedef size_t                     difference_type;
+          //! @{
+          typedef int                        difference_type;
           typedef shared_ptr<ISweeper<time>> value_type;
           typedef ISweeper<time>*            pointer;
           typedef ISweeper<time>             reference;
           typedef random_access_iterator_tag iterator_category;
-
-          size_t level;
+          //! @}
 
           //! @{
-          LevelIter(size_t level, Controller* ts)
+          int level;
+          //! @}
+
+          //! @{
+          LevelIter(int level, Controller* ts)
             : ts(ts), level(level)
-          {}
+          { }
           //! @}
 
           //! @{
@@ -178,13 +187,19 @@ namespace pfasst
       LevelIter coarsest() { return LevelIter(0, this); }
       //! @}
 
-
+      //! @{
       /**
        * Get current time step number.
        */
       size_t get_step()
       {
         return step;
+      }
+
+      void set_step(size_t n)
+      {
+        t += (n - step)*dt;
+        step = n;
       }
 
       time get_time_step()
@@ -227,8 +242,9 @@ namespace pfasst
       {
         return max_iterations;
       }
-
+      //! @}
   };
-}
+
+}  // ::pfasst
 
 #endif

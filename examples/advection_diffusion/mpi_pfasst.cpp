@@ -1,24 +1,20 @@
 /*
  * Advection/diffusion example using an encapsulated IMEX sweeper.
  *
- * This example uses a (serial) multi-level SDC sweeper.  It is
- * functionally exactly the same as ex2.cpp, but uses the 'auto
- * builder' to shorten the build and setup stages of the MLSDC
- * controller.
+ * This example uses MPI PFASST.
  */
 
-#include <cstdlib>
-#include <cassert>
 #include <memory>
-#include <vector>
-#include <string>
+#include <cassert>
 
+#include <mpi.h>
 #include <fftw3.h>
 
 #include <pfasst.hpp>
-#include <pfasst/mlsdc.hpp>
+#include <pfasst/pfasst.hpp>
+#include <pfasst/mpi_communicator.hpp>
 #include <pfasst/encap/automagic.hpp>
-#include <pfasst/encap/vector.hpp>
+#include <pfasst/encap/mpi_vector.hpp>
 
 #include "advection_diffusion_sweeper.hpp"
 #include "spectral_transfer_1d.hpp"
@@ -26,51 +22,56 @@
 using namespace std;
 using namespace pfasst;
 using namespace pfasst::encap;
+using namespace pfasst::mpi;
 
-
-int main(int /*argc*/, char** /*argv*/)
+error_map run_mpi_pfasst()
 {
-  MLSDC<> mlsdc;
-
   const size_t nsteps = 4;
   const double dt     = 0.01;
   const size_t niters = 4;
 
   vector<pair<size_t, pfasst::QuadratureType>> nodes = {
     { 3, pfasst::QuadratureType::GaussLobatto },
-    { 5, pfasst::QuadratureType::GaussLegendre }
+    { 5, pfasst::QuadratureType::GaussLobatto }
   };
 
   vector<size_t> ndofs = { 64, 128 };
 
-  /*
-   * the 'build' function is called once for each level, and returns a
-   * tuple containing a sweeper, encapsulation factory, and transfer
-   * routines.  in this case our builder is a lambda function that
-   * captures the 'ndofs' variable from above.
-   */
   auto build_level = [ndofs](size_t level) {
-    auto factory  = make_shared<VectorFactory<double>>(ndofs[level]);
+    auto factory  = make_shared<MPIVectorFactory<double>>(ndofs[level]);
     auto sweeper  = make_shared<AdvectionDiffusionSweeper<>>(ndofs[level]);
     auto transfer = make_shared<SpectralTransfer1D<>>();
 
     return AutoBuildTuple<>(sweeper, transfer, factory);
   };
 
-  /*
-   * the 'initial' function is called once for each level to set the
-   * intial conditions.
-   */
   auto initial = [](shared_ptr<EncapSweeper<>> sweeper, shared_ptr<Encapsulation<>> q0) {
     auto ad = dynamic_pointer_cast<AdvectionDiffusionSweeper<>>(sweeper);
     assert(ad);
     ad->exact(q0, 0.0);
   };
 
-  auto_build(mlsdc, nodes, build_level);
-  auto_setup(mlsdc, initial);
-  mlsdc.set_duration(0.0, nsteps*dt, dt, niters);
-  mlsdc.run();
+  MPICommunicator comm(MPI_COMM_WORLD);
+  PFASST<> pf;
 
-  fftw_cleanup();
+  auto_build(pf, nodes, build_level);
+  auto_setup(pf, initial);
+
+  pf.set_comm(&comm);
+  pf.set_duration(0.0, nsteps * dt, dt, niters);
+  pf.set_nsweeps({2, 1});
+  pf.run();
+
+  auto fine = pf.get_finest<AdvectionDiffusionSweeper<>>();
+  return fine->get_errors();
 }
+
+#ifndef PFASST_UNIT_TESTING
+int main(int argc, char** argv)
+{
+  MPI_Init(&argc, &argv);
+  run_mpi_pfasst();
+  fftw_cleanup();
+  MPI_Finalize();
+}
+#endif
