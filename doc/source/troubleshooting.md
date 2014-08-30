@@ -1,4 +1,4 @@
-# Trouble shooting                                                                  {#page_trouble}
+# Trouble Shooting                                                           {#page_troubleshooting}
 
 ## I'm getting SEGFAULTs, how do I track them down?
 

@@ -10,6 +10,9 @@ spectral deferred correction* (MLSDC) algorithms.
 News
 ----
 
+* August 29, 2014: PFASST v0.2.0 release. Please sse the [release notes](#releases) for more 
+  information.
+
 * July 25, 2014: PFASST v0.1.0 released.  Please see the [release notes](#releases) for more
   information.
 
@@ -30,10 +33,17 @@ Currently, it features the following content:
 * \subpage #page_examples
 * \subpage #page_contributing
 * \subpage #page_style_guide
+* \subpage #page_troubleshooting
 
 
 Releases
 --------
+
+* **v0.2.0** MPI-PFASST Release (2014/08/29)
+
+  Implementation of PFASST with MPI.
+  DOI: [10.5281/zenodo.11517][DOI_v020]
+  See \subpage #page_changelog "the Changelog" for details.
 
 * **v0.1.0** First Release (2014/07/25)
 
@@ -42,6 +52,7 @@ Releases
   See \subpage #page_changelog "the Changelog" for details.
 
 [DOI_v010]: http://dx.doi.org/10.5281/zenodo.11047
+[DOI_v020]: http://dx.doi.org/10.5281/zenodo.11517
 
 Release tags will be signed by one of the following PGP keys:
 
@@ -58,8 +69,11 @@ Build status
 
 For details see [Travis][pfasst-travis].
 
+A test coverage report is generated and published by [Jenkins][coverage-report].
 
-[documentation]: https://pint.fz-juelich.de/ci/view/PFASST/job/PFASST%20%28Docu%29/doxygen/
-[pfasst-travis]: https://travis-ci.org/Parallel-in-Time/PFASST
-[master-status]: https://travis-ci.org/Parallel-in-Time/PFASST.svg?branch=master
-[dev-status]:    https://travis-ci.org/Parallel-in-Time/PFASST.svg?branch=development
+
+[documentation]:   https://pint.fz-juelich.de/ci/view/PFASST/job/PFASST%20%28Docu%29/doxygen/
+[pfasst-travis]:   https://travis-ci.org/Parallel-in-Time/PFASST
+[master-status]:   https://travis-ci.org/Parallel-in-Time/PFASST.svg?branch=master
+[dev-status]:      https://travis-ci.org/Parallel-in-Time/PFASST.svg?branch=development
+[coverage-report]: https://pint.fz-juelich.de/ci/job/PFASST_GCC_4-8_Coverage/Test_Coverage

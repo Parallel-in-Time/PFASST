@@ -233,7 +233,16 @@ namespace pfasst
           }
         }
 
-        virtual void predict(bool initial)
+        /**
+         * Compute low-order provisional solution.
+         *
+         * This does not simply copy the initial value to all time nodes but carries out a few
+         * forward/backward IMEX Euler steps between the nodes.
+         *
+         * @param[in] initial if `true` the explicit and implicit part of the right hand side of the
+         *     ODE get evaluated with the initial value
+         */
+        virtual void predict(bool initial) override
         {
           const auto   nodes  = this->get_nodes();
           const size_t nnodes = nodes.size();
@@ -259,7 +268,7 @@ namespace pfasst
           if (this->last_node_is_virtual()) { this->integrate_end_state(dt); }
         }
 
-        virtual void sweep()
+        virtual void sweep() override
         {
           const auto   nodes  = this->get_nodes();
           const size_t nnodes = nodes.size();
