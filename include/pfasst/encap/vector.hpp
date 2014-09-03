@@ -111,7 +111,7 @@ namespace pfasst
          * @note In case any of the elements of `dst` or `src` can not be transformed via
          *     `dynamic_cast` into pfasst::encap::VectorEncapsulation std::abort is called.
          */
-        void mat_apply(vector<shared_ptr<Encapsulation<time>>> dst, time a, MatrixT<time> mat,
+        void mat_apply(vector<shared_ptr<Encapsulation<time>>> dst, time a, Matrix<time> mat,
                        vector<shared_ptr<Encapsulation<time>>> src, bool zero = true) override
         {
           size_t ndst = dst.size();
@@ -131,7 +131,7 @@ namespace pfasst
         }
 
         void mat_apply(vector<shared_ptr<VectorEncapsulation<scalar, time>>> dst,
-                       time a, MatrixT<time> mat,
+                       time a, Matrix<time> mat,
                        vector<shared_ptr<VectorEncapsulation<scalar, time>>> src, bool zero = true)
         {
           size_t ndst = dst.size();

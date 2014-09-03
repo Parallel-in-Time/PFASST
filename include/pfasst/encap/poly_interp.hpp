@@ -24,8 +24,8 @@ namespace pfasst
     {
         //! @{
         typedef vector<shared_ptr<Encapsulation<time>>> EncapVecT;
-        MatrixT<time> tmat;
-        MatrixT<time> fmat;
+        Matrix<time> tmat;
+        Matrix<time> fmat;
         //! @}
 
       public:

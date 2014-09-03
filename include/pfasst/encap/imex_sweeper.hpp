@@ -82,26 +82,26 @@ namespace pfasst
         /**
          * quadrature matrix containing weights for node-to-node integration
          */
-        MatrixT<time> s_mat;
+        Matrix<time> s_mat;
 
         /**
          * quadrature matrix containing weights for 0-to-last node integration
          */
-        MatrixT<time> b_mat;
+        Matrix<time> b_mat;
 
         /**
          * quadrature matrix containing weights for node-to-node integration of explicit part
          *
          * @see IMEXSweeper::setup(bool) for a short description
          */
-        MatrixT<time> s_mat_expl;
+        Matrix<time> s_mat_expl;
 
         /**
          * quadrature matrix containing weights for node-to-node integration of implicit part
          *
          * @see IMEXSweeper::setup(bool) for a short description
          */
-        MatrixT<time> s_mat_impl;
+        Matrix<time> s_mat_impl;
         //! @}
 
 
@@ -200,7 +200,7 @@ namespace pfasst
           this->s_mat = compute_quadrature(nodes, nodes, is_proper, QuadratureMatrix::S);
 
           auto q_mat = compute_quadrature(nodes, nodes, is_proper, QuadratureMatrix::Q);
-          this->b_mat = MatrixT<time>(1, nodes.size());
+          this->b_mat = Matrix<time>(1, nodes.size());
           for (size_t m = 0; m < nodes.size(); m++) {
             this->b_mat(0, m) = q_mat(nodes.size() - 2, m);
           }
