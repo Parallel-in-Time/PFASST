@@ -11,6 +11,7 @@
 
 #include "../globals.hpp"
 #include "../interfaces.hpp"
+#include "../quadrature.hpp"
 #include "encap_sweeper.hpp"
 
 namespace pfasst
@@ -64,7 +65,7 @@ namespace pfasst
           auto& crse = as_encap_sweeper(src);
 
           if (tmat.rows() == 0) {
-            tmat = pfasst::compute_interp<time>(fine.get_nodes(), crse.get_nodes());
+            tmat = pfasst::quadrature::compute_interp<time>(fine.get_nodes(), crse.get_nodes());
           }
 
           size_t nfine = fine.get_nodes().size();
