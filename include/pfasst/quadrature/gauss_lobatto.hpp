@@ -49,6 +49,7 @@ namespace pfasst
           }
           this->compute_nodes();
           this->compute_weights();
+          this->compute_delta_nodes();
         }
 
         GaussLobatto()

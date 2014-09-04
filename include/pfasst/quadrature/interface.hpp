@@ -143,6 +143,7 @@ namespace pfasst
         Matrix<precision> m_s_mat;
         vector<precision> m_q_vec;
         vector<precision> m_nodes;
+        vector<precision> m_delta_nodes;
         //! @}
 
       public:
@@ -165,6 +166,7 @@ namespace pfasst
             , m_s_mat(other.m_s_mat)
             , m_q_vec(other.m_q_vec)
             , m_nodes(other.m_nodes)
+            , m_delta_nodes(other.m_delta_nodes)
         {}
 
         IQuadrature(IQuadrature<precision>&& other)
@@ -189,6 +191,9 @@ namespace pfasst
 
         virtual const vector<precision>& nodes() const
         { return this->m_nodes; }
+
+        virtual const vector<precision>& delta_nodes() const
+        { return this->m_delta_nodes; }
 
         virtual size_t num_nodes() const
         { return this->m_num_nodes; }
@@ -218,6 +223,7 @@ namespace pfasst
           swap(first.m_s_mat, second.m_s_mat);
           swap(first.m_q_vec, second.m_q_vec);
           swap(first.m_nodes, second.m_nodes);
+          swap(first.m_delta_nodes, second.m_delta_nodes);
         }
         //! @}
 
@@ -233,6 +239,15 @@ namespace pfasst
           this->m_q_mat = compute_q_matrix(this->m_nodes);
           this->m_s_mat = compute_s_matrix(this->m_q_mat);
           this->m_q_vec = compute_q_vec(this->m_nodes);
+        }
+
+        virtual void compute_delta_nodes()
+        {
+          this->m_delta_nodes.resize(this->m_num_nodes);
+          this->m_delta_nodes[0] = this->m_nodes[0] - precision(0.0);
+          for (size_t m = 1; m < this->m_num_nodes; ++m) {
+            this->m_delta_nodes[m] = this->m_nodes[m] - this->m_nodes[m - 1];
+          }
         }
         //! @}
     };
