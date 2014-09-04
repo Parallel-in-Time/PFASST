@@ -27,8 +27,8 @@ namespace pfasst
     template<typename precision = pfasst::time_precision>
     class GaussRadau;
 
-    template<>
-    struct quadrature_traits<GaussRadau<>>
+    template<typename precision>
+    struct quadrature_traits<GaussRadau<precision>>
     {
       typedef pfasst::quadrature::gauss_radau integral_constant;
       static const bool left_is_node = false;
@@ -71,10 +71,10 @@ namespace pfasst
 
         //! @{
         virtual bool left_is_node() const
-        { return quadrature_traits<GaussRadau<>>::left_is_node; }
+        { return quadrature_traits<GaussRadau<precision>>::left_is_node; }
 
         virtual bool right_is_node() const
-        { return quadrature_traits<GaussRadau<>>::right_is_node; }
+        { return quadrature_traits<GaussRadau<precision>>::right_is_node; }
         //! @}
 
         //! @{

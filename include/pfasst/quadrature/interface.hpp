@@ -194,10 +194,10 @@ namespace pfasst
         { return this->m_num_nodes; }
 
         virtual bool left_is_node() const
-        { return quadrature_traits<IQuadrature<>>::left_is_node; }
+        { return quadrature_traits<IQuadrature<precision>>::left_is_node; }
 
         virtual bool right_is_node() const
-        { return quadrature_traits<IQuadrature<>>::right_is_node; }
+        { return quadrature_traits<IQuadrature<precision>>::right_is_node; }
         //! @}
 
         //! @{

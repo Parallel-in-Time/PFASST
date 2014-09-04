@@ -29,8 +29,8 @@ namespace pfasst
     template<typename precision = pfasst::time_precision>
     class Uniform;
 
-    template<>
-    struct quadrature_traits<Uniform<>>
+    template<typename precision>
+    struct quadrature_traits<Uniform<precision>>
     {
       typedef pfasst::quadrature::uniform integral_constant;
       static const bool left_is_node = true;
@@ -73,10 +73,10 @@ namespace pfasst
 
         //! @{
         virtual bool left_is_node() const
-        { return quadrature_traits<Uniform<>>::left_is_node; }
+        { return quadrature_traits<Uniform<precision>>::left_is_node; }
 
         virtual bool right_is_node() const
-        { return quadrature_traits<Uniform<>>::right_is_node; }
+        { return quadrature_traits<Uniform<precision>>::right_is_node; }
         //! @}
 
         //! @{

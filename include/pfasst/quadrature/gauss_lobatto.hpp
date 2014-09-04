@@ -27,8 +27,8 @@ namespace pfasst
     template<typename precision = pfasst::time_precision>
     class GaussLobatto;
 
-    template<>
-    struct quadrature_traits<GaussLobatto<>>
+    template<typename precision>
+    struct quadrature_traits<GaussLobatto<precision>>
     {
       typedef pfasst::quadrature::gauss_lobatto integral_constant;
       static const bool left_is_node = true;
@@ -71,10 +71,10 @@ namespace pfasst
 
         //! @{
         virtual bool left_is_node() const
-        { return quadrature_traits<GaussLobatto<>>::left_is_node; }
+        { return quadrature_traits<GaussLobatto<precision>>::left_is_node; }
 
         virtual bool right_is_node() const
-        { return quadrature_traits<GaussLobatto<>>::right_is_node; }
+        { return quadrature_traits<GaussLobatto<precision>>::right_is_node; }
         //! @}
 
         //! @{
