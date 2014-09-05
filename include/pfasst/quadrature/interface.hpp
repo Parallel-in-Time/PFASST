@@ -25,30 +25,23 @@ namespace pfasst
   namespace quadrature
   {
     template<typename scalar>
-    static Polynomial<scalar> build_polynomial(const size_t node, const vector<scalar>& from)
+    static Polynomial<scalar> build_polynomial(const size_t node, const vector<scalar>& nodes)
     {
-      const size_t from_size = from.size();
-      Polynomial<scalar> p(from_size + 1), p1(from_size + 1);
+      const size_t num_nodes = nodes.size();
+      Polynomial<scalar> p(num_nodes + 1), p1(num_nodes + 1);
       p[0] = 1.0;
 
-      for (size_t m = 0; m < from_size; ++m) {
+      for (size_t m = 0; m < num_nodes; ++m) {
         if (m == node) { continue; }
 
         // p_{m+1}(x) = (x - x_j) * p_m(x)
         p1[0] = scalar(0.0);
-        for (size_t j = 0; j < from_size;     ++j) { p1[j + 1]  = p[j]; }
-        for (size_t j = 0; j < from_size + 1; ++j) { p1[j]     -= p[j] * from[m]; }
-        for (size_t j = 0; j < from_size + 1; ++j) { p[j]       = p1[j]; }
+        for (size_t j = 0; j < num_nodes;     ++j) { p1[j + 1]  = p[j]; }
+        for (size_t j = 0; j < num_nodes + 1; ++j) { p1[j]     -= p[j] * nodes[m]; }
+        for (size_t j = 0; j < num_nodes + 1; ++j) { p[j]       = p1[j]; }
       }
 
       return p;
-    }
-
-
-    template<typename scalar>
-    static Polynomial<scalar> build_polynomial(const size_t node, const vector<scalar>& nodes)
-    {
-      return build_polynomial(node, nodes, nodes);
     }
 
 
@@ -62,7 +55,7 @@ namespace pfasst
       Matrix<scalar> q_mat = Matrix<scalar>::Zero(to_size, from_size);
 
       for (size_t m = 0; m < from_size; ++m) {
-        Polynomial<scalar> p = build_polynomial(m, from, to);
+        Polynomial<scalar> p = build_polynomial(m, from);
         // evaluate integrals
         auto den = p.evaluate(from[m]);
         auto P = p.integrate();
@@ -122,7 +115,7 @@ namespace pfasst
       vector<scalar> q_vec = vector<scalar>(num_nodes, scalar(0.0));
 
       for (size_t m = 0; m < num_nodes; ++m) {
-        Polynomial<scalar> p = build_polynomial(m, nodes, nodes);
+        Polynomial<scalar> p = build_polynomial(m, nodes);
         // evaluate integrals
         auto den = p.evaluate(nodes[m]);
         auto P = p.integrate();
@@ -137,6 +130,9 @@ namespace pfasst
     {
       protected:
         //! @{
+        static const bool LEFT_IS_NODE = false;
+        static const bool RIGHT_IS_NODE = false;
+
         size_t num_nodes;
         Matrix<precision> q_mat;
         Matrix<precision> s_mat;
@@ -198,10 +194,16 @@ namespace pfasst
         { return this->num_nodes; }
 
         virtual bool left_is_node() const
-        { return quadrature_traits<IQuadrature<precision>>::left_is_node; }
+        {
+          throw NotImplementedYet("Quadrature");
+          return LEFT_IS_NODE;
+        }
 
         virtual bool right_is_node() const
-        { return quadrature_traits<IQuadrature<precision>>::right_is_node; }
+        {
+          throw NotImplementedYet("Quadrature");
+          return RIGHT_IS_NODE;
+        }
         //! @}
 
         //! @{

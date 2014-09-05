@@ -25,26 +25,21 @@ namespace pfasst
   namespace quadrature
   {
     template<typename precision = pfasst::time_precision>
-    class GaussRadau;
-
-    template<typename precision>
-    struct quadrature_traits<GaussRadau<precision>>
-    {
-      typedef pfasst::quadrature::gauss_radau integral_constant;
-      static const bool left_is_node = false;
-      static const bool right_is_node = true;
-    };
-
-    template<typename precision>
     class GaussRadau
       : public IQuadrature<precision>
     {
+      protected:
+        //! @{
+        static const bool LEFT_IS_NODE = false;
+        static const bool RIGHT_IS_NODE = true;
+        //! @}
+
       public:
         //! @{
         GaussRadau(const size_t num_nodes)
           : IQuadrature<precision>(num_nodes)
         {
-          if (this->m_num_nodes < 2) {
+          if (this->num_nodes < 2) {
             throw invalid_argument("Gauss-Radau quadrature requires at least two quadrature nodes.");
           }
           this->compute_nodes();
@@ -72,10 +67,10 @@ namespace pfasst
 
         //! @{
         virtual bool left_is_node() const
-        { return quadrature_traits<GaussRadau<precision>>::left_is_node; }
+        { return LEFT_IS_NODE; }
 
         virtual bool right_is_node() const
-        { return quadrature_traits<GaussRadau<precision>>::right_is_node; }
+        { return RIGHT_IS_NODE; }
         //! @}
 
         //! @{

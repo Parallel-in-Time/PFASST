@@ -28,9 +28,7 @@ MATCHER(DoubleNear, "")
 
 TEST(NodesTest, GaussLegendreNodes)
 {
-  EXPECT_FALSE(quadrature_traits<GaussLegendre<>>::left_is_node);
   EXPECT_FALSE(GaussLegendre<>(3).left_is_node());
-  EXPECT_FALSE(quadrature_traits<GaussLegendre<>>::right_is_node);
   EXPECT_FALSE(GaussLegendre<>(3).right_is_node());
 
   const long double l3e[3] = { 0.11270166537925831,
@@ -66,9 +64,7 @@ TEST(NodesTest, GaussLegendreNodes)
 
 TEST(NodesTest, GaussLobattoNodes)
 {
-  EXPECT_TRUE(quadrature_traits<GaussLobatto<>>::left_is_node);
   EXPECT_TRUE(GaussLobatto<>(3).left_is_node());
-  EXPECT_TRUE(quadrature_traits<GaussLobatto<>>::right_is_node);
   EXPECT_TRUE(GaussLobatto<>(3).right_is_node());
 
   const long double l2e[2] = { 0.0,
@@ -125,9 +121,7 @@ TEST(NodesTest, GaussLobattoNodes)
 
 TEST(NodesTest, ClenshawCurtisNodes)
 {
-  EXPECT_TRUE(quadrature_traits<ClenshawCurtis<>>::left_is_node);
   EXPECT_TRUE(ClenshawCurtis<>(3).left_is_node());
-  EXPECT_TRUE(quadrature_traits<ClenshawCurtis<>>::right_is_node);
   EXPECT_TRUE(ClenshawCurtis<>(3).right_is_node());
 
   const long double cc2e[2] = { 0.0,
@@ -184,8 +178,8 @@ TEST(NodesTest, ClenshawCurtisNodes)
 
 TEST(NodesTest, UniformNodes)
 {
-  EXPECT_TRUE(quadrature_traits<Uniform<>>::left_is_node);
-  EXPECT_TRUE(quadrature_traits<Uniform<>>::right_is_node);
+  EXPECT_TRUE(Uniform<>(3).left_is_node());
+  EXPECT_TRUE(Uniform<>(3).right_is_node());
 
   const long double u2e[2] = { 0.0,
                                1.0

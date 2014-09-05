@@ -25,20 +25,15 @@ namespace pfasst
   namespace quadrature
   {
     template<typename precision = pfasst::time_precision>
-    class GaussLegendre;
-
-    template<typename precision>
-    struct quadrature_traits<GaussLegendre<precision>>
-    {
-      typedef pfasst::quadrature::gauss_legendre integral_constant;
-      static const bool left_is_node = false;
-      static const bool right_is_node = false;
-    };
-
-    template<typename precision>
     class GaussLegendre
       : public IQuadrature<precision>
     {
+      protected:
+        //! @{
+        static const bool LEFT_IS_NODE = false;
+        static const bool RIGHT_IS_NODE = false;
+        //! @}
+
       public:
         //! @{
         GaussLegendre(const size_t num_nodes)
@@ -69,10 +64,10 @@ namespace pfasst
 
         //! @{
         virtual bool left_is_node() const
-        { return quadrature_traits<GaussLegendre<precision>>::left_is_node; }
+        { return LEFT_IS_NODE; }
 
         virtual bool right_is_node() const
-        { return quadrature_traits<GaussLegendre<precision>>::right_is_node; }
+        { return RIGHT_IS_NODE; }
         //! @}
 
         //! @{

@@ -7,7 +7,7 @@
 
 using namespace ::testing;
 
-#include <pfasst/polynomial.hpp>
+#include <pfasst/quadrature/polynomial.hpp>
 
 
 TEST(PolynomialTest, Legendre)

@@ -27,20 +27,15 @@ namespace pfasst
   namespace quadrature
   {
     template<typename precision = pfasst::time_precision>
-    class Uniform;
-
-    template<typename precision>
-    struct quadrature_traits<Uniform<precision>>
-    {
-      typedef pfasst::quadrature::uniform integral_constant;
-      static const bool left_is_node = true;
-      static const bool right_is_node = true;
-    };
-
-    template<typename precision>
     class Uniform
       : public IQuadrature<precision>
     {
+      protected:
+        //! @{
+        static const bool LEFT_IS_NODE = true;
+        static const bool RIGHT_IS_NODE = true;
+        //! @}
+
       public:
         //! @{
         Uniform(const size_t num_nodes)
@@ -74,10 +69,10 @@ namespace pfasst
 
         //! @{
         virtual bool left_is_node() const
-        { return quadrature_traits<Uniform<precision>>::left_is_node; }
+        { return LEFT_IS_NODE; }
 
         virtual bool right_is_node() const
-        { return quadrature_traits<Uniform<precision>>::right_is_node; }
+        { return RIGHT_IS_NODE; }
         //! @}
 
         //! @{

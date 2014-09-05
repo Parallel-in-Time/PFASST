@@ -24,14 +24,6 @@ namespace pfasst
     typedef integral_constant<QuadratureType, QuadratureType::ClenshawCurtis> clenshaw_curtis;
     typedef integral_constant<QuadratureType, QuadratureType::Uniform> uniform;
     typedef integral_constant<QuadratureType, QuadratureType::UNDEFINED> undefined;
-
-    template<typename QuadratureT>
-    struct quadrature_traits
-    {
-      typedef pfasst::quadrature::undefined integral_constant;
-      static const bool left_is_node = false;
-      static const bool right_is_node = false;
-    };
   }
 }
 

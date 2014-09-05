@@ -27,20 +27,15 @@ namespace pfasst
   namespace quadrature
   {
     template<typename precision = pfasst::time_precision>
-    class ClenshawCurtis;
-
-    template<typename precision>
-    struct quadrature_traits<ClenshawCurtis<precision>>
-    {
-      typedef pfasst::quadrature::clenshaw_curtis integral_constant;
-      static const bool left_is_node = true;
-      static const bool right_is_node = true;
-    };
-
-    template<typename precision>
     class ClenshawCurtis
       : public IQuadrature<precision>
     {
+      protected:
+        //! @{
+        static const bool LEFT_IS_NODE = true;
+        static const bool RIGHT_IS_NODE = true;
+        //! @}
+
       public:
         //! @{
         ClenshawCurtis(const size_t num_nodes)
@@ -74,10 +69,10 @@ namespace pfasst
 
         //! @{
         virtual bool left_is_node() const
-        { return quadrature_traits<ClenshawCurtis<precision>>::left_is_node; }
+        { return LEFT_IS_NODE; }
 
         virtual bool right_is_node() const
-        { return quadrature_traits<ClenshawCurtis<precision>>::right_is_node; }
+        { return RIGHT_IS_NODE; }
         //! @}
 
         //! @{
