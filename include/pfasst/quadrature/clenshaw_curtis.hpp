@@ -5,18 +5,10 @@
 #include <vector>
 
 #include <boost/math/constants/constants.hpp>
-#include <Eigen/Dense>
 
 #include "../interfaces.hpp"
 #include "polynomial.hpp"
 #include "interface.hpp"
-#include "traits.hpp"
-
-template<typename scalar>
-using Matrix = Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
-
-template<typename scalar>
-using Index = typename Matrix<scalar>::Index;
 
 using namespace std;
 using namespace boost::math::constants;
@@ -38,7 +30,7 @@ namespace pfasst
 
       public:
         //! @{
-        ClenshawCurtis(const size_t num_nodes)
+        explicit ClenshawCurtis(const size_t num_nodes)
           : IQuadrature<precision>(num_nodes)
         {
           if (this->num_nodes < 2) {
@@ -49,38 +41,15 @@ namespace pfasst
           this->compute_delta_nodes();
         }
 
-        ClenshawCurtis()
-          : IQuadrature<precision>()
-        {}
+        ClenshawCurtis() = default;
 
-        ClenshawCurtis(const ClenshawCurtis<precision>& other)
-          : IQuadrature<precision>(other)
-        {}
-
-        ClenshawCurtis(ClenshawCurtis<precision>&& other)
-          : ClenshawCurtis<precision>()
-        {
-          swap(*this, other);
-        }
-
-        virtual ~ClenshawCurtis()
-        {}
+        virtual ~ClenshawCurtis() = default;
         //! @}
 
         //! @{
-        virtual bool left_is_node() const
-        { return LEFT_IS_NODE; }
+        virtual bool left_is_node() const { return LEFT_IS_NODE; }
 
-        virtual bool right_is_node() const
-        { return RIGHT_IS_NODE; }
-        //! @}
-
-        //! @{
-        ClenshawCurtis<precision>& operator=(ClenshawCurtis<precision> other)
-        {
-          swap(*this, other);
-          return *this;
-        }
+        virtual bool right_is_node() const { return RIGHT_IS_NODE; }
         //! @}
 
       protected:

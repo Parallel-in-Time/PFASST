@@ -11,7 +11,6 @@
 
 #include "interfaces.hpp"
 #include "quadrature/polynomial.hpp"
-#include "quadrature/traits.hpp"
 #include "quadrature/interface.hpp"
 #include "quadrature/gauss_lobatto.hpp"
 #include "quadrature/gauss_legendre.hpp"
@@ -48,11 +47,13 @@ namespace pfasst
       }
     }
 
+
     template<typename precision = pfasst::time_precision>
     vector<precision> compute_nodes(size_t nnodes, QuadratureType qtype)
     {
       return quadrature_factory<precision>(nnodes, qtype)->get_nodes();
     }
+
 
     template<typename precision = time_precision>
     Matrix<precision> compute_interp(vector<precision> dst, vector<precision> src)

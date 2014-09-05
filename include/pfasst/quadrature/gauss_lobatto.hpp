@@ -4,18 +4,9 @@
 #include <cassert>
 #include <vector>
 
-#include <Eigen/Dense>
-
 #include "../interfaces.hpp"
 #include "polynomial.hpp"
 #include "interface.hpp"
-#include "traits.hpp"
-
-template<typename scalar>
-using Matrix = Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
-
-template<typename scalar>
-using Index = typename Matrix<scalar>::Index;
 
 using namespace std;
 
@@ -36,7 +27,7 @@ namespace pfasst
 
       public:
         //! @{
-        GaussLobatto(const size_t num_nodes)
+        explicit GaussLobatto(const size_t num_nodes)
           : IQuadrature<precision>(num_nodes)
         {
           if (this->num_nodes < 2) {
@@ -47,38 +38,15 @@ namespace pfasst
           this->compute_delta_nodes();
         }
 
-        GaussLobatto()
-          : IQuadrature<precision>()
-        {}
+        GaussLobatto() = default;
 
-        GaussLobatto(const GaussLobatto<precision>& other)
-          : IQuadrature<precision>(other)
-        {}
-
-        GaussLobatto(GaussLobatto<precision>&& other)
-          : GaussLobatto<precision>()
-        {
-          swap(*this, other);
-        }
-
-        virtual ~GaussLobatto()
-        {}
+        virtual ~GaussLobatto() = default;
         //! @}
 
         //! @{
-        virtual bool left_is_node() const
-        { return LEFT_IS_NODE; }
+        virtual bool left_is_node() const { return LEFT_IS_NODE; }
 
-        virtual bool right_is_node() const
-        { return RIGHT_IS_NODE; }
-        //! @}
-
-        //! @{
-        GaussLobatto<precision>& operator=(GaussLobatto<precision> other)
-        {
-          swap(*this, other);
-          return *this;
-        }
+        virtual bool right_is_node() const { return RIGHT_IS_NODE; }
         //! @}
 
       protected:

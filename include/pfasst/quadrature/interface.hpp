@@ -9,7 +9,6 @@
 #include "../globals.hpp"
 #include "../interfaces.hpp"
 #include "polynomial.hpp"
-#include "traits.hpp"
 
 template<typename scalar>
 using Matrix = Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
@@ -24,6 +23,16 @@ namespace pfasst
 {
   namespace quadrature
   {
+    enum class QuadratureType : int {
+        GaussLegendre   =  0
+      , GaussLobatto    =  1
+      , GaussRadau      =  2
+      , ClenshawCurtis  =  3
+      , Uniform         =  4
+      , UNDEFINED       = -1
+    };
+
+
     template<typename scalar>
     static Polynomial<scalar> build_polynomial(const size_t node, const vector<scalar>& nodes)
     {
@@ -143,7 +152,7 @@ namespace pfasst
 
       public:
         //! @{
-        IQuadrature(const size_t num_nodes)
+        explicit IQuadrature(const size_t num_nodes)
           : num_nodes(num_nodes)
         {
           if (this->num_nodes == 0) {
@@ -155,43 +164,21 @@ namespace pfasst
           : num_nodes(0)
         {}
 
-        IQuadrature(const IQuadrature<precision>& other)
-          :   num_nodes(other.num_nodes)
-            , q_mat(other.q_mat)
-            , s_mat(other.s_mat)
-            , q_vec(other.q_vec)
-            , nodes(other.nodes)
-            , delta_nodes(other.delta_nodes)
-        {}
-
-        IQuadrature(IQuadrature<precision>&& other)
-          : IQuadrature<precision>()
-        {
-          swap(*this, other);
-        }
-
-        virtual ~IQuadrature()
-        {}
+        virtual ~IQuadrature() = default;
         //! @}
 
         //! @{
-        virtual const Matrix<precision>& get_q_mat() const
-        { return this->q_mat; }
+        virtual const Matrix<precision>& get_q_mat() const { return this->q_mat; }
 
-        virtual const Matrix<precision>& get_s_mat() const
-        { return this->s_mat; }
+        virtual const Matrix<precision>& get_s_mat() const { return this->s_mat; }
 
-        virtual const vector<precision>& get_q_vec() const
-        { return this->q_vec; }
+        virtual const vector<precision>& get_q_vec() const { return this->q_vec; }
 
-        virtual const vector<precision>& get_nodes() const
-        { return this->nodes; }
+        virtual const vector<precision>& get_nodes() const { return this->nodes; }
 
-        virtual const vector<precision>& get_delta_nodes() const
-        { return this->delta_nodes; }
+        virtual const vector<precision>& get_delta_nodes() const { return this->delta_nodes; }
 
-        virtual size_t get_num_nodes() const
-        { return this->num_nodes; }
+        virtual size_t get_num_nodes() const { return this->num_nodes; }
 
         virtual bool left_is_node() const
         {
@@ -203,28 +190,6 @@ namespace pfasst
         {
           throw NotImplementedYet("Quadrature");
           return RIGHT_IS_NODE;
-        }
-        //! @}
-
-        //! @{
-        //! copy-and-nothrow-swap idiom
-        IQuadrature<precision>& operator=(IQuadrature<precision> other)
-        {
-          // pass-by-value to implicitly call copy-constructor by compiler
-          swap(*this, other);
-          return *this;
-        }
-
-        //! copy-and-nothrow-swap idiom
-        friend void swap(IQuadrature<precision>& first, IQuadrature<precision>& second) noexcept
-        {
-          using std::swap;
-          swap(first.num_nodes, second.num_nodes);
-          swap(first.q_mat, second.q_mat);
-          swap(first.s_mat, second.s_mat);
-          swap(first.q_vec, second.q_vec);
-          swap(first.nodes, second.nodes);
-          swap(first.delta_nodes, second.delta_nodes);
         }
         //! @}
 

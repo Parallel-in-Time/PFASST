@@ -4,22 +4,10 @@
 #include <cassert>
 #include <vector>
 
-#include <boost/math/constants/constants.hpp>
-#include <Eigen/Dense>
-
 #include "../interfaces.hpp"
-#include "polynomial.hpp"
 #include "interface.hpp"
-#include "traits.hpp"
-
-template<typename scalar>
-using Matrix = Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
-
-template<typename scalar>
-using Index = typename Matrix<scalar>::Index;
 
 using namespace std;
-using namespace boost::math::constants;
 
 
 namespace pfasst
@@ -38,7 +26,7 @@ namespace pfasst
 
       public:
         //! @{
-        Uniform(const size_t num_nodes)
+        explicit Uniform(const size_t num_nodes)
           : IQuadrature<precision>(num_nodes)
         {
           if (this->num_nodes < 2) {
@@ -49,38 +37,15 @@ namespace pfasst
           this->compute_delta_nodes();
         }
 
-        Uniform()
-          : IQuadrature<precision>()
-        {}
+        Uniform() = default;
 
-        Uniform(const Uniform<precision>& other)
-          : IQuadrature<precision>(other)
-        {}
-
-        Uniform(Uniform<precision>&& other)
-          : Uniform<precision>()
-        {
-          swap(*this, other);
-        }
-
-        virtual ~Uniform()
-        {}
+        virtual ~Uniform() = default;
         //! @}
 
         //! @{
-        virtual bool left_is_node() const
-        { return LEFT_IS_NODE; }
+        virtual bool left_is_node() const { return LEFT_IS_NODE; }
 
-        virtual bool right_is_node() const
-        { return RIGHT_IS_NODE; }
-        //! @}
-
-        //! @{
-        Uniform<precision>& operator=(Uniform<precision> other)
-        {
-          swap(*this, other);
-          return *this;
-        }
+        virtual bool right_is_node() const { return RIGHT_IS_NODE; }
         //! @}
 
       protected:

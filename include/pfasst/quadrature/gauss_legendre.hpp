@@ -4,18 +4,9 @@
 #include <cassert>
 #include <vector>
 
-#include <Eigen/Dense>
-
 #include "../interfaces.hpp"
 #include "polynomial.hpp"
 #include "interface.hpp"
-#include "traits.hpp"
-
-template<typename scalar>
-using Matrix = Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
-
-template<typename scalar>
-using Index = typename Matrix<scalar>::Index;
 
 using namespace std;
 
@@ -36,7 +27,7 @@ namespace pfasst
 
       public:
         //! @{
-        GaussLegendre(const size_t num_nodes)
+        explicit GaussLegendre(const size_t num_nodes)
           : IQuadrature<precision>(num_nodes)
         {
           this->compute_nodes();
@@ -44,38 +35,15 @@ namespace pfasst
           this->compute_delta_nodes();
         }
 
-        GaussLegendre()
-          : IQuadrature<precision>()
-        {}
+        GaussLegendre() = default;
 
-        GaussLegendre(const GaussLegendre<precision>& other)
-          : IQuadrature<precision>(other)
-        {}
-
-        GaussLegendre(GaussLegendre<precision>&& other)
-          : GaussLegendre<precision>()
-        {
-          swap(*this, other);
-        }
-
-        virtual ~GaussLegendre()
-        {}
+        virtual ~GaussLegendre() = default;
         //! @}
 
         //! @{
-        virtual bool left_is_node() const
-        { return LEFT_IS_NODE; }
+        virtual bool left_is_node() const { return LEFT_IS_NODE; }
 
-        virtual bool right_is_node() const
-        { return RIGHT_IS_NODE; }
-        //! @}
-
-        //! @{
-        GaussLegendre<precision>& operator=(GaussLegendre<precision> other)
-        {
-          swap(*this, other);
-          return *this;
-        }
+        virtual bool right_is_node() const { return RIGHT_IS_NODE; }
         //! @}
 
       protected:

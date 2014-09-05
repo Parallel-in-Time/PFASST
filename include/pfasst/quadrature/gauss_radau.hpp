@@ -4,18 +4,9 @@
 #include <cassert>
 #include <vector>
 
-#include <Eigen/Dense>
-
 #include "../interfaces.hpp"
 #include "polynomial.hpp"
 #include "interface.hpp"
-#include "traits.hpp"
-
-template<typename scalar>
-using Matrix = Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
-
-template<typename scalar>
-using Index = typename Matrix<scalar>::Index;
 
 using namespace std;
 
@@ -36,7 +27,7 @@ namespace pfasst
 
       public:
         //! @{
-        GaussRadau(const size_t num_nodes)
+        explicit GaussRadau(const size_t num_nodes)
           : IQuadrature<precision>(num_nodes)
         {
           if (this->num_nodes < 2) {
@@ -47,38 +38,15 @@ namespace pfasst
           this->compute_delta_nodes();
         }
 
-        GaussRadau()
-          : IQuadrature<precision>()
-        {}
+        GaussRadau() = default;
 
-        GaussRadau(const GaussRadau<precision>& other)
-          : IQuadrature<precision>(other)
-        {}
-
-        GaussRadau(GaussRadau<precision>&& other)
-          : GaussRadau<precision>()
-        {
-          swap(*this, other);
-        }
-
-        virtual ~GaussRadau()
-        {}
+        virtual ~GaussRadau() = default;
         //! @}
 
         //! @{
-        virtual bool left_is_node() const
-        { return LEFT_IS_NODE; }
+        virtual bool left_is_node() const { return LEFT_IS_NODE; }
 
-        virtual bool right_is_node() const
-        { return RIGHT_IS_NODE; }
-        //! @}
-
-        //! @{
-        GaussRadau<precision>& operator=(GaussRadau<precision> other)
-        {
-          swap(*this, other);
-          return *this;
-        }
+        virtual bool right_is_node() const { return RIGHT_IS_NODE; }
         //! @}
 
       protected:
