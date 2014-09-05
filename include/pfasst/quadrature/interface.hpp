@@ -25,9 +25,8 @@ namespace pfasst
   namespace quadrature
   {
     template<typename scalar>
-    static Polynomial<scalar> build_polynomial(const size_t node, const vector<scalar>& from, const vector<scalar>& to)
+    static Polynomial<scalar> build_polynomial(const size_t node, const vector<scalar>& from)
     {
-      UNUSED(to);
       const size_t from_size = from.size();
       Polynomial<scalar> p(from_size + 1), p1(from_size + 1);
       p[0] = 1.0;
