@@ -92,32 +92,8 @@ namespace pfasst
         : controller(nullptr)
       {}
 
-      ISweeper(const ISweeper<time>& other)
-        : controller(other.controller)
-      {}
-
-      ISweeper(ISweeper<time>&& other)
-        : ISweeper()
-      {
-        swap(*this, other);
-      }
-
       virtual ~ISweeper()
       {}
-      //! @}
-
-      //! @{
-      ISweeper<time>& operator=(ISweeper<time> other)
-      {
-        swap(*this, other);
-        return *this;
-      }
-
-      friend void swap(ISweeper<time>& first, ISweeper<time>& second)
-      {
-        using std::swap;
-        swap(first.controller, second.controller);
-      }
       //! @}
 
       //! @{
