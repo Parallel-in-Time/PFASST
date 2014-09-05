@@ -90,14 +90,14 @@ namespace pfasst
         //! @{
         virtual void compute_nodes() override
         {
-          this->m_nodes = vector<precision>(this->m_num_nodes, precision(0.0));
-          auto roots = Polynomial<precision>::legendre(this->m_num_nodes - 1).differentiate().roots();
+          this->nodes = vector<precision>(this->num_nodes, precision(0.0));
+          auto roots = Polynomial<precision>::legendre(this->num_nodes - 1).differentiate().roots();
 
-          for (size_t j = 0; j < this->m_num_nodes - 2; j++) {
-            this->m_nodes[j + 1] = 0.5 * (1.0 + roots[j]);
+          for (size_t j = 0; j < this->num_nodes - 2; j++) {
+            this->nodes[j + 1] = 0.5 * (1.0 + roots[j]);
           }
-          this->m_nodes.front() = 0.0;
-          this->m_nodes.back() = 1.0;
+          this->nodes.front() = 0.0;
+          this->nodes.back() = 1.0;
         }
         //! @}
     };

@@ -87,11 +87,11 @@ namespace pfasst
         //! @{
         virtual void compute_nodes() override
         {
-          this->m_nodes = vector<precision>(this->m_num_nodes, precision(0.0));
-          auto roots = Polynomial<precision>::legendre(this->m_num_nodes).roots();
+          this->nodes = vector<precision>(this->num_nodes, precision(0.0));
+          auto roots = Polynomial<precision>::legendre(this->num_nodes).roots();
 
-          for (size_t j = 0; j < this->m_num_nodes; j++) {
-            this->m_nodes[j] = 0.5 * (1.0 + roots[j]);
+          for (size_t j = 0; j < this->num_nodes; j++) {
+            this->nodes[j] = 0.5 * (1.0 + roots[j]);
           }
         }
         //! @}

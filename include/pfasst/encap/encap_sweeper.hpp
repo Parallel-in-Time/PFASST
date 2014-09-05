@@ -79,7 +79,7 @@ namespace pfasst
         //! @{
         virtual void spread() override
         {
-          for (size_t m = 1; m < this->quad->num_nodes(); m++) {
+          for (size_t m = 1; m < this->quad->get_num_nodes(); m++) {
             this->get_state(m)->copy(this->u_start);
           }
         }
@@ -113,7 +113,7 @@ namespace pfasst
 
         const vector<time> get_nodes() const
         {
-          return this->quad->nodes();
+          return this->quad->get_nodes();
         }
 
         void set_factory(shared_ptr<EncapFactory<time>> factory)

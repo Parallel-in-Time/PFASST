@@ -137,35 +137,35 @@ namespace pfasst
     {
       protected:
         //! @{
-        size_t m_num_nodes;
-        Matrix<precision> m_q_mat;
-        Matrix<precision> m_s_mat;
-        vector<precision> m_q_vec;
-        vector<precision> m_nodes;
-        vector<precision> m_delta_nodes;
+        size_t num_nodes;
+        Matrix<precision> q_mat;
+        Matrix<precision> s_mat;
+        vector<precision> q_vec;
+        vector<precision> nodes;
+        vector<precision> delta_nodes;
         //! @}
 
       public:
         //! @{
         IQuadrature(const size_t num_nodes)
-          : m_num_nodes(num_nodes)
+          : num_nodes(num_nodes)
         {
-          if (this->m_num_nodes == 0) {
+          if (this->num_nodes == 0) {
             throw invalid_argument("Any quadrature requires at least one quadrature nodes.");
           }
         }
 
         IQuadrature()
-          : m_num_nodes(0)
+          : num_nodes(0)
         {}
 
         IQuadrature(const IQuadrature<precision>& other)
-          :   m_num_nodes(other.m_num_nodes)
-            , m_q_mat(other.m_q_mat)
-            , m_s_mat(other.m_s_mat)
-            , m_q_vec(other.m_q_vec)
-            , m_nodes(other.m_nodes)
-            , m_delta_nodes(other.m_delta_nodes)
+          :   num_nodes(other.num_nodes)
+            , q_mat(other.q_mat)
+            , s_mat(other.s_mat)
+            , q_vec(other.q_vec)
+            , nodes(other.nodes)
+            , delta_nodes(other.delta_nodes)
         {}
 
         IQuadrature(IQuadrature<precision>&& other)
@@ -179,23 +179,23 @@ namespace pfasst
         //! @}
 
         //! @{
-        virtual const Matrix<precision>& q_mat() const
-        { return this->m_q_mat; }
+        virtual const Matrix<precision>& get_q_mat() const
+        { return this->q_mat; }
 
-        virtual const Matrix<precision>& s_mat() const
-        { return this->m_s_mat; }
+        virtual const Matrix<precision>& get_s_mat() const
+        { return this->s_mat; }
 
-        virtual const vector<precision>& q_vec() const
-        { return this->m_q_vec; }
+        virtual const vector<precision>& get_q_vec() const
+        { return this->q_vec; }
 
-        virtual const vector<precision>& nodes() const
-        { return this->m_nodes; }
+        virtual const vector<precision>& get_nodes() const
+        { return this->nodes; }
 
-        virtual const vector<precision>& delta_nodes() const
-        { return this->m_delta_nodes; }
+        virtual const vector<precision>& get_delta_nodes() const
+        { return this->delta_nodes; }
 
-        virtual size_t num_nodes() const
-        { return this->m_num_nodes; }
+        virtual size_t get_num_nodes() const
+        { return this->num_nodes; }
 
         virtual bool left_is_node() const
         { return quadrature_traits<IQuadrature<precision>>::left_is_node; }
@@ -217,12 +217,12 @@ namespace pfasst
         friend void swap(IQuadrature<precision>& first, IQuadrature<precision>& second) noexcept
         {
           using std::swap;
-          swap(first.m_num_nodes, second.m_num_nodes);
-          swap(first.m_q_mat, second.m_q_mat);
-          swap(first.m_s_mat, second.m_s_mat);
-          swap(first.m_q_vec, second.m_q_vec);
-          swap(first.m_nodes, second.m_nodes);
-          swap(first.m_delta_nodes, second.m_delta_nodes);
+          swap(first.num_nodes, second.num_nodes);
+          swap(first.q_mat, second.q_mat);
+          swap(first.s_mat, second.s_mat);
+          swap(first.q_vec, second.q_vec);
+          swap(first.nodes, second.nodes);
+          swap(first.delta_nodes, second.delta_nodes);
         }
         //! @}
 
@@ -235,17 +235,17 @@ namespace pfasst
 
         virtual void compute_weights()
         {
-          this->m_q_mat = compute_q_matrix(this->m_nodes);
-          this->m_s_mat = compute_s_matrix(this->m_q_mat);
-          this->m_q_vec = compute_q_vec(this->m_nodes);
+          this->q_mat = compute_q_matrix(this->nodes);
+          this->s_mat = compute_s_matrix(this->q_mat);
+          this->q_vec = compute_q_vec(this->nodes);
         }
 
         virtual void compute_delta_nodes()
         {
-          this->m_delta_nodes.resize(this->m_num_nodes);
-          this->m_delta_nodes[0] = this->m_nodes[0] - precision(0.0);
-          for (size_t m = 1; m < this->m_num_nodes; ++m) {
-            this->m_delta_nodes[m] = this->m_nodes[m] - this->m_nodes[m - 1];
+          this->delta_nodes.resize(this->num_nodes);
+          this->delta_nodes[0] = this->nodes[0] - precision(0.0);
+          for (size_t m = 1; m < this->num_nodes; ++m) {
+            this->delta_nodes[m] = this->nodes[m] - this->nodes[m - 1];
           }
         }
         //! @}

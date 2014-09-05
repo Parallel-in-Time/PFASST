@@ -51,7 +51,7 @@ namespace pfasst
     template<typename precision = pfasst::time_precision>
     vector<precision> compute_nodes(size_t nnodes, QuadratureType qtype)
     {
-      return quadrature_factory<precision>(nnodes, qtype)->nodes();
+      return quadrature_factory<precision>(nnodes, qtype)->get_nodes();
     }
 
     template<typename precision = time_precision>

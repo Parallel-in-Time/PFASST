@@ -46,7 +46,7 @@ namespace pfasst
         Uniform(const size_t num_nodes)
           : IQuadrature<precision>(num_nodes)
         {
-          if (this->m_num_nodes < 2) {
+          if (this->num_nodes < 2) {
             throw invalid_argument("Uniform quadrature requires at least two quadrature nodes.");
           }
           this->compute_nodes();
@@ -92,9 +92,9 @@ namespace pfasst
         //! @{
         virtual void compute_nodes()
         {
-          this->m_nodes = vector<precision>(this->m_num_nodes, precision(0.0));
-          for (size_t j = 0; j < this->m_num_nodes; j++) {
-            this->m_nodes[j] = precision(j) / (this->m_num_nodes - 1);
+          this->nodes = vector<precision>(this->num_nodes, precision(0.0));
+          for (size_t j = 0; j < this->num_nodes; j++) {
+            this->nodes[j] = precision(j) / (this->num_nodes - 1);
           }
         }
         //! @}

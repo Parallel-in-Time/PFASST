@@ -102,8 +102,8 @@ namespace pfasst
         {
           vector<shared_ptr<Encapsulation<time>>> dst = { this->u_state.back() };
           dst[0]->copy(this->u_state.front());
-          dst[0]->mat_apply(dst, dt, this->quad->q_mat(), this->fs_expl, false);
-          dst[0]->mat_apply(dst, dt, this->quad->q_mat(), this->fs_impl, false);
+          dst[0]->mat_apply(dst, dt, this->quad->get_q_mat(), this->fs_expl, false);
+          dst[0]->mat_apply(dst, dt, this->quad->get_q_mat(), this->fs_impl, false);
         }
 
       public:
@@ -219,10 +219,10 @@ namespace pfasst
          */
         virtual void setup(bool coarse) override
         {
-          auto nodes = this->quad->nodes();
+          auto nodes = this->quad->get_nodes();
           assert(nodes.size() >= 1);
 
-          auto s_mat = this->quad->s_mat();
+          auto s_mat = this->quad->get_s_mat();
 
           this->s_mat_expl = s_mat;
           this->s_mat_impl = s_mat;
@@ -261,7 +261,7 @@ namespace pfasst
          */
         virtual void predict(bool initial) override
         {
-          const auto   nodes  = this->quad->nodes();
+          const auto   nodes  = this->quad->get_nodes();
           const size_t nnodes = nodes.size();
           assert(nnodes >= 1);
 
@@ -286,7 +286,7 @@ namespace pfasst
 
         virtual void sweep() override
         {
-          const auto   nodes  = this->quad->nodes();
+          const auto   nodes  = this->quad->get_nodes();
           const size_t nnodes = nodes.size();
           assert(nnodes >= 1);
 
@@ -321,7 +321,7 @@ namespace pfasst
 
         virtual void do_inner_nodes(const size_t m, const time t, const time ds) override
         {
-          assert(m > 0 && m < this->quad->num_nodes() - 1);
+          assert(m > 0 && m < this->quad->get_num_nodes() - 1);
           shared_ptr<Encapsulation<time>> rhs = this->get_factory()->create(pfasst::encap::solution);
 
           rhs->copy(this->u_state[m - 1]);
@@ -352,16 +352,16 @@ namespace pfasst
           UNUSED(t); UNUSED(dt);
           if (this->quad->right_is_node()) {
             // u_{end} = u_M^{k+1}
-            this->u_state.back() = this->u_state[this->quad->num_nodes()];
+            this->u_state.back() = this->u_state[this->quad->get_num_nodes()];
 
           } else {
             // u_{end} = u_0 + \sum_{l=1}^M q_l f(u_l^{k+1})
             this->u_end->copy(this->u_start);
             shared_ptr<Encapsulation<time>> integral = this->get_factory()->create(pfasst::encap::solution);
             // TODO: probably need to recompute F-evaluations here
-            for (size_t m = 0; m < this->quad->num_nodes(); ++m) {
-              integral->saxpy(this->quad->q_vec()[m], this->fs_expl[m]);
-              integral->saxpy(this->quad->q_vec()[m], this->fs_impl[m]);
+            for (size_t m = 0; m < this->quad->get_num_nodes(); ++m) {
+              integral->saxpy(this->quad->get_q_vec()[m], this->fs_expl[m]);
+              integral->saxpy(this->quad->get_q_vec()[m], this->fs_impl[m]);
             }
             this->u_end->saxpy(1.0, integral);
           }
@@ -388,7 +388,7 @@ namespace pfasst
         {
           time t0 = this->get_controller()->get_time();
           time dt = this->get_controller()->get_time_step();
-          time t =  t0 + dt * this->quad->nodes()[m];
+          time t =  t0 + dt * this->quad->get_nodes()[m];
           if (m == 0) {
             this->f_expl_eval(this->fs_expl[m], this->u_state[m], t);
           }
@@ -403,8 +403,8 @@ namespace pfasst
          */
         virtual void integrate(time dt, vector<shared_ptr<Encapsulation<time>>> dst) const override
         {
-          dst[0]->mat_apply(dst, dt, this->quad->s_mat(), this->fs_expl, true);
-          dst[0]->mat_apply(dst, dt, this->quad->s_mat(), this->fs_impl, false);
+          dst[0]->mat_apply(dst, dt, this->quad->get_s_mat(), this->fs_expl, true);
+          dst[0]->mat_apply(dst, dt, this->quad->get_s_mat(), this->fs_impl, false);
         }
         //! @}
 

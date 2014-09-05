@@ -216,7 +216,7 @@ TEST(NodesTest, UniformNodes)
 
 TEST(QuadratureTest, GaussLobattoNodes)
 {
-  Eigen::Matrix<double, 3, 3> s_mat_3 = GaussLobatto<double>(3).s_mat();
+  Eigen::Matrix<double, 3, 3> s_mat_3 = GaussLobatto<double>(3).get_s_mat();
   Eigen::Matrix<double, 3, 3> s_mat_3_expected;
   s_mat_3_expected <<  0.0,                 0.0,                  0.0,
                        0.20833333333333333, 0.33333333333333333, -0.04166666666666666,
@@ -227,7 +227,7 @@ TEST(QuadratureTest, GaussLobattoNodes)
     }
   }
 
-  Eigen::Matrix<double, 5, 5> s_mat_5 = GaussLobatto<double>(5).s_mat();
+  Eigen::Matrix<double, 5, 5> s_mat_5 = GaussLobatto<double>(5).get_s_mat();
   Eigen::Matrix<double, 5, 5> s_mat_5_expected;
   s_mat_5_expected <<  0.0, 0.0, 0.0, 0.0, 0.0,
                        0.067728432186156897969267419174073482, 0.11974476934341168251615379970493965,
@@ -249,8 +249,8 @@ TEST(QuadratureTest, GaussLobattoNodes)
     }
   }
 
-  Eigen::Matrix<double, 5, 5> q_mat_5 = GaussLobatto<double>(5).q_mat();
-  vector<double> q_vec = GaussLobatto<double>(5).q_vec();
+  Eigen::Matrix<double, 5, 5> q_mat_5 = GaussLobatto<double>(5).get_q_mat();
+  vector<double> q_vec = GaussLobatto<double>(5).get_q_vec();
 
   for (size_t col = 0; col < 5; ++col) {
     EXPECT_THAT(q_vec[col], ::testing::DoubleEq(q_mat_5(4, col)));
@@ -259,7 +259,7 @@ TEST(QuadratureTest, GaussLobattoNodes)
 
 TEST(QuadratureTest, ClenshawCurtisNodes)
 {
-  Eigen::Matrix<double, 4, 4> s_mat_4 = ClenshawCurtis<double>(4).s_mat();
+  Eigen::Matrix<double, 4, 4> s_mat_4 = ClenshawCurtis<double>(4).get_s_mat();
   Eigen::Matrix<double, 4, 4> s_mat_4_expected;
   s_mat_4_expected <<  0.0, 0.0, 0.0, 0.0,
                        0.10243055555555555555555555555555556,  0.16319444444444444444444444444444444,
@@ -305,12 +305,12 @@ class QmatTest
 TEST_P(QmatTest, AllNodes)
 {
   long double qsum;
-  for (int m = 0; m < this->quad->q_mat().rows(); ++m) {
+  for (int m = 0; m < this->quad->get_q_mat().rows(); ++m) {
     qsum = 0;
-    for (int j = 0; j < this->quad->q_mat().cols(); ++j) {
-      qsum += this->quad->q_mat()(m,j);
+    for (int j = 0; j < this->quad->get_q_mat().cols(); ++j) {
+      qsum += this->quad->get_q_mat()(m,j);
     }
-    EXPECT_NEAR(qsum, this->quad->nodes()[m], (long double)(3E-12));
+    EXPECT_NEAR(qsum, this->quad->get_nodes()[m], (long double)(3E-12));
   }
 }
 
