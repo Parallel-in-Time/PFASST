@@ -37,42 +37,9 @@ namespace pfasst
           : quad(nullptr)
         {}
 
-        EncapSweeper(const EncapSweeper<time>& other)
-          :   quad(other.quad)
-            , factory(other.factory)
-            , u_start(other.u_start)
-            , u_end(other.u_end)
-            , u_end_old(other.u_end_old)
-        {}
-
-        EncapSweeper(EncapSweeper<time>&& other)
-          : EncapSweeper<time>()
-        {
-          swap(*this, other);
-        }
-
         virtual ~EncapSweeper()
         {
           if (this->quad) delete this->quad;
-        }
-        //! @}
-
-        //! @{
-        EncapSweeper<time>& operator=(EncapSweeper<time> other)
-        {
-          swap(*this, other);
-          return *this;
-        }
-
-        friend void swap(EncapSweeper<time>& first, EncapSweeper<time>& second)
-        {
-          pfasst::ISweeper<time>::swap(first, second);
-          using std::swap;
-          swap(first.quad, second.quad);
-          swap(first.factory, second.factory);
-          swap(first.u_start, second.u_start);
-          swap(first.u_end, second.u_end);
-          swap(first.u_end_old, second.u_end_old);
         }
         //! @}
 
@@ -91,7 +58,7 @@ namespace pfasst
           this->quad = quad;
         }
 
-        const quadrature::IQuadrature<time>* get_quadrature()
+        const quadrature::IQuadrature<time>* get_quadrature() const
         {
           return this->quad;
         }
