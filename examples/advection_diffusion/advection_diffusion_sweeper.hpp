@@ -38,6 +38,7 @@ template<typename time = pfasst::time_precision>
 class AdvectionDiffusionSweeper
   : public pfasst::encap::IMEXSweeper<time>
 {
+  protected:
     //! @{
     FFT fft;
     vector<complex<double>> ddx, lap;
@@ -56,7 +57,7 @@ class AdvectionDiffusionSweeper
 
   public:
     //! @{
-    AdvectionDiffusionSweeper(size_t nvars)
+    explicit AdvectionDiffusionSweeper(size_t nvars)
     {
       this->ddx.resize(nvars);
       this->lap.resize(nvars);
@@ -67,9 +68,65 @@ class AdvectionDiffusionSweeper
       }
     }
 
+    AdvectionDiffusionSweeper() = default;
+
     virtual ~AdvectionDiffusionSweeper()
     {
       cout << "number of f1 evals: " << this->nf1evals << endl;
+    }
+    //! @}
+
+    //! @{
+    void exact(shared_ptr<Encapsulation<time>> q, time t)
+    {
+      this->exact(as_vector<double, time>(q), t);
+    }
+
+    void exact(DVectorT& q, time t)
+    {
+      size_t n = q.size();
+      double a = 1.0 / sqrt(4 * PI * nu * (t + t0));
+
+      for (size_t i = 0; i < n; i++) {
+        q[i] = 0.0;
+      }
+
+      for (int ii = -2; ii < 3; ii++) {
+        for (size_t i = 0; i < n; i++) {
+          double x = double(i) / n - 0.5 + ii - t * v;
+          q[i] += a * exp(-x * x / (4 * nu * (t + t0)));
+        }
+      }
+    }
+
+    void echo_error(time t, bool predict = false)
+    {
+      auto& qend = as_vector<double, time>(this->get_u_end());
+      DVectorT qex(qend.size());
+
+      this->exact(qex, t);
+
+      double max = 0.0;
+      for (size_t i = 0; i < qend.size(); i++) {
+        double d = abs(qend[i] - qex[i]);
+        if (d > max) { max = d; }
+      }
+
+      auto n = this->get_controller()->get_step();
+      auto k = this->get_controller()->get_iteration();
+      cout << "err: " << n << " " << k << " " << scientific << max
+           << " (" << qend.size() << ", " << predict << ")"
+           << endl;
+
+      this->errors.insert(pair<pair<size_t, size_t>, double>(pair<size_t, size_t>(n, k), max));
+    }
+
+    /**
+     * retrieve errors at iterations and time nodes
+     */
+    error_map get_errors()
+    {
+      return this->errors;
     }
     //! @}
 
@@ -167,59 +224,6 @@ class AdvectionDiffusionSweeper
     }
     //! @}
 
-    //! @{
-    void exact(shared_ptr<Encapsulation<time>> q, time t)
-    {
-      this->exact(as_vector<double, time>(q), t);
-    }
-
-    void exact(DVectorT& q, time t)
-    {
-      size_t n = q.size();
-      double a = 1.0 / sqrt(4 * PI * nu * (t + t0));
-
-      for (size_t i = 0; i < n; i++) {
-        q[i] = 0.0;
-      }
-
-      for (int ii = -2; ii < 3; ii++) {
-        for (size_t i = 0; i < n; i++) {
-          double x = double(i) / n - 0.5 + ii - t * v;
-          q[i] += a * exp(-x * x / (4 * nu * (t + t0)));
-        }
-      }
-    }
-
-    void echo_error(time t, bool predict = false)
-    {
-      auto& qend = as_vector<double, time>(this->get_end_state());
-      DVectorT qex(qend.size());
-
-      this->exact(qex, t);
-
-      double max = 0.0;
-      for (size_t i = 0; i < qend.size(); i++) {
-        double d = abs(qend[i] - qex[i]);
-        if (d > max) { max = d; }
-      }
-
-      auto n = this->get_controller()->get_step();
-      auto k = this->get_controller()->get_iteration();
-      cout << "err: " << n << " " << k << " " << scientific << max
-           << " (" << qend.size() << ", " << predict << ")"
-           << endl;
-
-      this->errors.insert(pair<pair<size_t, size_t>, double>(pair<size_t, size_t>(n, k), max));
-    }
-
-    /**
-     * retrieve errors at iterations and time nodes
-     */
-    error_map get_errors()
-    {
-      return this->errors;
-    }
-    //! @}
 };
 
 #endif

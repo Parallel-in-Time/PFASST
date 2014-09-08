@@ -18,54 +18,77 @@ namespace pfasst
 {
   namespace encap
   {
-
     template<typename time = time_precision>
     class EncapSweeper
       : public ISweeper<time>
     {
-      public:
+      protected:
         //! @{
-        typedef Encapsulation<time> encap_type;
-        typedef EncapFactory<time> factory_type;
-        //! @}
-
-      private:
-        //! @{
-        vector<time> nodes;
-        vector<bool> is_proper;
-        shared_ptr<factory_type> factory;
+        quadrature::IQuadrature<time>* quad;
+        shared_ptr<EncapFactory<time>> factory;
+        shared_ptr<Encapsulation<time>> u_start;
+        shared_ptr<Encapsulation<time>> u_end;
+        shared_ptr<Encapsulation<time>> u_end_old;
         //! @}
 
       public:
         //! @{
-        virtual ~EncapSweeper()
+        EncapSweeper()
+          : quad(nullptr)
         {}
+
+        virtual ~EncapSweeper()
+        {
+          if (this->quad) delete this->quad;
+        }
         //! @}
 
         //! @{
-        virtual void set_nodes(vector<time> nodes)
+        virtual void spread() override
         {
-          auto augmented = pfasst::augment_nodes(nodes);
-          this->nodes = get<0>(augmented);
-          this->is_proper = get<1>(augmented);
+          for (size_t m = 1; m < this->quad->get_num_nodes(); m++) {
+            this->get_state(m)->copy(this->u_start);
+          }
+        }
+        //! @}
+
+        //! @{
+        void set_quadrature(quadrature::IQuadrature<time>* quad)
+        {
+          this->quad = quad;
         }
 
-        virtual const vector<time> get_nodes() const
+        const quadrature::IQuadrature<time>* get_quadrature() const
         {
-          return nodes;
+          return this->quad;
         }
 
-        const vector<bool> get_is_proper() const
+        shared_ptr<Encapsulation<time>> get_u_start() const
         {
-          return is_proper;
+          return this->u_start;
         }
 
-        virtual void set_factory(shared_ptr<factory_type> factory)
+        shared_ptr<Encapsulation<time>> get_u_end() const
+        {
+          return this->u_end;
+        }
+
+        shared_ptr<const Encapsulation<time>> get_u_end_old() const
+        {
+          return this->u_end_old;
+        }
+
+        const vector<time> get_nodes() const
+        {
+          return this->quad->get_nodes();
+        }
+
+        void set_factory(shared_ptr<EncapFactory<time>> factory)
         {
           this->factory = factory;
         }
 
-        virtual shared_ptr<factory_type> get_factory() const
+        virtual shared_ptr<EncapFactory<time>> get_factory() const
         {
           return factory;
         }
@@ -78,10 +101,20 @@ namespace pfasst
          *
          * @note This method must be implemented in derived sweepers.
          */
-        virtual void set_state(shared_ptr<const encap_type> u0, size_t m)
+        virtual void set_state(shared_ptr<const Encapsulation<time>> u0, size_t m)
         {
           UNUSED(u0); UNUSED(m);
           throw NotImplementedYet("sweeper");
+        }
+
+        void set_u_start(shared_ptr<const Encapsulation<time>> u_start)
+        {
+          this->u_start = u_start;
+        }
+
+        void set_u_end(shared_ptr<const Encapsulation<time>> u_end)
+        {
+          this->u_end = u_end;
         }
 
         /**
@@ -127,8 +160,9 @@ namespace pfasst
         }
 
         virtual shared_ptr<Encapsulation<time>> get_end_state()
+        __attribute__((deprecated("use u_end")))
         {
-          return this->get_state(this->get_nodes().size() - 1);
+          return this->get_u_end();
         }
         //! @}
 
@@ -141,13 +175,6 @@ namespace pfasst
         virtual void advance() override
         {
           throw NotImplementedYet("sweeper");
-        }
-
-        virtual void spread() override
-        {
-          for (size_t m = 1; m < nodes.size(); m++) {
-            this->get_state(m)->copy(this->get_state(0));
-          }
         }
 
         /**
@@ -175,7 +202,7 @@ namespace pfasst
          *
          * @note This method must be implemented in derived sweepers.
          */
-        virtual void integrate(time dt, vector<shared_ptr<encap_type>> dst) const
+        virtual void integrate(time dt, vector<shared_ptr<Encapsulation<time>>> dst) const
         {
           UNUSED(dt); UNUSED(dst);
           throw NotImplementedYet("sweeper");
