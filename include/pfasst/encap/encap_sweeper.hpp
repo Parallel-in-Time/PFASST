@@ -177,24 +177,6 @@ namespace pfasst
           throw NotImplementedYet("sweeper");
         }
 
-        virtual void do_inner_nodes(const size_t m, const time t, const time ds) override
-        {
-          UNUSED(m); UNUSED(t); UNUSED(ds);
-          throw NotImplementedYet("sweeper");
-        }
-
-        virtual void do_first_node(const time t, const time ds) override
-        {
-          UNUSED(t); UNUSED(ds);
-          throw NotImplementedYet("sweeper");
-        }
-
-        virtual void do_last_point(const time t, const time dt) override
-        {
-          UNUSED(t); UNUSED(dt);
-          throw NotImplementedYet("sweeper");
-        }
-
         /**
          * evaluates the right hand side at given time node
          *

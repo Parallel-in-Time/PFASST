@@ -305,53 +305,35 @@ namespace pfasst
             }
           }
 
-          // sweep
-          this->do_first_node(t, dt * delta_nodes[0]); // FIXME: really?
-          for (size_t m = 0; m < num_nodes - 1; ++m) {
-            time ds = dt * delta_nodes[m + 1];
-            this->do_inner_nodes(m, t, ds);
-            t += ds;
-          }
-          this->do_last_point(t, dt);
-        }
-
-        virtual void advance() override
-        {
-          this->u_start->copy(this->u_end);
-          this->fs_expl_start->copy(this->fs_expl_end);
-          this->fs_impl_start->copy(this->fs_impl_end);
-        }
-
-        virtual void do_inner_nodes(const size_t m, const time t, const time ds) override
-        {
           shared_ptr<Encapsulation<time>> rhs = this->get_factory()->create(pfasst::encap::solution);
+          time ds = dt * delta_nodes[0];
 
-          rhs->copy(this->u_state.at(m));
-          rhs->saxpy(ds, this->fs_expl.at(m));
-          rhs->saxpy(1.0, this->s_integrals.at(m + 1));
-          this->impl_solve(this->fs_impl.at(m + 1), this->u_state.at(m + 1), t, ds, rhs);
-          this->f_expl_eval(this->fs_expl.at(m + 1), this->u_state.at(m + 1), t + ds);
-        }
-
-        virtual void do_first_node(const time t, const time ds) override
-        {
+          // handle the first quadrature node (which might not be equal to the time start point)
           if (this->quad->left_is_node()) {
             // u_1^{k+1} = u_0
             this->u_state.front() = this->u_start;
 
           } else {
             // u_1^{k+1} = u_0 + \Delta_t1 ( F_I(u_1^{k+1}) - F_I(u_1^k) ) + \sum_l=1^M q_1,l F(u_l^k)
-            shared_ptr<Encapsulation<time>> rhs = this->get_factory()->create(pfasst::encap::solution);
             rhs->copy(this->u_start);
             rhs->saxpy(1.0, this->s_integrals[0]);
             this->impl_solve(this->fs_impl[1], this->u_state[0], t, ds, rhs);
             this->f_expl_eval(this->fs_expl[1], this->u_state[0], t + ds);
           }
-        }
 
-        virtual void do_last_point(const time t, const time dt) override
-        {
-          UNUSED(t); UNUSED(dt);
+          // handle the inner quadrature nodes
+          //   (i.e. not the first and not the last node, neither time start nor end)
+          for (size_t m = 0; m < num_nodes - 1; ++m) {
+            ds = dt * delta_nodes[m + 1];
+            rhs->copy(this->u_state.at(m));
+            rhs->saxpy(ds, this->fs_expl.at(m));
+            rhs->saxpy(1.0, this->s_integrals.at(m + 1));
+            this->impl_solve(this->fs_impl.at(m + 1), this->u_state.at(m + 1), t, ds, rhs);
+            this->f_expl_eval(this->fs_expl.at(m + 1), this->u_state.at(m + 1), t + ds);
+            t += ds;
+          }
+
+          // handle the last quadrature node (which might not be equal to the time end point)
           if (this->quad->right_is_node()) {
             // u_{end} = u_M^{k+1}
             this->u_end = this->u_state.back();
@@ -367,6 +349,13 @@ namespace pfasst
             }
             this->u_end->saxpy(1.0, integral);
           }
+        }
+
+        virtual void advance() override
+        {
+          this->u_start->copy(this->u_end);
+          this->fs_expl_start->copy(this->fs_expl_end);
+          this->fs_impl_start->copy(this->fs_impl_end);
         }
 
         virtual void save(bool initial_only) override

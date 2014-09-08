@@ -154,12 +154,6 @@ namespace pfasst
        */
       virtual void advance() = 0;
 
-      virtual void do_inner_nodes(const size_t m, const time t, const time ds) = 0;
-
-      virtual void do_first_node(const time t, const time ds) = 0;
-
-      virtual void do_last_point(const time t, const time dt) = 0;
-
       /**
        * Save states (and/or function values) at all nodes.
        *
