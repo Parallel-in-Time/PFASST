@@ -235,16 +235,16 @@ namespace pfasst
          */
         virtual void predict(bool initial) override
         {
-          const auto   nodes  = this->quad->get_nodes();
-          const size_t num_nodes = this->quad->get_num_nodes();
-          const auto delta_nodes = this->quad->get_delta_nodes();
+          const auto   nodes       = this->quad->get_nodes();
+          const size_t num_nodes   = this->quad->get_num_nodes();
+          const auto   delta_nodes = this->quad->get_delta_nodes();
 
           time dt = this->get_controller()->get_time_step();
           time t  = this->get_controller()->get_time();
 
           if (initial) {
-            this->f_expl_eval(this->fs_expl_start, this->u_start, t + dt * this->quad->get_nodes()[0]);
-            this->f_impl_eval(this->fs_impl_start, this->u_start, t + dt * this->quad->get_nodes()[0]);
+            this->f_expl_eval(this->fs_expl_start, this->u_start, t);
+            this->f_impl_eval(this->fs_impl_start, this->u_start, t);
           }
 
           shared_ptr<Encapsulation<time>> rhs = this->get_factory()->create(pfasst::encap::solution);
@@ -252,9 +252,9 @@ namespace pfasst
           // do_first_node pridict
           if (this->quad->left_is_node()) {
             // u_1^{k+1} = u_0
-            this->u_state.front() = this->u_start;
-            this->fs_expl.front() = this->fs_expl_start;
-            this->fs_impl.front() = this->fs_impl_start;
+            this->u_state.front()->copy(this->u_start);
+            this->fs_expl.front()->copy(this->fs_expl_start);
+            this->fs_impl.front()->copy(this->fs_impl_start);
 
           } else {
             // first node is not time start
@@ -311,7 +311,7 @@ namespace pfasst
           // handle the first quadrature node (which might not be equal to the time start point)
           if (this->quad->left_is_node()) {
             // u_1^{k+1} = u_0
-            this->u_state.front() = this->u_start;
+            this->u_state.front()->copy(this->u_start);
 
           } else {
             // u_1^{k+1} = u_0 + \Delta_t1 ( F_I(u_1^{k+1}) - F_I(u_1^k) ) + \sum_l=1^M q_1,l F(u_l^k)
@@ -342,7 +342,6 @@ namespace pfasst
             // u_{end} = u_0 + \sum_{l=1}^M q_l f(u_l^{k+1})
             this->u_end->copy(this->u_start);
             shared_ptr<Encapsulation<time>> integral = this->get_factory()->create(pfasst::encap::solution);
-            // TODO: probably need to recompute F-evaluations here
             for (size_t m = 0; m < this->quad->get_num_nodes(); ++m) {
               integral->saxpy(this->quad->get_q_vec()[m], this->fs_expl[m]);
               integral->saxpy(this->quad->get_q_vec()[m], this->fs_impl[m]);
