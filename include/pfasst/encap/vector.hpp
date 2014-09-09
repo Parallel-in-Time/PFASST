@@ -11,8 +11,6 @@
 #include <vector>
 #include <cassert>
 
-#include <boost/numeric/ublas/matrix.hpp>
-
 #include "encapsulation.hpp"
 
 using namespace std;
@@ -113,7 +111,7 @@ namespace pfasst
          * @note In case any of the elements of `dst` or `src` can not be transformed via
          *     `dynamic_cast` into pfasst::encap::VectorEncapsulation std::abort is called.
          */
-        void mat_apply(vector<shared_ptr<Encapsulation<time>>> dst, time a, matrix<time> mat,
+        void mat_apply(vector<shared_ptr<Encapsulation<time>>> dst, time a, Matrix<time> mat,
                        vector<shared_ptr<Encapsulation<time>>> src, bool zero = true) override
         {
           size_t ndst = dst.size();
@@ -133,7 +131,7 @@ namespace pfasst
         }
 
         void mat_apply(vector<shared_ptr<VectorEncapsulation<scalar, time>>> dst,
-                       time a, matrix<time> mat,
+                       time a, Matrix<time> mat,
                        vector<shared_ptr<VectorEncapsulation<scalar, time>>> src, bool zero = true)
         {
           size_t ndst = dst.size();

@@ -10,16 +10,17 @@
 
 #include <Eigen/Dense>
 
+template<typename coeff>
+using Matrix = Eigen::Matrix<coeff, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+
+#include <boost/math/constants/constants.hpp>
+using namespace boost::math::constants;
+
 using std::complex;
 using std::string;
 using std::vector;
 
-template<typename coeff>
-using matrix = Eigen::Matrix<coeff, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
-
 #include "interfaces.hpp"
-
-#define PI 3.1415926535897932384626433832795028841971693993751
 
 namespace pfasst
 {
@@ -205,7 +206,7 @@ namespace pfasst
 
     } else if (qtype == QuadratureType::ClenshawCurtis) {
       for (size_t j = 0; j < nnodes; j++) {
-        nodes[j] = 0.5 * (1.0 - cos(j * PI / (nnodes - 1)));
+        nodes[j] = 0.5 * (1.0 - cos(j * pi<node>() / (nnodes - 1)));
       }
 
     } else if (qtype == QuadratureType::Uniform) {
@@ -241,14 +242,14 @@ namespace pfasst
   enum class QuadratureMatrix { S, Q };
 
   template<typename node = time_precision>
-  matrix<node> compute_quadrature(vector<node> dst, vector<node> src, vector<bool> is_proper,
+  Matrix<node> compute_quadrature(vector<node> dst, vector<node> src, vector<bool> is_proper,
                                   QuadratureMatrix type)
   {
     const size_t ndst = dst.size();
     const size_t nsrc = src.size();
 
     assert(ndst >= 1);
-    matrix<node> mat(ndst - 1, nsrc);
+    Matrix<node> mat(ndst - 1, nsrc);
     mat.fill(0.0);
 
     Polynomial<node> p(nsrc + 1), p1(nsrc + 1);
@@ -290,12 +291,12 @@ namespace pfasst
   }
 
   template<typename node = time_precision>
-  matrix<node> compute_interp(vector<node> dst, vector<node> src)
+  Matrix<node> compute_interp(vector<node> dst, vector<node> src)
   {
     const size_t ndst = dst.size();
     const size_t nsrc = src.size();
 
-    matrix<node> mat(ndst, nsrc);
+    Matrix<node> mat(ndst, nsrc);
 
     for (size_t i = 0; i < ndst; i++) {
       for (size_t j = 0; j < nsrc; j++) {
