@@ -204,17 +204,19 @@ namespace pfasst
 
           this->s_mat_expl = s_mat_cmpt;
           this->s_mat_impl = s_mat_cmpt;
-          // for (size_t m = 1; m < s_mat_cmpt.rows(); ++m) {
-          //   this->s_mat_expl(m, m - 1) -= nodes[m] - nodes[m-1];
-          //   this->s_mat_impl(m, m)     -= nodes[m] - nodes[m-1];
-          //   // this->s_mat_expl(m, m - 1) -= delta_nodes[m];
-          //   // this->s_mat_impl(m, m)     -= delta_nodes[m];
-          // }
-
-         for (size_t m = 0; m < nodes.size() - 1; m++) {
-            time ds = nodes[m + 1] - nodes[m];
-            this->s_mat_expl(m, m)     -= ds;
-            this->s_mat_impl(m, m + 1) -= ds;
+          if (this->quad->left_is_node()) {
+            for (size_t m = 0; m < nodes.size() - 1; m++) {
+              time ds = nodes[m + 1] - nodes[m];
+              this->s_mat_expl(m, m)     -= ds;
+              this->s_mat_impl(m, m + 1) -= ds;
+            }
+          } else {
+            this->s_mat_impl(0, 0) -= nodes[0];
+            for (size_t m = 1; m < nodes.size(); m++) {
+              time ds = nodes[m] - nodes[m - 1];
+              this->s_mat_expl(m, m - 1) -= ds;
+              this->s_mat_impl(m, m)     -= ds;
+            }
           }
 
           this->u_start = this->get_factory()->create(pfasst::encap::solution);
@@ -329,18 +331,19 @@ namespace pfasst
           if (!this->quad->left_is_node()) {
             time ds = dt * nodes[0];
             rhs->copy(this->u_start);
-            rhs->saxpy(ds, this->fs_expl_start);
+            //            rhs->saxpy(ds, this->fs_expl_start);
             rhs->saxpy(1.0, this->s_integrals[0]);
             this->impl_solve(this->fs_impl[0], this->u_state[0], t, ds, rhs);
             this->f_expl_eval(this->fs_expl[0], this->u_state[0], t + ds);
           }
 
           // step across all nodes
+          size_t m_adj = this->quad->left_is_node() ? 0 : 1;
           for (size_t m = 0; m < num_nodes - 1; ++m) {
             time ds = dt * (nodes[m+1] - nodes[m]);
             rhs->copy(this->u_state[m]);
             rhs->saxpy(ds, this->fs_expl[m]);
-            rhs->saxpy(1.0, this->s_integrals[m]);
+            rhs->saxpy(1.0, this->s_integrals[m + m_adj]);
             this->impl_solve(this->fs_impl[m + 1], this->u_state[m + 1], t, ds, rhs);
             this->f_expl_eval(this->fs_expl[m + 1], this->u_state[m + 1], t + ds);
             t += ds;
