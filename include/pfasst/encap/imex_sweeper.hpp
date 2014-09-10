@@ -331,7 +331,6 @@ namespace pfasst
           if (!this->quad->left_is_node()) {
             time ds = dt * nodes[0];
             rhs->copy(this->u_start);
-            //            rhs->saxpy(ds, this->fs_expl_start);
             rhs->saxpy(1.0, this->s_integrals[0]);
             this->impl_solve(this->fs_impl[0], this->u_state[0], t, ds, rhs);
             this->f_expl_eval(this->fs_expl[0], this->u_state[0], t + ds);
@@ -363,6 +362,9 @@ namespace pfasst
             this->u_state[0]->copy(this->u_end);
             this->fs_expl.front()->copy(this->fs_expl.back());
             this->fs_impl.front()->copy(this->fs_impl.back());
+          } if (this->quad->right_is_node()) {
+            this->u_start->copy(this->u_end);
+            this->fs_expl_start->copy(this->fs_expl.back());
           } else {
             throw NotImplementedYet("imex advance");
           }
