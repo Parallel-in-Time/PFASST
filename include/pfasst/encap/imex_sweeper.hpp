@@ -22,7 +22,7 @@ namespace pfasst
     using pfasst::encap::Encapsulation;
 
     /**
-     * interface for an semi-implicit sweeper
+     * Semi-implicit IMEX sweeper.
      *
      * Given an ODE \\( \\frac{\\partial}{\\partial t}u(t) = F(t,u) \\) where the function of the
      * right hand side \\( F(t,u) \\) can be split into a non-stiff and a stiff part.
@@ -88,18 +88,23 @@ namespace pfasst
 
         //! @{
         /**
-         * quadrature matrix containing weights for node-to-node integration of explicit part
+         * Quadrature matrix containing weights for node-to-node integration for the explicit part.
          *
          * @see IMEXSweeper::setup(bool) for a short description
          */
         Matrix<time> s_mat_expl;
 
         /**
-         * quadrature matrix containing weights for node-to-node integration of implicit part
+         * Quadrature matrix containing weights for node-to-node integration of the implicit part.
          *
          * @see IMEXSweeper::setup(bool) for a short description
          */
         Matrix<time> s_mat_impl;
+
+        /**
+         * Compact quadrature matrix.
+         */
+        Matrix<time> s_mat_cmpt;
         //! @}
 
         /**
@@ -189,13 +194,28 @@ namespace pfasst
           const auto nodes = this->quad->get_nodes();
           const size_t num_nodes = this->quad->get_num_nodes();
           const auto delta_nodes = this->quad->get_delta_nodes();
+
           auto s_mat = this->quad->get_s_mat();
 
-          this->s_mat_expl = s_mat;
-          this->s_mat_impl = s_mat;
-          for (size_t m = 1; m < num_nodes; ++m) {
-            this->s_mat_expl(m, m - 1) -= delta_nodes[m];
-            this->s_mat_impl(m, m)     -= delta_nodes[m];
+          if (this->quad->left_is_node()) {
+            this->s_mat_cmpt = s_mat.block(1, 0, num_nodes-1, num_nodes);
+          } else {
+            this->s_mat_cmpt = s_mat;
+          }
+
+          this->s_mat_expl = s_mat_cmpt;
+          this->s_mat_impl = s_mat_cmpt;
+          // for (size_t m = 1; m < s_mat_cmpt.rows(); ++m) {
+          //   this->s_mat_expl(m, m - 1) -= nodes[m] - nodes[m-1];
+          //   this->s_mat_impl(m, m)     -= nodes[m] - nodes[m-1];
+          //   // this->s_mat_expl(m, m - 1) -= delta_nodes[m];
+          //   // this->s_mat_impl(m, m)     -= delta_nodes[m];
+          // }
+
+         for (size_t m = 0; m < nodes.size() - 1; m++) {
+            time ds = nodes[m + 1] - nodes[m];
+            this->s_mat_expl(m, m)     -= ds;
+            this->s_mat_impl(m, m + 1) -= ds;
           }
 
           this->u_start = this->get_factory()->create(pfasst::encap::solution);
@@ -205,11 +225,13 @@ namespace pfasst
             if (coarse) {
               this->previous_u_state.push_back(this->get_factory()->create(pfasst::encap::solution));
             }
-            // XXX: can prolly save some f's here for virtual nodes...
             this->fs_expl.push_back(this->get_factory()->create(pfasst::encap::function));
             this->fs_impl.push_back(this->get_factory()->create(pfasst::encap::function));
 
-            // XXX: if left_is_node is true we do a whole lotta noops...
+          }
+
+          auto num_non_zero = this->quad->left_is_node() ? num_nodes - 1 : num_nodes;
+          for (size_t m = 0; m < num_non_zero; m++) {
             this->s_integrals.push_back(this->get_factory()->create(pfasst::encap::solution));
             if (coarse) {
               this->fas_corrections.push_back(this->get_factory()->create(pfasst::encap::solution));
@@ -218,8 +240,6 @@ namespace pfasst
 
           if (!this->quad->left_is_node()) {
             this->fs_expl_start = this->get_factory()->create(pfasst::encap::function);
-          } else {
-            this->fs_expl_start = fs_expl.front();
           }
           // this->fs_expl_end = this->get_factory()->create(pfasst::encap::function);
           // this->fs_impl_start = this->get_factory()->create(pfasst::encap::function);
@@ -228,7 +248,7 @@ namespace pfasst
           assert(this->u_state.size() == this->quad->get_num_nodes());
           assert(this->fs_expl.size() == this->quad->get_num_nodes());
           // assert(this->fs_impl.size() == this->quad->get_num_nodes());
-          assert(this->s_integrals.size() == this->quad->get_num_nodes());
+          // assert(this->s_integrals.size() == this->quad->get_num_nodes());
         }
 
         /**
@@ -249,11 +269,12 @@ namespace pfasst
           time t  = this->get_controller()->get_time();
 
           if (initial) {
-            this->f_expl_eval(this->fs_expl_start, this->u_start, t);
             if (this->quad->left_is_node()) {
               this->u_state[0]->copy(this->u_start);
               this->f_impl_eval(this->fs_impl[0], this->u_start, t);
-              // no f_expl_eval here (fs_expl[0] points to fs_expl_start in this case)
+              this->f_expl_eval(this->fs_expl[0], this->u_start, t);
+            } else {
+              this->f_expl_eval(this->fs_expl_start, this->u_start, t);
             }
           }
 
@@ -279,11 +300,11 @@ namespace pfasst
           }
 
           // set end state
-          if (this->quad->right_is_node()) {
+          // if (this->quad->right_is_node()) {
             this->u_end->copy(this->u_state.back());
-          } else {
-            this->integrate_end_state(dt);
-          }
+          // } else {
+          //   this->integrate_end_state(dt);
+          // }
         }
 
         virtual void sweep() override
@@ -295,7 +316,6 @@ namespace pfasst
           time dt = this->get_controller()->get_time_step();
           time t  = this->get_controller()->get_time();
 
-          // integrate (XXX: if left_is_node() is true we're doing a bunch of noops; slice here?)
           this->s_integrals[0]->mat_apply(this->s_integrals, dt, this->s_mat_expl, this->fs_expl, true);
           this->s_integrals[0]->mat_apply(this->s_integrals, dt, this->s_mat_impl, this->fs_impl, false);
           if (this->fas_corrections.size() > 0) {
@@ -316,13 +336,12 @@ namespace pfasst
             this->f_expl_eval(this->fs_expl[0], this->u_state[0], t + ds);
           }
 
-
           // step across all nodes
           for (size_t m = 0; m < num_nodes - 1; ++m) {
             time ds = dt * (nodes[m+1] - nodes[m]);
             rhs->copy(this->u_state[m]);
             rhs->saxpy(ds, this->fs_expl[m]);
-            rhs->saxpy(1.0, this->s_integrals[m + 1]); // XXX: aaaarrrrrrrrrrggggggggggh
+            rhs->saxpy(1.0, this->s_integrals[m]);
             this->impl_solve(this->fs_impl[m + 1], this->u_state[m + 1], t, ds, rhs);
             this->f_expl_eval(this->fs_expl[m + 1], this->u_state[m + 1], t + ds);
             t += ds;
