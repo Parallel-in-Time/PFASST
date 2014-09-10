@@ -112,11 +112,10 @@ namespace pfasst
         */
         void integrate_end_state(time dt)
         {
-          // XXX
-          // vector<shared_ptr<Encapsulation<time>>> dst = { this->u_end };
-          // dst[0]->copy(this->u_start);
-          // dst[0]->mat_apply(dst, dt, this->quad->get_q_vec(), this->fs_expl, false);
-          // dst[0]->mat_apply(dst, dt, this->quad->get_q_vec(), this->fs_impl, false);
+          vector<shared_ptr<Encapsulation<time>>> dst = { this->u_end };
+          dst[0]->copy(this->u_start);
+          dst[0]->mat_apply(dst, dt, this->quad->get_b_mat(), this->fs_expl, false);
+          dst[0]->mat_apply(dst, dt, this->quad->get_b_mat(), this->fs_impl, false);
         }
 
       public:
@@ -300,11 +299,11 @@ namespace pfasst
           }
 
           // set end state
-          // if (this->quad->right_is_node()) {
+          if (this->quad->right_is_node()) {
             this->u_end->copy(this->u_state.back());
-          // } else {
-          //   this->integrate_end_state(dt);
-          // }
+          } else {
+            this->integrate_end_state(dt);
+          }
         }
 
         virtual void sweep() override
@@ -351,23 +350,19 @@ namespace pfasst
           if (this->quad->right_is_node()) {
             this->u_end->copy(this->u_state.back());
           } else {
-            // XXX
-            // // u_{end} = u_0 + \sum_{l=1}^M q_l f(u_l^{k+1})
-            // this->u_end->copy(this->u_start);
-            // shared_ptr<Encapsulation<time>> integral = this->get_factory()->create(pfasst::encap::solution);
-            // for (size_t m = 0; m < this->quad->get_num_nodes(); ++m) {
-            //   integral->saxpy(this->quad->get_q_vec()[m], this->fs_expl[m]);
-            //   integral->saxpy(this->quad->get_q_vec()[m], this->fs_impl[m]);
-            // }
-            // this->u_end->saxpy(1.0, integral);
+            this->integrate_end_state(dt);
           }
         }
 
         virtual void advance() override
         {
-          this->u_start->copy(this->u_end);
-          // this->fs_expl_start->copy(this->fs_expl_end);
-          // this->fs_impl_start->copy(this->fs_impl_end);
+          if (this->quad->left_is_node() && this->quad->right_is_node()) {
+            this->u_state[0]->copy(this->u_end);
+            this->fs_expl.front()->copy(this->fs_expl.back());
+            this->fs_impl.front()->copy(this->fs_impl.back());
+          } else {
+            throw NotImplementedYet("imex advance");
+          }
         }
 
         virtual void save(bool initial_only) override
