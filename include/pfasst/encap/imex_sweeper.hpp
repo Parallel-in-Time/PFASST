@@ -315,7 +315,7 @@ namespace pfasst
           this->s_integrals[0]->mat_apply(this->s_integrals, dt, this->s_mat_expl, this->fs_expl, true);
           this->s_integrals[0]->mat_apply(this->s_integrals, dt, this->s_mat_impl, this->fs_impl, false);
           if (this->fas_corrections.size() > 0) {
-            for (size_t m = 0; m < num_nodes; m++) {
+            for (size_t m = 0; m < this->s_integrals.size(); m++) {
               this->s_integrals[m]->saxpy(1.0, this->fas_corrections[m]);
             }
           }
@@ -357,7 +357,7 @@ namespace pfasst
             this->state[0]->copy(this->end_state);
             this->fs_expl.front()->copy(this->fs_expl.back());
             this->fs_impl.front()->copy(this->fs_impl.back());
-          } if (this->quad->right_is_node()) {
+          } else if (this->quad->right_is_node()) {
             this->start_state->copy(this->end_state);
             this->fs_expl_start->copy(this->fs_expl.back());
           } else {
