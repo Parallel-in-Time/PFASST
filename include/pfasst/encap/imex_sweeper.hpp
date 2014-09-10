@@ -366,7 +366,10 @@ namespace pfasst
             this->u_start->copy(this->u_end);
             this->fs_expl_start->copy(this->fs_expl.back());
           } else {
-            throw NotImplementedYet("imex advance");
+            time t0 = this->get_controller()->get_time();
+            time dt = this->get_controller()->get_time_step();
+            this->u_start->copy(this->u_end);
+            this->f_expl_eval(this->fs_expl_start, this->u_start, t0+dt);
           }
         }
 
