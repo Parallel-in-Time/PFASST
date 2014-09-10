@@ -145,7 +145,8 @@ namespace pfasst
         size_t num_nodes;
         Matrix<precision> q_mat;
         Matrix<precision> s_mat;
-        vector<precision> q_vec;
+        vector<precision> q_vec; // XXX
+        Matrix<precision> b_mat;
         vector<precision> nodes;
         vector<precision> delta_nodes;
         //! @}
@@ -171,6 +172,8 @@ namespace pfasst
         virtual const Matrix<precision>& get_q_mat() const { return this->q_mat; }
 
         virtual const Matrix<precision>& get_s_mat() const { return this->s_mat; }
+
+        virtual const Matrix<precision>& get_b_mat() const { return this->b_mat; }
 
         virtual const vector<precision>& get_q_vec() const { return this->q_vec; }
 
@@ -205,6 +208,10 @@ namespace pfasst
           this->q_mat = compute_q_matrix(this->nodes);
           this->s_mat = compute_s_matrix(this->q_mat);
           this->q_vec = compute_q_vec(this->nodes);
+          this->b_mat = Matrix<precision>::Zero(1, this->num_nodes);
+          for (size_t i = 0; i < this->num_nodes; i++){
+            this->b_mat(0,i) = this->q_vec[i];
+          }
         }
 
         virtual void compute_delta_nodes()
