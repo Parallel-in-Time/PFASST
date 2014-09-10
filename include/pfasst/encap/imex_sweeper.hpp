@@ -47,13 +47,13 @@ namespace pfasst
          * solution values \\( u(\\tau) \\) at all time nodes \\( \\tau \\in [0, M-1] \\) of the
          * current iteration
          */
-        vector<shared_ptr<Encapsulation<time>>> u_state;
+        vector<shared_ptr<Encapsulation<time>>> state;
 
         /**
          * solution values \\( u(t) \\) at all time nodes \\( t \\in [0, M-1] \\) of the
          * previous iteration
          */
-        vector<shared_ptr<Encapsulation<time>>> previous_u_state;
+        vector<shared_ptr<Encapsulation<time>>> saved_state;
 
         /**
          * node-to-node integrated values of \\( F(t,u) \\) at all time nodes \\( t \\in
@@ -112,8 +112,8 @@ namespace pfasst
         */
         void integrate_end_state(time dt)
         {
-          vector<shared_ptr<Encapsulation<time>>> dst = { this->u_end };
-          dst[0]->copy(this->u_start);
+          vector<shared_ptr<Encapsulation<time>>> dst = { this->end_state };
+          dst[0]->copy(this->start_state);
           dst[0]->mat_apply(dst, dt, this->quad->get_b_mat(), this->fs_expl, false);
           dst[0]->mat_apply(dst, dt, this->quad->get_b_mat(), this->fs_impl, false);
         }
@@ -126,14 +126,9 @@ namespace pfasst
         //! @}
 
         //! @{
-        virtual void set_state(shared_ptr<const Encapsulation<time>> u0, size_t m) override
-        {
-          this->u_state[m]->copy(u0);
-        }
-
         virtual shared_ptr<Encapsulation<time>> get_state(size_t m) const override
         {
-          return this->u_state[m];
+          return this->state[m];
         }
 
         virtual shared_ptr<Encapsulation<time>> get_tau(size_t m) const override
@@ -143,7 +138,7 @@ namespace pfasst
 
         virtual shared_ptr<Encapsulation<time>> get_saved_state(size_t m) const override
         {
-          return this->previous_u_state[m];
+          return this->saved_state[m];
         }
         //! @}
 
@@ -192,7 +187,7 @@ namespace pfasst
         {
           const auto nodes = this->quad->get_nodes();
           const size_t num_nodes = this->quad->get_num_nodes();
-          const auto delta_nodes = this->quad->get_delta_nodes();
+          // const auto delta_nodes = this->quad->get_delta_nodes();
 
           auto s_mat = this->quad->get_s_mat();
 
@@ -219,12 +214,12 @@ namespace pfasst
             }
           }
 
-          this->u_start = this->get_factory()->create(pfasst::encap::solution);
-          this->u_end = this->get_factory()->create(pfasst::encap::solution);
+          this->start_state = this->get_factory()->create(pfasst::encap::solution);
+          this->end_state = this->get_factory()->create(pfasst::encap::solution);
           for (size_t m = 0; m < num_nodes; m++) {
-            this->u_state.push_back(this->get_factory()->create(pfasst::encap::solution));
+            this->state.push_back(this->get_factory()->create(pfasst::encap::solution));
             if (coarse) {
-              this->previous_u_state.push_back(this->get_factory()->create(pfasst::encap::solution));
+              this->saved_state.push_back(this->get_factory()->create(pfasst::encap::solution));
             }
             this->fs_expl.push_back(this->get_factory()->create(pfasst::encap::function));
             this->fs_impl.push_back(this->get_factory()->create(pfasst::encap::function));
@@ -246,7 +241,7 @@ namespace pfasst
           // this->fs_impl_start = this->get_factory()->create(pfasst::encap::function);
           // this->fs_impl_end = this->get_factory()->create(pfasst::encap::function);
 
-          assert(this->u_state.size() == this->quad->get_num_nodes());
+          assert(this->state.size() == this->quad->get_num_nodes());
           assert(this->fs_expl.size() == this->quad->get_num_nodes());
           // assert(this->fs_impl.size() == this->quad->get_num_nodes());
           // assert(this->s_integrals.size() == this->quad->get_num_nodes());
@@ -264,18 +259,18 @@ namespace pfasst
         {
           const auto   nodes       = this->quad->get_nodes();
           const size_t num_nodes   = this->quad->get_num_nodes();
-          const auto   delta_nodes = this->quad->get_delta_nodes();
+          // const auto   delta_nodes = this->quad->get_delta_nodes();
 
           time dt = this->get_controller()->get_time_step();
           time t  = this->get_controller()->get_time();
 
           if (initial) {
             if (this->quad->left_is_node()) {
-              this->u_state[0]->copy(this->u_start);
-              this->f_impl_eval(this->fs_impl[0], this->u_start, t);
-              this->f_expl_eval(this->fs_expl[0], this->u_start, t);
+              this->state[0]->copy(this->start_state);
+              this->f_impl_eval(this->fs_impl[0], this->start_state, t);
+              this->f_expl_eval(this->fs_expl[0], this->start_state, t);
             } else {
-              this->f_expl_eval(this->fs_expl_start, this->u_start, t);
+              this->f_expl_eval(this->fs_expl_start, this->start_state, t);
             }
           }
 
@@ -284,25 +279,25 @@ namespace pfasst
           // step to first node if necessary
           if (!this->quad->left_is_node()) {
             time ds = dt * nodes[0];
-            rhs->copy(this->u_start);
+            rhs->copy(this->start_state);
             rhs->saxpy(ds, this->fs_expl_start);
-            this->impl_solve(this->fs_impl[0], this->u_state[0], t, ds, rhs);
-            this->f_expl_eval(this->fs_expl[0], this->u_state[0], t + ds);
+            this->impl_solve(this->fs_impl[0], this->state[0], t, ds, rhs);
+            this->f_expl_eval(this->fs_expl[0], this->state[0], t + ds);
           }
 
           // step across all nodes
           for (size_t m = 0; m < num_nodes - 1; ++m) {
             time ds = dt * (nodes[m+1] - nodes[m]);
-            rhs->copy(this->u_state[m]);
+            rhs->copy(this->state[m]);
             rhs->saxpy(ds, this->fs_expl[m]);
-            this->impl_solve(this->fs_impl[m + 1], this->u_state[m + 1], t, ds, rhs);
-            this->f_expl_eval(this->fs_expl[m + 1], this->u_state[m + 1], t + ds);
+            this->impl_solve(this->fs_impl[m + 1], this->state[m + 1], t, ds, rhs);
+            this->f_expl_eval(this->fs_expl[m + 1], this->state[m + 1], t + ds);
             t += ds;
           }
 
           // set end state
           if (this->quad->right_is_node()) {
-            this->u_end->copy(this->u_state.back());
+            this->end_state->copy(this->state.back());
           } else {
             this->integrate_end_state(dt);
           }
@@ -312,7 +307,7 @@ namespace pfasst
         {
           const auto   nodes  = this->quad->get_nodes();
           const size_t num_nodes = nodes.size();
-          const auto delta_nodes = this->quad->get_delta_nodes();
+          // const auto delta_nodes = this->quad->get_delta_nodes();
 
           time dt = this->get_controller()->get_time_step();
           time t  = this->get_controller()->get_time();
@@ -330,27 +325,27 @@ namespace pfasst
           // step to first node if necessary
           if (!this->quad->left_is_node()) {
             time ds = dt * nodes[0];
-            rhs->copy(this->u_start);
+            rhs->copy(this->start_state);
             rhs->saxpy(1.0, this->s_integrals[0]);
-            this->impl_solve(this->fs_impl[0], this->u_state[0], t, ds, rhs);
-            this->f_expl_eval(this->fs_expl[0], this->u_state[0], t + ds);
+            this->impl_solve(this->fs_impl[0], this->state[0], t, ds, rhs);
+            this->f_expl_eval(this->fs_expl[0], this->state[0], t + ds);
           }
 
           // step across all nodes
           size_t m_adj = this->quad->left_is_node() ? 0 : 1;
           for (size_t m = 0; m < num_nodes - 1; ++m) {
             time ds = dt * (nodes[m+1] - nodes[m]);
-            rhs->copy(this->u_state[m]);
+            rhs->copy(this->state[m]);
             rhs->saxpy(ds, this->fs_expl[m]);
             rhs->saxpy(1.0, this->s_integrals[m + m_adj]);
-            this->impl_solve(this->fs_impl[m + 1], this->u_state[m + 1], t, ds, rhs);
-            this->f_expl_eval(this->fs_expl[m + 1], this->u_state[m + 1], t + ds);
+            this->impl_solve(this->fs_impl[m + 1], this->state[m + 1], t, ds, rhs);
+            this->f_expl_eval(this->fs_expl[m + 1], this->state[m + 1], t + ds);
             t += ds;
           }
 
           // set end state
           if (this->quad->right_is_node()) {
-            this->u_end->copy(this->u_state.back());
+            this->end_state->copy(this->state.back());
           } else {
             this->integrate_end_state(dt);
           }
@@ -359,27 +354,27 @@ namespace pfasst
         virtual void advance() override
         {
           if (this->quad->left_is_node() && this->quad->right_is_node()) {
-            this->u_state[0]->copy(this->u_end);
+            this->state[0]->copy(this->end_state);
             this->fs_expl.front()->copy(this->fs_expl.back());
             this->fs_impl.front()->copy(this->fs_impl.back());
           } if (this->quad->right_is_node()) {
-            this->u_start->copy(this->u_end);
+            this->start_state->copy(this->end_state);
             this->fs_expl_start->copy(this->fs_expl.back());
           } else {
             time t0 = this->get_controller()->get_time();
             time dt = this->get_controller()->get_time_step();
-            this->u_start->copy(this->u_end);
-            this->f_expl_eval(this->fs_expl_start, this->u_start, t0+dt);
+            this->start_state->copy(this->end_state);
+            this->f_expl_eval(this->fs_expl_start, this->start_state, t0+dt);
           }
         }
 
         virtual void save(bool initial_only) override
         {
           if (initial_only) {
-            this->previous_u_state[0]->copy(u_state[0]);
+            this->saved_state[0]->copy(state[0]);
           } else {
-            for (size_t m = 0; m < this->previous_u_state.size(); m++) {
-              this->previous_u_state[m]->copy(u_state[m]);
+            for (size_t m = 0; m < this->saved_state.size(); m++) {
+              this->saved_state[m]->copy(state[m]);
             }
           }
         }
@@ -396,9 +391,9 @@ namespace pfasst
           time dt = this->get_controller()->get_time_step();
           time t =  t0 + dt * this->quad->get_nodes()[m];
           if (m == 0) {
-            this->f_expl_eval(this->fs_expl.front(), this->u_state.front(), t);
+            this->f_expl_eval(this->fs_expl.front(), this->state.front(), t);
           }
-          this->f_impl_eval(this->fs_impl[m], this->u_state[m], t);
+          this->f_impl_eval(this->fs_impl[m], this->state[m], t);
         }
 
         /**

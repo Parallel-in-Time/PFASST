@@ -29,7 +29,7 @@ using pfasst::encap::as_vector;
 
 /**
  * errors at different iterations and time nodes
- * 
+ *
  * Mapping a pair of step/iteration indices onto the error of the solution.
  */
 typedef map<pair<size_t, size_t>, double> error_map;
@@ -101,7 +101,7 @@ class AdvectionDiffusionSweeper
 
     void echo_error(time t, bool predict = false)
     {
-      auto& qend = as_vector<double, time>(this->get_u_end());
+      auto& qend = as_vector<double, time>(this->get_end_state());
       DVectorT qex(qend.size());
 
       this->exact(qex, t);

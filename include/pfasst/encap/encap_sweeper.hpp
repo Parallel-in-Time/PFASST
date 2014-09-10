@@ -26,9 +26,8 @@ namespace pfasst
         //! @{
         quadrature::IQuadrature<time>* quad;
         shared_ptr<EncapFactory<time>> factory;
-        shared_ptr<Encapsulation<time>> u_start;
-        shared_ptr<Encapsulation<time>> u_end;
-        shared_ptr<Encapsulation<time>> u_end_old;
+        shared_ptr<Encapsulation<time>> start_state;
+        shared_ptr<Encapsulation<time>> end_state;
         //! @}
 
       public:
@@ -47,7 +46,7 @@ namespace pfasst
         virtual void spread() override
         {
           for (size_t m = 1; m < this->quad->get_num_nodes(); m++) {
-            this->get_state(m)->copy(this->u_start);
+            this->get_state(m)->copy(this->start_state);
           }
         }
         //! @}
@@ -63,19 +62,9 @@ namespace pfasst
           return this->quad;
         }
 
-        shared_ptr<Encapsulation<time>> get_u_start() const
+        shared_ptr<Encapsulation<time>> get_start_state() const
         {
-          return this->u_start;
-        }
-
-        shared_ptr<Encapsulation<time>> get_u_end() const
-        {
-          return this->u_end;
-        }
-
-        shared_ptr<const Encapsulation<time>> get_u_end_old() const
-        {
-          return this->u_end_old;
+          return this->start_state;
         }
 
         const vector<time> get_nodes() const
@@ -91,30 +80,6 @@ namespace pfasst
         virtual shared_ptr<EncapFactory<time>> get_factory() const
         {
           return factory;
-        }
-
-        /**
-         * sets solution values at time node index `m`
-         *
-         * @param[in] u0 values to set
-         * @param[in] m 0-based node index
-         *
-         * @note This method must be implemented in derived sweepers.
-         */
-        virtual void set_state(shared_ptr<const Encapsulation<time>> u0, size_t m)
-        {
-          UNUSED(u0); UNUSED(m);
-          throw NotImplementedYet("sweeper");
-        }
-
-        void set_u_start(shared_ptr<const Encapsulation<time>> u_start)
-        {
-          this->u_start = u_start;
-        }
-
-        void set_u_end(shared_ptr<const Encapsulation<time>> u_end)
-        {
-          this->u_end = u_end;
         }
 
         /**
@@ -160,9 +125,8 @@ namespace pfasst
         }
 
         virtual shared_ptr<Encapsulation<time>> get_end_state()
-        __attribute__((deprecated("use u_end")))
         {
-          return this->get_u_end();
+          return this->end_state;
         }
         //! @}
 

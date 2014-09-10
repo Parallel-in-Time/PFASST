@@ -25,7 +25,8 @@ error_map run_vanilla_sdc()
   const size_t ndofs  = 64;
   const size_t niters = 4;
 
-  auto quad    = pfasst::quadrature::quadrature_factory(nnodes, pfasst::quadrature::QuadratureType::GaussLobatto);
+   // auto quad    = pfasst::quadrature::quadrature_factory(nnodes, pfasst::quadrature::QuadratureType::GaussLobatto);
+  auto quad    = pfasst::quadrature::quadrature_factory(nnodes-2, pfasst::quadrature::QuadratureType::GaussLegendre);
   auto factory = make_shared<pfasst::encap::VectorFactory<double>>(ndofs);
   auto sweeper = make_shared<AdvectionDiffusionSweeper<>>(ndofs);
 
@@ -36,7 +37,7 @@ error_map run_vanilla_sdc()
   sdc.set_duration(0.0, nsteps*dt, dt, niters);
   sdc.setup();
 
-  auto q0 = sweeper->get_u_start();
+  auto q0 = sweeper->get_start_state();
   sweeper->exact(q0, 0.0);
 
   sdc.run();
