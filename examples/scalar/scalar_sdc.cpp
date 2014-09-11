@@ -20,21 +20,21 @@
 
 double run_scalar_sdc(const size_t nsteps, const double dt, const size_t nnodes,
                       const size_t niters, const complex<double> lambda, 
-                      const pfasst::QuadratureType nodetype)
+                      const pfasst::quadrature::QuadratureType nodetype)
 {
   pfasst::SDC<> sdc;
 
   // For test equation, set initial value to \\( 1+0i \\)
   const complex<double> y0 = complex<double>(1.0, 0.0);
 
-  auto nodes = pfasst::compute_nodes(nnodes, nodetype);
+  auto quad = pfasst::quadrature::quadrature_factory(nnodes, nodetype);
 
   // This is a scalar example, so we use the encap::VectorFactory with fixed length of 1 and 
   //  complex type.
   auto factory = make_shared<pfasst::encap::VectorFactory<complex<double>>>(1);
   auto sweeper = make_shared<ScalarSweeper<>>(lambda, y0);
 
-  sweeper->set_nodes(nodes);
+  sweeper->set_quadrature(quad);
   sweeper->set_factory(factory);
 
   sdc.add_level(sweeper);
@@ -62,7 +62,7 @@ int main(int /*argc*/, char** /*argv*/)
   const size_t nnodes = 4;
   const size_t niters = 6;
   const complex<double> lambda = complex<double>(-1.0, 1.0);
-  const pfasst::QuadratureType nodetype = pfasst::QuadratureType::GaussLobatto;
+  const pfasst::quadrature::QuadratureType nodetype = pfasst::quadrature::QuadratureType::GaussLobatto;
 
   run_scalar_sdc(nsteps, dt, nnodes, niters, lambda, nodetype);
 }
