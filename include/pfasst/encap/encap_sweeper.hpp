@@ -46,7 +46,8 @@ namespace pfasst
         virtual void spread() override
         {
           for (size_t m = 1; m < this->quad->get_num_nodes(); m++) {
-            this->get_state(m)->copy(this->start_state);
+            //            this->get_state(m)->copy(this->start_state);
+            this->get_state(m)->copy(this->get_state(0));
           }
         }
         //! @}

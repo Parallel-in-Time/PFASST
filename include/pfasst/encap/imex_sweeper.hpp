@@ -390,9 +390,9 @@ namespace pfasst
           time t0 = this->get_controller()->get_time();
           time dt = this->get_controller()->get_time_step();
           time t =  t0 + dt * this->quad->get_nodes()[m];
-          if (m == 0) {
-            this->f_expl_eval(this->fs_expl.front(), this->state.front(), t);
-          }
+          // if (m == 0) {
+            this->f_expl_eval(this->fs_expl[m], this->state[m], t);
+          // }
           this->f_impl_eval(this->fs_impl[m], this->state[m], t);
         }
 
@@ -404,8 +404,10 @@ namespace pfasst
          */
         virtual void integrate(time dt, vector<shared_ptr<Encapsulation<time>>> dst) const override
         {
-          dst[0]->mat_apply(dst, dt, this->quad->get_s_mat(), this->fs_expl, true);
-          dst[0]->mat_apply(dst, dt, this->quad->get_s_mat(), this->fs_impl, false);
+          // dst[0]->mat_apply(dst, dt, this->quad->get_s_mat(), this->fs_expl, true);
+          // dst[0]->mat_apply(dst, dt, this->quad->get_s_mat(), this->fs_impl, false);
+          dst[0]->mat_apply(dst, dt, this->s_mat_cmpt, this->fs_expl, true);
+          dst[0]->mat_apply(dst, dt, this->s_mat_cmpt, this->fs_impl, false);
         }
         //! @}
 
