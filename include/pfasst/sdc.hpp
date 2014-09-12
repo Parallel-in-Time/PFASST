@@ -9,6 +9,7 @@
 using namespace std;
 
 #include "controller.hpp"
+#include "config.hpp"
 
 namespace pfasst
 {
@@ -17,6 +18,24 @@ namespace pfasst
   class SDC
     : public Controller<time>
   {
+    private:
+      static void init_config_options(po::options_description& opts)
+      {
+        opts.add_options()
+          ("num_iter", po::value<size_t>(), "number of iterations")
+          ("num_steps", po::value<size_t>(), "number of time steps")
+          ("delte_step", po::value<time>(), "width of one time step")
+          ;
+      }
+
+    public:
+      static void enable_config_options()
+      {
+        pfasst::config::Options::get_instance()
+          .register_init_function("SDC Sweeper",
+                                  function<void(po::options_description&)>(init_config_options));
+      }
+
     public:
       void run()
       {
