@@ -16,10 +16,15 @@ else()
 endif()
 set(Boost_USE_MULTITHREADED ON)
 
-find_package(Boost REQUIRED)
+if(${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
+    set(Boost_COMPILER "-clang${CMAKE_CXX_COMPILER_VERSION_MAJOR}${CMAKE_CXX_COMPILER_VERSION_MINOR}")
+endif()
+
+find_package(Boost COMPONENTS program_options REQUIRED)
 message(STATUS "Boost include path: ${Boost_INCLUDE_DIRS}")
 message(STATUS "Boost library path: ${Boost_LIBRARY_DIRS}")
 list(APPEND 3rdparty_INCLUDES ${Boost_INCLUDE_DIRS})
+list(APPEND 3rdparty_DEPENDEND_LIBS ${Boost_LIBRARIES})
 
 
 message(STATUS "--------------------------------------------------------------------------------")

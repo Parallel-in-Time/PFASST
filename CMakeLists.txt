@@ -66,6 +66,11 @@ else()
 endif()
 message(STATUS "Your compiler has C++11 support. Hurray!")
 
+string(REGEX MATCH "^[0-9]+" CMAKE_CXX_COMPILER_VERSION_MAJOR ${CMAKE_CXX_COMPILER_VERSION})
+string(REGEX MATCH "\\.[0-9]+\\." cmake_cxx_compiler_version_minor ${CMAKE_CXX_COMPILER_VERSION})
+string(REGEX MATCH "[0-9]+" CMAKE_CXX_COMPILER_VERSION_MINOR ${cmake_cxx_compiler_version_minor})
+string(REGEX MATCH "[0-9]+$" CMAKE_CXX_COMPILER_VERSION_PATCH ${CMAKE_CXX_COMPILER_VERSION})
+
 # Enable all compiler warnings
 add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic")
 
@@ -110,6 +115,6 @@ message(STATUS "****************************************************************
 message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 message(STATUS "C++ Compiler ID: ${CMAKE_CXX_COMPILER_ID}")
 message(STATUS "C++ Compiler Names: ${CMAKE_CXX_COMPILER_NAMES}")
-message(STATUS "C++ Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}")
+message(STATUS "C++ Compiler Version: ${CMAKE_CXX_COMPILER_VERSION} (${CMAKE_CXX_COMPILER_VERSION_MAJOR}.${CMAKE_CXX_COMPILER_VERSION_MINOR}.${CMAKE_CXX_COMPILER_VERSION_PATCH})")
 message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS}")
 message(STATUS "C++ link flags: ${CMAKE_CXX_LINK_FLAGS}")
