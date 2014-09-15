@@ -50,6 +50,8 @@ class BorisSweeper
     vector<shared_ptr<encap_type>> previous_particles;
     vector<shared_ptr<encap_type>> tau_corrections;
 
+    vector<acceleration_type> e_field_evals;
+
     vector<velocity_type> s_integrals;
     vector<position_type> ss_integrals;
 
@@ -233,7 +235,7 @@ class BorisSweeper
     virtual void predict(bool initial) override
     {
       UNUSED(initial);
-      // TODO: implement predict for BorisSweeper
+      this->spread();
     }
 
     virtual void sweep() override
@@ -256,14 +258,14 @@ class BorisSweeper
       }
 
       for (size_t m = 0; m < nnodes - 1; m++) {
-        ::dt<time> dt(this->delta_nodes[m+1]);
+        ::dt<time> ds(this->delta_nodes[m+1]);
 
         //// Update Position (explicit)
         //
         // x_{m+1}^{k+1} = x_{m}^{k}
         this->particles[m+1]->pos() = position_type(this->particles[m]->pos());
         //               + delta_nodes_{m} * v_{0}
-        this->particles[m+1]->pos() += this->particles[0]->vel().convert(dt);
+        this->particles[m+1]->pos() += this->particles[0]->vel().convert(ds);
         //               + \sum_{l=1}^{m} s_{m+1,l}^{x} (f_{l}^{k+1} - f_{l}^{k})
         for (size_t l = 1; l < m; l++) {
           this->particles[m+1]->pos() += this->particles[l]
@@ -276,20 +278,23 @@ class BorisSweeper
           this->particles[m+1]->pos() += this->ss_integrals[l];
         }
 
+        // evaluate electric field with new position
+        this->e_field_evals[m+1] = this->e_field->evaluate(this->particles, m+1, nodes[m]);
+
         //// Update Velocity (semi-implicit)
         //
         c_k_term.zero();  // reset
         //                 - delta_nodes_{m} / 2 * f_{m+1}^{k}
-        c_k_term.saxpy(-0.5, this->previous_particles[m+1]->accel().convert(dt));
+        c_k_term -= 0.5 * this->previous_particles[m+1]->accel().convert(ds);
         //                 - delta_nodes_{m} / 2 * f_{m}^{k}
-        c_k_term.saxpy(-0.5, this->previous_particles[m]->accel().convert(dt));
+        c_k_term -= 0.5 * this->previous_particles[m]->accel().convert(ds);
         //                 + s_integral[m]
         for (size_t l = 1; l < nnodes; l++) {
           c_k_term += this->s_integrals[l];
         }
 
         // doing Boris' magic
-        this->boris_solve(nodes[m], nodes[m+1], dt, m, c_k_term);
+        this->boris_solve(nodes[m], nodes[m+1], ds, m, c_k_term);
       }
     }
 
@@ -313,41 +318,40 @@ class BorisSweeper
     //! @}
 
     //! @{
-      virtual void post(ICommunicator* comm, int tag) override
-      {
-        UNUSED(comm); UNUSED(tag);
-        // TODO: implement BorisSweeper::post
-      };
+    virtual void post(ICommunicator* comm, int tag) override
+    {
+      UNUSED(comm); UNUSED(tag);
+      // TODO: implement BorisSweeper::post
+    };
 
-      virtual void send(ICommunicator* comm, int tag, bool blocking) override
-      {
-        UNUSED(comm); UNUSED(tag); UNUSED(blocking);
-        // TODO: implement BorisSweeper::send
-      }
+    virtual void send(ICommunicator* comm, int tag, bool blocking) override
+    {
+      UNUSED(comm); UNUSED(tag); UNUSED(blocking);
+      // TODO: implement BorisSweeper::send
+    }
 
-      virtual void recv(ICommunicator* comm, int tag, bool blocking) override
-      {
-        UNUSED(comm); UNUSED(tag); UNUSED(blocking);
-        // TODO: implement BorisSweeper::recv
-      }
+    virtual void recv(ICommunicator* comm, int tag, bool blocking) override
+    {
+      UNUSED(comm); UNUSED(tag); UNUSED(blocking);
+      // TODO: implement BorisSweeper::recv
+    }
 
-      virtual void broadcast(ICommunicator* comm) override
-      {
-        UNUSED(comm);
-        // TODO: implement BorisSweeper::broadcast
-      }
+    virtual void broadcast(ICommunicator* comm) override
+    {
+      UNUSED(comm);
+      // TODO: implement BorisSweeper::broadcast
+    }
     //! @}
 
     //! @{
     virtual void boris_solve(const time tm, const time t_next, const ::dt<time> dt, const size_t m,
                              const velocity_type& c_k_term)
     {
+      UNUSED(tm);
       velocity_type c_k_term_half = scalar(0.5) * c_k_term;
       ::dt<time> beta(this->particles[m]->charge() * dt.v 
                       / (scalar(2.0) * this->particles[m]->mass()));
-      acceleration_type e_mean = (this->e_field->evaluate(this->particles, m, tm) 
-                                  - this->e_field->evaluate(this->particles, m+1, tm)) 
-                                 * scalar(0.5);
+      acceleration_type e_mean = (this->e_field_evals[m] - this->e_field_evals[m+1]) * scalar(0.5);
 
       // v^{-} = v^{k}
       velocity_type v_minus = this->particles[m]->vel();

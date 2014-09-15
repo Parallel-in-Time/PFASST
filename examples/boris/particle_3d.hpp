@@ -398,7 +398,7 @@ class Velocity3DEncapsulation
     this_type& operator+=(const value_type value)
     {
       static_assert(is_arithmetic<value_type>::value,
-                    "Only arithmetic types can be added to Velocity.");
+                    "Only arithmetic types or Velocities can be added to Velocity.");
       this->u += value;
       this->v += value;
       this->w += value;
@@ -412,6 +412,28 @@ class Velocity3DEncapsulation
       this->u += second.u;
       this->v += second.v;
       this->w += second.w;
+      return *this;
+    }
+
+    //! vel -= value
+    template<typename value_type>
+    this_type& operator-=(const value_type value)
+    {
+      static_assert(is_arithmetic<value_type>::value,
+                    "Only arithmetic types or Velocities can be subtracted from Velocity.");
+      this->u -= value;
+      this->v -= value;
+      this->w -= value;
+      return *this;
+    }
+
+    //! vel -= other
+    this_type& operator-=(const this_type& second)
+    {
+      assert(this->DIM == second.DIM);
+      this->u -= second.u;
+      this->v -= second.v;
+      this->w -= second.w;
       return *this;
     }
 
