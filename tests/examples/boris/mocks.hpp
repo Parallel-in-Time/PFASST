@@ -61,8 +61,8 @@ class MockEField
 
   public:
     using parent_type::evaluate;
-    MOCK_METHOD2_T(evaluate,
-                   typename parent_type::particle_type::velocity_type(shared_ptr<typename parent_type::particle_type>, time));
+    MOCK_METHOD3_T(evaluate,
+                   typename parent_type::particle_type::acceleration_type(vector<shared_ptr<typename parent_type::particle_type>>, size_t, time));
 };
 
 
@@ -79,8 +79,8 @@ class MockBField
 
   public:
     using parent_type::evaluate;
-    MOCK_METHOD2_T(evaluate,
-                   typename parent_type::particle_type::position_type(shared_ptr<typename parent_type::particle_type>, time));
+    MOCK_METHOD3_T(evaluate,
+                   typename parent_type::particle_type::acceleration_type(vector<shared_ptr<typename parent_type::particle_type>>, size_t, time));
 };
 
 
@@ -104,7 +104,8 @@ class MockEOperator
 
   public:
     using parent_type::evaluate;
-    MOCK_METHOD4_T(evaluate, scalar(shared_ptr<const typename parent_type::particle_type>,
+    MOCK_METHOD5_T(evaluate, scalar(vector<shared_ptr<typename parent_type::particle_type>>,
+                                    size_t,
                                     time,
                                     shared_ptr<const typename parent_type::e_field_type>,
                                     shared_ptr<const typename parent_type::b_field_type>));

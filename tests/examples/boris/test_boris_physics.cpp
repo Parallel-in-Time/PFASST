@@ -1,4 +1,5 @@
 #include <memory>
+#include <vector>
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
@@ -7,6 +8,7 @@
 
 #include "mocks.hpp"
 
+using namespace std;
 using namespace ::testing;
 
 typedef MockParticle<double, double> MockParticleT;
@@ -35,8 +37,10 @@ TEST(ElectricFieldTest, OmegaZ)
 TEST(ElectricFieldTest, Evaluation)
 {
   EFieldT default_ctor;
-  shared_ptr<const MockParticleT> p = make_shared<const MockParticleT>();
-  EXPECT_THROW(default_ctor.evaluate(p, 0.0), NotImplementedYet);
+  vector<shared_ptr<MockParticleT>> particles { make_shared<MockParticleT>(),
+                                                make_shared<MockParticleT>(),
+                                                make_shared<MockParticleT>() };
+  EXPECT_THROW(default_ctor.evaluate(particles, 0, 0.0), NotImplementedYet);
 }
 
 
@@ -59,8 +63,10 @@ TEST(MagneticFieldTest, OmegaC)
 TEST(MagneticFieldTest, Evaluation)
 {
   BFieldT default_ctor;
-  shared_ptr<const MockParticleT> p = make_shared<const MockParticleT>();
-  EXPECT_THROW(default_ctor.evaluate(p, 0.0), NotImplementedYet);
+  vector<shared_ptr<MockParticleT>> particles { make_shared<MockParticleT>(),
+                                                make_shared<MockParticleT>(),
+                                                make_shared<MockParticleT>() };
+  EXPECT_THROW(default_ctor.evaluate(particles, 0, 0.0), NotImplementedYet);
 }
 
 
@@ -72,14 +78,16 @@ TEST(EnergyOperatorTest, Evaluation)
     make_shared<const typename EnergyOperatorT::e_field_type>();
   shared_ptr<const typename EnergyOperatorT::b_field_type> BField = \
     make_shared<const typename EnergyOperatorT::b_field_type>();
-  shared_ptr<const typename EnergyOperatorT::particle_type> particle = \
-    make_shared<const typename EnergyOperatorT::particle_type>();
+  vector<shared_ptr<typename EnergyOperatorT::particle_type>> particles \
+    { make_shared<typename EnergyOperatorT::particle_type>(),
+      make_shared<typename EnergyOperatorT::particle_type>(),
+      make_shared<typename EnergyOperatorT::particle_type>() };
 
-  ON_CALL(e_operator, evaluate(_, _, _, _))
+  ON_CALL(e_operator, evaluate(_, _, _, _, _))
     .WillByDefault(Return(1.0));
-  EXPECT_CALL(e_operator, evaluate(_, _, _, _))
+  EXPECT_CALL(e_operator, evaluate(_, _, _, _, _))
     .Times(1);
-  EXPECT_THAT(e_operator.evaluate(particle, 0.0, EField, BField), DoubleEq(1.0));
+  EXPECT_THAT(e_operator.evaluate(particles, 0, 0.0, EField, BField), DoubleEq(1.0));
 }
 
 

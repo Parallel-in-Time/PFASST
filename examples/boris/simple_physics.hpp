@@ -9,24 +9,25 @@ template<
   typename time,
   template <typename, typename> class ParticleT
 >
-class IdealQuadrupolePotential2D
+class IdealQuadrupolePotential
   : public ElectricField<scalar, time, ParticleT>
 {
   private:
     typedef ElectricField<scalar, time, ParticleT> parent_type;
 
   public:
-    virtual ~IdealQuadrupolePotential2D()
+    virtual ~IdealQuadrupolePotential()
     {}
 
     /**
      * Calculates the potential energy of a particle in a ideal quadrupole potential.
      *
      * @f[
-     *   E(\vec{x}) = - \frac{\varepsilon \omega_z^2}{\alpha} \begin{pmatrix}1 & 0 \\ 0 & 1\end{pmatrix} \vec{x}
+     *   E(\vec{x}_m) = - \frac{\varepsilon \omega_z^2}{\alpha} \begin{pmatrix}1 & 0 \\ 0 & 1\end{pmatrix} \vec{x}
      * @f]
      */
-    virtual scalar evaluate(shared_ptr<const typename parent_type::particle_type> particle,
+    virtual scalar evaluate(vector<shared_ptr<typename parent_type::particle_type>> particles,
+                            size_t m,
                             time t) override
     {}
 };
@@ -52,10 +53,11 @@ class ConstantMagneticField
      *
      * As the magnetic field is assumed constant in space and time, evaluation can be simplified to
      * @f[
-     *   \vec{v} \times B = \frac{\omega_c}{\alpha} \begin{pmatrix}0 & 1 \\ -1 & 0\end{pmatrix} \vec{v}
+     *   \vec{v}_m \times B = \frac{\omega_c}{\alpha} \begin{pmatrix}0 & 1 \\ -1 & 0\end{pmatrix} \vec{v}
      * @f]
      */
-    virtual scalar evaluate(shared_ptr<const typename parent_type::particle_type> particle,
+    virtual scalar evaluate(vector<shared_ptr<typename parent_type::particle_type>> particles,
+                            size_t m,
                             time t) override
     {}
 };

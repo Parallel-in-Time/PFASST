@@ -6,7 +6,7 @@
 #include <memory>
 #include <cassert>
 
-#include <boost/numeric/ublas/matrix.hpp>
+#include <Eigen/Dense>
 
 #include <pfasst/globals.hpp>
 #include <pfasst/interfaces.hpp>
@@ -16,6 +16,8 @@ using namespace std;
 using namespace pfasst;
 using namespace pfasst::encap;
 
+template<typename coeff>
+using Matrix = Eigen::Matrix<coeff, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
 typedef false_type deactivated_function;
 
@@ -92,7 +94,7 @@ class ParticleComponentEncapsulation
     }
 
     virtual void mat_apply(vector<shared_ptr<Encapsulation<time>>> dst, 
-                           time a, matrix<time> mat,
+                           time a, Matrix<time> mat,
                            vector<shared_ptr<Encapsulation<time>>> src, 
                            bool zero = true) override
     {
@@ -260,7 +262,7 @@ class ParticleEncapsulation
     }
 
     virtual void mat_apply(vector<shared_ptr<Encapsulation<time>>> dst, 
-                           time a, matrix<time> mat,
+                           time a, Matrix<time> mat,
                            vector<shared_ptr<Encapsulation<time>>> src, 
                            bool zero = true) override final
     {

@@ -65,12 +65,14 @@ class ElectricField
 
     //! @{
     /**
-     * Calculates the potential energy \\( E(\\vec{x},t) \\) of a particle at a given time \\( t \\).
+     * Calculates the potential energy \\( E(\\vec{x}_m,t) \\) of a particle \\( m \\) at a given 
+     * time \\( t \\) with respect to all particles.
      */
     virtual typename parent_type::particle_type::acceleration_type
-    evaluate(shared_ptr<const typename parent_type::particle_type> particle, time t)
+    evaluate(vector<shared_ptr<typename parent_type::particle_type>> particles, size_t m,
+             time t)
     {
-      UNUSED(particle); UNUSED(t);
+      UNUSED(particles); UNUSED(m); UNUSED(t);
       throw NotImplementedYet("evaluate of ElectricField");
     }
     //! @}
@@ -109,13 +111,14 @@ class MagneticField
 
     //! @{
     /**
-     * Calculates the kinetic energy \\( \\vec{v} \\times B(t) \\) of a particle at a given time 
-     * \\( t \\).
+     * Calculates the kinetic energy \\( \\vec{v}_m \\times B(t) \\) of a particle \\( m \\) at a 
+     * given time \\( t \\) with respect to all particles.
      */
     virtual typename parent_type::particle_type::acceleration_type
-    evaluate(shared_ptr<const typename parent_type::particle_type> particle, time t)
+    evaluate(vector<shared_ptr<typename parent_type::particle_type>> particles, size_t m,
+             time t)
     {
-      UNUSED(particle); UNUSED(t);
+      UNUSED(particles); UNUSED(m); UNUSED(t);
       throw NotImplementedYet("evaluate of MagneticField");
     }
     //! @}
@@ -151,16 +154,17 @@ class EnergyOperator
     /**
      * Computes the energy of a particle.
      *
-     * The energy of the particle \\( p \\) in a given electric field \\( E(p,t) \\) and 
-     * magnetic field \\( B(t) \\) at a given time \\( t \\) is usually given by the sum of the 
-     * potential and kinetic energy.
+     * The energy of the particle \\( p_m \\) in a given electric field \\( E(P,t) \\) and 
+     * magnetic field \\( B(t) \\) at a given time \\( t \\) with respect to all particles \\( P \\) 
+     * is usually given by the sum of the potential and kinetic energy.
      */
-    virtual scalar evaluate(shared_ptr<const particle_type> particle,
+    virtual scalar evaluate(vector<shared_ptr<particle_type>> particles,
+                            size_t m,
                             time t,
                             shared_ptr<const e_field_type> E,
                             shared_ptr<const b_field_type> B)
     {
-      UNUSED(particle); UNUSED(t); UNUSED(E); UNUSED(B);
+      UNUSED(particles); UNUSED(m); UNUSED(t); UNUSED(E); UNUSED(B);
       throw NotImplementedYet("evaluate of Energy Operator");
       return scalar(0.0);
     }

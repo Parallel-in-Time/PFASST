@@ -88,7 +88,7 @@ class Position3DEncapsulation
     }
 
     virtual void mat_apply(vector<shared_ptr<Encapsulation<time>>> dst, 
-                           time a, matrix<time> mat,
+                           time a, Matrix<time> mat,
                            vector<shared_ptr<Encapsulation<time>>> src, 
                            bool zero = true) override
     {
@@ -109,7 +109,7 @@ class Position3DEncapsulation
     }
 
     virtual void mat_apply(vector<shared_ptr<this_type>> dst, 
-                           time a, matrix<time> mat,
+                           time a, Matrix<time> mat,
                            vector<shared_ptr<this_type>> src, 
                            bool zero = true)
     {
@@ -321,7 +321,7 @@ class Velocity3DEncapsulation
     }
 
     virtual void mat_apply(vector<shared_ptr<Encapsulation<time>>> dst, 
-                           time a, matrix<time> mat,
+                           time a, Matrix<time> mat,
                            vector<shared_ptr<Encapsulation<time>>> src, 
                            bool zero = true) override
     {
@@ -342,7 +342,7 @@ class Velocity3DEncapsulation
     }
 
     virtual void mat_apply(vector<shared_ptr<this_type>> dst, 
-                           time a, matrix<time> mat,
+                           time a, Matrix<time> mat,
                            vector<shared_ptr<this_type>> src, 
                            bool zero = true)
     {
@@ -567,7 +567,7 @@ class Acceleration3DEncapsulation
     }
 
     virtual void mat_apply(vector<shared_ptr<Encapsulation<time>>> dst, 
-                           time a, matrix<time> mat,
+                           time a, Matrix<time> mat,
                            vector<shared_ptr<Encapsulation<time>>> src, 
                            bool zero = true) override
     {
@@ -588,7 +588,7 @@ class Acceleration3DEncapsulation
     }
 
     virtual void mat_apply(vector<shared_ptr<this_type>> dst, 
-                           time a, matrix<time> mat,
+                           time a, Matrix<time> mat,
                            vector<shared_ptr<this_type>> src, 
                            bool zero = true)
     {

@@ -6,8 +6,7 @@
 #include <map>
 #include <cassert>
 
-#include <boost/numeric/ublas/matrix.hpp>
-using boost::numeric::ublas::matrix;
+#include <Eigen/Dense>
 
 #include <pfasst/encap/encap_sweeper.hpp>
 
@@ -18,6 +17,9 @@ using boost::numeric::ublas::matrix;
 using namespace std;
 using namespace pfasst;
 using namespace pfasst::encap;
+
+template<typename coeff>
+using Matrix = Eigen::Matrix<coeff, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
 typedef map<pair<size_t, size_t>, double> error_map;
 
@@ -54,10 +56,10 @@ class BorisSweeper
     //! delta_nodes[m] = nodes[m] - nodes[m-1]
     vector<time> delta_nodes;
 
-    matrix<time> s_mat;
-    matrix<time> ss_mat;
-    matrix<time> qx_mat;
-    matrix<time> qt_mat;
+    Matrix<time> s_mat;
+    Matrix<time> ss_mat;
+    Matrix<time> qx_mat;
+    Matrix<time> qt_mat;
 
   public:
     //! @{
@@ -96,7 +98,7 @@ class BorisSweeper
 
     virtual void set_state(shared_ptr<const encap_type> u0, size_t m)
     {
-      this->particles[m]->copy(u0);
+      this->particles[m]->operator=(*(u0.get()));
     }
 
     virtual shared_ptr<Encapsulation<time>> get_state(size_t m) const override
@@ -171,13 +173,18 @@ class BorisSweeper
       assert(nodes.size() >= 1);
       size_t nnodes = nodes.size();
 
-      matrix<time> q_mat = compute_quadrature(nodes, nodes, is_proper, QuadratureMatrix::Q);
-      assert(q_mat.size1() == q_mat.size2());
-      matrix<time> qq_mat = matrix<time>(nnodes, nnodes, time(0.0));
-      this->s_mat = matrix<time>(nnodes, nnodes, time(0.0));
-      this->qt_mat = matrix<time>(nnodes, nnodes, time(0.0));
-      this->qx_mat = matrix<time>(nnodes, nnodes, time(0.0));
-      this->ss_mat = matrix<time>(nnodes, nnodes, time(0.0));
+      Matrix<time> q_mat = compute_quadrature(nodes, nodes, is_proper, QuadratureMatrix::Q);
+      assert(q_mat.rows() == q_mat.cols());
+      Matrix<time> qq_mat = Matrix<time>(nnodes, nnodes);
+      qq_mat.fill(time(0.0));
+      this->s_mat = Matrix<time>(nnodes, nnodes);
+      this->s_mat.fill(time(0.0));
+      this->qt_mat = Matrix<time>(nnodes, nnodes);
+      this->qt_mat.fill(time(0.0));
+      this->qx_mat = Matrix<time>(nnodes, nnodes);
+      this->qx_mat.fill(time(0.0));
+      this->ss_mat = Matrix<time>(nnodes, nnodes);
+      this->ss_mat.fill(time(0.0));
 
       // compute QQ, S, SS, Q_T, Q_x
       // building rules for Q_E and Q_I:
@@ -214,7 +221,7 @@ class BorisSweeper
 
     virtual void advance() override
     {
-      this->particles[0]->copy(const_pointer_cast<const encap_type>(this->particles.back()));
+      this->set_state(const_pointer_cast<const encap_type>(this->particles.back()), 0);
     }
 
     virtual void evaluate(size_t m) override
@@ -299,7 +306,9 @@ class BorisSweeper
 
     virtual void spread() override
     {
-      // TODO: implement spread for BorisSweeper
+      for (size_t m = 1; m < this->particles.size(); ++m) {
+        this->set_state(const_pointer_cast<const encap_type>(this->particles[0]), m);
+      }
     }
     //! @}
 
@@ -307,24 +316,25 @@ class BorisSweeper
       virtual void post(ICommunicator* comm, int tag) override
       {
         UNUSED(comm); UNUSED(tag);
+        // TODO: implement BorisSweeper::post
       };
 
       virtual void send(ICommunicator* comm, int tag, bool blocking) override
       {
         UNUSED(comm); UNUSED(tag); UNUSED(blocking);
-        NotImplementedYet("pfasst");
+        // TODO: implement BorisSweeper::send
       }
 
       virtual void recv(ICommunicator* comm, int tag, bool blocking) override
       {
         UNUSED(comm); UNUSED(tag); UNUSED(blocking);
-        NotImplementedYet("pfasst");
+        // TODO: implement BorisSweeper::recv
       }
 
       virtual void broadcast(ICommunicator* comm) override
       {
         UNUSED(comm);
-        NotImplementedYet("pfasst");
+        // TODO: implement BorisSweeper::broadcast
       }
     //! @}
 
@@ -333,9 +343,11 @@ class BorisSweeper
                              const velocity_type& c_k_term)
     {
       velocity_type c_k_term_half = scalar(0.5) * c_k_term;
-      ::dt<time> beta(this->particles[m]->charge() * dt.v / (scalar(2.0) * this->particles[m]->mass()));
-      acceleration_type e_mean = \
-        (this->e_field->evaluate(this->particles[m], tm) - this->e_field->evaluate(this->particles[m+1], tm)) * scalar(0.5);
+      ::dt<time> beta(this->particles[m]->charge() * dt.v 
+                      / (scalar(2.0) * this->particles[m]->mass()));
+      acceleration_type e_mean = (this->e_field->evaluate(this->particles, m, tm) 
+                                  - this->e_field->evaluate(this->particles, m+1, tm)) 
+                                 * scalar(0.5);
 
       // v^{-} = v^{k}
       velocity_type v_minus = this->particles[m]->vel();
@@ -345,7 +357,7 @@ class BorisSweeper
       v_minus += e_mean.convert(beta) + c_k_term_half;
 
       // Boris' kick
-      velocity_type boris_t = this->b_field->evaluate(this->particles[m], t_next).convert(beta);
+      velocity_type boris_t = this->b_field->evaluate(this->particles, m, t_next).convert(beta);
       velocity_type boris_t_sqr = dot(boris_t, boris_t);
       velocity_type boris_s = velocity_type((scalar(2.0) * boris_t.u) / (scalar(1.0) + boris_t_sqr.u),
                                             (scalar(2.0) * boris_t.v) / (scalar(1.0) + boris_t_sqr.v),
