@@ -182,6 +182,7 @@ class ParticleEncapsulation
     //! @{
     scalar m_mass;
     scalar m_charge;
+    scalar m_alpha;
     position_type m_pos;
     velocity_type m_vel;
     acceleration_type m_accel;
@@ -196,6 +197,7 @@ class ParticleEncapsulation
     ParticleEncapsulation(const scalar mass, const scalar charge)
       :   m_mass(mass)
         , m_charge(charge)
+        , m_alpha(mass / charge)
     {}
 
     ParticleEncapsulation(const scalar mass, const scalar charge,
@@ -276,6 +278,8 @@ class ParticleEncapsulation
     const scalar&            mass() const   { return this->m_mass; }
           scalar&            charge()       { return this->m_charge; }
     const scalar&            charge() const { return this->m_charge; }
+          scalar&            alpha()        { return this->m_alpha; }
+    const scalar&            alpha() const  { return this->m_alpha; }
           position_type&     pos()          { return this->m_pos; }
     const position_type&     pos() const    { return this->m_pos; }
           velocity_type&     vel()          { return this->m_vel; }

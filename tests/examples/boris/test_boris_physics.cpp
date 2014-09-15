@@ -21,17 +21,17 @@ typedef MockEOperator<double, double> EnergyOperatorT;
 TEST(ElectricFieldTest, Instantiation)
 {
   EFieldT default_ctor;
-  EXPECT_THAT(default_ctor.omega_z, DoubleEq(1.0));
+  EXPECT_THAT(default_ctor.omega_e, DoubleEq(1.0));
 
   EFieldT special_ctor = EFieldT(0.5);
-  EXPECT_THAT(special_ctor.omega_z, DoubleEq(0.5));
+  EXPECT_THAT(special_ctor.omega_e, DoubleEq(0.5));
 }
 
 TEST(ElectricFieldTest, OmegaZ)
 {
   EFieldT default_ctor;
-  default_ctor.omega_z = 0.0;
-  EXPECT_THAT(default_ctor.omega_z, DoubleEq(0.0));
+  default_ctor.omega_e = 0.0;
+  EXPECT_THAT(default_ctor.omega_e, DoubleEq(0.0));
 }
 
 TEST(ElectricFieldTest, Evaluation)
@@ -47,17 +47,17 @@ TEST(ElectricFieldTest, Evaluation)
 TEST(MagneticFieldTest, Instantiation)
 {
   BFieldT default_ctor;
-  EXPECT_THAT(default_ctor.omega_c, DoubleEq(1.0));
+  EXPECT_THAT(default_ctor.omega_b, DoubleEq(1.0));
 
   BFieldT special_ctor = BFieldT(0.5);
-  EXPECT_THAT(special_ctor.omega_c, DoubleEq(0.5));
+  EXPECT_THAT(special_ctor.omega_b, DoubleEq(0.5));
 }
 
 TEST(MagneticFieldTest, OmegaC)
 {
   BFieldT default_ctor;
-  default_ctor.omega_c = 0.0;
-  EXPECT_THAT(default_ctor.omega_c, DoubleEq(0.0));
+  default_ctor.omega_b = 0.0;
+  EXPECT_THAT(default_ctor.omega_b, DoubleEq(0.0));
 }
 
 TEST(MagneticFieldTest, Evaluation)

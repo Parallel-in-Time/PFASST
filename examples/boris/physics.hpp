@@ -46,13 +46,13 @@ class ElectricField
 
   public:
     //! @{
-    scalar omega_z;
+    scalar omega_e;
     //! @}
 
   public:
     //! @{
-    ElectricField(scalar omega_z)
-      : omega_z(omega_z)
+    ElectricField(scalar omega_e)
+      : omega_e(omega_e)
     {}
 
     ElectricField()
@@ -92,13 +92,13 @@ class MagneticField
 
   public:
     //! @{
-    scalar omega_c;
+    scalar omega_b;
     //! @}
 
   public:
     //! @{
-    MagneticField(scalar omega_c)
-      : omega_c(omega_c)
+    MagneticField(scalar omega_b)
+      : omega_b(omega_b)
     {}
 
     MagneticField()
