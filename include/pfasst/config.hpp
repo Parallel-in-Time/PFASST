@@ -102,7 +102,7 @@ namespace pfasst
 
 
     template<typename T>
-    static const T& get_value(const string& name, const T& default_val)
+    static const T get_value(const string& name, const T& default_val)
     {
       return Options::get_instance().get_variables_map().count(name) 
               ? Options::get_instance().get_variables_map()[name].as<T>() : default_val;
@@ -110,7 +110,7 @@ namespace pfasst
 
 
     template<typename T>
-    static const T& get_value(const string& name)
+    static const T get_value(const string& name)
     {
       return Options::get_instance().get_variables_map()[name].as<T>();
     }

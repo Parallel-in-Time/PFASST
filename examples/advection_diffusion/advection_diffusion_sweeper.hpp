@@ -48,11 +48,12 @@ class AdvectionDiffusionSweeper
     }
 
   public:
-    static void enable_config_options()
+    static void enable_config_options(size_t index = -1)
     {
       pfasst::config::Options::get_instance()
         .register_init_function("Advection-Diffusion Sweeper",
-                                function<void(po::options_description&)>(init_config_options));
+                                function<void(po::options_description&)>(init_config_options),
+                                index);
     }
 
   private:
