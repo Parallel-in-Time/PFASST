@@ -4,12 +4,25 @@
 #include <memory>
 #include <stdexcept>
 #include <cassert>
+#include <ostream>
 #include <type_traits>
+
+#include <Eigen/Core>
 
 #include "particle.hpp"
 
+template<typename prec>
+using Matrix = Eigen::Matrix<prec, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+
 using namespace pfasst;
 using namespace pfasst::encap;
+
+
+template<
+  typename scalar,
+  typename time = time_precision
+>
+class Velocity3DEncapsulation;
 
 
 template<
@@ -40,6 +53,15 @@ class Position3DEncapsulation
         , z(z)
     {}
 
+    Position3DEncapsulation(const Matrix<time>& vector)
+      : Position3DEncapsulation()
+    {
+      assert((vector.cols() == 1 && vector.rows() == 3) || (vector.cols() == 3 && vector.rows() == 1));
+      this->x = vector(0);
+      this->y = vector(1);
+      this->z = vector(2);
+    }
+
     //! Copy CTor
     Position3DEncapsulation(const this_type& other)
       :   x(other.x)
@@ -64,6 +86,13 @@ class Position3DEncapsulation
       this->x = scalar(0.0);
       this->y = scalar(0.0);
       this->z = scalar(0.0);
+    }
+
+    virtual Matrix<time> as_matrix() const override
+    {
+      Matrix<time> mat(1, 3);
+      mat << this->x, this->y, this->z;
+      return mat;
     }
     //! @}
 
@@ -117,9 +146,33 @@ class Position3DEncapsulation
       // TODO: implement aA*x for 3D-Position
       throw NotImplementedYet("aA*x for 3D-Position");
     }
+
+    friend this_type cross(const this_type& first, const this_type& second)
+    {
+      assert(first.DIM == second.DIM);
+      return this_type(first.y * second.z - first.z * second.y,
+                       first.z * second.x - first.x * second.z,
+                       first.x * second.y - first.y * second.x);
+    }
+
+    virtual scalar norm0() const
+    {
+      return scalar(sqrt(this->x * this->x + this->y * this->y + this->z * this->z));
+    }
     //! @}
 
     //! @{
+    virtual scalar operator[](const size_t index) const override
+    {
+      assert(index < 3);
+      switch (index) {
+        case 0: return this->x; break;
+        case 1: return this->y; break;
+        case 2: return this->z; break;
+        default: throw out_of_range("Invalid value index for Position3D");
+      }
+    }
+
     this_type& operator=(const this_type& other)
     {
       assert(this != &other);
@@ -142,10 +195,10 @@ class Position3DEncapsulation
     }
 
     //! this *= value
-    template<typename value_type>
-    this_type& operator*(const value_type value)
+//     template<typename value_type>
+    this_type& operator*=(const scalar value)
     {
-      static_assert(is_arithmetic<value_type>::value,
+      static_assert(is_arithmetic<scalar>::value,
                     "Position can only be multiplied by arithmetic types.");
       this->x *= value;
       this->y *= value;
@@ -154,58 +207,60 @@ class Position3DEncapsulation
     }
 
     //! newpos = value * pos
-    template<typename value_type>
-    friend this_type operator*(const value_type value, const this_type& first)
+//     template<typename value_type>
+    friend this_type operator*(const scalar value, const this_type& first)
     {
-      static_assert(is_arithmetic<value_type>::value,
+      static_assert(is_arithmetic<scalar>::value,
                     "Position can only be multiplied by arithmetic types.");
       return this_type(value * first.x, value * first.y, value * first.z);
     }
 
     //! newpos = pos * value
-    template<typename value_type>
-    friend this_type operator*(const this_type& first, const value_type value)
+//     template<typename value_type>
+    friend this_type operator*(const this_type& first, const scalar value)
     {
-      static_assert(is_arithmetic<value_type>::value,
+      static_assert(is_arithmetic<scalar>::value,
                     "Position can only be multiplied by arithmetic types.");
       return this_type(first.x * value, first.y * value, first.z * value);
     }
 
-    //! this += value
-    template<typename value_type>
-    this_type& operator+(const value_type value)
+    //! newvel = pos / delta_time
+    friend Velocity3DEncapsulation<scalar, time> operator/(const this_type& first, const ::dt<time> ds)
     {
-      static_assert(is_arithmetic<value_type>::value,
+      return Velocity3DEncapsulation<scalar, time>(first.x / ds.v, first.y / ds.v, first.z / ds.v);
+    }
+
+    //! newpos = pos / value
+//     template<typename value_type>
+    friend this_type operator/(const this_type& first, const scalar value)
+    {
+      static_assert(is_arithmetic<scalar>::value,
+                    "Position can only be devided by arithmetic types.");
+      return this_type(first.x / value, first.y / value, first.z / value);
+    }
+
+    //! pos /= value
+//     template<typename value_type>
+    this_type& operator/=(const scalar value)
+    {
+      static_assert(is_arithmetic<scalar>::value,
+                    "Position can only be devided by arithmetic types.");
+      this->x /= value;
+      this->y /= value;
+      this->z /= value;
+      return *this;
+    }
+
+    //! this += value
+//     template<typename value_type>
+    this_type& operator+=(const scalar value)
+    {
+      static_assert(is_arithmetic<scalar>::value,
                     "Position can only be multiplied by arithmetic types.");
       this->x += value;
       this->y += value;
       this->z += value;
       return *this;
-    }
-
-    //! newpos = value + pos
-    template<typename value_type>
-    friend this_type operator+(const value_type value, const this_type& first)
-    {
-      static_assert(is_arithmetic<value_type>::value,
-                    "Position can only be multiplied by arithmetic types.");
-      return this_type(first.x + value, first.y + value, first.z + value);
-    }
-
-    //! newpos = pos + value
-    template<typename value_type>
-    friend this_type operator+(const this_type& first, const value_type value)
-    {
-      static_assert(is_arithmetic<value_type>::value,
-                    "Position can only be multiplied by arithmetic types.");
-      return this_type(first.x + value, first.y + value, first.z + value);
-    }
-
-    //! newpos = pos + other
-    friend this_type operator+(const this_type& first, const this_type& second)
-    {
-      assert(first.DIM == second.DIM);
-      return this_type(first.x + second.x, first.y + second.y, first.z + second.z);
     }
 
     //! this += other
@@ -218,15 +273,69 @@ class Position3DEncapsulation
       return *this;
     }
 
-    //! newpos = pos - other
-    friend this_type operator-=(const this_type& first, const this_type& second)
+    //! newpos = value + pos
+//     template<typename value_type>
+    friend this_type operator+(const scalar value, const this_type& first)
     {
-      assert(first.DIM == second.DIM);
-      return this_type(first.x - second.x, first.y - second.y, first.z - second.y);
+      static_assert(is_arithmetic<scalar>::value,
+                    "Position can only be multiplied by arithmetic types.");
+      return this_type(first.x + value, first.y + value, first.z + value);
     }
 
-    //! this -= other
-    this_type& operator-(const this_type& other)
+    //! newpos = pos + value
+//     template<typename value_type>
+    friend this_type operator+(const this_type& first, const scalar value)
+    {
+      static_assert(is_arithmetic<scalar>::value,
+                    "Position can only be multiplied by arithmetic types.");
+      return this_type(first.x + value, first.y + value, first.z + value);
+    }
+
+    //! newpos = pos + other
+    friend this_type operator+(const this_type& first, const this_type& second)
+    {
+      assert(first.DIM == second.DIM);
+      return this_type(first.x + second.x, first.y + second.y, first.z + second.z);
+    }
+
+    //! newpos = pos - other
+    friend this_type operator-(const this_type& first, const this_type& second)
+    {
+      assert(first.DIM == second.DIM);
+      return this_type(first.x - second.x, first.y - second.y, first.z - second.z);
+    }
+
+    //! newpos = pos - value
+//     template<typename value_type>
+    friend this_type operator-(const this_type& first, const scalar value)
+    {
+      static_assert(is_arithmetic<scalar>::value,
+                    "Position can only be subtracted by arithmetic types.");
+      return this_type(first.x - value, first.y - value, first.z - value);
+    }
+
+    //! newpos = value - pos
+//     template<typename value_type>
+    friend this_type operator-(const scalar value, const this_type& first)
+    {
+      static_assert(is_arithmetic<scalar>::value,
+                    "Position can only be subtracted by arithmetic types.");
+      return first - value;
+    }
+
+    //! this -= value
+//     template<typename value_type>
+    this_type& operator-=(const scalar value)
+    {
+      static_assert(is_arithmetic<scalar>::value,
+                    "Position can only be subtracted by arithmetic types.");
+      this->x -= value;
+      this->y -= value;
+      this->z -= value;
+      return *this;
+    }
+
+    this_type& operator-=(const this_type& other)
     {
       assert(this->DIM == other.DIM);
       this->x -= other.x;
@@ -238,9 +347,17 @@ class Position3DEncapsulation
 };
 
 
+template<typename scalar, typename time>
+ostream& operator<<(ostream& out, const Position3DEncapsulation<scalar, time>& pos)
+{
+  out << pos.as_matrix();
+  return out;
+}
+
+
 template<
   typename scalar,
-  typename time = time_precision
+  typename time /*= time_precision*/
 >
 class Velocity3DEncapsulation
   : public VelocityEncapsulation<scalar, time>
@@ -265,6 +382,15 @@ class Velocity3DEncapsulation
         , v(v)
         , w(w)
     {}
+
+    Velocity3DEncapsulation(const Matrix<time>& vector)
+      : Velocity3DEncapsulation()
+    {
+      assert((vector.cols() == 1 && vector.rows() == 3) || (vector.cols() == 3 && vector.rows() == 1));
+      this->u = vector(0);
+      this->v = vector(1);
+      this->w = vector(2);
+    }
 
     //! Copy CTor
     Velocity3DEncapsulation(const this_type& other)
@@ -297,6 +423,13 @@ class Velocity3DEncapsulation
       this->u = scalar(0.0);
       this->v = scalar(0.0);
       this->w = scalar(0.0);
+    }
+
+    virtual Matrix<time> as_matrix() const override
+    {
+      Matrix<time> mat(1, 3);
+      mat << this->u, this->v, this->w;
+      return mat;
     }
     //! @}
 
@@ -350,6 +483,19 @@ class Velocity3DEncapsulation
       // TODO: implement aA*x for 3D-Velocity
       throw NotImplementedYet("aA*x for 3D-Velocity");
     }
+
+    friend this_type cross(const this_type& first, const this_type& second)
+    {
+      assert(first.DIM == second.DIM);
+      return this_type(first.v * second.w - first.w * second.v,
+                       first.w * second.u - first.u * second.w,
+                       first.u * second.v - first.v * second.u);
+    }
+
+    virtual scalar norm0() const
+    {
+      return scalar(sqrt(this->u * this->u + this->v * this->v + this->w * this->w));
+    }
     //! @}
 
     //! @{
@@ -361,6 +507,17 @@ class Velocity3DEncapsulation
     //! @}
 
     //! @{
+    virtual scalar operator[](const size_t index) const override
+    {
+      assert(index < 3);
+      switch (index) {
+        case 0: return this->u; break;
+        case 1: return this->v; break;
+        case 2: return this->w; break;
+        default: throw out_of_range("Invalid value index for Velocity3D");
+      }
+    }
+
     this_type& operator=(const this_type& other)
     {
       if (this != &other) {
@@ -394,10 +551,10 @@ class Velocity3DEncapsulation
     }
 
     //! vel += value
-    template<typename value_type>
-    this_type& operator+=(const value_type value)
+//     template<typename value_type>
+    this_type& operator+=(const scalar value)
     {
-      static_assert(is_arithmetic<value_type>::value,
+      static_assert(is_arithmetic<scalar>::value,
                     "Only arithmetic types or Velocities can be added to Velocity.");
       this->u += value;
       this->v += value;
@@ -416,10 +573,10 @@ class Velocity3DEncapsulation
     }
 
     //! vel -= value
-    template<typename value_type>
-    this_type& operator-=(const value_type value)
+//     template<typename value_type>
+    this_type& operator-=(const scalar value)
     {
-      static_assert(is_arithmetic<value_type>::value,
+      static_assert(is_arithmetic<scalar>::value,
                     "Only arithmetic types or Velocities can be subtracted from Velocity.");
       this->u -= value;
       this->v -= value;
@@ -438,19 +595,19 @@ class Velocity3DEncapsulation
     }
 
     //! newvel = vel + value
-    template<typename value_type>
-    friend this_type operator+(const this_type& first, const value_type value)
+//     template<typename value_type>
+    friend this_type operator+(const this_type& first, const scalar value)
     {
-      static_assert(is_arithmetic<value_type>::value,
+      static_assert(is_arithmetic<scalar>::value,
                     "Only arithmetic types can be added to Velocity.");
       return this_type(first.u + value, first.v + value, first.w + value);
     }
 
     //! newvel = value + vel
-    template<typename value_type>
-    friend this_type operator+(const value_type value, const this_type& first)
+//     template<typename value_type>
+    friend this_type operator+(const scalar value, const this_type& first)
     {
-      static_assert(is_arithmetic<value_type>::value,
+      static_assert(is_arithmetic<scalar>::value,
                     "Only arithmetic types can be added to Velocity.");
       return this_type(first.u + value, first.v + value, first.w + value);
     }
@@ -462,11 +619,36 @@ class Velocity3DEncapsulation
       return this_type(first.u + second.u, first.v + second.v, first.w + second.w);
     }
 
-    //! vel *= value
-    template<typename value_type>
-    this_type& operator*=(const value_type value)
+    //! newvel = vel - other
+    friend this_type operator-(const this_type& first, const this_type& second)
     {
-      static_assert(is_arithmetic<value_type>::value,
+      assert(first.DIM == second.DIM);
+      return this_type(first.u - second.u, first.v - second.v, first.w - second.w);
+    }
+
+    //! newvel = vel - value
+//     template<typename value_type>
+    friend this_type operator-(const this_type& first, const scalar value)
+    {
+      static_assert(is_arithmetic<scalar>::value,
+                    "Only arithmetic types can be subtracted from Velocity.");
+      return this_type(first.u - value, first.v - value, first.w - value);
+    }
+
+    //! newvel = value - vel
+//     template<typename value_type>
+    friend this_type operator-(const scalar value, const this_type& first)
+    {
+      static_assert(is_arithmetic<scalar>::value,
+                    "Only arithmetic types can be subtrated from Velocity.");
+      return first - value;
+    }
+
+    //! vel *= value
+//     template<typename value_type>
+    this_type& operator*=(const scalar value)
+    {
+      static_assert(is_arithmetic<scalar>::value,
                     "Velocity can only be multiplied by arithmetic types.");
       this->u *= value;
       this->v *= value;
@@ -475,35 +657,39 @@ class Velocity3DEncapsulation
     }
 
     //! newvel = value * vel
-    template<typename value_type>
-    friend this_type operator*(const value_type value, const this_type& first)
+//     template<typename value_type>
+    friend this_type operator*(const scalar value, const this_type& first)
     {
-      static_assert(is_arithmetic<value_type>::value,
+      static_assert(is_arithmetic<scalar>::value,
                     "Velocity can only be multiplied by arithmetic types.");
       return this_type(first.u * value, first.v * value, first.w * value);
     }
 
     //! newvel = vel * value
-    template<typename value_type>
-    friend this_type operator*(const this_type& first, const value_type value)
+//     template<typename value_type>
+    friend this_type operator*(const this_type& first, const scalar value)
     {
-      static_assert(is_arithmetic<value_type>::value,
+      static_assert(is_arithmetic<scalar>::value,
                     "Velocity can only be multiplied by arithmetic types.");
       return this_type(first.u * value, first.v * value, first.w * value);
+    }
+
+    //! newvel = vel / value
+//     template<typename value_type>
+    friend this_type operator/(const this_type& first, const scalar value)
+    {
+      static_assert(is_arithmetic<scalar>::value,
+                    "Velocity can only be devided by arithmetic types.");
+      return this_type(first.u / value, first.v / value, first.w / value);
     }
 };
 
 
 template<typename scalar, typename time>
-//! newvel = vel x vel
-Velocity3DEncapsulation<scalar, time>
-dot(const Velocity3DEncapsulation<scalar, time>& first,
-    const Velocity3DEncapsulation<scalar, time>& second)
+ostream& operator<<(ostream& out, const Velocity3DEncapsulation<scalar, time>& vel)
 {
-  assert(first.DIM == second.DIM);
-  return Velocity3DEncapsulation<scalar, time>(first.v * second.w - first.w * second.v,
-                                               first.w * second.u - first.u * second.w,
-                                               first.u * second.v - first.v * second.u);
+  out << vel.as_matrix();
+  return out;
 }
 
 
@@ -533,6 +719,15 @@ class Acceleration3DEncapsulation
         , b(b)
         , c(c)
     {}
+
+    Acceleration3DEncapsulation(const Matrix<time>& vector)
+      : Acceleration3DEncapsulation()
+    {
+      assert((vector.cols() == 1 && vector.rows() == 3) || (vector.cols() == 3 && vector.rows() == 1));
+      this->a = vector(0);
+      this->b = vector(1);
+      this->c = vector(2);
+    }
 
     //! Copy CTor
     Acceleration3DEncapsulation(const this_type& other)
@@ -565,6 +760,13 @@ class Acceleration3DEncapsulation
       this->a = scalar(0.0);
       this->b = scalar(0.0);
       this->c = scalar(0.0);
+    }
+
+    virtual Matrix<time> as_matrix() const override
+    {
+      Matrix<time> mat(1, 3);
+      mat << this->a, this->b, this->c;
+      return mat;
     }
     //! @}
 
@@ -618,6 +820,18 @@ class Acceleration3DEncapsulation
       // TODO: implement aA*x for 3D-Acceleration
       throw NotImplementedYet("aA*x for 3D-Acceleration");
     }
+
+    friend this_type cross(const this_type& first, const this_type& second)
+    {
+      return this_type(first.b * second.c - first.c * second.b,
+                       first.c * second.a - first.a * second.c,
+                       first.a * second.b - first.b * second.a);
+    }
+
+    virtual scalar norm0() const
+    {
+      return scalar(sqrt(this->a * this->a + this->b * this->b + this->c * this->c));
+    }
     //! @}
 
     //! @{
@@ -635,6 +849,17 @@ class Acceleration3DEncapsulation
     //! @}
 
     //! @{
+    virtual scalar operator[](const size_t index) const override
+    {
+      assert(index < 3);
+      switch (index) {
+        case 0: return this->a; break;
+        case 1: return this->b; break;
+        case 2: return this->c; break;
+        default: throw out_of_range("Invalid value index for Acceleration3D");
+      }
+    }
+
     this_type& operator=(const this_type& other)
     {
       if (this != &other) {
@@ -667,38 +892,45 @@ class Acceleration3DEncapsulation
       return *this;
     }
 
-    //! newaccel = value * accel
-    template<typename value_type>
-    friend this_type operator*(const value_type value, const this_type& first)
+    //! newaccel = accel * value
+//     template<typename value_type>
+    friend this_type operator*(const this_type& first, const scalar value)
     {
-      static_assert(is_arithmetic<value_type>::value,
+      static_assert(is_arithmetic<scalar>::value,
                     "Acceleration can only be multiplied by arithmetic types.");
       return this_type(first.a * value, first.b * value, first.c * value);
     }
 
-    //! newaccel = accel * value
-    template<typename value_type>
-    friend this_type operator*(const this_type& first, const value_type value)
+    //! newaccel = value * accel
+//     template<typename value_type>
+    friend this_type operator*(const scalar value, const this_type& first)
     {
-      return this_type(value * first.a, value * first.b, value * first.c);
+      return first * value;
+    }
+
+    //! newaccel = accel / value
+//     template<typename value_type>
+    friend this_type operator/(const this_type& first, const scalar value)
+    {
+      static_assert(is_arithmetic<scalar>::value,
+                    "Acceleration can only be devided by arithmetic types.");
+      return this_type(first.a / value, first.b / value, first.c / value);
     }
 
     //! newaccel = accel + value
-    template<typename value_type>
-    friend this_type operator+(const this_type& first, const value_type value)
+//     template<typename value_type>
+    friend this_type operator+(const this_type& first, const scalar value)
     {
-      static_assert(is_arithmetic<value_type>::value,
+      static_assert(is_arithmetic<scalar>::value,
                     "Acceleration can only be multiplied by arithmetic types.");
       return this_type(first.a + value, first.b + value, first.c + value);
     }
 
     //! newaccel = value + accel
-    template<typename value_type>
-    friend this_type operator+(const value_type value, const this_type& first)
+//     template<typename value_type>
+    friend this_type operator+(const scalar value, const this_type& first)
     {
-      static_assert(is_arithmetic<value_type>::value,
-                    "Acceleration can only be multiplied by arithmetic types.");
-      return this_type(value + first.a, value + first.b, value + first.c);
+      return first + value;
     }
 
     //! newaccel = accel + other
@@ -715,11 +947,27 @@ class Acceleration3DEncapsulation
       return this_type(first.a - second.a, first.b - second.b, first.c - second.c);
     }
 
-    //! accel *= value
-    template<typename value_type>
-    this_type& operator*=(const value_type value)
+    //! newaccel = accel - value
+//     template<typename value_type>
+    friend this_type operator-(const this_type& first, const scalar value)
     {
-      static_assert(is_arithmetic<value_type>::value,
+      static_assert(is_arithmetic<scalar>::value,
+                    "Acceleration can only be subtracted by arithmetic types.");
+      return this_type(first.a - value, first.b - value, first.c - value);
+    }
+
+    //! newaccel = accel - value
+//     template<typename value_type>
+    friend this_type operator-(const scalar value, const this_type& first)
+    {
+      return first - value;
+    }
+
+    //! accel *= value
+//     template<typename value_type>
+    this_type& operator*=(const scalar value)
+    {
+      static_assert(is_arithmetic<scalar>::value,
                     "Acceleration can only be multiplied by arithmetic types.");
       this->a *= value;
       this->b *= value;
@@ -728,24 +976,14 @@ class Acceleration3DEncapsulation
     }
 
     //! accel += value
-    template<typename value_type>
-    this_type& operator+=(const value_type value)
+//     template<typename value_type>
+    this_type& operator+=(const scalar value)
     {
-      static_assert(is_arithmetic<value_type>::value,
+      static_assert(is_arithmetic<scalar>::value,
                     "Only arithmetic types can be added to Acceleration.");
       this->a += value;
       this->b += value;
       this->c += value;
-      return *this;
-    }
-
-    //! accel -= value
-    template<typename value_type>
-    this_type& operator-=(const value_type value)
-    {
-      this->a -= value;
-      this->b -= value;
-      this->c -= value;
       return *this;
     }
 
@@ -756,6 +994,18 @@ class Acceleration3DEncapsulation
       this->a += second.a;
       this->b += second.b;
       this->c += second.c;
+      return *this;
+    }
+
+    //! accel -= value
+//     template<typename value_type>
+    this_type& operator-=(const scalar value)
+    {
+      static_assert(is_arithmetic<scalar>::value,
+                    "Only arithmetic types can be subtracted from Acceleration.");
+      this->a -= value;
+      this->b -= value;
+      this->c -= value;
       return *this;
     }
 
@@ -770,6 +1020,12 @@ class Acceleration3DEncapsulation
     }
 };
 
+template<typename scalar, typename time>
+ostream& operator<<(ostream& out, const Acceleration3DEncapsulation<scalar, time>& accel)
+{
+  out << accel.as_matrix();
+  return out;
+}
 
 
 template<
@@ -856,6 +1112,26 @@ class Particle3DEncapsulation
     //! @}
 
     //! @{
+    virtual Matrix<time> as_matrix() const override
+    {
+      Matrix<time> mat(3, 3);
+      mat.block(0, 0, 3, 1) = this->m_pos.as_matrix().transpose();
+      mat.block(0, 1, 3, 1) = this->m_vel.as_matrix().transpose();
+      mat.block(0, 2, 3, 1) = this->m_accel.as_matrix().transpose();
+      return mat;
+    }
+
+    virtual Matrix<time> as_vector() const override
+    {
+      Matrix<time> mat(1, 9);
+      mat.block(0, 0, 1, 3) = this->m_pos.as_matrix();
+      mat.block(0, 3, 1, 3) = this->m_vel.as_matrix();
+      mat.block(0, 6, 1, 3) = this->m_accel.as_matrix();
+      return mat;
+    }
+    //! @}
+
+    //! @{
     /**
      * gives the particle's energy as its maximum norm
      */
@@ -867,6 +1143,19 @@ class Particle3DEncapsulation
     }
     //! @}
 };
+
+
+
+template<
+  typename scalar,
+  typename time = time_precision
+>
+ostream& operator<<(ostream& out, const Particle3DEncapsulation<time, scalar>& particle)
+{
+  out << "pos: " << particle.pos().as_matrix() << "\tvel: " << particle.vel().as_matrix() << "\taccel: " << particle.accel().as_matrix();
+  return out;
+}
+
 
 // XXX: not sure whether this factory is actually useful
 template<

@@ -17,184 +17,185 @@ typedef Acceleration3DEncapsulation<double, double> Acceleration3D;
 typedef Particle3DEncapsulation<double, double> Particle3DT;
 
 
-TEST(BorisParticle, Instantiation)
-{
-  EXPECT_TRUE(is_default_constructible<ParticleT>::value);
-  EXPECT_TRUE(is_destructible<ParticleT>::value);
-  EXPECT_TRUE(is_copy_constructible<ParticleT>::value);
-  EXPECT_TRUE(is_move_constructible<ParticleT>::value);
-  EXPECT_TRUE(is_copy_assignable<ParticleT>::value);
-  EXPECT_TRUE(is_move_assignable<ParticleT>::value);
-
-  ParticleT default_ctor;
-  EXPECT_THAT(default_ctor.DIM, 0);
-  EXPECT_THAT(default_ctor.charge(), DoubleEq(1.0));
-  EXPECT_THAT(default_ctor.mass(), DoubleEq(1.0));
-
-  ParticleT special_ctor = ParticleT(0.5, 1.0);
-  EXPECT_THAT(special_ctor.mass(), DoubleEq(0.5));
-  EXPECT_THAT(special_ctor.charge(), DoubleEq(1.0));
-}
-
 /*
- * Position3DEncapsulation
+ * ParticleComponent3DEncapsulation
  */
-TEST(BorisParticlePosition3D, Initialization)
+
+template<typename T>
+class OperatorTests :
+  public ::testing::Test
 {
-  EXPECT_TRUE(is_default_constructible<Position3D>::value);
-  EXPECT_TRUE(is_destructible<Position3D>::value);
-  EXPECT_TRUE(is_copy_constructible<Position3D>::value);
-  EXPECT_TRUE(is_move_constructible<Position3D>::value);
+  public:
+    const double c1, c2, c3;
+    const T val1;
+    T val2;
+    T val1_copy;
 
-  Position3D default_pos;
-  EXPECT_THAT(default_pos.DIM, 3);
-  EXPECT_THAT(default_pos.x, DoubleEq(0.0));
-  EXPECT_THAT(default_pos.y, DoubleEq(0.0));
-  EXPECT_THAT(default_pos.z, DoubleEq(0.0));
+  public:
+    OperatorTests()
+      :   c1(0.1), c2(1.2), c3(-42.0)
+        , val1( c1,  c2,  c3)
+        , val2(-c1, -c2, -c3)
+    {}
+    virtual ~OperatorTests()
+    {}
+};
 
-  const Position3D pos2(0.5, 1.0, -0.5);
-  EXPECT_THAT(pos2.x, DoubleEq(0.5));
-  EXPECT_THAT(pos2.y, DoubleEq(1.0));
-  EXPECT_THAT(pos2.z, DoubleEq(-0.5));
+TYPED_TEST_CASE_P(OperatorTests);
+
+TYPED_TEST_P(OperatorTests, Initialization)
+{
+  EXPECT_TRUE(is_default_constructible<TypeParam>::value);
+  EXPECT_TRUE(is_destructible<TypeParam>::value);
+  EXPECT_TRUE(is_copy_constructible<TypeParam>::value);
+  EXPECT_TRUE(is_move_constructible<TypeParam>::value);
+
+  TypeParam default_val;
+  EXPECT_THAT(default_val.DIM, 3);
+  EXPECT_THAT(default_val[0], DoubleEq(0.0));
+  EXPECT_THAT(default_val[1], DoubleEq(0.0));
+  EXPECT_THAT(default_val[2], DoubleEq(0.0));
+
+  EXPECT_THAT(this->val1[0], DoubleEq(this->c1));
+  EXPECT_THAT(this->val1[1], DoubleEq(this->c2));
+  EXPECT_THAT(this->val1[2], DoubleEq(this->c3));
 }
 
-TEST(BorisParticlePosition3D, Copyable)
+TYPED_TEST_P(OperatorTests, Copyable)
 {
-  EXPECT_TRUE(is_copy_assignable<Position3D>::value);
-  EXPECT_TRUE(is_move_assignable<Position3D>::value);
+  EXPECT_TRUE(is_copy_assignable<TypeParam>::value);
+  EXPECT_TRUE(is_move_assignable<TypeParam>::value);
 
-  const Position3D pos_original(0.5, 1.0, -0.5);
+  TypeParam copy1(this->val1);
+  EXPECT_THAT(copy1[0], DoubleEq(this->val1[0]));
+  EXPECT_THAT(copy1[1], DoubleEq(this->val1[1]));
+  EXPECT_THAT(copy1[2], DoubleEq(this->val1[2]));
 
-  Position3D pos_copy1(pos_original);
-  EXPECT_THAT(pos_copy1.x, DoubleEq(0.5));
-  EXPECT_THAT(pos_copy1.y, DoubleEq(1.0));
-  EXPECT_THAT(pos_copy1.z, DoubleEq(-0.5));
-
-  Position3D pos_copy1b;
-  pos_copy1b = pos_copy1;
-  EXPECT_THAT(pos_copy1b.x, DoubleEq(0.5));
-  EXPECT_THAT(pos_copy1b.y, DoubleEq(1.0));
-  EXPECT_THAT(pos_copy1b.z, DoubleEq(-0.5));
+  TypeParam copy2;
+  copy2 = this->val1;
+  EXPECT_THAT(copy2[0], DoubleEq(this->val1[0]));
+  EXPECT_THAT(copy2[1], DoubleEq(this->val1[1]));
+  EXPECT_THAT(copy2[2], DoubleEq(this->val1[2]));
 }
 
-TEST(BorisParticlePosition3D, axpy)
+TYPED_TEST_P(OperatorTests, axpy)
 {
-  Position3D pos_2(0.5, 1.0, -0.5);
-  const Position3D other_pos(0.5, 1.0, -0.5);
+  this->val2.saxpy(1.0, this->val1);
+  EXPECT_THAT(this->val2[0], DoubleEq(0.0));
+  EXPECT_THAT(this->val2[1], DoubleEq(0.0));
+  EXPECT_THAT(this->val2[2], DoubleEq(0.0));
 
-  pos_2.saxpy(1.0, other_pos);
-  EXPECT_THAT(pos_2.x, DoubleEq(1.0));
-  EXPECT_THAT(pos_2.y, DoubleEq(2.0));
-  EXPECT_THAT(pos_2.z, DoubleEq(-1.0));
+  shared_ptr<TypeParam> spr1 = make_shared<TypeParam>(this->c1, this->c2, this->c3);
+  spr1->saxpy(0.0, this->val1);
+  EXPECT_THAT(spr1->operator[](0), DoubleEq(this->c1));
+  EXPECT_THAT(spr1->operator[](1), DoubleEq(this->c2));
+  EXPECT_THAT(spr1->operator[](2), DoubleEq(this->c3));
 
-  shared_ptr<Position3D> pos_1 = make_shared<Position3D>(0.5, 1.0, -0.5);
-  pos_1->saxpy(0.0, other_pos);
-  EXPECT_THAT(pos_1->x, DoubleEq(0.5));
-  EXPECT_THAT(pos_1->y, DoubleEq(1.0));
-
-  shared_ptr<Position3D> pos_0 = make_shared<Position3D>(0.5, 1.0, -0.5);
-  pos_0->saxpy(-1.0, other_pos);
-  EXPECT_THAT(pos_0->x, DoubleEq(0.0));
-  EXPECT_THAT(pos_0->y, DoubleEq(0.0));
+  shared_ptr<TypeParam> spr2 = make_shared<TypeParam>(this->c1, this->c2, this->c3);
+  spr2->saxpy(-1.0, this->val1);
+  EXPECT_THAT(spr2->operator[](0), DoubleEq(0.0));
+  EXPECT_THAT(spr2->operator[](1), DoubleEq(0.0));
+  EXPECT_THAT(spr2->operator[](2), DoubleEq(0.0));
 }
 
-TEST(BorisParticlePosition3D, operators)
+
+TYPED_TEST_P(OperatorTests, Addition)
 {
-  const Position3D pos1(0.1, 0.2, -0.1);
-  Position3D pos2(-0.1, -0.2, 0.1);
+  TypeParam add1 = this->val1 + this->val2;
+  EXPECT_THAT(add1[0], DoubleEq(this->c1 + (- this->c1)));
+  EXPECT_THAT(add1[1], DoubleEq(this->c2 + (- this->c2)));
+  EXPECT_THAT(add1[2], DoubleEq(this->c3 + (- this->c3)));
+  EXPECT_THAT(this->val2[0], DoubleEq(- this->c1));
+  EXPECT_THAT(this->val2[1], DoubleEq(- this->c2));
+  EXPECT_THAT(this->val2[2], DoubleEq(- this->c3));
 
-  long double one = 1.0;
+  TypeParam add2 = this->val1 + 1.0;
+  EXPECT_THAT(add2[0], DoubleEq(this->c1 + 1.0));
+  EXPECT_THAT(add2[1], DoubleEq(this->c2 + 1.0));
+  EXPECT_THAT(add2[2], DoubleEq(this->c3 + 1.0));
 
-  Position3D twice = pos1 * 2.0;
-  EXPECT_THAT(twice.x, DoubleEq(0.2));
-  EXPECT_THAT(twice.y, DoubleEq(0.4));
-  EXPECT_THAT(pos1.x, DoubleEq(0.1));
-  EXPECT_THAT(pos1.y, DoubleEq(0.2));
+  TypeParam add3 = 1.0 + this->val1;
+  EXPECT_THAT(add3[0], DoubleEq(this->c1 + 1.0));
+  EXPECT_THAT(add3[1], DoubleEq(this->c2 + 1.0));
+  EXPECT_THAT(add3[2], DoubleEq(this->c3 + 1.0));
 
-  Position3D twice2 = 2.0 * pos1;
-  EXPECT_THAT(twice2.x, DoubleEq(0.2));
-  EXPECT_THAT(twice2.y, DoubleEq(0.4));
-  EXPECT_THAT(pos1.x, DoubleEq(0.1));
-  EXPECT_THAT(pos1.y, DoubleEq(0.2));
+  this->val1_copy = this->val1;
+  this->val1_copy += 1.0;
+  EXPECT_THAT(this->val1_copy[0], DoubleEq(this->c1 + 1.0));
+  EXPECT_THAT(this->val1_copy[1], DoubleEq(this->c2 + 1.0));
+  EXPECT_THAT(this->val1_copy[2], DoubleEq(this->c3 + 1.0));
 
-  Position3D add1 = pos1 + pos2;
-  EXPECT_THAT(add1.x, DoubleEq(0.0));
-  EXPECT_THAT(add1.y, DoubleEq(0.0));
-  EXPECT_THAT(pos1.x, DoubleEq(0.1));
-  EXPECT_THAT(pos1.y, DoubleEq(0.2));
-  EXPECT_THAT(pos2.x, DoubleEq(-0.1));
-  EXPECT_THAT(pos2.y, DoubleEq(-0.2));
-
-  Position3D add2 = pos1 + one;
-  EXPECT_THAT(add2.x, DoubleEq(1.1));
-  EXPECT_THAT(add2.y, DoubleEq(1.2));
-  EXPECT_THAT(pos1.x, DoubleEq(0.1));
-  EXPECT_THAT(pos1.y, DoubleEq(0.2));
-
-  Position3D add3 = one + pos1;
-  EXPECT_THAT(add3.x, DoubleEq(1.1));
-  EXPECT_THAT(add3.y, DoubleEq(1.2));
-  EXPECT_THAT(pos1.x, DoubleEq(0.1));
-  EXPECT_THAT(pos1.y, DoubleEq(0.2));
+  this->val1_copy = this->val1;
+  this->val1_copy += this->val2;
+  EXPECT_THAT(this->val1_copy[0], DoubleEq(this->c1 + (- this->c1)));
+  EXPECT_THAT(this->val1_copy[1], DoubleEq(this->c2 + (- this->c2)));
+  EXPECT_THAT(this->val1_copy[2], DoubleEq(this->c3 + (- this->c3)));
 }
 
+TYPED_TEST_P(OperatorTests, Subtraction)
+{
+  TypeParam sub1 = this->val1 - this->val2;
+  EXPECT_THAT(sub1[0], DoubleEq(this->c1 - (- this->c1)));
+  EXPECT_THAT(sub1[1], DoubleEq(this->c2 - (- this->c2)));
+  EXPECT_THAT(sub1[2], DoubleEq(this->c3 - (- this->c3)));
+  EXPECT_THAT(this->val2[0], DoubleEq(- this->c1));
+  EXPECT_THAT(this->val2[1], DoubleEq(- this->c2));
+  EXPECT_THAT(this->val2[2], DoubleEq(- this->c3));
+
+  TypeParam sub2 = this->val1 - 1.0;
+  EXPECT_THAT(sub2[0], DoubleEq(this->c1 - 1.0));
+  EXPECT_THAT(sub2[1], DoubleEq(this->c2 - 1.0));
+  EXPECT_THAT(sub2[2], DoubleEq(this->c3 - 1.0));
+
+  TypeParam sub3 = 1.0 - this->val1;
+  EXPECT_THAT(sub3[0], DoubleEq(this->c1 - 1.0));
+  EXPECT_THAT(sub3[1], DoubleEq(this->c2 - 1.0));
+  EXPECT_THAT(sub3[2], DoubleEq(this->c3 - 1.0));
+
+  this->val1_copy = this->val1;
+  this->val1_copy -= 1.0;
+  EXPECT_THAT(this->val1_copy[0], DoubleEq(this->c1 - 1.0));
+  EXPECT_THAT(this->val1_copy[1], DoubleEq(this->c2 - 1.0));
+  EXPECT_THAT(this->val1_copy[2], DoubleEq(this->c3 - 1.0));
+
+  this->val1_copy = this->val1;
+  this->val1_copy -= this->val2;
+  EXPECT_THAT(this->val1_copy[0], DoubleEq(this->c1 - (- this->c1)));
+  EXPECT_THAT(this->val1_copy[1], DoubleEq(this->c2 - (- this->c2)));
+  EXPECT_THAT(this->val1_copy[2], DoubleEq(this->c3 - (- this->c3)));
+}
+
+TYPED_TEST_P(OperatorTests, Multiplication)
+{
+  TypeParam twice = this->val1 * 2.0;
+  EXPECT_THAT(twice[0], DoubleEq(2.0 * this->c1));
+  EXPECT_THAT(twice[1], DoubleEq(2.0 * this->c2));
+  EXPECT_THAT(twice[2], DoubleEq(2.0 * this->c3));
+
+  TypeParam twice2 = 2.0 * this->val1;
+  EXPECT_THAT(twice2[0], DoubleEq(2.0 * this->c1));
+  EXPECT_THAT(twice2[1], DoubleEq(2.0 * this->c2));
+  EXPECT_THAT(twice2[2], DoubleEq(2.0 * this->c3));
+}
+
+TYPED_TEST_P(OperatorTests, Division)
+{
+  TypeParam twice = this->val1 / 2.0;
+  EXPECT_THAT(twice[0], DoubleEq(this->c1 / 2.0));
+  EXPECT_THAT(twice[1], DoubleEq(this->c2 / 2.0));
+  EXPECT_THAT(twice[2], DoubleEq(this->c3 / 2.0));
+}
+
+REGISTER_TYPED_TEST_CASE_P(OperatorTests,
+                           Initialization, Copyable, axpy,
+                           Addition, Subtraction, Multiplication, Division);
+
+typedef ::testing::Types<Position3D, Velocity3D, Acceleration3D> Dim3Types;
+INSTANTIATE_TYPED_TEST_CASE_P(ParticleComponent3D, OperatorTests, Dim3Types);
 
 /*
  * Velocity3DEncapsulation
  */
-TEST(BorisParticleVelocity3D, Initialization)
-{
-  EXPECT_TRUE(is_default_constructible<Velocity3D>::value);
-  EXPECT_TRUE(is_copy_constructible<Velocity3D>::value);
-  EXPECT_TRUE(is_move_constructible<Velocity3D>::value);
-  EXPECT_TRUE(is_destructible<Velocity3D>::value);
-
-  Velocity3D default_ctor;
-  EXPECT_THAT(default_ctor.DIM, 3);
-  EXPECT_THAT(default_ctor.u, DoubleEq(0.0));
-  EXPECT_THAT(default_ctor.v, DoubleEq(0.0));
-  EXPECT_THAT(default_ctor.w, DoubleEq(0.0));
-
-  const Velocity3D vel2(0.5, 1.0, -0.5);
-  EXPECT_THAT(vel2.DIM, 3);
-  EXPECT_THAT(vel2.u, DoubleEq(0.5));
-  EXPECT_THAT(vel2.v, DoubleEq(1.0));
-  EXPECT_THAT(vel2.w, DoubleEq(-0.5));
-}
-
-TEST(BorisParticleVelocity3D, Copyable)
-{
-  EXPECT_TRUE(is_copy_assignable<Velocity3D>::value);
-  EXPECT_TRUE(is_move_assignable<Velocity3D>::value);
-
-  Velocity3D vel_copy;
-  const Velocity3D vel2(0.5, 1.0, -0.5);
-  vel_copy = vel2;
-  EXPECT_THAT(vel_copy.u, DoubleEq(0.5));
-  EXPECT_THAT(vel_copy.v, DoubleEq(1.0));
-  EXPECT_THAT(vel_copy.w, DoubleEq(-0.5));
-}
-
-TEST(BorisParticleVelocity3D, axpy)
-{
-  Velocity3D vel_2(0.5, 1.0, -0.5);
-  const Velocity3D other_vel(0.5, 1.0, -0.5);
-
-  vel_2.saxpy(1.0, other_vel);
-  EXPECT_THAT(vel_2.u, DoubleEq(1.0));
-  EXPECT_THAT(vel_2.v, DoubleEq(2.0));
-
-  shared_ptr<Velocity3D> vel_1 = make_shared<Velocity3D>(0.5, 1.0, -0.5);
-  vel_1->saxpy(0.0, other_vel);
-  EXPECT_THAT(vel_1->u, DoubleEq(0.5));
-  EXPECT_THAT(vel_1->v, DoubleEq(1.0));
-
-  shared_ptr<Velocity3D> vel_0 = make_shared<Velocity3D>(0.5, 1.0, -0.5);
-  vel_0->saxpy(-1.0, other_vel);
-  EXPECT_THAT(vel_0->u, DoubleEq(0.0));
-  EXPECT_THAT(vel_0->v, DoubleEq(0.0));
-}
-
 TEST(BorisParticleVelocity3D, convert)
 {
   Velocity3D vel1(0.1, 0.2, -0.1);
@@ -205,98 +206,9 @@ TEST(BorisParticleVelocity3D, convert)
   EXPECT_THAT(converted.z, DoubleEq(-0.2));
 }
 
-TEST(BorisParticleVelocity3D, operators)
-{
-  Velocity3D vel1(0.1, 0.2, -0.1);
-  Velocity3D vel2(-0.1, -0.2, 0.1);
-
-  long double one = 1.0;
-
-  Velocity3D twice = vel1 * 2.0;
-  EXPECT_THAT(twice.u, DoubleEq(0.2));
-  EXPECT_THAT(twice.v, DoubleEq(0.4));
-  EXPECT_THAT(vel1.u, DoubleEq(0.1));
-  EXPECT_THAT(vel1.v, DoubleEq(0.2));
-
-  Velocity3D twice2 = 2.0 * vel1;
-  EXPECT_THAT(twice2.u, DoubleEq(0.2));
-  EXPECT_THAT(twice2.v, DoubleEq(0.4));
-  EXPECT_THAT(vel1.u, DoubleEq(0.1));
-  EXPECT_THAT(vel1.v, DoubleEq(0.2));
-
-  Velocity3D add1 = vel1 + vel2;
-  EXPECT_THAT(add1.u, DoubleEq(0.0));
-  EXPECT_THAT(add1.v, DoubleEq(0.0));
-  EXPECT_THAT(vel1.u, DoubleEq(0.1));
-  EXPECT_THAT(vel1.v, DoubleEq(0.2));
-  EXPECT_THAT(vel2.u, DoubleEq(-0.1));
-  EXPECT_THAT(vel2.v, DoubleEq(-0.2));
-
-  Velocity3D add2 = vel1 + one;
-  EXPECT_THAT(add2.u, DoubleEq(1.1));
-  EXPECT_THAT(add2.v, DoubleEq(1.2));
-  EXPECT_THAT(vel1.u, DoubleEq(0.1));
-  EXPECT_THAT(vel1.v, DoubleEq(0.2));
-
-  Velocity3D add3 = one + vel1;
-  EXPECT_THAT(add3.u, DoubleEq(1.1));
-  EXPECT_THAT(add3.v, DoubleEq(1.2));
-  EXPECT_THAT(vel1.u, DoubleEq(0.1));
-  EXPECT_THAT(vel1.v, DoubleEq(0.2));
-}
-
-
 /*
  * Acceleration3DEncapsulation
  */
-TEST(BorisParticleAcceleration3D, Initialization)
-{
-  EXPECT_TRUE(is_default_constructible<Acceleration3D>::value);
-  EXPECT_TRUE(is_copy_constructible<Acceleration3D>::value);
-  EXPECT_TRUE(is_move_constructible<Acceleration3D>::value);
-  EXPECT_TRUE(is_destructible<Acceleration3D>::value);
-
-  Acceleration3D default_ctor;
-  EXPECT_THAT(default_ctor.DIM, 3);
-  EXPECT_THAT(default_ctor.a, DoubleEq(0.0));
-  EXPECT_THAT(default_ctor.b, DoubleEq(0.0));
-  EXPECT_THAT(default_ctor.c, DoubleEq(0.0));
-
-  shared_ptr<const Acceleration3D> accel2 = make_shared<const Acceleration3D>(0.5, 1.0, -0.5);
-  EXPECT_THAT(accel2->a, DoubleEq(0.5));
-  EXPECT_THAT(accel2->b, DoubleEq(1.0));
-  EXPECT_THAT(accel2->c, DoubleEq(-0.5));
-}
-
-TEST(BorisParticleAcceleration3D, Copyable)
-{
-  Acceleration3D accel_copy;
-  const Acceleration3D accel2(0.5, 1.0, -0.5);
-  accel_copy = accel2;
-  EXPECT_THAT(accel_copy.a, DoubleEq(0.5));
-  EXPECT_THAT(accel_copy.b, DoubleEq(1.0));
-  EXPECT_THAT(accel_copy.c, DoubleEq(-0.5));
-}
-
-TEST(BorisParticleAcceleration3D, axpy)
-{
-  Acceleration3D accel_2(0.5, 1.0, -0.5);
-  const Acceleration3D accel2(0.5, 1.0, -0.5);
-  accel_2.saxpy(1.0, accel2);
-  EXPECT_THAT(accel_2.a, DoubleEq(1.0));
-  EXPECT_THAT(accel_2.b, DoubleEq(2.0));
-
-  shared_ptr<Acceleration3D> accel_1 = make_shared<Acceleration3D>(0.5, 1.0, -0.5);
-  accel_1->saxpy(0.0, accel2);
-  EXPECT_THAT(accel_1->a, DoubleEq(0.5));
-  EXPECT_THAT(accel_1->b, DoubleEq(1.0));
-
-  shared_ptr<Acceleration3D> accel_0 = make_shared<Acceleration3D>(0.5, 1.0, -0.5);
-  accel_0->saxpy(-1.0, accel2);
-  EXPECT_THAT(accel_0->a, DoubleEq(0.0));
-  EXPECT_THAT(accel_0->b, DoubleEq(0.0));
-}
-
 TEST(BorisParticleAcceleration3D, convert)
 {
   Acceleration3D accel1(0.1, 0.2, -0.5);
@@ -308,46 +220,6 @@ TEST(BorisParticleAcceleration3D, convert)
   Velocity3D converted_vel = accel1.convert(dt<double>(2.0));
   EXPECT_THAT(converted_vel.u, DoubleEq(0.2));
   EXPECT_THAT(converted_vel.v, DoubleEq(0.4));
-}
-
-TEST(BorisParticleAcceleration3D, operators)
-{
-  Acceleration3D accel1(0.1, 0.2, -0.1);
-  Acceleration3D accel2(-0.1, -0.2, 0.1);
-
-  long double one = 1.0;
-
-  Acceleration3D twice = accel1 * 2.0;
-  EXPECT_THAT(twice.a, DoubleEq(0.2));
-  EXPECT_THAT(twice.b, DoubleEq(0.4));
-  EXPECT_THAT(accel1.a, DoubleEq(0.1));
-  EXPECT_THAT(accel1.b, DoubleEq(0.2));
-
-  Acceleration3D twice2 = 2.0 * accel1;
-  EXPECT_THAT(twice2.a, DoubleEq(0.2));
-  EXPECT_THAT(twice2.b, DoubleEq(0.4));
-  EXPECT_THAT(accel1.a, DoubleEq(0.1));
-  EXPECT_THAT(accel1.b, DoubleEq(0.2));
-
-  Acceleration3D add1 = accel1 + accel2;
-  EXPECT_THAT(add1.a, DoubleEq(0.0));
-  EXPECT_THAT(add1.b, DoubleEq(0.0));
-  EXPECT_THAT(accel1.a, DoubleEq(0.1));
-  EXPECT_THAT(accel1.b, DoubleEq(0.2));
-  EXPECT_THAT(accel2.a, DoubleEq(-0.1));
-  EXPECT_THAT(accel2.b, DoubleEq(-0.2));
-
-  Acceleration3D add2 = accel1 + one;
-  EXPECT_THAT(add2.a, DoubleEq(1.1));
-  EXPECT_THAT(add2.b, DoubleEq(1.2));
-  EXPECT_THAT(accel1.a, DoubleEq(0.1));
-  EXPECT_THAT(accel1.b, DoubleEq(0.2));
-
-  Acceleration3D add3 = one + accel1;
-  EXPECT_THAT(add3.a, DoubleEq(1.1));
-  EXPECT_THAT(add3.b, DoubleEq(1.2));
-  EXPECT_THAT(accel1.a, DoubleEq(0.1));
-  EXPECT_THAT(accel1.b, DoubleEq(0.2));
 }
 
 

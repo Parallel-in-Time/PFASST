@@ -6,8 +6,8 @@ include_directories(
 
 set(TESTS
     test_boris_particle
-    test_boris_physics
-    test_boris_sweeper
+#     test_boris_physics
+#     test_boris_sweeper
 )
 
 foreach(test ${TESTS})
@@ -21,6 +21,12 @@ foreach(test ${TESTS})
     set_target_properties(${test}
         PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/tests/examples/boris
     )
+    if(pfasst_WITH_GCC_PROF AND ${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
+        set_target_properties(${test}
+            PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -ftest-coverage -fprofile-arcs"
+                       LINK_FLAGS "-fprofile-arcs"
+        )
+    endif()
     add_test(NAME ${test}
         COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/tests/examples/boris/${test} --gtest_output=xml:${test}_out.xml
     )

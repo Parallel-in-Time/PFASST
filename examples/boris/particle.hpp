@@ -84,6 +84,8 @@ class ParticleComponentEncapsulation
       UNUSED(other);
       assert(deactivated_function::value);
     }
+
+    virtual Matrix<scalar> as_matrix() const = 0;
     //! @}
 
     //! @{
@@ -100,6 +102,14 @@ class ParticleComponentEncapsulation
     {
       UNUSED(dst); UNUSED(a); UNUSED(mat); UNUSED(src); UNUSED(zero);
       throw NotImplementedYet("aA*x for Encapsulation onto ParticleComponent");
+    }
+    //! @}
+
+    //! @{
+    virtual scalar operator[](const size_t index) const
+    {
+      UNUSED(index);
+      throw NotImplementedYet("operator[] for ParticleComponent");
     }
     //! @}
 };
@@ -205,6 +215,7 @@ class ParticleEncapsulation
                           const acceleration_type& accel)
       :   m_mass(mass)
         , m_charge(charge)
+        , m_alpha(mass / charge)
         , m_pos(pos)
         , m_vel(vel)
         , m_accel(accel)
@@ -254,6 +265,9 @@ class ParticleEncapsulation
       UNUSED(other);
       assert(deactivated_function::value);
     }
+
+    virtual Matrix<time> as_matrix() const = 0;
+    virtual Matrix<time> as_vector() const = 0;
     //! @}
 
     //! @{
