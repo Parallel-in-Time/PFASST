@@ -70,7 +70,7 @@ class ElectricField
      */
     virtual typename parent_type::particle_type::acceleration_type
     evaluate(vector<shared_ptr<typename parent_type::particle_type>> particles, size_t m,
-             time t)
+             time t) const
     {
       UNUSED(particles); UNUSED(m); UNUSED(t);
       throw NotImplementedYet("evaluate of ElectricField");
@@ -116,7 +116,7 @@ class MagneticField
      */
     virtual typename parent_type::particle_type::acceleration_type
     evaluate(vector<shared_ptr<typename parent_type::particle_type>> particles, size_t m,
-             time t)
+             time t) const
     {
       UNUSED(particles); UNUSED(m); UNUSED(t);
       throw NotImplementedYet("evaluate of MagneticField");
@@ -125,51 +125,72 @@ class MagneticField
 };
 
 
+static_assert(std::is_move_constructible<MagneticField<double, double, Particle3DEncapsulation>>::value, "");
+static_assert(std::is_move_assignable<MagneticField<double, double, Particle3DEncapsulation>>::value, "");
+
+
 template<
   typename scalar,
   typename time,
-  typename ParticleT,
-  typename EFieldT,
-  typename BFieldT
+  template <typename, typename> class ParticleT,
+  template <typename, typename, template <typename, typename> class> class EFieldT,
+  template <typename, typename, template <typename, typename> class> class BFieldT
 >
 class EnergyOperator
 {
+  private:
+    typedef EnergyOperator<scalar, time, ParticleT, EFieldT, BFieldT> this_type;
+
   public:
     //! @{
-    typedef ParticleT particle_type;
-    typedef EFieldT e_field_type;
-    typedef BFieldT b_field_type;
+    typedef ParticleT<scalar, time> particle_type;
+    typedef EFieldT<scalar, time, ParticleT> e_field_type;
+    typedef BFieldT<scalar, time, ParticleT> b_field_type;
     //! @}
+
+  protected:
+    e_field_type e_field;
+    b_field_type b_field;
 
   public:
     //! @{
     EnergyOperator()
     {}
-
-    virtual ~EnergyOperator()
+    EnergyOperator(const e_field_type& e_field, const b_field_type& b_field)
+      :   e_field(e_field)
+        , b_field(b_field)
     {}
+    //! @}
+
+    //! @{
+    virtual const e_field_type& get_e_field() const
+    {
+      return this->e_field;
+    }
+    virtual const b_field_type& get_b_field() const
+    {
+      return this->b_field;
+    }
     //! @}
 
     //! @{
     /**
      * Computes the energy of a particle.
      *
-     * The energy of the particle \\( p_m \\) in a given electric field \\( E(P,t) \\) and 
-     * magnetic field \\( B(t) \\) at a given time \\( t \\) with respect to all particles \\( P \\) 
-     * is usually given by the sum of the potential and kinetic energy.
+     * The energy of the particles \\( P \\) in a given electric field \\( E(P,t) \\) and 
+     * magnetic field \\( B(t) \\) at a given time \\( t \\) is usually given by the sum of the 
+     * potential and kinetic energy.
      */
-    virtual scalar evaluate(vector<shared_ptr<particle_type>> particles,
-                            size_t m,
-                            time t,
-                            shared_ptr<const e_field_type> E,
-                            shared_ptr<const b_field_type> B)
+    virtual scalar evaluate(const vector<shared_ptr<particle_type>>& particles, const time t) const
     {
-      UNUSED(particles); UNUSED(m); UNUSED(t); UNUSED(E); UNUSED(B);
+      UNUSED(particles); UNUSED(t);
       throw NotImplementedYet("evaluate of Energy Operator");
       return scalar(0.0);
     }
     //! @}
 };
 
+static_assert(std::is_move_constructible<EnergyOperator<double, double, Particle3DEncapsulation, ElectricField, MagneticField>>::value, "");
+static_assert(std::is_move_assignable<EnergyOperator<double, double, Particle3DEncapsulation, ElectricField, MagneticField>>::value, "");
 
 #endif  // _EXAMPLES__BORIS__PHYSICS__HPP_
