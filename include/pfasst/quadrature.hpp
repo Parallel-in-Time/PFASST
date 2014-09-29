@@ -344,8 +344,10 @@ namespace pfasst
 
   namespace config
   {
+    // note: GCC fails with "error: explicit template specialization cannot have a storage class"
+    //       if this template specialization is also declared 'static'; Clang does not care.
     template<>
-    static const pfasst::QuadratureType get_value(const string& name)
+    const pfasst::QuadratureType get_value(const string& name)
     {
       const string type = Options::get_instance().get_variables_map()[name].as<string>();
       if (type == "gauss-lobatto") {
@@ -363,8 +365,10 @@ namespace pfasst
       }
     }
 
+    // note: GCC fails with "error: explicit template specialization cannot have a storage class"
+    //       if this template specialization is also declared 'static'; Clang does not care.
     template<>
-    static const pfasst::QuadratureType get_value(const string& name,
+    const pfasst::QuadratureType get_value(const string& name,
                                                   const pfasst::QuadratureType& default_value)
     {
       if (Options::get_instance().get_variables_map().count(name) == 1) {
