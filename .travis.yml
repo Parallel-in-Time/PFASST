@@ -12,18 +12,10 @@ notifications:
 #  -> https://github.com/travis-ci/travis-ci/issues/1519
 env:
   matrix:
-    - CMAKE_BUILD_TYPE="Release" WITH_MPI=OFF BOOST_VERSION=1.53
-    - CMAKE_BUILD_TYPE="Release" WITH_MPI=OFF BOOST_VERSION=1.53
-    - CMAKE_BUILD_TYPE="Release" WITH_MPI=ON BOOST_VERSION=1.53
-    - CMAKE_BUILD_TYPE="Debug" WITH_MPI=OFF BOOST_VERSION=1.53
-    - CMAKE_BUILD_TYPE="Debug" WITH_MPI=OFF BOOST_VERSION=1.53
-    - CMAKE_BUILD_TYPE="Debug" WITH_MPI=ON BOOST_VERSION=1.53
-    - CMAKE_BUILD_TYPE="Release" WITH_MPI=OFF BOOST_VERSION=1.55
-    - CMAKE_BUILD_TYPE="Release" WITH_MPI=OFF BOOST_VERSION=1.55
-    - CMAKE_BUILD_TYPE="Release" WITH_MPI=ON BOOST_VERSION=1.55
-    - CMAKE_BUILD_TYPE="Debug" WITH_MPI=OFF BOOST_VERSION=1.55
-    - CMAKE_BUILD_TYPE="Debug" WITH_MPI=OFF BOOST_VERSION=1.55
-    - CMAKE_BUILD_TYPE="Debug" WITH_MPI=ON BOOST_VERSION=1.55
+    - CMAKE_BUILD_TYPE="Release" WITH_MPI=OFF
+    - CMAKE_BUILD_TYPE="Release" WITH_MPI=ON
+    - CMAKE_BUILD_TYPE="Debug" WITH_MPI=OFF
+    - CMAKE_BUILD_TYPE="Debug" WITH_MPI=ON
 
 compiler:
   - gcc
@@ -31,16 +23,16 @@ compiler:
 
 before_install:
   # boost packages
-  - if [ "${BOOST_VERSION}" == "1.53" ]; then sudo add-apt-repository ppa:apokluda/boost1.53 --yes; fi
-  - if [ "${BOOST_VERSION}" == "1.55" ]; then sudo add-apt-repository ppa:boost-latest/ppa --yes; fi
+  - sudo add-apt-repository ppa:boost-latest/ppa --yes
   # libstdc++-4.8
   - sudo add-apt-repository ppa:ubuntu-toolchain-r/test --yes
   - sudo apt-get update
 
 install:
-  - if [ "${WITH_MPI}" == "ON" ]; then sudo apt-get -qq install mpich2 libmpich2-dev; fi
   - sudo apt-get install g++-4.8
-  - sudo apt-get install "libboost${BOOST_VERSION}-all-dev" libfftw3-3 libfftw3-dev
+  - sudo apt-get install libfftw3-3 libfftw3-dev
+  - sudo apt-get install libboost1.55-dev libboost1.55-dbg libboost1.55-tools-dev libboost1.55-all-dev
+  - if [ "${WITH_MPI}" == "ON" ]; then sudo apt-get -qq install mpich2 libmpich2-dev; fi
 
 before_script:
   # update compilers
