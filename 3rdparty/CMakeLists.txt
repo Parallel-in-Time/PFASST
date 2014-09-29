@@ -16,7 +16,7 @@ else()
 endif()
 set(Boost_USE_MULTITHREADED ON)
 
-if(${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
+if(${compiler_version_available} AND ${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
     set(Boost_COMPILER "-clang${CMAKE_CXX_COMPILER_VERSION_MAJOR}${CMAKE_CXX_COMPILER_VERSION_MINOR}")
 endif()
 
