@@ -77,7 +77,7 @@ class HighPrecisionTest
 
 TEST_P(HighPrecisionTest, AllNodes)
 {
-  EXPECT_THAT(err, Le<double>(5e-12)) << "Failed to bring relative error below 5e-12";
+  EXPECT_THAT(err, Le<double>(9e-12)) << "Failed to bring relative error below 9e-12";
 }
 
 INSTANTIATE_TEST_CASE_P(ScalarSDC, HighPrecisionTest,
