@@ -98,6 +98,11 @@ namespace pfasst
          * Augmented quadrature matrix.
          */
         Matrix<time> aug_s_mat;
+
+        /**
+         * Compact quadrature matrix.
+         */
+        Matrix<time> cpt_s_mat;
         //! @}
 
         /**
@@ -184,16 +189,17 @@ namespace pfasst
           auto const s_mat = this->quad->get_s_mat();
 
           this->aug_nodes = nodes;
-         if (!this->quad->left_is_node()) { this->aug_nodes.insert(this->aug_nodes.begin(), 0.0); }
-          if (!this->quad->right_is_node()) { this->aug_nodes.insert(this->aug_nodes.end(), 1.0); }
+          if (!this->quad->left_is_node()) { this->aug_nodes.insert(this->aug_nodes.begin(), 0.0); }
 
           auto const num_aug_nodes = aug_nodes.size();
 
           this->aug_s_mat = Matrix<time>::Zero(num_aug_nodes-1, num_aug_nodes);
           if (this->quad->left_is_node()) {
             this->aug_s_mat.block(0, 0, num_nodes-1, num_nodes) = s_mat.block(1, 0, num_nodes-1, num_nodes);
+            this->cpt_s_mat = s_mat.block(1, 0, num_nodes-1, num_nodes);
           } else {
             this->aug_s_mat.block(0, 1, num_nodes, num_nodes) = s_mat.block(0, 0, num_nodes, num_nodes);
+            this->cpt_s_mat = s_mat;
           }
 
           this->s_mat_expl = aug_s_mat;
@@ -203,10 +209,6 @@ namespace pfasst
             this->s_mat_expl(m, m)     -= ds;
             this->s_mat_impl(m, m + 1) -= ds;
           }
-
-          // cout << s_mat << endl;
-          // cout << aug_s_mat << endl;
-          // cout << s_mat_expl << endl;
 
           this->start_state = this->get_factory()->create(pfasst::encap::solution);
           this->end_state = this->get_factory()->create(pfasst::encap::solution);
@@ -223,21 +225,11 @@ namespace pfasst
           this->aug_fs_impl = this->fs_impl;
 
           if (!this->quad->left_is_node()) {
-            this->aug_state.insert(this->aug_state.begin(), this->get_factory()->create(pfasst::encap::solution));
-
+            this->aug_state.insert(this->aug_state.begin(), this->start_state);
             this->aug_fs_expl.insert(this->aug_fs_expl.begin(), this->get_factory()->create(pfasst::encap::function));
-            // XXX: this should really be a nullptr...
+            // XXX: this should really be a nullptr... but then we need to some fancy mat_apply magic
             this->aug_fs_impl.insert(this->aug_fs_impl.begin(), this->get_factory()->create(pfasst::encap::function));
-            //            this->aug_fs_impl.insert(this->aug_fs_expl.begin(), nullptr);
           }
-
-          // auto num_non_zero = this->quad->left_is_node() ? num_nodes - 1 : num_nodes;
-          // for (size_t m = 0; m < num_non_zero; m++) {
-          //   this->s_integrals.push_back(this->get_factory()->create(pfasst::encap::solution));
-          //   if (coarse) {
-          //     this->fas_corrections.push_back(this->get_factory()->create(pfasst::encap::solution));
-          //   }
-          // }
 
           for (size_t m = 0; m < num_aug_nodes-1; m++) {
             this->s_integrals.push_back(this->get_factory()->create(pfasst::encap::solution));
@@ -246,17 +238,9 @@ namespace pfasst
             }
           }
 
-          // if (!this->quad->left_is_node()) {
-          //   this->fs_expl_start = this->get_factory()->create(pfasst::encap::function);
-          // }
-          // this->fs_expl_end = this->get_factory()->create(pfasst::encap::function);
-          // this->fs_impl_start = this->get_factory()->create(pfasst::encap::function);
-          // this->fs_impl_end = this->get_factory()->create(pfasst::encap::function);
-
           assert(this->state.size() == this->quad->get_num_nodes());
           assert(this->fs_expl.size() == this->quad->get_num_nodes());
-          // assert(this->fs_impl.size() == this->quad->get_num_nodes());
-          // assert(this->s_integrals.size() == this->quad->get_num_nodes());
+          assert(this->fs_impl.size() == this->quad->get_num_nodes());
         }
 
         /**
@@ -336,8 +320,9 @@ namespace pfasst
 
         virtual void advance() override
         {
-          this->aug_state[0]->copy(this->end_state);
+          this->start_state->copy(this->end_state);
           if (this->quad->left_is_node() && this->quad->right_is_node()) {
+            this->aug_state[0]->copy(this->end_state);
             this->aug_fs_expl[0]->copy(this->aug_fs_expl.back());
             this->aug_fs_impl[0]->copy(this->aug_fs_impl.back());
           } else if (this->quad->right_is_node()) {
@@ -345,7 +330,7 @@ namespace pfasst
           } else {
             time t0 = this->get_controller()->get_time();
             time dt = this->get_controller()->get_time_step();
-            this->f_expl_eval(this->aug_fs_expl[0], this->aug_state[0], t0+dt);
+            this->f_expl_eval(this->aug_fs_expl[0], this->start_state, t0+dt);
           }
         }
 
@@ -363,17 +348,15 @@ namespace pfasst
         /**
          * @copybrief EncapSweeper::evaluate()
          *
-        * If the node `m` is virtual (not proper), we can save some
-        * implicit/explicit evaluations.
-        */
+         * If the node `m` is virtual (not proper), we can save some
+         * implicit/explicit evaluations.
+         */
         virtual void evaluate(size_t m) override
         {
           time t0 = this->get_controller()->get_time();
           time dt = this->get_controller()->get_time_step();
           time t =  t0 + dt * this->quad->get_nodes()[m];
-          // if (m == 0) {
-            this->f_expl_eval(this->fs_expl[m], this->state[m], t);
-          // }
+          this->f_expl_eval(this->fs_expl[m], this->state[m], t);
           this->f_impl_eval(this->fs_impl[m], this->state[m], t);
         }
 
@@ -385,10 +368,8 @@ namespace pfasst
          */
         virtual void integrate(time dt, vector<shared_ptr<Encapsulation<time>>> dst) const override
         {
-          // dst[0]->mat_apply(dst, dt, this->quad->get_s_mat(), this->fs_expl, true);
-          // dst[0]->mat_apply(dst, dt, this->quad->get_s_mat(), this->fs_impl, false);
-          // dst[0]->mat_apply(dst, dt, this->s_mat_cmpt, this->fs_expl, true);
-          // dst[0]->mat_apply(dst, dt, this->s_mat_cmpt, this->fs_impl, false);
+          dst[0]->mat_apply(dst, dt, this->cpt_s_mat, this->fs_expl, true);
+          dst[0]->mat_apply(dst, dt, this->cpt_s_mat, this->fs_impl, false);
         }
         //! @}
 
