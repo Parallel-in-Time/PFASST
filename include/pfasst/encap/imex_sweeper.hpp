@@ -193,7 +193,7 @@ namespace pfasst
           if (this->quad->left_is_node()) {
             this->aug_s_mat.block(0, 0, num_nodes-1, num_nodes) = s_mat.block(1, 0, num_nodes-1, num_nodes);
           } else {
-            this->aug_s_mat.block(0, 0, num_nodes, num_nodes) = s_mat.block(0, 0, num_nodes, num_nodes);
+            this->aug_s_mat.block(0, 1, num_nodes, num_nodes) = s_mat.block(0, 0, num_nodes, num_nodes);
           }
 
           this->s_mat_expl = aug_s_mat;
@@ -204,9 +204,9 @@ namespace pfasst
             this->s_mat_impl(m, m + 1) -= ds;
           }
 
-          cout << s_mat << endl;
-          cout << aug_s_mat << endl;
-          cout << s_mat_expl << endl;
+          // cout << s_mat << endl;
+          // cout << aug_s_mat << endl;
+          // cout << s_mat_expl << endl;
 
           this->start_state = this->get_factory()->create(pfasst::encap::solution);
           this->end_state = this->get_factory()->create(pfasst::encap::solution);
@@ -223,8 +223,12 @@ namespace pfasst
           this->aug_fs_impl = this->fs_impl;
 
           if (!this->quad->left_is_node()) {
+            this->aug_state.insert(this->aug_state.begin(), this->get_factory()->create(pfasst::encap::solution));
+
             this->aug_fs_expl.insert(this->aug_fs_expl.begin(), this->get_factory()->create(pfasst::encap::function));
-            this->aug_fs_impl.insert(this->aug_fs_expl.begin(), shared_ptr<Encapsulation<time>>(nullptr));
+            // XXX: this should really be a nullptr...
+            this->aug_fs_impl.insert(this->aug_fs_impl.begin(), this->get_factory()->create(pfasst::encap::function));
+            //            this->aug_fs_impl.insert(this->aug_fs_expl.begin(), nullptr);
           }
 
           // auto num_non_zero = this->quad->left_is_node() ? num_nodes - 1 : num_nodes;
