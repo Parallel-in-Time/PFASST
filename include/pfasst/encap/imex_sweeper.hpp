@@ -306,6 +306,12 @@ namespace pfasst
           }
         }
 
+        /**
+         * Perform one SDC sweep/iteration.
+         *
+         * This computes a high-order solution from the previous iteration's function values and
+         * corrects it using forward/backward Euler steps across the nodes.
+         */
         virtual void sweep() override
         {
           time dt = this->get_controller()->get_time_step();
@@ -340,11 +346,18 @@ namespace pfasst
           }
         }
 
+        /**
+         * Advance the end solution to start solution.
+         */
         virtual void advance() override
         {
+          // solutions
           this->start_state->copy(this->end_state);
-          if (this->quad->left_is_node() && this->quad->right_is_node()) {
+          if (this->quad->left_is_node()) {
             this->aug_state[0]->copy(this->end_state);
+          }
+          // functions
+          if (this->quad->left_is_node() && this->quad->right_is_node()) {
             this->aug_fs_expl[0]->copy(this->aug_fs_expl.back());
             this->aug_fs_impl[0]->copy(this->aug_fs_impl.back());
           } else if (this->quad->right_is_node()) {
@@ -356,6 +369,9 @@ namespace pfasst
           }
         }
 
+        /**
+         * Save current solution states.
+         */
         virtual void save(bool initial_only) override
         {
           if (initial_only) {
@@ -369,9 +385,6 @@ namespace pfasst
 
         /**
          * @copybrief EncapSweeper::evaluate()
-         *
-         * If the node `m` is virtual (not proper), we can save some
-         * implicit/explicit evaluations.
          */
         virtual void evaluate(size_t m) override
         {
@@ -397,12 +410,12 @@ namespace pfasst
 
         //! @{
         /**
-         * Evaluates the explicit part of the right hand side of the ODE at the given time.
+         * Evaluate the explicit part of the ODE.
          *
-         * @param[in,out] f_expl_encap Encapsulation to store the evaluated right hand side
-         * @param[in] u_encap Encapsulation storing the solution values to use for computing the
-         *     explicit part of the right hand side of the ODE
-         * @param[in] t time point of the evaluation
+         * @param[in,out] f_expl_encap Encapsulation to store the explicit function evaluation.
+         * @param[in] u_encap Encapsulation that stores the solution state at which to evaluate the
+         *     explicit part of the ODE.
+         * @param[in] t Time point of the evaluation.
          *
          * @note This method must be implemented in derived sweepers.
          */
@@ -415,15 +428,15 @@ namespace pfasst
         }
 
         /**
-         * Evaluates the implicit part of the right hand side of the ODE at the given time.
+         * Evaluate the implicit part of the ODE.
          *
          * This is typically called to compute the implicit part of the right hand side at the first
          * collocation node, and on all nodes after restriction or interpolation.
          *
-         * @param[in,out] f_impl_encap Encapsulation to store the evaluated right hand side
-         * @param[in] u_encap Encapsulation storing the solution values to use for computing the
-         *     implicit part of the right hand side of the ODE
-         * @param[in] t time point of the evaluation
+         * @param[in,out] f_impl_encap Encapsulation to store the implicit function evaluation.
+         * @param[in] u_encap Encapsulation storing the solution state at which to evaluate the
+         *     implicit part of the ODE.
+         * @param[in] t Time point of the evaluation.
          *
          * @note This method must be implemented in derived sweepers.
          */
@@ -436,18 +449,18 @@ namespace pfasst
         }
 
         /**
-         * Solves \\( U - \\Delta t f_{\\rm impl}(U) = RHS \\) for \\( U \\).
+         * Solve \\( U - \\Delta t F_{\\rm impl}(U) = RHS \\) for \\( U \\).
          *
          * During an IMEX SDC sweep, the correction equation is evolved using a forward-Euler
          * stepper for the explicit piece, and a backward-Euler stepper for the implicit piece.
          * This routine (implemented by the user) performs the solve required to perform one
-         * backward-Euler sub-step, and also returns \\( f_{\\rm impl}(U) \\).
+         * backward-Euler sub-step, and also returns \\( F_{\\rm impl}(U) \\).
          *
-         * @param[in,out] f_encap Encapsulation to store the evaluated right hand side
-         * @param[in,out] u_encap Encapsulation to store the solution of the backward-Euler sub-step
-         * @param[in] t time point (of \\( RHS \\))
-         * @param[in] dt sub-step size to the previous time point (\\( \\Delta t \\))
-         * @param[in] rhs_encap Encapsulation storing \\( RHS \\)
+         * @param[in,out] f_encap Encapsulation to store the evaluated implicit piece.
+         * @param[in,out] u_encap Encapsulation to store the solution of the backward-Euler sub-step.
+         * @param[in] t time point (of \\( RHS \\)).
+         * @param[in] dt sub-step size to the previous time point (\\( \\Delta t \\)).
+         * @param[in] rhs_encap Encapsulation that stores \\( RHS \\).
          *
          * @note This method must be implemented in derived sweepers.
          */
