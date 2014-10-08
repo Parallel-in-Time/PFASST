@@ -46,7 +46,7 @@ int main(int /*argc*/, char** /*argv*/)
 {
   const double x0 = 1.0, y0 = 0.0;
   const size_t nsteps = 40;
-  const double dt     = 0.1;
+  const double dt     = 1e-2;
   const size_t nnodes = 2;
   const size_t niters = 1;
   const double nu     = 5.0;

@@ -49,6 +49,9 @@ private:
   //! Output file
   fstream output_file;
   
+  // error: For nu=0, vdP reduces to linear oscillator, otherwise no analytic solution is available
+  double error;
+  
 public:
   /**
    * Generic constructor; initialize all function call counters with zero.
@@ -92,8 +95,10 @@ public:
     real_vector_type qex(qend.size());
     
     this->exact(qex, t);
-    //double max_err = abs(qend[0] - qex[0]) / abs(qex[0]);
-    //cout << "x: " << qend[0] << " -- y: " << qend[1] << endl;
+    
+    double max_err = max(abs(qend[0] - qex[0])/abs(qex[0]) , abs(qend[1]-qex[1])/abs(qex[1]) );
+    cout << "error: " << max_err << endl;
+    this->error = max_err;
     this->output_file << qend[0] << "    " << qend[1] << endl;
   }
   
@@ -102,7 +107,7 @@ public:
    */
   double get_errors()
   {
-    return -1.0;
+    return this->error;
   }
   
   /**
@@ -134,10 +139,24 @@ public:
    */
   void exact(real_vector_type& q, time t)
   {
-    // TODO: There is no analytic solution for the vdP oscillator, so simply return the initial value
-    UNUSED(t);
-    q[0] = this->x0;
-    q[1] = this->y0;
+    if (nu==0)
+    {
+      /** 
+       * For nu=0 and given initial value x0, y0, the analytic solution reads
+       * x(t) =  y0*sin(t) + x0*cos(t)
+       * y(t) = -x0*sin(t) + y0*cos(t)
+       *
+       * Note that for t=0, we recover x(0) = x0, y(0) = y0.
+       */
+      q[0] = this->y0*sin(t) + this->x0*cos(t);
+      q[1] = -this->x0*sin(t) + this->y0*cos(t);
+    }
+    else
+    {
+      // For the nonlinear case, there is no analytic solution for the vdP oscillator, so simply return the initial value
+      q[0] = this->x0;
+      q[1] = this->y0;
+    }
   }
   
   void exact(shared_ptr<encap_type> q_encap, time t)
