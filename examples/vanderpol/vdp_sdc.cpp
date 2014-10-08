@@ -44,8 +44,8 @@ double run_vdp_sdc(const size_t nsteps, const double dt, const size_t nnodes,
  */
 int main(int /*argc*/, char** /*argv*/)
 {
-  const size_t nsteps = 1;
-  const double dt     = 1e-4;
+  const size_t nsteps = 2000;
+  const double dt     = 0.1;
   const size_t nnodes = 2;
   const size_t niters = 1;
   const double nu     = 5.0;
