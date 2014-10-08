@@ -47,7 +47,6 @@ namespace pfasst
          * Solution values \\( U \\) at all time nodes of the current iteration.
          */
         vector<shared_ptr<Encapsulation<time>>> state;
-        vector<shared_ptr<Encapsulation<time>>> aug_state;
 
         /**
          * Solution values \\( U \\) at all time nodes of the previous iteration.
@@ -69,14 +68,23 @@ namespace pfasst
          * iteration.
          */
         vector<shared_ptr<Encapsulation<time>>> fs_expl;
-        vector<shared_ptr<Encapsulation<time>>> aug_fs_expl;
 
         /**
          * Values of the implicit part of the right hand side \\( F_{impl}(t,u) \\) at all time nodes of the current
          * iteration.
          */
         vector<shared_ptr<Encapsulation<time>>> fs_impl;
+        //! @}
+
+        //! @{
+        /**
+         * Augmented solution and function values.
+         *
+         * For quadrature rules that do not include the left end point (0.0), we add a virtual (augmented) node.
+         */
+        vector<shared_ptr<Encapsulation<time>>> aug_state;
         vector<shared_ptr<Encapsulation<time>>> aug_fs_impl;
+        vector<shared_ptr<Encapsulation<time>>> aug_fs_expl;
         //! @}
 
         //! @{
@@ -97,12 +105,12 @@ namespace pfasst
         /**
          * Augmented quadrature matrix.
          */
-        Matrix<time> aug_s_mat;
+        Matrix<time> s_mat_augm;
 
         /**
          * Compact quadrature matrix.
          */
-        Matrix<time> cpt_s_mat;
+        Matrix<time> q_mat_cmpt;
         //! @}
 
         /**
@@ -183,33 +191,43 @@ namespace pfasst
          */
         virtual void setup(bool coarse) override
         {
+          //
+          // nodes
+          //
           auto const nodes = this->quad->get_nodes();
           auto const num_nodes = this->quad->get_num_nodes();
 
-          auto const s_mat = this->quad->get_s_mat();
-
           this->aug_nodes = nodes;
-          if (!this->quad->left_is_node()) { this->aug_nodes.insert(this->aug_nodes.begin(), 0.0); }
-
+          if (!this->quad->left_is_node()) {
+            this->aug_nodes.insert(this->aug_nodes.begin(), 0.0);
+          }
           auto const num_aug_nodes = aug_nodes.size();
 
-          this->aug_s_mat = Matrix<time>::Zero(num_aug_nodes-1, num_aug_nodes);
+          //
+          // quadrature matrices
+          //
+          auto const s_mat = this->quad->get_s_mat();
+          auto const q_mat = this->quad->get_q_mat();
+          this->s_mat_augm = Matrix<time>::Zero(num_aug_nodes-1, num_aug_nodes);
           if (this->quad->left_is_node()) {
-            this->aug_s_mat.block(0, 0, num_nodes-1, num_nodes) = s_mat.block(1, 0, num_nodes-1, num_nodes);
-            this->cpt_s_mat = s_mat.block(1, 0, num_nodes-1, num_nodes);
+            this->s_mat_augm.block(0, 0, num_nodes-1, num_nodes) = s_mat.block(1, 0, num_nodes-1, num_nodes);
+            this->q_mat_cmpt = q_mat.block(1, 0, num_nodes-1, num_nodes);
           } else {
-            this->aug_s_mat.block(0, 1, num_nodes, num_nodes) = s_mat.block(0, 0, num_nodes, num_nodes);
-            this->cpt_s_mat = s_mat;
+            this->s_mat_augm.block(0, 1, num_nodes, num_nodes) = s_mat.block(0, 0, num_nodes, num_nodes);
+            this->q_mat_cmpt = q_mat;
           }
 
-          this->s_mat_expl = aug_s_mat;
-          this->s_mat_impl = aug_s_mat;
+          this->s_mat_expl = s_mat_augm;
+          this->s_mat_impl = s_mat_augm;
           for (size_t m = 0; m < aug_nodes.size() - 1; m++) {
             time ds = aug_nodes[m + 1] - aug_nodes[m];
             this->s_mat_expl(m, m)     -= ds;
             this->s_mat_impl(m, m + 1) -= ds;
           }
 
+          //
+          // allocate
+          //
           this->start_state = this->get_factory()->create(pfasst::encap::solution);
           this->end_state = this->get_factory()->create(pfasst::encap::solution);
           for (size_t m = 0; m < num_nodes; m++) {
@@ -220,6 +238,17 @@ namespace pfasst
             this->fs_expl.push_back(this->get_factory()->create(pfasst::encap::function));
             this->fs_impl.push_back(this->get_factory()->create(pfasst::encap::function));
           }
+
+          for (size_t m = 0; m < num_aug_nodes-1; m++) {
+            this->s_integrals.push_back(this->get_factory()->create(pfasst::encap::solution));
+            if (coarse) {
+              this->fas_corrections.push_back(this->get_factory()->create(pfasst::encap::solution));
+            }
+          }
+
+          //
+          // augment
+          //
           this->aug_state = this->state;
           this->aug_fs_expl = this->fs_expl;
           this->aug_fs_impl = this->fs_impl;
@@ -229,13 +258,6 @@ namespace pfasst
             this->aug_fs_expl.insert(this->aug_fs_expl.begin(), this->get_factory()->create(pfasst::encap::function));
             // XXX: this should really be a nullptr... but then we need to some fancy mat_apply magic
             this->aug_fs_impl.insert(this->aug_fs_impl.begin(), this->get_factory()->create(pfasst::encap::function));
-          }
-
-          for (size_t m = 0; m < num_aug_nodes-1; m++) {
-            this->s_integrals.push_back(this->get_factory()->create(pfasst::encap::solution));
-            if (coarse) {
-              this->fas_corrections.push_back(this->get_factory()->create(pfasst::encap::solution));
-            }
           }
 
           assert(this->state.size() == this->quad->get_num_nodes());
@@ -368,8 +390,8 @@ namespace pfasst
          */
         virtual void integrate(time dt, vector<shared_ptr<Encapsulation<time>>> dst) const override
         {
-          dst[0]->mat_apply(dst, dt, this->cpt_s_mat, this->fs_expl, true);
-          dst[0]->mat_apply(dst, dt, this->cpt_s_mat, this->fs_impl, false);
+          dst[0]->mat_apply(dst, dt, this->q_mat_cmpt, this->fs_expl, true);
+          dst[0]->mat_apply(dst, dt, this->q_mat_cmpt, this->fs_impl, false);
         }
         //! @}
 

@@ -164,35 +164,29 @@ namespace pfasst
           auto crse_factory = crse.get_factory();
           auto fine_factory = fine.get_factory();
 
-          EncapVecT crse_z2n(ncrse - 1), fine_z2n(nfine - 1), rstr_z2n(ncrse - 1);
+          EncapVecT crse_int(ncrse - 1), fine_int(nfine - 1), rstr_int(ncrse - 1);
 
-          for (size_t m = 0; m < ncrse - 1; m++) { crse_z2n[m] = crse_factory->create(solution); }
-          for (size_t m = 0; m < ncrse - 1; m++) { rstr_z2n[m] = crse_factory->create(solution); }
-          for (size_t m = 0; m < nfine - 1; m++) { fine_z2n[m] = fine_factory->create(solution); }
+          for (size_t m = 0; m < ncrse - 1; m++) { crse_int[m] = crse_factory->create(solution); }
+          for (size_t m = 0; m < ncrse - 1; m++) { rstr_int[m] = crse_factory->create(solution); }
+          for (size_t m = 0; m < nfine - 1; m++) { fine_int[m] = fine_factory->create(solution); }
 
           // compute '0 to node' integral on the coarse level
-          crse.integrate(dt, crse_z2n);
-          for (size_t m = 1; m < ncrse - 1; m++) {
-            crse_z2n[m]->saxpy(1.0, crse_z2n[m - 1]);
-          }
+          crse.integrate(dt, crse_int);
 
           // compute '0 to node' integral on the fine level
-          fine.integrate(dt, fine_z2n);
-          for (size_t m = 1; m < nfine - 1; m++) {
-            fine_z2n[m]->saxpy(1.0, fine_z2n[m - 1]);
-          }
+          fine.integrate(dt, fine_int);
 
           // restrict '0 to node' fine integral
           int trat = (int(nfine) - 1) / (int(ncrse) - 1);
           for (size_t m = 1; m < ncrse; m++) {
-            this->restrict(rstr_z2n[m - 1], fine_z2n[m * trat - 1]);
+            this->restrict(rstr_int[m - 1], fine_int[m * trat - 1]);
           }
 
           // compute 'node to node' tau correction
           EncapVecT tau(ncrse - 1), rstr_and_crse(2 * (ncrse - 1));
           for (size_t m = 0; m < ncrse - 1; m++) { tau[m] = crse.get_tau(m); }
-          for (size_t m = 0; m < ncrse - 1; m++) { rstr_and_crse[m] = rstr_z2n[m]; }
-          for (size_t m = 0; m < ncrse - 1; m++) { rstr_and_crse[ncrse - 1 + m] = crse_z2n[m]; }
+          for (size_t m = 0; m < ncrse - 1; m++) { rstr_and_crse[m] = rstr_int[m]; }
+          for (size_t m = 0; m < ncrse - 1; m++) { rstr_and_crse[ncrse - 1 + m] = crse_int[m]; }
 
           if (fmat.rows() == 0) {
             fmat.resize(ncrse - 1, 2 * (ncrse - 1));
