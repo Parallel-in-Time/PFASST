@@ -45,7 +45,7 @@ namespace pfasst
         auto isweeper = c.get_level(l);
         auto sweeper = dynamic_pointer_cast<pfasst::encap::EncapSweeper<time>>(isweeper);
         assert(sweeper);
-        auto q0 = sweeper->get_state(0);
+        auto q0 = sweeper->get_start_state();
         initial(sweeper, q0);
       }
     }

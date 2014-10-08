@@ -38,7 +38,7 @@ int main(int /*argc*/, char** /*argv*/)
 
   vector<pair<size_t, pfasst::quadrature::QuadratureType>> nodes = {
     { 3, pfasst::quadrature::QuadratureType::GaussLobatto },
-    { 5, pfasst::quadrature::QuadratureType::GaussLegendre }
+    { 5, pfasst::quadrature::QuadratureType::GaussLobatto }
   };
 
   vector<size_t> ndofs = { 64, 128 };
