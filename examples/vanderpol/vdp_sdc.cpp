@@ -1,5 +1,5 @@
 /**
- * Solve the van der Pol oscillator
+ * Run SDC for the van der Pol oscillator.
  *
  */
 
@@ -19,6 +19,7 @@ double run_vdp_sdc(const size_t nsteps, const double dt, const size_t nnodes,
   
   // van der Pol oscillator (as first order system) has two components
   auto factory = make_shared<pfasst::encap::VectorFactory<double>>(2);
+  // input is parameter nu and initial values for position and velocity
   auto sweeper = make_shared<VdpSweeper<>>(nu, x0, y0);
   
   sweeper->set_nodes(nodes);
@@ -45,12 +46,12 @@ double run_vdp_sdc(const size_t nsteps, const double dt, const size_t nnodes,
 int main(int /*argc*/, char** /*argv*/)
 {
   const double x0 = 1.0, y0 = 0.0;
-  const size_t nsteps = 40;
-  const double dt     = 1e-2;
+  const size_t nsteps = 50;
+  const double dt     = 10.0/( (double) nsteps);
   const size_t nnodes = 2;
-  const size_t niters = 1;
-  const double nu     = 5.0;
-  const pfasst::QuadratureType nodetype = pfasst::QuadratureType::GaussLobatto;
+  const size_t niters = 2;
+  const double nu     = 0.0;
+  const pfasst::QuadratureType nodetype = pfasst::QuadratureType::GaussLegendre;
   
   run_vdp_sdc(nsteps, dt, nnodes, niters, nu, x0, y0, nodetype);
 }

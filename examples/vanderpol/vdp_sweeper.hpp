@@ -20,6 +20,8 @@ using namespace std;
  * Although derived from the IMEX sweeper, the explicit part does not do anything
  * and a fully implicit Euler is used as a base method.
  *
+ * Note that an analytical solution is available only for nu=0, where the vdP simplifies
+ * to the standard linear oscillator. Hence, actual errors are computed only for nu=0
  */
 template<typename time = pfasst::time_precision>
 class VdpSweeper
@@ -34,7 +36,7 @@ private:
   //! Parameter nu in the van-der-Pol oscillator
   double nu;
   
-  // Starting values
+  //! Starting values
   double x0, y0;
   
   //! Maximum number of iterations for the nonlinear Newton solver
@@ -49,12 +51,13 @@ private:
   //! Output file
   fstream output_file;
   
-  // error: For nu=0, vdP reduces to linear oscillator, otherwise no analytic solution is available
+  //! error: For nu=0, vdP reduces to linear oscillator, otherwise no analytic solution is available
   double error;
   
 public:
   /**
    * Generic constructor; initialize all function call counters with zero.
+   * Also open file to write solution.
    * @param[in] coefficient nu of van-der-Pol oscillator
    */
   VdpSweeper(double nu, double x0, double y0)
@@ -69,11 +72,12 @@ public:
   , n_newton_iter(0)
   {
     this->output_file.open("./vanderpol.txt", ios_base::out);
+    // The file should also contain the initial value, so perform a first write here
     this->output_file << x0 << "    " << y0 << endl;
   }
   
   /**
-   * Upon destruction, report final error and number of function calls
+   * Upon destruction, report final error and number of function calls and close output file.
    */
   virtual ~VdpSweeper()
   {
@@ -84,7 +88,8 @@ public:
   }
   
   /**
-   * Compute error between last state and exact solution at time tand print it to cout
+   * Computes and prints out error, which is meaningful only for nu=0.
+   * Also writes the current solution into an ascii file
    *
    * @param[in] t Time
    */
@@ -133,7 +138,8 @@ public:
   }
   
   /**
-   * Computes the exact solution \\( u_0 \\exp \\left( \\lambda*t \\right) \\) at a given time t.
+   * If nu=0, this computes the exact solution at time t. For other values of nu, it just returns
+   * the inital value, because there is no analytical solution to evaluate.
    *
    * @param[in] t Time
    */
@@ -141,7 +147,7 @@ public:
   {
     if (nu==0)
     {
-      /** 
+      /**
        * For nu=0 and given initial value x0, y0, the analytic solution reads
        * x(t) =  y0*sin(t) + x0*cos(t)
        * y(t) = -x0*sin(t) + y0*cos(t)
@@ -167,6 +173,7 @@ public:
   
   /**
    * Evaluate the explicit part of the right hand side.
+   * Because we use a fully implicit Euler for the vdP oscillator, this returns zeros.
    */
   void f_expl_eval(shared_ptr<encap_type> f_encap,
                    shared_ptr<encap_type> q_encap, time t) override
@@ -184,6 +191,7 @@ public:
   
   /**
    * Evaluate the implicit part of the right hand side.
+   * Because we use a fully implicit Euler for the vdP oscillator, here the full rhs of vdP is computed
    */
   void f_impl_eval(shared_ptr<encap_type> f_encap,
                    shared_ptr<encap_type> q_encap, time t) override
@@ -202,8 +210,8 @@ public:
   
   /**
    * For given \\( b \\), solve
-   * \\( \\left( \\mathbb{I}_d - \\Delta t \\text{real}(\\lambda) \\right) u = b \\)
-   * for \\( u \\) and set f_encap to \\( \\text{real}(\\lambda) u \\)
+   * \\( \\left( u - \\Delta t f(u) \\right) u = b \\)
+   * for \\( u \\) and set f_encap to \\( f(u) \\)
    */
   void impl_solve(shared_ptr<encap_type> f_encap,
                   shared_ptr<encap_type> q_encap, time t, time dt,
@@ -228,6 +236,8 @@ public:
      * q_new = q + inv(P'(q))*(-P(q))
      *
      * Note that P'(q) = Id - dt*f'(q).
+     *
+     * The inverse of P' has been computed symbolically, so that P'(q)*x can be evaluated directly.
      */
     
     // initialize residual
@@ -275,17 +285,19 @@ public:
       q[0] += f[0];
       q[1] += f[1];
       
-      // Compute norm of update q_new - q = inv(J(q))*(-f(q)) in maximum norm
-      residual = fmax( abs(f[0]), abs(f[1]) );
-      
-      //std::cout << "Newton res: " << scientific << residual << std::endl;
+      // Compute relative residual; note that f = q_new - q is the update
+      residual = fmax( abs(f[0]), abs(f[1]) ) / fmax( abs(q[0]), abs(q[1]) );
       
       iter++;
       this->n_newton_iter++;
       
     } while ( (iter<this->newton_maxit) && (residual>this->newton_tol) );
     
-    std::cout << "Newton: res = " << scientific << residual << " -- n_iter = " << iter << std::endl;
+    // Say something, only if the residual tolerance has not been reach in the maximum number of iterations
+    if (residual >=this->newton_tol)
+    {
+      std::cout << "Newton failed to converge: res = " << scientific << residual << " -- n_iter = " << iter << " of maxit = " << this->newton_maxit << std::endl;
+    }
     
     // Set f to f(q)
     f[0] = q[1];
