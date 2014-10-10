@@ -45,13 +45,15 @@ double run_vdp_sdc(const size_t nsteps, const double dt, const size_t nnodes,
  */
 int main(int /*argc*/, char** /*argv*/)
 {
-  const double x0 = 1.0, y0 = 0.0;
-  const size_t nsteps = 1;
-  const double dt     = 0.2/( (double) nsteps);
-  const size_t nnodes = 2;
-  const size_t niters = 2;
-  const double nu     = 0.0;
+  const double x0 = 2.0, y0 = 0.0;
+  const size_t nsteps = 1000;
+  const double dt     = 50.0/( (double) nsteps);
+  const size_t nnodes = 3;
+  const size_t niters = 1;
+  const double nu     = 5.0;
   const pfasst::QuadratureType nodetype = pfasst::QuadratureType::GaussLegendre;
+  
+  std::cout << "Used timestep: " << dt << std::endl;
   
   run_vdp_sdc(nsteps, dt, nnodes, niters, nu, x0, y0, nodetype);
 }

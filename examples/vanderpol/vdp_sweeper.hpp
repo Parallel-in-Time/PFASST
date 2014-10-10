@@ -72,6 +72,7 @@ public:
   , n_newton_iter(0)
   {
     this->output_file.open("./vanderpol.txt", ios_base::out);
+
     // The file should also contain the initial value, so perform a first write here
     this->output_file << x0 << "    " << y0 << endl;
   }
@@ -101,9 +102,12 @@ public:
     
     this->exact(qex, t);
     
-    double max_err = max(abs(qend[0] - qex[0])/abs(qex[0]) , abs(qend[1]-qex[1])/abs(qex[1]) );
-    cout << "error: " << max_err << endl;
-    this->error = max_err;
+    if (this->nu==0)
+    {
+      double max_err = max(abs(qend[0] - qex[0])/abs(qex[0]) , abs(qend[1]-qex[1])/abs(qex[1]) );
+      cout << "error: " << max_err << endl;
+      this->error = max_err;
+    }
     this->output_file << qend[0] << "    " << qend[1] << endl;
   }
   
@@ -145,7 +149,7 @@ public:
    */
   void exact(real_vector_type& q, time t)
   {
-    if (nu==0)
+    if (this->nu==0)
     {
       /**
        * For nu=0 and given initial value x0, y0, the analytic solution reads
