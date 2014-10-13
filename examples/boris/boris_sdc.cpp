@@ -12,10 +12,10 @@ error_map<double> run_boris_sdc()
   pfasst::SDC<> sdc;
 
   const size_t nsteps     = 100;
-  const double dt         = 0.01;
-  const size_t nnodes     = 2;
+  const double dt         = 0.015625;
+  const size_t nnodes     = 5;
 //   const size_t nparticles = 1;
-  const size_t niters     = 2;
+  const size_t niters     = 7;
 
   const double mass = 1.0;
   const double charge = 1.0;
@@ -45,6 +45,7 @@ error_map<double> run_boris_sdc()
   p0->vel().u = 100;
   p0->vel().w = 100;
 
+  sweeper->set_initial_energy();
   cout << "Initial Particle: " << *(dynamic_pointer_cast<Particle3DEncapsulation<double, double>>(sweeper->get_state(0))) << endl;
   sdc.run();
 

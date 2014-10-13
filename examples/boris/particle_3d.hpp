@@ -147,12 +147,12 @@ class Position3DEncapsulation
       throw NotImplementedYet("aA*x for 3D-Position");
     }
 
-    friend this_type cross(const this_type& first, const this_type& second)
+    virtual this_type cross(const this_type& second)
     {
-      assert(first.DIM == second.DIM);
-      return this_type(first.y * second.z - first.z * second.y,
-                       first.z * second.x - first.x * second.z,
-                       first.x * second.y - first.y * second.x);
+      assert(this->DIM == second.DIM);
+      return this_type(this->y * second.z - this->z * second.y,
+                       this->z * second.x - this->x * second.z,
+                       this->x * second.y - this->y * second.x);
     }
 
     virtual scalar norm0() const
@@ -484,12 +484,12 @@ class Velocity3DEncapsulation
       throw NotImplementedYet("aA*x for 3D-Velocity");
     }
 
-    friend this_type cross(const this_type& first, const this_type& second)
+    virtual this_type cross(const this_type& second)
     {
-      assert(first.DIM == second.DIM);
-      return this_type(first.v * second.w - first.w * second.v,
-                       first.w * second.u - first.u * second.w,
-                       first.u * second.v - first.v * second.u);
+      assert(this->DIM == second.DIM);
+      return this_type(this->v * second.w - this->w * second.v,
+                       this->w * second.u - this->u * second.w,
+                       this->u * second.v - this->v * second.u);
     }
 
     virtual scalar norm0() const
@@ -821,11 +821,11 @@ class Acceleration3DEncapsulation
       throw NotImplementedYet("aA*x for 3D-Acceleration");
     }
 
-    friend this_type cross(const this_type& first, const this_type& second)
+    virtual this_type cross(const this_type& second)
     {
-      return this_type(first.b * second.c - first.c * second.b,
-                       first.c * second.a - first.a * second.c,
-                       first.a * second.b - first.b * second.a);
+      return this_type(this->b * second.c - this->c * second.b,
+                       this->c * second.a - this->a * second.c,
+                       this->a * second.b - this->b * second.a);
     }
 
     virtual scalar norm0() const

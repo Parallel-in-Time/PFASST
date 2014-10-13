@@ -59,19 +59,9 @@ class IdealQuadrupolePotential
              time t) const override
     {
       UNUSED(t);
-//       cout << OUT::bold << OUT::red << "ELECTRICITYIIIIIIIIII:" << OUT::reset << endl;
       Matrix<scalar> pos_m(particles[m]->pos().as_matrix().transpose());
       scalar factor = (- this->epsilon) * (this->omega_e * this->omega_e) / particles[m]->alpha();
       Matrix<scalar> accel(factor * this->matrix * pos_m);
-//       cout << "  "
-//            << "(- " << this->epsilon << " * (" << this->omega_e << " * " << this->omega_e << ") / " << particles[m]->alpha()
-//            << " [=" << factor << "])" << " * " << endl
-//            << this->matrix << endl
-//            << "times" << endl
-//            << pos_m << endl
-//            << "=" << endl
-//            << accel << endl;
-//       cout << OUT::yellow << "electricityiiiiiiiiii DONE" << OUT::reset << endl;
       return typename parent_type::particle_type::acceleration_type(accel);
     }
 };
@@ -127,20 +117,10 @@ class ConstantMagneticField
              size_t m,
              time t) const override
     {
-//       cout << OUT::bold << OUT::red << "MAGNETICS:" << OUT::reset << endl;
       UNUSED(t);
       Matrix<scalar> vel_m(particles[m]->vel().as_matrix().transpose());
       scalar factor = this->omega_b / particles[m]->alpha();
       Matrix<scalar> accel(factor * this->matrix * vel_m);
-//       cout << this->matrix << endl
-//            << "times" << endl
-//            << vel_m << endl
-//            << "=" << endl
-//            << accel << endl;
-//       accel *= factor;
-//       cout << " * " << this->omega_b << " / " << particles[m]->alpha() << " [=" << factor << "]" << endl
-//            << " = " << endl << accel << endl;
-//       cout << OUT::yellow << "magnetics DONE" << OUT::reset << endl;
       return typename parent_type::particle_type::acceleration_type(accel);
     }
 };
@@ -202,23 +182,15 @@ class SimplePhysicsEnergyOperator
      */
     virtual scalar evaluate(const vector<shared_ptr<particle_type>>& particles, const time t) const
     {
-      cout << OUT::bold << OUT::red << "ENERGYIIIIIIIIIIIIIIII: (t=" << t << ")" << OUT::reset << endl;
       scalar energy(0.0);
-//       cout << "  Energy Operator Matrix:" << endl << this->op << endl;
       Matrix<time> u_vec = Matrix<time>(6, 1);
       for (size_t i = 0; i < particles.size(); ++i) {
         auto p = particles[i];
-        cout << "    particle " << i << ": " << *(p.get()) << endl;
         u_vec.block(0, 0, 3, 1) = p->pos().as_matrix().transpose();
         u_vec.block(3, 0, 3, 1) = p->vel().as_matrix().transpose();
-//         cout << "      u^T * m/2 Eop * u:" << endl
-//              << "      u^T = " << u_vec.transpose() << endl;
         auto e = Matrix<time>(u_vec.transpose() * (p->mass() / time(2.0) * this->op) * u_vec);
-//         cout << "      ==> (transposed): " << e.transpose() << endl;
         energy += e(0);
-        cout << "      --> " << OUT::blue << OUT::bold << energy << OUT::reset << endl;
       }
-      cout << OUT::yellow << "energyiiiiiiiiiiiiiiii DONE" << OUT::reset << endl;
       return energy;
     }
     //! @}
