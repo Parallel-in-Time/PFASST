@@ -85,8 +85,14 @@ namespace pfasst
 
       void broadcast()
       {
-        this->get_finest()->broadcast(comm);
-        initial = true;
+        if (this->comm->size() == 1) {
+          for (auto leviter = this->coarsest(); leviter <= this->finest(); ++leviter) {
+            leviter.current()->advance();
+          }
+        } else {
+          this->get_finest()->broadcast(comm);
+          initial = true;
+        }
       }
 
       int tag (int level)
@@ -127,7 +133,12 @@ namespace pfasst
         for (int nblock = 0; nblock < nblocks; nblock++) {
           this->set_step(nblock * comm->size() + comm->rank());
 
-          predictor();
+          if (this->comm->size() == 1) {
+            predict = true;
+            initial = this->get_step() == 0;
+          } else {
+            predictor();
+          }
 
           for (this->set_iteration(0); this->get_iteration() < this->get_max_iterations();
                this->advance_iteration()) {
@@ -158,9 +169,10 @@ namespace pfasst
 
         fine->send(comm, tag(l), false);
 
-        auto dt = this->get_time_step();
-        trns->restrict(crse, fine, true);
-        trns->fas(dt, crse, fine);
+        bool restrict_initial = this->comm->size() > 1 ? true : initial;
+
+        trns->restrict(crse, fine, restrict_initial);
+        trns->fas(this->get_time_step(), crse, fine);
         crse->save();
 
         return l - 1;
@@ -180,10 +192,13 @@ namespace pfasst
         auto crse = l.coarse();
         auto trns = l.transfer();
 
-        trns->interpolate(fine, crse, true);
+        bool interpolate_initial = this->comm->size() > 1;
+        trns->interpolate(fine, crse, interpolate_initial);
 
-        fine->recv(comm, tag(l), false);
-        trns->interpolate_initial(fine, crse);
+        if (interpolate_initial) {
+          fine->recv(comm, tag(l), false);
+          trns->interpolate_initial(fine, crse);
+        }
 
         if (l < this->finest()) {
           perform_sweeps(l.level);
@@ -210,8 +225,6 @@ namespace pfasst
        */
       LevelIter cycle_v(LevelIter l)
       {
-        // this v-cycle is a bit different than in mlsdc
-
         if (l.level == 0) {
           l = cycle_bottom(l);
         } else {
