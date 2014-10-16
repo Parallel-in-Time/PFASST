@@ -120,27 +120,25 @@ namespace pfasst
                               shared_ptr<const ISweeper<time>> src,
                               bool restrict_initial) override
         {
-          auto& crse = as_encap_sweeper(dst);
-          auto& fine = as_encap_sweeper(src);
+          auto& crse = pfasst::encap::as_encap_sweeper(dst);
+          auto& fine = pfasst::encap::as_encap_sweeper(src);
 
-          auto dnodes = crse.get_nodes();
-          auto snodes = fine.get_nodes();
+          auto const crse_nodes = crse.get_nodes();
+          auto const fine_nodes = fine.get_nodes();
+          auto const num_crse = crse_nodes.size();
+          auto const num_fine = fine_nodes.size();
 
-          size_t ncrse = crse.get_nodes().size();
-          assert(ncrse > 1);
-          size_t nfine = fine.get_nodes().size();
-
-          int trat = (int(nfine) - 1) / (int(ncrse) - 1);
+          int trat = (int(num_fine) - 1) / (int(num_crse) - 1);
 
           int m0 = restrict_initial ? 0 : 1;
-          for (size_t m = m0; m < ncrse; m++) {
-            if (dnodes[m] != snodes[m * trat]) {
+          for (size_t m = m0; m < num_crse; m++) {
+            if (crse_nodes[m] != fine_nodes[m * trat]) {
               throw NotImplementedYet("coarse nodes must be nested");
             }
             this->restrict(crse.get_state(m), fine.get_state(m * trat));
           }
 
-          for (size_t m = m0; m < ncrse; m++) { crse.evaluate(m); }
+          for (size_t m = m0; m < num_crse; m++) { crse.evaluate(m); }
         }
 
 
@@ -158,8 +156,8 @@ namespace pfasst
           auto& crse = pfasst::encap::as_encap_sweeper(dst);
           auto& fine = pfasst::encap::as_encap_sweeper(src);
 
-          size_t ncrse = crse.get_nodes().size(); assert(ncrse >= 1);
-          size_t nfine = fine.get_nodes().size(); assert(nfine >= 1);
+          auto const ncrse = crse.get_nodes().size(); assert(ncrse >= 1);
+          auto const nfine = fine.get_nodes().size(); assert(nfine >= 1);
 
           auto crse_factory = crse.get_factory();
           auto fine_factory = fine.get_factory();
