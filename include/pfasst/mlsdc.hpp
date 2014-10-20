@@ -13,25 +13,25 @@
 
 using namespace std;
 
-
 namespace pfasst
 {
 
-  template<typename time = double>
+  template<typename time = pfasst::time_precision>
   class MLSDC
     : public Controller<time>
   {
     protected:
       vector<size_t> nsweeps;
-      bool predict;
-      bool initial;
 
       typedef typename pfasst::Controller<time>::LevelIter LevelIter;
 
-      void perform_sweeps(LevelIter leviter)
+      bool predict; //<! whether to use a 'predict' sweep
+      bool initial; //<! whether we're sweeping from a new initial condition
+
+      void perform_sweeps(size_t level)
       {
-        auto sweeper = leviter.current();
-        for (size_t s = 0; s < nsweeps[leviter.level]; s++) {
+        auto sweeper = this->get_level(level);
+        for (size_t s = 0; s < this->nsweeps[level]; s++) {
           if (predict) {
             sweeper->predict(initial & predict);
             predict = false;
@@ -42,6 +42,98 @@ namespace pfasst
       }
 
     public:
+      /**
+       * Evolve ODE using MLSDC.
+       *
+       * This assumes that the user has set initial conditions on the finest level.
+       * Currently uses a fixed number of iterations per step.
+       */
+      void run()
+      {
+        for (; this->get_time() < this->get_end_time(); this->advance_time()) {
+          predict = true;  // use predictor for first fine sweep of each step
+          initial = true;
+
+          // iterate by performing v-cycles
+          for (this->set_iteration(0);
+               this->get_iteration() < this->get_max_iterations();
+               this->advance_iteration()) {
+            cycle_v(this->finest());
+            initial = false;
+          }
+
+          perform_sweeps(this->finest().level);
+
+          if (this->get_time() + this->get_time_step() < this->get_end_time()) {
+            this->get_finest()->advance();
+          }
+        }
+      }
+
+      /**
+       * Cycle down: sweep on current (fine), restrict to coarse.
+       */
+      LevelIter cycle_down(LevelIter l)
+      {
+        auto fine = l.current();
+        auto crse = l.coarse();
+        auto trns = l.transfer();
+
+        perform_sweeps(l.level);
+
+        trns->restrict(crse, fine, initial);
+        trns->fas(this->get_time_step(), crse, fine);
+        crse->save();
+
+        return l - 1;
+      }
+
+      /**
+       * Cycle up: interpolate coarse correction to fine, sweep on current (fine).
+       *
+       * Note that if the fine level corresponds to the finest MLSDC level, we don't perform a
+       * sweep.
+       * In this case the only operation that is performed here is interpolation.
+       */
+      LevelIter cycle_up(LevelIter l)
+      {
+        auto fine = l.current();
+        auto crse = l.coarse();
+        auto trns = l.transfer();
+
+        trns->interpolate(fine, crse);
+
+        if (l < this->finest()) {
+          perform_sweeps(l.level);
+        }
+
+        return l + 1;
+      }
+
+      /**
+       * Cycle bottom: sweep on the current (coarsest) level.
+       */
+      LevelIter cycle_bottom(LevelIter l)
+      {
+        perform_sweeps(l.level);
+        return l + 1;
+      }
+
+      /**
+       * Perform an MLSDC V-cycle.
+       */
+      LevelIter cycle_v(LevelIter l)
+      {
+        if (l.level == 0) {
+          l = cycle_bottom(l);
+        } else {
+          l = cycle_down(l);
+          l = cycle_v(l);
+          l = cycle_up(l);
+        }
+        return l;
+      }
+
       void setup() override
       {
         nsweeps.resize(this->nlevels());
@@ -55,96 +147,6 @@ namespace pfasst
       void set_nsweeps(vector<size_t> nsweeps)
       {
         this->nsweeps = nsweeps;
-      }
-
-      /**
-       * evolve ODE using MLSDC.
-       *
-       * This assumes that the user has set initial conditions on the finest level.
-       * Currently uses a fixed number of iterations per step.
-       */
-      void run()
-      {
-        for (; this->get_time() < this->get_end_time(); this->advance_time()) {
-          predict = true;  // use predictor for first fine sweep of each step
-          initial = this->get_step() == 0;  // only evaluate node 0 functions on first step
-
-          // iterate by performing v-cycles
-          for (this->set_iteration(0);
-               this->get_iteration() < this->get_max_iterations();
-               this->advance_iteration()) {
-            cycle_v(this->finest());
-          }
-
-          // advance all levels
-          for (auto leviter = this->coarsest(); leviter <= this->finest(); ++leviter) {
-            leviter.current()->advance();
-          }
-        }
-      }
-
-      /**
-       * cycle down: sweep on current (fine), restrict to coarse.
-       */
-      LevelIter cycle_down(LevelIter leviter)
-      {
-        auto fine = leviter.current();
-        auto crse = leviter.coarse();
-        auto trns = leviter.transfer();
-
-        perform_sweeps(leviter);
-
-        trns->restrict(crse, fine, initial);
-        trns->fas(this->get_time_step(), crse, fine);
-        crse->save();
-
-        return leviter - 1;
-      }
-
-      /**
-       * cycle up: interpolate coarse correction to fine, sweep on current (fine).
-       *
-       * Note that if the fine level corresponds to the finest MLSDC level, we don't perform a
-       * sweep.
-       * In this case the only operation that is performed here is interpolation.
-       */
-      LevelIter cycle_up(LevelIter leviter)
-      {
-        auto fine = leviter.current();
-        auto crse = leviter.coarse();
-        auto trns = leviter.transfer();
-
-        trns->interpolate(fine, crse);
-
-        if (leviter < this->finest()) {
-          perform_sweeps(leviter);
-        }
-
-        return leviter + 1;
-      }
-
-      /**
-       * cycle bottom: sweep on the current (coarsest) level.
-       */
-      LevelIter cycle_bottom(LevelIter leviter)
-      {
-        perform_sweeps(leviter);
-        return leviter + 1;
-      }
-
-      /**
-       * perform an MLSDC V-cycle.
-       */
-      LevelIter cycle_v(LevelIter leviter)
-      {
-        if (leviter.level == 0) {
-          leviter = cycle_bottom(leviter);
-        } else {
-          leviter = cycle_down(leviter);
-          leviter = cycle_v(leviter);
-          leviter = cycle_up(leviter);
-        }
-        return leviter;
       }
 
   };
