@@ -13,6 +13,9 @@ set(vanderpol_examples
 
 foreach(example ${vanderpol_examples})
     add_executable(${example} ${CMAKE_CURRENT_SOURCE_DIR}/${example}.cpp)
+    target_link_libraries(${example}
+        ${3rdparty_DEPENDEND_LIBS}
+    )
     set_target_properties(${example}
         PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/examples/vanderpol
     )
