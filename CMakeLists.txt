@@ -113,3 +113,25 @@ message(STATUS "C++ Compiler Names: ${CMAKE_CXX_COMPILER_NAMES}")
 message(STATUS "C++ Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}")
 message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS}")
 message(STATUS "C++ link flags: ${CMAKE_CXX_LINK_FLAGS}")
+
+INSTALL(FILES
+  include/pfasst/controller.hpp
+  include/pfasst/globals.hpp
+  include/pfasst/interfaces.hpp
+  include/pfasst/mlsdc.hpp
+  include/pfasst/mpi_communicator.hpp
+  include/pfasst/options.hpp
+  include/pfasst/pfasst.hpp
+  include/pfasst/quadrature.hpp
+  include/pfasst/sdc.hpp
+  DESTINATION include/pfasst)
+
+INSTALL(FILES
+  include/pfasst/encap/automagic.hpp
+  include/pfasst/encap/encapsulation.hpp
+  include/pfasst/encap/encap_sweeper.hpp
+  include/pfasst/encap/imex_sweeper.hpp
+  include/pfasst/encap/mpi_vector.hpp
+  include/pfasst/encap/poly_interp.hpp
+  include/pfasst/encap/vector.hpp
+  DESTINATION include/pfasst/encap)
