@@ -9,7 +9,6 @@
 
 #include <fftw3.h>
 
-#include <pfasst.hpp>
 #include <pfasst/sdc.hpp>
 #include <pfasst/encap/vector.hpp>
 
