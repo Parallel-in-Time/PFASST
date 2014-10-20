@@ -8,7 +8,6 @@
 
 #include <fftw3.h>
 
-#include <pfasst.hpp>
 #include <pfasst/mlsdc.hpp>
 #include <pfasst/encap/vector.hpp>
 

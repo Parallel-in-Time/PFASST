@@ -10,7 +10,6 @@
 #include <mpi.h>
 #include <fftw3.h>
 
-#include <pfasst.hpp>
 #include <pfasst/pfasst.hpp>
 #include <pfasst/mpi_communicator.hpp>
 #include <pfasst/encap/automagic.hpp>

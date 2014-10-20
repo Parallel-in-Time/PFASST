@@ -12,7 +12,6 @@
 
 #include<complex>
 
-#include<pfasst.hpp>
 #include<pfasst/sdc.hpp>
 #include<pfasst/encap/vector.hpp>
 
