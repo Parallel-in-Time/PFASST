@@ -120,7 +120,6 @@ INSTALL(FILES
   include/pfasst/interfaces.hpp
   include/pfasst/mlsdc.hpp
   include/pfasst/mpi_communicator.hpp
-  include/pfasst/options.hpp
   include/pfasst/pfasst.hpp
   include/pfasst/quadrature.hpp
   include/pfasst/sdc.hpp
