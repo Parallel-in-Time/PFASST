@@ -18,7 +18,7 @@ env:
     - CMAKE_BUILD_TYPE="Debug" WITH_MPI=ON
 
 compiler:
-  #- gcc  # FIXME: Travis has some problems with Boost and GCC 4.8 on linking
+  - gcc  # FIXME: Travis has some problems with Boost and GCC 4.8 on linking
   - clang
 
 before_install:
