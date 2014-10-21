@@ -33,6 +33,7 @@ foreach(example ${all_advec_examples})
         add_dependencies(${example} fftw3)
     endif()
     target_link_libraries(${example}
+        ${3rdparty_DEPENDEND_LIBS}
         ${FFTW_LIBRARIES}
     )
     set_target_properties(${example}

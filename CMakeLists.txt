@@ -9,11 +9,12 @@ include(ExternalProject)
 # Set default ExternalProject root directory
 set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/3rdparty)
 
-option(pfasst_DISABLE_LIBCXX "Disable use of LLVM's libc++ when compiling with Clang." ON )
-option(pfasst_BUILD_EXAMPLES "Build example programs."                                 ON )
-option(pfasst_BUILD_TESTS    "Build test suite for PFASST."                            ON )
-option(pfasst_WITH_MPI       "Build with MPI enabled."                                 OFF)
-option(pfasst_WITH_GCC_PROF  "Enable excessive debugging & profiling output with GCC." OFF)
+option(pfasst_DISABLE_LIBCXX    "Disable use of LLVM's libc++ when compiling with Clang." ON )
+option(pfasst_BUILD_SHARED_LIBS "Build shared libraries."                                 OFF)
+option(pfasst_BUILD_EXAMPLES    "Build example programs."                                 ON )
+option(pfasst_BUILD_TESTS       "Build test suite for PFASST."                            ON )
+option(pfasst_WITH_MPI          "Build with MPI enabled."                                 OFF)
+option(pfasst_WITH_GCC_PROF     "Enable excessive debugging & profiling output with GCC." OFF)
 
 # Set output directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${pfasst_SOURCE_DIR}/dist/bin")
@@ -66,6 +67,17 @@ else()
 endif()
 message(STATUS "Your compiler has C++11 support. Hurray!")
 
+if(CMAKE_CXX_COMPILER_VERSION)
+    string(REGEX MATCH "^[0-9]+" CMAKE_CXX_COMPILER_VERSION_MAJOR ${CMAKE_CXX_COMPILER_VERSION})
+    string(REGEX MATCH "\\.[0-9]+\\." cmake_cxx_compiler_version_minor ${CMAKE_CXX_COMPILER_VERSION})
+    string(REGEX MATCH "[0-9]+" CMAKE_CXX_COMPILER_VERSION_MINOR ${cmake_cxx_compiler_version_minor})
+    string(REGEX MATCH "[0-9]+$" CMAKE_CXX_COMPILER_VERSION_PATCH ${CMAKE_CXX_COMPILER_VERSION})
+    set(compiler_version_available TRUE)
+else()
+    message(WARNING "Compiler Version not available. Configuration might fail.")
+    set(compiler_version_available FALSE)
+endif()
+
 # Enable all compiler warnings
 add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic")
 
@@ -110,6 +122,6 @@ message(STATUS "****************************************************************
 message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 message(STATUS "C++ Compiler ID: ${CMAKE_CXX_COMPILER_ID}")
 message(STATUS "C++ Compiler Names: ${CMAKE_CXX_COMPILER_NAMES}")
-message(STATUS "C++ Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}")
+message(STATUS "C++ Compiler Version: ${CMAKE_CXX_COMPILER_VERSION} (${CMAKE_CXX_COMPILER_VERSION_MAJOR}.${CMAKE_CXX_COMPILER_VERSION_MINOR}.${CMAKE_CXX_COMPILER_VERSION_PATCH})")
 message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS}")
 message(STATUS "C++ link flags: ${CMAKE_CXX_LINK_FLAGS}")
