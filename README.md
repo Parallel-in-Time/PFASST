@@ -35,6 +35,8 @@ Currently, it features the following content:
 * \subpage #page_style_guide
 * \subpage #page_troubleshooting
 
+[documentation]:      https://pint.fz-juelich.de/ci/view/PFASST/job/PFASST_LATEST_STABLE_DOCU/doxygen
+
 
 Releases
 --------
@@ -61,19 +63,20 @@ Release tags will be signed by one of the following PGP keys:
 
 
 Build status
+------------
 
-| Branch      | Status                              |
-|-------------|-------------------------------------|
-| Master      | ![master-status][]                  |
-| Development | ![dev-status][]                     |
+| Branch      | Status                 | Details                           |
+|-------------|------------------------|-----------------------------------|
+| Master      | ![master-status-img][] | [Jenkins Job][master-status-link] |
+| Development | ![dev-status-img][]    | [Jenkins Job][dev-status-link]    |
 
-For details see [Travis][pfasst-travis].
+Results of static code analysis such as test coverage or SLOCcount metrics can be found at
+[this Jenkins job][coverage-job].
+Further metrics can be found on [Open Hub aka Ohloh][openhub].
 
-A test coverage report is generated and published by [Jenkins][coverage-report].
-
-
-[documentation]:   https://pint.fz-juelich.de/ci/view/PFASST/job/PFASST%20%28Docu%29/doxygen/
-[pfasst-travis]:   https://travis-ci.org/Parallel-in-Time/PFASST
-[master-status]:   https://travis-ci.org/Parallel-in-Time/PFASST.svg?branch=master
-[dev-status]:      https://travis-ci.org/Parallel-in-Time/PFASST.svg?branch=development
-[coverage-report]: https://pint.fz-juelich.de/ci/job/PFASST_GCC_4-8_Coverage/Test_Coverage
+[master-status-img]:  https://pint.fz-juelich.de/ci/view/PFASST/job/PFASST_LATEST_STABLE/badge/icon
+[master-status-link]: https://pint.fz-juelich.de/ci/view/PFASST/job/PFASST_LATEST_STABLE
+[dev-status-img]:     https://pint.fz-juelich.de/ci/view/PFASST/job/PFASST_DEVELOPMENT/badge/icon
+[dev-status-link]:    https://pint.fz-juelich.de/ci/view/PFASST/job/PFASST_DEVELOPMENT
+[coverage-job]:       https://pint.fz-juelich.de/ci/view/PFASST/job/PFASST_LATEST_STABLE_ANALYSIS/
+[openhub]:            https://www.openhub.net/p/PFASST
