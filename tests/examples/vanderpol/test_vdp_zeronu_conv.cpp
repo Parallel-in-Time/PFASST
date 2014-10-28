@@ -14,12 +14,12 @@ using namespace ::testing;
 #define PFASST_UNIT_TESTING
 #include "../examples/vanderpol/vdp_sdc.cpp"
 #undef PFASST_UNIT_TESTING
-    
+
 /*
  * parameterized test fixture with number of nodes as parameter
  */
 class VdPConvergenceTest
-  : public TestWithParam<tuple<size_t, pfasst::QuadratureType>>
+  : public TestWithParam<tuple<size_t, pfasst::quadrature::QuadratureType>>
 {
   protected:
     size_t nnodes; // parameter
@@ -36,7 +36,7 @@ class VdPConvergenceTest
     vector<double> convrate;
     double dt;
     size_t niters;
-    pfasst::QuadratureType nodetype;
+    pfasst::quadrature::QuadratureType nodetype;
     size_t nnodes_in_call;
 
     // set parameters base on node type
@@ -44,46 +44,45 @@ class VdPConvergenceTest
     {
       switch (this->nodetype)
       {
-        case pfasst::QuadratureType::GaussLobatto:
+        case pfasst::quadrature::QuadratureType::GaussLobatto:
           this->niters = 2 * this->nnodes - 2;
           this->Tend = 0.66;
           this->nsteps = { 7, 9, 11, 13 };
           this->nnodes_in_call = this->nnodes;
           break;
 
-        case pfasst::QuadratureType::GaussLegendre:
+        case pfasst::quadrature::QuadratureType::GaussLegendre:
           this->niters = 2 * this->nnodes;
           this->Tend = 0.88;
           this->nsteps = { 7, 9, 11, 13 };
           this->nnodes_in_call = this->nnodes + 2;
           break;
-        
-        case pfasst::QuadratureType::GaussRadau:
+
+        case pfasst::quadrature::QuadratureType::GaussRadau:
           this->niters = 2 * this->nnodes - 1;
           this->Tend = 0.88;
           this->nsteps = { 7, 9, 11, 13 };
           this->nnodes_in_call = this->nnodes + 1;
           break;
-         
+
         // NOTE: At the moment, both Clenshaw Curtis and equidistant nodes do not
         // reproduce the expected convergence rate... something is wrong, either with
         // the test or with the nodes
-        
+
         // Also: What is the ACTUAL number of quadrature nodes in both cases?
-        case pfasst::QuadratureType::ClenshawCurtis:
+        case pfasst::quadrature::QuadratureType::ClenshawCurtis:
           this->niters = this->nnodes;
           this->Tend = 0.65;
           this->nsteps = { 25, 35, 45, 55 };
           this->nnodes_in_call = this->nnodes + 1;
-          break;        
-              
-        case pfasst::QuadratureType::Uniform:
+          break;
+
+        case pfasst::quadrature::QuadratureType::Uniform:
           this->niters = this->nnodes;
           this->Tend = 0.65;
           this->nsteps = { 25, 35, 45, 55 };
           this->nnodes_in_call = this->nnodes;
           break;
-         
 
         default:
           break;
@@ -131,7 +130,7 @@ TEST_P(VdPConvergenceTest, AllNodes)
      */
     switch (this->nodetype)
     {
-      case pfasst::QuadratureType::GaussLobatto:
+      case pfasst::quadrature::QuadratureType::GaussLobatto:
         // Expect convergence rate of 2*nodes-2 from collocation formula, doing an identical number
         // of iteration should suffice to reach this as each iteration should increase order by one
         EXPECT_THAT(convrate[i], Ge(double(0.95* 2 * nnodes - 2)))  << "Convergence rate for "
@@ -141,7 +140,7 @@ TEST_P(VdPConvergenceTest, AllNodes)
                                                               << " not within expected range.";
         break;
 
-      case pfasst::QuadratureType::GaussLegendre:
+      case pfasst::quadrature::QuadratureType::GaussLegendre:
         // convergence rates for Legendre nodes should be 2*nodes
         EXPECT_THAT(convrate[i], Ge<double>(0.99* 2 * this->nnodes)) << "Convergence rate for "
                                                                << this->nnodes
@@ -150,8 +149,7 @@ TEST_P(VdPConvergenceTest, AllNodes)
                                                                << " not within expected range.";
         break;
 
-      
-      case pfasst::QuadratureType::GaussRadau:
+      case pfasst::quadrature::QuadratureType::GaussRadau:
         // convergence rate for Radau nodes should be 2*nodes-1
         // For some case, the convergence rate is ALMOST that value, hence put in the 0.99
         EXPECT_THAT(convrate[i], Ge<double>(0.99* 2 * this->nnodes - 1)) << "Convergence rate for " 
@@ -160,8 +158,8 @@ TEST_P(VdPConvergenceTest, AllNodes)
                                                                          << " for nsteps " << this->nsteps[i]
                                                                          << " not within expected range.";
         break;
-      
-      case pfasst::QuadratureType::ClenshawCurtis:
+
+      case pfasst::quadrature::QuadratureType::ClenshawCurtis:
         // Clenshaw Curtis should be of order nnodes
         EXPECT_THAT(convrate[i], Ge<double>(0.99 * this->nnodes))  << "Convergence rate for "
                                                             << this->nnodes
@@ -169,8 +167,8 @@ TEST_P(VdPConvergenceTest, AllNodes)
                                                             << " for nsteps " << this->nsteps[i]
                                                             << " not within expected range.";
         break;
-       
-      case pfasst::QuadratureType::Uniform:
+
+      case pfasst::quadrature::QuadratureType::Uniform:
         // Equidistant nodes should be of order nnodes
         EXPECT_THAT(convrate[i], Ge<double>(0.99 * this->nnodes)) << "Convergence rate for "
                                                            << this->nnodes
@@ -178,7 +176,6 @@ TEST_P(VdPConvergenceTest, AllNodes)
                                                            << " for nsteps " << this->nsteps[i]
                                                            << " not within expected range.";
         break;
-       
 
       default:
         EXPECT_TRUE(false);
@@ -189,11 +186,11 @@ TEST_P(VdPConvergenceTest, AllNodes)
 
 INSTANTIATE_TEST_CASE_P(VanDerPol, VdPConvergenceTest,
                         Combine(Range<size_t>(2, 4),
-                                Values(pfasst::QuadratureType::GaussLobatto,
-                                       pfasst::QuadratureType::GaussLegendre,
-                                       pfasst::QuadratureType::GaussRadau,
-                                       pfasst::QuadratureType::ClenshawCurtis,
-                                       pfasst::QuadratureType::Uniform))
+                                Values(pfasst::quadrature::QuadratureType::GaussLobatto,
+                                       pfasst::quadrature::QuadratureType::GaussLegendre,
+                                       pfasst::quadrature::QuadratureType::GaussRadau,
+                                       pfasst::quadrature::QuadratureType::ClenshawCurtis,
+                                       pfasst::quadrature::QuadratureType::Uniform))
 );
 
 int main(int argc, char** argv)
