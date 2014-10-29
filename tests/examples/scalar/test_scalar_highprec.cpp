@@ -28,7 +28,7 @@ class HighPrecisionTest
     const double dt = 0.2; // = Tend for single step
     const size_t nsteps = 1;
     const size_t niters = 30;
-    const size_t nnodes = 8; 
+    const size_t nnodes = 8;
     size_t nnodes_in_call;
     double err;
 
@@ -41,7 +41,7 @@ class HighPrecisionTest
           break;
 
         case pfasst::quadrature::QuadratureType::GaussLegendre:
-          this->nnodes_in_call = this->nnodes + 2;
+          this->nnodes_in_call = this->nnodes;
           break;
 
         case pfasst::quadrature::QuadratureType::GaussRadau:
