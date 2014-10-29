@@ -16,9 +16,6 @@ foreach(test ${TESTS})
         ${3rdparty_DEPENDEND_LIBS}
         ${pfasst_DEPENDED_LIBS}
     )
-    set_target_properties(${test}
-        PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/tests
-    )
     if(pfasst_WITH_GCC_PROF AND ${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
         set_target_properties(${test}
             PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -ftest-coverage -fprofile-arcs"
@@ -26,7 +23,7 @@ foreach(test ${TESTS})
         )
     endif()
     add_test(NAME ${test}
-        COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/tests/${test} --gtest_output=xml:${test}_out.xml
+        COMMAND ${CMAKE_BINARY_DIR}/tests/${test} --gtest_output=xml:${test}_out.xml
     )
 endforeach(test)
 
