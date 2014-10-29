@@ -119,9 +119,20 @@ if(pfasst_BUILD_TESTS)
 endif()
 message(STATUS "********************************************************************************")
 
-message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
-message(STATUS "C++ Compiler ID: ${CMAKE_CXX_COMPILER_ID}")
-message(STATUS "C++ Compiler Names: ${CMAKE_CXX_COMPILER_NAMES}")
-message(STATUS "C++ Compiler Version: ${CMAKE_CXX_COMPILER_VERSION} (${CMAKE_CXX_COMPILER_VERSION_MAJOR}.${CMAKE_CXX_COMPILER_VERSION_MINOR}.${CMAKE_CXX_COMPILER_VERSION_PATCH})")
-message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS}")
-message(STATUS "C++ link flags: ${CMAKE_CXX_LINK_FLAGS}")
+message(STATUS "Creating 'install' target for header files")
+message(STATUS "  will install them to '${CMAKE_INSTALL_PREFIX}/include/pfasst'")
+install(DIRECTORY include/pfasst/
+  DESTINATION include/pfasst
+  FILES_MATCHING PATTERN "*.hpp"
+)
+
+message(STATUS "********************************************************************************")
+if(${CMAKE_VERBOSE_MAKEFILE})
+  message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
+  message(STATUS "C++ Compiler ID: ${CMAKE_CXX_COMPILER_ID}")
+  message(STATUS "C++ Compiler Names: ${CMAKE_CXX_COMPILER_NAMES}")
+  message(STATUS "C++ Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}")
+  message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS}")
+  message(STATUS "C++ link flags: ${CMAKE_CXX_LINK_FLAGS}")
+  message(STATUS "********************************************************************************")
+endif()
