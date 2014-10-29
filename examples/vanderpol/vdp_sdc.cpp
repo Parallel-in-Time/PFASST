@@ -31,7 +31,7 @@ double run_vdp_sdc(const size_t nsteps, const double dt, const size_t nnodes,
   sdc.set_duration(0.0, dt*nsteps, dt, niters);
   sdc.setup();
 
-  auto q0 = sweeper->get_state(0);
+  auto q0 = sweeper->get_start_state();
   sweeper->exact(q0, 0.0);
 
   sdc.run();
