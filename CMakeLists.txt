@@ -12,14 +12,10 @@ set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/3rdparty)
 option(pfasst_DISABLE_LIBCXX    "Disable use of LLVM's libc++ when compiling with Clang." ON )
 option(pfasst_BUILD_SHARED_LIBS "Build shared libraries."                                 OFF)
 option(pfasst_BUILD_EXAMPLES    "Build example programs."                                 ON )
+option(pfasst_INSTALL_EXAMPLES  "Install example programs."                               OFF)
 option(pfasst_BUILD_TESTS       "Build test suite for PFASST."                            ON )
 option(pfasst_WITH_MPI          "Build with MPI enabled."                                 OFF)
 option(pfasst_WITH_GCC_PROF     "Enable excessive debugging & profiling output with GCC." OFF)
-
-# Set output directories
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${pfasst_SOURCE_DIR}/dist/bin")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${pfasst_SOURCE_DIR}/dist/lib")
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${pfasst_SOURCE_DIR}/dist/lib")
 
 if(${pfasst_WITH_MPI})
     find_package(MPI REQUIRED)
@@ -109,6 +105,7 @@ add_subdirectory(include)
 if(pfasst_BUILD_EXAMPLES)
     message(STATUS "********************************************************************************")
     message(STATUS "Configuring examples")
+    set(examples_to_install)
     add_subdirectory(examples)
 endif()
 
@@ -122,9 +119,17 @@ message(STATUS "****************************************************************
 message(STATUS "Creating 'install' target for header files")
 message(STATUS "  will install them to '${CMAKE_INSTALL_PREFIX}/include/pfasst'")
 install(DIRECTORY include/pfasst/
-  DESTINATION include/pfasst
-  FILES_MATCHING PATTERN "*.hpp"
+    DESTINATION include/pfasst
+    FILES_MATCHING PATTERN "*.hpp"
 )
+if(pfasst_BUILD_EXAMPLES AND pfasst_INSTALL_EXAMPLES)
+    message(STATUS "Example programms have been added to 'install' target")
+    message(STATUS "  will install them to '${CMAKE_INSTALL_PREFIX}/bin'")
+    message(STATUS "  example programs:")
+    foreach(example_program ${examples_to_install})
+        message(STATUS "    - ${example_program}")
+    endforeach()
+endif()
 
 message(STATUS "********************************************************************************")
 if(${CMAKE_VERBOSE_MAKEFILE})

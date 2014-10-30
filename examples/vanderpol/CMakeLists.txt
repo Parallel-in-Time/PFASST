@@ -1,5 +1,4 @@
-set(all_example_runs ${all_example_runs})
-set(all_vanderpol_example_runs)
+set(examples_to_install ${examples_to_install})
 
 message(STATUS "  vanderpol")
 include_directories(
@@ -16,27 +15,9 @@ foreach(example ${vanderpol_examples})
     target_link_libraries(${example}
         ${3rdparty_DEPENDEND_LIBS}
     )
-    set_target_properties(${example}
-        PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/examples/vanderpol
-    )
+    if(pfasst_INSTALL_EXAMPLES)
+        install(TARGETS ${example} RUNTIME DESTINATION bin)
+    endif()
 endforeach(example)
 
-message(STATUS "    creating make targets to run examples")
-foreach(example ${vanderpol_examples})
-    add_custom_target(run_example_vanderpol_${example}
-        COMMAND ${example}
-        DEPENDS ${example}
-        WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/examples/vanderpol
-        COMMENT "Running van der Pol example: ${example}" VERBATIM
-    )
-    list(APPEND all_scalar_example_runs run_example_vanderpol_${example})
-    message(STATUS "      - run_example_vanderpol_${example}")
-endforeach(example)
-
-add_custom_target(run_example_vanderpol_all
-  DEPENDS ${all_vanderpol_example_runs}
-  COMMENT "Running all van der Pol examples" VERBATIM
-)
-message(STATUS "    - run_example_vanderpol_all")
-
-set(all_example_runs ${all_example_runs} ${all_vanderpol_example_runs} PARENT_SCOPE)
+set(examples_to_install ${examples_to_install} ${vanderpol_examples} PARENT_SCOPE)
