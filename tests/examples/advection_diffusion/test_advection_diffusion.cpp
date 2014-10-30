@@ -61,7 +61,7 @@ TEST(ErrorTest, SerialMLSDC)
   auto max_iter = get_iter(*std::max_element(errors.begin(), errors.end(),
              [get_iter](const vtype p1, const vtype p2) { return get_iter(p1) < get_iter(p2); }));
 
-  vector<double> tol = { 8e-11, 8e-11, 8e-11, 8e-11 };
+  vector<double> tol = { 8e-10, 8e-10, 8e-10, 8e-10 };
   vector<double> err;
   for (auto& x: errors) {
     if (get_iter(x) == max_iter) {

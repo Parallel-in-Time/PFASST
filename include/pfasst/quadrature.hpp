@@ -1,383 +1,151 @@
+#ifndef _PFASST__QUADRATURE_HPP_
+#define _PFASST__QUADRATURE_HPP_
 
-#ifndef _PFASST_QUADRATURE_HPP_
-#define _PFASST_QUADRATURE_HPP_
-
-#include <algorithm>
 #include <cmath>
-#include <complex>
-#include <limits>
+#include <exception>
+#include <type_traits>
 #include <vector>
 
 #include <Eigen/Dense>
-
-template<typename coeff>
-using Matrix = Eigen::Matrix<coeff, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
-
 #include <boost/math/constants/constants.hpp>
-using namespace boost::math::constants;
-
-using std::complex;
-using std::string;
-using std::vector;
 
 #include "config.hpp"
 #include "interfaces.hpp"
+#include "quadrature/polynomial.hpp"
+#include "quadrature/interface.hpp"
+#include "quadrature/gauss_lobatto.hpp"
+#include "quadrature/gauss_legendre.hpp"
+#include "quadrature/gauss_radau.hpp"
+#include "quadrature/clenshaw_curtis.hpp"
+#include "quadrature/uniform.hpp"
+
+template<typename scalar>
+using Matrix = Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+
+using namespace std;
 
 namespace pfasst
 {
-  template<typename CoeffT>
-  class Polynomial
+  namespace quadrature
   {
-      vector<CoeffT> c;
-
-    public:
-      Polynomial(size_t n)
-        : c(n)
-      {
-        fill(c.begin(), c.end(), 0.0);
-      }
-
-      size_t order() const
-      {
-        return c.size() - 1;
-      }
-
-      CoeffT& operator[](const size_t i)
-      {
-        return c.at(i);
-      }
-
-      Polynomial<CoeffT> differentiate() const
-      {
-        Polynomial<CoeffT> p(c.size() - 1);
-        for (size_t j = 1; j < c.size(); j++) {
-          p[j - 1] = j * c[j];
-        }
-        return p;
-      }
-
-      Polynomial<CoeffT> integrate() const
-      {
-        Polynomial<CoeffT> p(c.size() + 1);
-        for (size_t j = 0; j < c.size(); j++) {
-          p[j + 1] = c[j] / (j + 1);
-        }
-        return p;
-      }
-
-      template<typename xtype>
-      xtype evaluate(const xtype x) const
-      {
-        int n = c.size() - 1;
-        xtype v = c[n];
-        for (int j = n - 1; j >= 0; j--) {
-          v = x * v + c[j];
-        }
-        return v;
-      }
-
-      Polynomial<CoeffT> normalize() const
-      {
-        Polynomial<CoeffT> p(c.size());
-        for (size_t j = 0; j < c.size(); j++) {
-          p[j] = c[j] / c.back();
-        }
-        return p;
-      }
-
-      vector<CoeffT> roots() const
-      {
-        assert(c.size() >= 1);
-        size_t n = c.size() - 1;
-
-        // initial guess
-        Polynomial<complex<CoeffT>> z0(n), z1(n);
-        for (size_t j = 0; j < n; j++) {
-          z0[j] = pow(complex<double>(0.4, 0.9), j);
-          z1[j] = z0[j];
-        }
-
-        // durand-kerner-weierstrass iterations
-        Polynomial<CoeffT> p = normalize();
-        for (size_t k = 0; k < 100; k++) {
-          complex<CoeffT> num, den;
-          for (size_t i = 0; i < n; i++) {
-            num = p.evaluate(z0[i]);
-            den = 1.0;
-            for (size_t j = 0; j < n; j++) {
-              if (j == i) { continue; }
-              den = den * (z0[i] - z0[j]);
-            }
-            z0[i] = z0[i] - num / den;
-          }
-
-          // converged?
-          CoeffT acc = 0.0;
-          for (size_t j = 0; j < n; j++) { acc += abs(z0[j] - z1[j]); }
-          if (acc < 2 * std::numeric_limits<CoeffT>::epsilon()) { break; }
-
-          z1 = z0;
-        }
-
-        vector<CoeffT> roots(n);
-        for (size_t j = 0; j < n; j++) {
-          roots[j] = (abs(z0[j]) < 4 * std::numeric_limits<CoeffT>::epsilon()) ? 0.0 : real(z0[j]);
-        }
-
-        sort(roots.begin(), roots.end());
-        return roots;
-      }
-
-      static Polynomial<CoeffT> legendre(const size_t order)
-      {
-        if (order == 0) {
-          Polynomial<CoeffT> p(1);
-          p[0] = 1.0;
-          return p;
-        }
-
-        if (order == 1) {
-          Polynomial<CoeffT> p(2);
-          p[0] = 0.0;
-          p[1] = 1.0;
-          return p;
-        }
-
-        Polynomial<CoeffT> p0(order + 1), p1(order + 1), p2(order + 1);
-        p0[0] = 1.0; p1[1] = 1.0;
-
-        // (n + 1) P_{n+1} = (2n + 1) x P_{n} - n P_{n-1}
-        for (size_t m = 1; m < order; m++) {
-          for (size_t j = 1; j < order + 1; j++) {
-            p2[j] = ((2 * m + 1) * p1[j - 1] - m * p0[j]) / (m + 1);
-          }
-          p2[0] = - int(m) * p0[0] / (m + 1);
-
-          for (size_t j = 0; j < order + 1; j++) {
-            p0[j] = p1[j];
-            p1[j] = p2[j];
-          }
-        }
-
-        return p2;
-      }
-  };
-
-
-  enum class QuadratureType : int {
-      GaussLegendre   = 1
-    , GaussLobatto    = 2
-    , GaussRadau      = 3
-    , ClenshawCurtis  = 4
-    , Uniform         = 5
-  };
-
-
-  template<typename node = time_precision>
-  vector<node> compute_nodes(size_t nnodes, QuadratureType qtype)
-  {
-    vector<node> nodes(nnodes);
-
-    if (qtype == QuadratureType::GaussLegendre) {
-      auto roots = Polynomial<node>::legendre(nnodes).roots();
-      for (size_t j = 0; j < nnodes; j++) {
-        nodes[j] = 0.5 * (1.0 + roots[j]);
-      }
-
-    } else if (qtype == QuadratureType::GaussLobatto) {
-      auto roots = Polynomial<node>::legendre(nnodes - 1).differentiate().roots();
-      assert(nnodes >= 2);
-      for (size_t j = 0; j < nnodes - 2; j++) {
-        nodes[j + 1] = 0.5 * (1.0 + roots[j]);
-      }
-      nodes.front() = 0.0;
-      nodes.back() = 1.0;
-
-    } else if (qtype == QuadratureType::GaussRadau) {
-      auto l   = Polynomial<node>::legendre(nnodes);
-      auto lm1 = Polynomial<node>::legendre(nnodes - 1);
-      for (size_t i = 0; i < nnodes; i++) {
-        l[i] += lm1[i];
-      }
-      auto roots = l.roots();
-      for (size_t j = 1; j < nnodes; j++) {
-        nodes[j - 1] = 0.5 * (1.0 - roots[nnodes - j]);
-      }
-      nodes.back() = 1.0;
-
-    } else if (qtype == QuadratureType::ClenshawCurtis) {
-      for (size_t j = 0; j < nnodes; j++) {
-        nodes[j] = 0.5 * (1.0 - cos(j * pi<node>() / (nnodes - 1)));
-      }
-
-    } else if (qtype == QuadratureType::Uniform) {
-      for (size_t j = 0; j < nnodes; j++) {
-        nodes[j] = node(j) / (nnodes - 1);
-      }
-
-    } else {
-      throw ValueError("invalid node type passed to compute_nodes.");
-    }
-
-    return nodes;
-  }
-
-  template<typename node>
-  auto augment_nodes(vector<node> const orig) -> pair<vector<node>, vector<bool>> {
-    vector<node> nodes = orig;
-
-    bool left = nodes.front() == node(0.0);
-    bool right = nodes.back() == node(1.0);
-
-    if (!left)  { nodes.insert(nodes.begin(), node(0.0)); }
-    if (!right) { nodes.insert(nodes.end(),   node(1.0)); }
-
-    vector<bool> is_proper(nodes.size(), true);
-    is_proper.front() = left;
-    is_proper.back() = right;
-
-    return pair<vector<node>, vector<bool>>(nodes, is_proper);
-  }
-
-//  enum class QuadratureMatrix { S, Q, QQ }; // returning QQ might be cool for 2nd-order stuff
-  enum class QuadratureMatrix { S, Q };
-
-  template<typename node = time_precision>
-  Matrix<node> compute_quadrature(vector<node> dst, vector<node> src, vector<bool> is_proper,
-                                  QuadratureMatrix type)
-  {
-    const size_t ndst = dst.size();
-    const size_t nsrc = src.size();
-
-    assert(ndst >= 1);
-    Matrix<node> mat(ndst - 1, nsrc);
-    mat.fill(0.0);
-
-    Polynomial<node> p(nsrc + 1), p1(nsrc + 1);
-
-    for (size_t i = 0; i < nsrc; i++) {
-      if (!is_proper[i]) { continue; }
-
-      // construct interpolating polynomial coefficients
-      p[0] = 1.0;
-      for (size_t j = 1; j < nsrc + 1; j++) { p[j] = 0.0; }
-      for (size_t m = 0; m < nsrc; m++) {
-        if ((!is_proper[m]) || (m == i)) { continue; }
-
-        // p_{m+1}(x) = (x - x_j) * p_m(x)
-        p1[0] = 0.0;
-        for (size_t j = 0; j < nsrc;   j++) { p1[j + 1]  = p[j]; }
-        for (size_t j = 0; j < nsrc + 1; j++) { p1[j]   -= p[j] * src[m]; }
-        for (size_t j = 0; j < nsrc + 1; j++) { p[j] = p1[j]; }
-      }
-
-      // evaluate integrals
-      auto den = p.evaluate(src[i]);
-      auto P = p.integrate();
-      for (size_t j = 1; j < ndst; j++) {
-        node q = 0.0;
-        if (type == QuadratureMatrix::S) {
-          q = P.evaluate(dst[j]) - P.evaluate(dst[j - 1]);
-        } else if (type == QuadratureMatrix::Q) {
-          q = P.evaluate(dst[j]) - P.evaluate(0.0);
-        } else {
-          throw ValueError("Further matrix types are not implemented yet");
-        }
-
-        mat(j - 1, i) = q / den;
-      }
-    }
-
-    return mat;
-  }
-
-  template<typename node = time_precision>
-  Matrix<node> compute_interp(vector<node> dst, vector<node> src)
-  {
-    const size_t ndst = dst.size();
-    const size_t nsrc = src.size();
-
-    Matrix<node> mat(ndst, nsrc);
-
-    for (size_t i = 0; i < ndst; i++) {
-      for (size_t j = 0; j < nsrc; j++) {
-        node den = 1.0;
-        node num = 1.0;
-
-        for (size_t k = 0; k < nsrc; k++) {
-          if (k == j) { continue; }
-          den *= src[j] - src[k];
-          num *= dst[i] - src[k];
-        }
-
-        if (abs(num) > 1e-32) {
-          mat(i, j) = num / den;
-        } else {
-          mat(i, j) = 0.0;
-        }
-      }
-    }
-
-    return mat;
-  }
-
-
-  class Quadrature
-  {
-    private:
-      static void init_config_options(po::options_description& opts)
-      {
-        opts.add_options()
-          ("nodes_type", po::value<string>(), "type of quadrature nodes")
-          ("num_nodes", po::value<size_t>(), "number of quadrature nodes");
-      }
-
-    public:
-      static void enable_config_options(size_t index = -1)
-      {
-        pfasst::config::Options::get_instance()
-          .register_init_function("Quadrature",
-                                  function<void(po::options_description&)>(init_config_options),
-                                  index);
-      }
-  };
-
-  namespace config
-  {
-    // note: GCC fails with "error: explicit template specialization cannot have a storage class"
-    //       if this template specialization is also declared 'static'; Clang does not care.
-    template<>
-    const pfasst::QuadratureType get_value(const string& name)
+    template<typename precision = pfasst::time_precision>
+    IQuadrature<precision>* quadrature_factory(const size_t nnodes,
+                                               const QuadratureType qtype)
     {
-      const string type = Options::get_instance().get_variables_map()[name].as<string>();
-      if (type == "gauss-lobatto") {
-        return pfasst::QuadratureType::GaussLobatto;
-      } else if (type == "gauss-legendre") {
-        return pfasst::QuadratureType::GaussLegendre;
-      } else if (type == "gauss-radau") {
-        return pfasst::QuadratureType::GaussRadau;
-      } else if (type == "clenshaw-curtis") {
-        return pfasst::QuadratureType::ClenshawCurtis;
-      } else if (type == "uniform") {
-        return pfasst::QuadratureType::Uniform;
+      if (qtype == QuadratureType::GaussLegendre) {
+        return new GaussLegendre<precision>(nnodes);
+      } else if (qtype == QuadratureType::GaussLobatto) {
+        return new GaussLobatto<precision>(nnodes);
+      } else if (qtype == QuadratureType::GaussRadau) {
+        return new GaussRadau<precision>(nnodes);
+      } else if (qtype == QuadratureType::ClenshawCurtis) {
+        return new ClenshawCurtis<precision>(nnodes);
+      } else if (qtype == QuadratureType::Uniform) {
+        return new Uniform<precision>(nnodes);
       } else {
-        throw invalid_argument("Quadrature type '" + type + "' not known.");
+        throw ValueError("invalid node type passed to compute_nodes.");
+        return nullptr;
       }
     }
 
-    // note: GCC fails with "error: explicit template specialization cannot have a storage class"
-    //       if this template specialization is also declared 'static'; Clang does not care.
-    template<>
-    const pfasst::QuadratureType get_value(const string& name,
-                                                  const pfasst::QuadratureType& default_value)
+
+    template<typename precision = pfasst::time_precision>
+    vector<precision> compute_nodes(size_t nnodes, QuadratureType qtype)
     {
-      if (Options::get_instance().get_variables_map().count(name) == 1) {
-        return pfasst::config::get_value<pfasst::QuadratureType>(name);
-      } else {
-        return default_value;
-      }
+      return quadrature_factory<precision>(nnodes, qtype)->get_nodes();
     }
-  }
+
+
+    template<typename precision = time_precision>
+    Matrix<precision> compute_interp(vector<precision> dst, vector<precision> src)
+    {
+      const size_t ndst = dst.size();
+      const size_t nsrc = src.size();
+
+      Matrix<precision> mat(ndst, nsrc);
+
+      for (size_t i = 0; i < ndst; i++) {
+        for (size_t j = 0; j < nsrc; j++) {
+          precision den = 1.0;
+          precision num = 1.0;
+
+          for (size_t k = 0; k < nsrc; k++) {
+            if (k == j) { continue; }
+            den *= src[j] - src[k];
+            num *= dst[i] - src[k];
+          }
+
+          if (abs(num) > 1e-32) {
+            mat(i, j) = num / den;
+          } else {
+            mat(i, j) = 0.0;
+          }
+        }
+      }
+
+      return mat;
+    }
+
+    class Quadrature
+    {
+      private:
+        static void init_config_options(po::options_description& opts)
+        {
+          opts.add_options()
+            ("nodes_type", po::value<string>(), "type of quadrature nodes")
+            ("num_nodes", po::value<size_t>(), "number of quadrature nodes");
+        }
+
+      public:
+        static void enable_config_options(size_t index = -1)
+        {
+          pfasst::config::Options::get_instance()
+            .register_init_function("Quadrature",
+                                    function<void(po::options_description&)>(init_config_options),
+                                    index);
+        }
+    };
+
+    namespace config
+    {
+      // note: GCC fails with "error: explicit template specialization cannot have a storage class"
+      //       if this template specialization is also declared 'static'; Clang does not care.
+      //      template<>
+      pfasst::quadrature::QuadratureType get_value(const string& name)
+      {
+        const string type = pfasst::config::Options::get_instance().get_variables_map()[name].as<string>();
+        if (type == "gauss-lobatto") {
+          return pfasst::quadrature::QuadratureType::GaussLobatto;
+        } else if (type == "gauss-legendre") {
+          return pfasst::quadrature::QuadratureType::GaussLegendre;
+        } else if (type == "gauss-radau") {
+          return pfasst::quadrature::QuadratureType::GaussRadau;
+        } else if (type == "clenshaw-curtis") {
+          return pfasst::quadrature::QuadratureType::ClenshawCurtis;
+        } else if (type == "uniform") {
+          return pfasst::quadrature::QuadratureType::Uniform;
+        } else {
+          throw invalid_argument("Quadrature type '" + type + "' not known.");
+        }
+      }
+
+      // note: GCC fails with "error: explicit template specialization cannot have a storage class"
+      //       if this template specialization is also declared 'static'; Clang does not care.
+      //      template<>
+      pfasst::quadrature::QuadratureType get_value(const string& name,
+                                                   const pfasst::quadrature::QuadratureType& default_value)
+      {
+        if (pfasst::config::Options::get_instance().get_variables_map().count(name) == 1) {
+          return pfasst::config::get_value<pfasst::quadrature::QuadratureType>(name);
+        } else {
+          return default_value;
+        }
+      }
+
+    } // ::pfasst::quadrature::config
+
+  }  // ::pfasst::quadrature
+
 }  // ::pfasst
 
-#endif
+#endif  // _PFASST__QUADRATURE_HPP_
