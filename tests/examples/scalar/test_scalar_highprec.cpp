@@ -23,15 +23,15 @@ class HighPrecisionTest
 {
   protected:
     pfasst::QuadratureType nodetype; // parameter
-    
+
     const complex<double> lambda = complex<double>(-1.0,1.0);
     const double dt = 0.2; // = Tend for single step
     const size_t nsteps = 1;
     const size_t niters = 30;
-    const size_t nnodes = 8; 
+    const size_t nnodes = 8;
     size_t nnodes_in_call;
     double err;
-    
+
     void set_parameters()
     {
       switch (this->nodetype)
@@ -39,29 +39,29 @@ class HighPrecisionTest
         case pfasst::QuadratureType::GaussLobatto:
           this->nnodes_in_call = this->nnodes;
           break;
-        
+
         case pfasst::QuadratureType::GaussLegendre:
-          this->nnodes_in_call = this->nnodes + 2;
+          this->nnodes_in_call = this->nnodes;
           break;
-          
+
         case pfasst::QuadratureType::GaussRadau:
           this->nnodes_in_call = this->nnodes + 1;
           break;
-        
+
         case pfasst::QuadratureType::ClenshawCurtis:
           this->nnodes_in_call = this->nnodes + 1;
           break;
-        
+
         case pfasst::QuadratureType::Uniform:
           this->nnodes_in_call = this->nnodes + 1;
-          break;  
-        
+          break;
+
         default:
           break;
       }
-      
+
     }
-            
+
   public:
     virtual void SetUp()
     {
@@ -70,7 +70,7 @@ class HighPrecisionTest
       this->err = run_scalar_sdc(this->nsteps, this->dt, this->nnodes_in_call,
                                  this->niters, this->lambda, this->nodetype);
     }
-    
+
     virtual void TearDown()
     {}
 };
