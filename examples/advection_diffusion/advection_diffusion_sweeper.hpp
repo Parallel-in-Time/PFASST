@@ -15,6 +15,7 @@
 
 #include <pfasst/globals.hpp>
 #include <pfasst/encap/imex_sweeper.hpp>
+#include <pfasst/config.hpp>
 
 #include "fft.hpp"
 
@@ -38,7 +39,24 @@ template<typename time = pfasst::time_precision>
 class AdvectionDiffusionSweeper
   : public pfasst::encap::IMEXSweeper<time>
 {
-  protected:
+  private:
+    static void init_config_options(po::options_description& opts)
+    {
+      opts.add_options()
+        ("spatial_dofs", po::value<size_t>(), "number of spatial degrees of freedom")
+        ;
+    }
+
+  public:
+    static void enable_config_options(size_t index = -1)
+    {
+      pfasst::config::Options::get_instance()
+        .register_init_function("Advection-Diffusion Sweeper",
+                                function<void(po::options_description&)>(init_config_options),
+                                index);
+    }
+
+  private:
     //! @{
     FFT fft;
     vector<complex<double>> ddx, lap;

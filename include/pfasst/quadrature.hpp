@@ -9,6 +9,7 @@
 #include <Eigen/Dense>
 #include <boost/math/constants/constants.hpp>
 
+#include "config.hpp"
 #include "interfaces.hpp"
 #include "quadrature/polynomial.hpp"
 #include "quadrature/interface.hpp"
@@ -85,6 +86,63 @@ namespace pfasst
       return mat;
     }
   }  // ::pfasst::quadrature
+
+  class Quadrature
+  {
+    private:
+      static void init_config_options(po::options_description& opts)
+      {
+        opts.add_options()
+          ("nodes_type", po::value<string>(), "type of quadrature nodes")
+          ("num_nodes", po::value<size_t>(), "number of quadrature nodes");
+      }
+
+    public:
+      static void enable_config_options(size_t index = -1)
+      {
+        pfasst::config::Options::get_instance()
+          .register_init_function("Quadrature",
+                                  function<void(po::options_description&)>(init_config_options),
+                                  index);
+      }
+  };
+
+  namespace config
+  {
+    // note: GCC fails with "error: explicit template specialization cannot have a storage class"
+    //       if this template specialization is also declared 'static'; Clang does not care.
+    template<>
+    const pfasst::quadrature::QuadratureType get_value(const string& name)
+    {
+      const string type = Options::get_instance().get_variables_map()[name].as<string>();
+      if (type == "gauss-lobatto") {
+        return pfasst::quadrature::QuadratureType::GaussLobatto;
+      } else if (type == "gauss-legendre") {
+        return pfasst::quadrature::QuadratureType::GaussLegendre;
+      } else if (type == "gauss-radau") {
+        return pfasst::quadrature::QuadratureType::GaussRadau;
+      } else if (type == "clenshaw-curtis") {
+        return pfasst::quadrature::QuadratureType::ClenshawCurtis;
+      } else if (type == "uniform") {
+        return pfasst::quadrature::QuadratureType::Uniform;
+      } else {
+        throw invalid_argument("Quadrature type '" + type + "' not known.");
+      }
+    }
+
+    // note: GCC fails with "error: explicit template specialization cannot have a storage class"
+    //       if this template specialization is also declared 'static'; Clang does not care.
+    template<>
+    const pfasst::quadrature::QuadratureType get_value(const string& name,
+                                                       const pfasst::quadrature::QuadratureType& default_value)
+    {
+      if (Options::get_instance().get_variables_map().count(name) == 1) {
+        return pfasst::config::get_value<pfasst::quadrature::QuadratureType>(name);
+      } else {
+        return default_value;
+      }
+    }
+  }
 }  // ::pfasst
 
 #endif  // _PFASST__QUADRATURE_HPP_
