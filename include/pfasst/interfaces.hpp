@@ -155,6 +155,13 @@ namespace pfasst
       virtual void advance() = 0;
 
       /**
+       * Return convergence status.
+       *
+       * This is used by controllers to shortcircuit iterations.
+       */
+      virtual bool converged() { return false; }
+
+      /**
        * Save states (and/or function values) at all nodes.
        *
        * This is typically done in MLSDC/PFASST immediately after a call to restrict.

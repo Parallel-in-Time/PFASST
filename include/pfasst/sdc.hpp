@@ -53,6 +53,9 @@ namespace pfasst
             } else {
               sweeper->sweep();
             }
+            if (sweeper->converged()) {
+              break;
+            }
           }
           sweeper->advance();
         }
