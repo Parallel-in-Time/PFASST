@@ -18,7 +18,7 @@ env:
     - CMAKE_BUILD_TYPE="Debug" WITH_MPI=ON
 
 compiler:
-  - gcc  # FIXME: Travis has some problems with Boost and GCC 4.8 on linking
+  - gcc
   - clang
 
 before_install:
@@ -41,7 +41,7 @@ before_script:
 script:
   - mkdir build
   - cd build
-  - cmake -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -Dpfasst_WITH_MPI=${WITH_MPI} -Dpfasst_DISABLE_LIBCXX=ON -Dpfasst_BUILD_TESTS=ON -Dpfasst_BUILD_EXAMPLES=ON -DCMAKE_VERBOSE_MAKEFILE=ON ..
+  - cmake -DCMAKE_INSTALL_PREFIX=$HOME -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -Dpfasst_WITH_MPI=${WITH_MPI} -Dpfasst_DISABLE_LIBCXX=ON -Dpfasst_BUILD_TESTS=ON -Dpfasst_BUILD_EXAMPLES=ON -DCMAKE_VERBOSE_MAKEFILE=ON ..
   - make ARGS="-V"
   - make test ARGS="-V"
-  - make run_example_all
+  - make install
