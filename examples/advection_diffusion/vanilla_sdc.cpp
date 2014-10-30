@@ -25,21 +25,22 @@ error_map run_vanilla_sdc()
   const size_t nnodes = pfasst::config::get_value<size_t>("num_nodes", 5);
   const size_t ndofs  = pfasst::config::get_value<size_t>("spatial_dofs", 64);
   const size_t niters = pfasst::config::get_value<size_t>("num_iter", 4);
-  const pfasst::QuadratureType quad_type = \
-    pfasst::config::get_value<pfasst::QuadratureType>("nodes_type", pfasst::QuadratureType::GaussLobatto);
+  const pfasst::quadrature::QuadratureType quad_type = \
+    pfasst::config::get_value<pfasst::quadrature::QuadratureType>("nodes_type", pfasst::quadrature::QuadratureType::GaussLobatto);
 
-  auto nodes   = pfasst::compute_nodes(nnodes, quad_type);
+   // auto quad    = pfasst::quadrature::quadrature_factory(nnodes, pfasst::quadrature::QuadratureType::GaussLobatto);
+  auto quad    = pfasst::quadrature::quadrature_factory(nnodes-2, pfasst::quadrature::QuadratureType::GaussLegendre);
   auto factory = make_shared<pfasst::encap::VectorFactory<double>>(ndofs);
   auto sweeper = make_shared<AdvectionDiffusionSweeper<>>(ndofs);
 
-  sweeper->set_nodes(nodes);
+  sweeper->set_quadrature(quad);
   sweeper->set_factory(factory);
 
   sdc.add_level(sweeper);
   sdc.set_duration(0.0, nsteps*dt, dt, niters);
   sdc.setup();
 
-  auto q0 = sweeper->get_state(0);
+  auto q0 = sweeper->get_start_state();
   sweeper->exact(q0, 0.0);
 
   sdc.run();

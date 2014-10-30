@@ -11,6 +11,7 @@
 
 #include "../globals.hpp"
 #include "../interfaces.hpp"
+#include "../quadrature.hpp"
 #include "encap_sweeper.hpp"
 
 namespace pfasst
@@ -64,7 +65,7 @@ namespace pfasst
           auto& crse = as_encap_sweeper(src);
 
           if (tmat.rows() == 0) {
-            tmat = pfasst::compute_interp<time>(fine.get_nodes(), crse.get_nodes());
+            tmat = pfasst::quadrature::compute_interp<time>(fine.get_nodes(), crse.get_nodes());
           }
 
           size_t nfine = fine.get_nodes().size();
@@ -119,27 +120,25 @@ namespace pfasst
                               shared_ptr<const ISweeper<time>> src,
                               bool restrict_initial) override
         {
-          auto& crse = as_encap_sweeper(dst);
-          auto& fine = as_encap_sweeper(src);
+          auto& crse = pfasst::encap::as_encap_sweeper(dst);
+          auto& fine = pfasst::encap::as_encap_sweeper(src);
 
-          auto dnodes = crse.get_nodes();
-          auto snodes = fine.get_nodes();
+          auto const crse_nodes = crse.get_nodes();
+          auto const fine_nodes = fine.get_nodes();
+          auto const num_crse = crse_nodes.size();
+          auto const num_fine = fine_nodes.size();
 
-          size_t ncrse = crse.get_nodes().size();
-          assert(ncrse > 1);
-          size_t nfine = fine.get_nodes().size();
-
-          int trat = (int(nfine) - 1) / (int(ncrse) - 1);
+          int trat = (int(num_fine) - 1) / (int(num_crse) - 1);
 
           int m0 = restrict_initial ? 0 : 1;
-          for (size_t m = m0; m < ncrse; m++) {
-            if (dnodes[m] != snodes[m * trat]) {
+          for (size_t m = m0; m < num_crse; m++) {
+            if (crse_nodes[m] != fine_nodes[m * trat]) {
               throw NotImplementedYet("coarse nodes must be nested");
             }
             this->restrict(crse.get_state(m), fine.get_state(m * trat));
           }
 
-          for (size_t m = m0; m < ncrse; m++) { crse.evaluate(m); }
+          for (size_t m = m0; m < num_crse; m++) { crse.evaluate(m); }
         }
 
 
@@ -157,41 +156,35 @@ namespace pfasst
           auto& crse = pfasst::encap::as_encap_sweeper(dst);
           auto& fine = pfasst::encap::as_encap_sweeper(src);
 
-          size_t ncrse = crse.get_nodes().size(); assert(ncrse >= 1);
-          size_t nfine = fine.get_nodes().size(); assert(nfine >= 1);
+          auto const ncrse = crse.get_nodes().size(); assert(ncrse >= 1);
+          auto const nfine = fine.get_nodes().size(); assert(nfine >= 1);
 
           auto crse_factory = crse.get_factory();
           auto fine_factory = fine.get_factory();
 
-          EncapVecT crse_z2n(ncrse - 1), fine_z2n(nfine - 1), rstr_z2n(ncrse - 1);
+          EncapVecT crse_int(ncrse - 1), fine_int(nfine - 1), rstr_int(ncrse - 1);
 
-          for (size_t m = 0; m < ncrse - 1; m++) { crse_z2n[m] = crse_factory->create(solution); }
-          for (size_t m = 0; m < ncrse - 1; m++) { rstr_z2n[m] = crse_factory->create(solution); }
-          for (size_t m = 0; m < nfine - 1; m++) { fine_z2n[m] = fine_factory->create(solution); }
+          for (size_t m = 0; m < ncrse - 1; m++) { crse_int[m] = crse_factory->create(solution); }
+          for (size_t m = 0; m < ncrse - 1; m++) { rstr_int[m] = crse_factory->create(solution); }
+          for (size_t m = 0; m < nfine - 1; m++) { fine_int[m] = fine_factory->create(solution); }
 
           // compute '0 to node' integral on the coarse level
-          crse.integrate(dt, crse_z2n);
-          for (size_t m = 1; m < ncrse - 1; m++) {
-            crse_z2n[m]->saxpy(1.0, crse_z2n[m - 1]);
-          }
+          crse.integrate(dt, crse_int);
 
           // compute '0 to node' integral on the fine level
-          fine.integrate(dt, fine_z2n);
-          for (size_t m = 1; m < nfine - 1; m++) {
-            fine_z2n[m]->saxpy(1.0, fine_z2n[m - 1]);
-          }
+          fine.integrate(dt, fine_int);
 
           // restrict '0 to node' fine integral
           int trat = (int(nfine) - 1) / (int(ncrse) - 1);
           for (size_t m = 1; m < ncrse; m++) {
-            this->restrict(rstr_z2n[m - 1], fine_z2n[m * trat - 1]);
+            this->restrict(rstr_int[m - 1], fine_int[m * trat - 1]);
           }
 
           // compute 'node to node' tau correction
           EncapVecT tau(ncrse - 1), rstr_and_crse(2 * (ncrse - 1));
           for (size_t m = 0; m < ncrse - 1; m++) { tau[m] = crse.get_tau(m); }
-          for (size_t m = 0; m < ncrse - 1; m++) { rstr_and_crse[m] = rstr_z2n[m]; }
-          for (size_t m = 0; m < ncrse - 1; m++) { rstr_and_crse[ncrse - 1 + m] = crse_z2n[m]; }
+          for (size_t m = 0; m < ncrse - 1; m++) { rstr_and_crse[m] = rstr_int[m]; }
+          for (size_t m = 0; m < ncrse - 1; m++) { rstr_and_crse[ncrse - 1 + m] = crse_int[m]; }
 
           if (fmat.rows() == 0) {
             fmat.resize(ncrse - 1, 2 * (ncrse - 1));

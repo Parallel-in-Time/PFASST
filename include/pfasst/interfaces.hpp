@@ -88,6 +88,10 @@ namespace pfasst
 
     public:
       //! @{
+      ISweeper()
+        : controller(nullptr)
+      {}
+
       virtual ~ISweeper()
       {}
       //! @}

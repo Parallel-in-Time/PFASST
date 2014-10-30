@@ -60,7 +60,11 @@ namespace pfasst
         for (int nblock = 0; nblock < nblocks; nblock++) {
           this->set_step(nblock * comm->size() + comm->rank());
 
-          predictor();
+          if (this->comm->size() == 1) {
+            predict = true;
+          } else {
+            predictor();
+          }
 
           for (this->set_iteration(0);
                this->get_iteration() < this->get_max_iterations();
@@ -92,9 +96,9 @@ namespace pfasst
 
         fine->send(comm, tag(l), false);
 
-        auto dt = this->get_time_step();
         trns->restrict(crse, fine, true);
-        trns->fas(dt, crse, fine);
+
+        trns->fas(this->get_time_step(), crse, fine);
         crse->save();
 
         return l - 1;

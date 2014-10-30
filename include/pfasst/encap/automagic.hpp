@@ -23,15 +23,15 @@ namespace pfasst
                            >;
 
     template<typename ControllerT, typename BuildT, typename time = time_precision>
-    void auto_build(ControllerT& c, vector<pair<size_t, pfasst::QuadratureType>> nodes, BuildT build)
+    void auto_build(ControllerT& c, vector<pair<size_t, quadrature::QuadratureType>> nodes, BuildT build)
     {
       for (size_t l = 0; l < nodes.size(); l++) {
-        auto nds = pfasst::compute_nodes<time>(get<0>(nodes[l]), get<1>(nodes[l]));
+        auto quad = quadrature::quadrature_factory<time>(get<0>(nodes[l]), get<1>(nodes[l]));
         AutoBuildTuple<time> tpl = build(l);
         auto sweeper = get<0>(tpl);
         auto transfer = get<1>(tpl);
         auto factory = get<2>(tpl);
-        sweeper->set_nodes(nds);
+        sweeper->set_quadrature(quad);
         sweeper->set_factory(factory);
         c.add_level(sweeper, transfer, false);
       }
@@ -45,7 +45,7 @@ namespace pfasst
         auto isweeper = c.get_level(l);
         auto sweeper = dynamic_pointer_cast<pfasst::encap::EncapSweeper<time>>(isweeper);
         assert(sweeper);
-        auto q0 = sweeper->get_state(0);
+        auto q0 = sweeper->get_start_state();
         initial(sweeper, q0);
       }
     }

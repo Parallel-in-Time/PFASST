@@ -2,10 +2,12 @@
 include_directories(
     ${3rdparty_INCLUDES}
     ${pfasst_INCLUDES}
+    ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 set(TESTS
     test_quadrature
+    test_polynomial
 )
 
 foreach(test ${TESTS})
