@@ -152,9 +152,8 @@ class AdvectionDiffusionSweeper
     /**
      * @copybrief pfasst::encap::IMEXSweeper::predict()
      */
-    void predict(bool initial) override
+    void post_predict() override
     {
-      pfasst::encap::IMEXSweeper<time>::predict(initial);
       time t  = this->get_controller()->get_time();
       time dt = this->get_controller()->get_time_step();
       this->echo_error(t + dt, true);
@@ -163,9 +162,8 @@ class AdvectionDiffusionSweeper
     /**
      * @copybrief pfasst::encap::IMEXSweeper::sweep()
      */
-    void sweep() override
+    void post_sweep() override
     {
-      pfasst::encap::IMEXSweeper<time>::sweep();
       time t  = this->get_controller()->get_time();
       time dt = this->get_controller()->get_time_step();
       this->echo_error(t + dt);
