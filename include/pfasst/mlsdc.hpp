@@ -17,16 +17,6 @@ namespace pfasst
 {
 
   /**
-   * Converged exception.
-   *
-   * Thrown when the controller detects that the finest sweeper has converged.
-   */
-  class ConvergedException
-    : public exception
-  {
-  };
-
-  /**
    * Multilevel SDC controller.
    */
   template<typename time = pfasst::time_precision>
@@ -38,8 +28,9 @@ namespace pfasst
 
       typedef typename pfasst::Controller<time>::LevelIter LevelIter;
 
-      bool predict; //<! whether to use a 'predict' sweep
-      bool initial; //<! whether we're sweeping from a new initial condition
+      bool predict;   //<! whether to use a 'predict' sweep
+      bool initial;   //<! whether we're sweeping from a new initial condition
+      bool converged; //<! whether we've converged
 
       void perform_sweeps(size_t level)
       {
@@ -66,18 +57,16 @@ namespace pfasst
         for (; this->get_time() < this->get_end_time(); this->advance_time()) {
           predict = true;
           initial = true;
+          converged = false;
 
-          try {
+          for (this->set_iteration(0);
+               this->get_iteration() < this->get_max_iterations() && !converged;
+               this->advance_iteration()) {
+            cycle_v(this->finest());
+            initial = false;
+          }
 
-            for (this->set_iteration(0);
-                 this->get_iteration() < this->get_max_iterations();
-                 this->advance_iteration()) {
-              cycle_v(this->finest());
-              initial = false;
-            }
-            perform_sweeps(this->finest().level);
-
-          } catch (ConvergedException& e) { }
+          perform_sweeps(this->finest().level);
 
           if (this->get_time() + this->get_time_step() < this->get_end_time()) {
             this->get_finest()->advance();
@@ -113,7 +102,8 @@ namespace pfasst
         perform_sweeps(l.level);
 
         if (l == this->finest() && fine->converged()) {
-          throw ConvergedException();
+          converged = true;
+          return l;
         }
 
         trns->restrict(crse, fine, initial);
@@ -163,6 +153,9 @@ namespace pfasst
           l = cycle_bottom(l);
         } else {
           l = cycle_down(l);
+          if (converged) {
+            return l;
+          }
           l = cycle_v(l);
           l = cycle_up(l);
         }
