@@ -66,6 +66,7 @@ error_map run_serial_mlsdc()
   auto sweeper = mlsdc.get_finest<AdvectionDiffusionSweeper<>>();
   auto q0 = sweeper->get_start_state();
   sweeper->exact(q0, 0.0);
+  //  sweeper->set_residual_tolerances(1e-5, 0.0);
 
   /*
    * run mlsdc!

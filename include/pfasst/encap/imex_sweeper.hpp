@@ -420,8 +420,8 @@ namespace pfasst
             dst[m]->saxpy(-1.0, this->get_state(m));
             // XXX: add tau corrections
           }
-          dst[0]->mat_apply(dst, dt, this->q_mat_cmpt, this->fs_expl, false);
-          dst[0]->mat_apply(dst, dt, this->q_mat_cmpt, this->fs_impl, false);
+          dst[0]->mat_apply(dst, dt, this->quad->get_q_mat(), this->fs_expl, false);
+          dst[0]->mat_apply(dst, dt, this->quad->get_q_mat(), this->fs_impl, false);
         }
         //! @}
 
