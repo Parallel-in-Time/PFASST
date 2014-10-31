@@ -175,6 +175,12 @@ namespace pfasst
       //! @}
 
       //! @{
+      virtual void post_sweep() { }
+      virtual void post_predict() { }
+      virtual void post_step() { }
+      //! @}
+
+      //! @{
       virtual void post(ICommunicator* comm, int tag)
       {
         UNUSED(comm); UNUSED(tag);

@@ -44,7 +44,7 @@ class ScalarSweeper
      * Generic constructor; initialize all function call counters with zero.
      * @param[in] lambda coefficient in test equation
      * @param[in] u0 initial value at \\( t=0 \\)
-     */ 
+     */
     ScalarSweeper(const complex<double>& lambda, const complex<double>& u0)
       :   lambda(lambda)
         , u0(u0)
@@ -91,22 +91,20 @@ class ScalarSweeper
     }
 
     /**
-     * Prediction step and update of error. Uses predictor as provided by IMEXSweeper.
+     * Post prediction step, update of error.
      */
-    void predict(bool initial) override
+    void post_predict() override
     {
-      pfasst::encap::IMEXSweeper<time>::predict(initial);
       time t  = this->get_controller()->get_time();
       time dt = this->get_controller()->get_time_step();
       this->echo_error(t + dt);
     }
 
     /**
-     * Perform a sweep and update error. Uses sweep as provided by IMEXSweeper.
+     * Post sweep, update error.
      */
-    void sweep() override
+    void post_sweep() override
     {
-      pfasst::encap::IMEXSweeper<time>::sweep();
       time t  = this->get_controller()->get_time();
       time dt = this->get_controller()->get_time_step();
       this->echo_error(t + dt);
@@ -161,8 +159,8 @@ class ScalarSweeper
     }
 
     /**
-     * For given \\( b \\), solve 
-     * \\( \\left( \\mathbb{I}_d - \\Delta t \\text{real}(\\lambda) \\right) u = b \\) 
+     * For given \\( b \\), solve
+     * \\( \\left( \\mathbb{I}_d - \\Delta t \\text{real}(\\lambda) \\right) u = b \\)
      * for \\( u \\) and set f_encap to \\( \\text{real}(\\lambda) u \\)
      */
     void impl_solve(shared_ptr<encap_type> f_encap,

@@ -120,22 +120,20 @@ class VdpSweeper
     }
 
     /**
-     * Prediction step and update of error. Uses predictor as provided by IMEXSweeper.
+     * Post prediction step, update error.
      */
-    void predict(bool initial) override
+    void post_predict() override
     {
-      pfasst::encap::IMEXSweeper<time>::predict(initial);
       time t  = this->get_controller()->get_time();
       time dt = this->get_controller()->get_time_step();
       this->echo_error(t + dt);
     }
 
     /**
-     * Perform a sweep and update error. Uses sweep as provided by IMEXSweeper.
+     * Post sweep, update error.
      */
-    void sweep() override
+    void post_sweep() override
     {
-      pfasst::encap::IMEXSweeper<time>::sweep();
       time t  = this->get_controller()->get_time();
       time dt = this->get_controller()->get_time_step();
       this->echo_error(t + dt);

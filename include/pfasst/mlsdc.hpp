@@ -34,9 +34,11 @@ namespace pfasst
         for (size_t s = 0; s < this->nsweeps[level]; s++) {
           if (predict) {
             sweeper->predict(initial & predict);
+            sweeper->post_predict();
             predict = false;
           } else {
             sweeper->sweep();
+            sweeper->post_sweep();
           }
         }
       }
@@ -63,6 +65,8 @@ namespace pfasst
           }
 
           perform_sweeps(this->finest().level);
+
+          this->get_finest()->post_step();
 
           if (this->get_time() + this->get_time_step() < this->get_end_time()) {
             this->get_finest()->advance();
