@@ -181,7 +181,7 @@ namespace pfasst
 
         //! @{
         /**
-         * Compute residual at each SDC node (including FAS corrections).
+         * Set residual tolerances for convergence checking.
          */
         void set_residual_tolerances(time abs_residual_tol, time rel_residual_tol, int order=0)
         {
