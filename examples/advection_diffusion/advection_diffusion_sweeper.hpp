@@ -16,6 +16,7 @@
 #include <pfasst/globals.hpp>
 #include <pfasst/encap/imex_sweeper.hpp>
 #include <pfasst/config.hpp>
+#include <pfasst/logging.hpp>
 
 #include "fft.hpp"
 
@@ -90,7 +91,7 @@ class AdvectionDiffusionSweeper
 
     virtual ~AdvectionDiffusionSweeper()
     {
-      cout << "number of f1 evals: " << this->nf1evals << endl;
+      LOG(INFO) << "number of f1 evals: " << this->nf1evals;
     }
     //! @}
 
@@ -132,9 +133,8 @@ class AdvectionDiffusionSweeper
 
       auto n = this->get_controller()->get_step();
       auto k = this->get_controller()->get_iteration();
-      cout << "err: " << n << " " << k << " " << scientific << max
-           << " (" << qend.size() << ", " << predict << ")"
-           << endl;
+      CLOG(INFO, "data_values") << n << k << qend;
+      LOG(INFO) << "err:" << n << k << max << "(" << qend.size() << "," << predict << ")";
 
       this->errors.insert(pair<pair<size_t, size_t>, double>(pair<size_t, size_t>(n, k), max));
     }
