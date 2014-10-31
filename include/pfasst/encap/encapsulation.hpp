@@ -76,6 +76,11 @@ namespace pfasst
         }
         //! @}
 
+        virtual time norm0() const
+        {
+          throw NotImplementedYet("norm0");
+        }
+
         //! @{
         /**
          * provides basic mathematical operation \\(y+=ax\\).
