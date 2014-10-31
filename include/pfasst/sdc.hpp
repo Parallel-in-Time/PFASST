@@ -50,10 +50,13 @@ namespace pfasst
             bool predict = this->get_iteration() == 0;
             if (predict) {
               sweeper->predict(initial);
+              sweeper->post_predict();
             } else {
               sweeper->sweep();
+              sweeper->post_sweep();
             }
           }
+          sweeper->post_step();
           sweeper->advance();
         }
       }

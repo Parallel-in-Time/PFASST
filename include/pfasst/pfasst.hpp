@@ -28,9 +28,11 @@ namespace pfasst
         for (size_t s = 0; s < this->nsweeps[level]; s++) {
           if (predict) {
             sweeper->predict(predict);
+            sweeper->post_predict();
             predict = false;
           } else {
             sweeper->sweep();
+            sweeper->post_sweep();
           }
         }
       }
@@ -72,6 +74,8 @@ namespace pfasst
             post();
             cycle_v(this->finest());
           }
+
+          this->get_finest()->post_step();
 
           if (nblock < nblocks - 1) {
             broadcast();
