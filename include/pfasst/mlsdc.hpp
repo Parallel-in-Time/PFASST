@@ -16,6 +16,19 @@ using namespace std;
 namespace pfasst
 {
 
+  /**
+   * Converged exception.
+   *
+   * Thrown when the controller detects that the finest sweeper has converged.
+   */
+  class ConvergedException
+    : public exception
+  {
+  };
+
+  /**
+   * Multilevel SDC controller.
+   */
   template<typename time = pfasst::time_precision>
   class MLSDC
     : public Controller<time>
@@ -43,7 +56,7 @@ namespace pfasst
 
     public:
       /**
-       * Evolve ODE using MLSDC.
+       * Solve ODE using MLSDC.
        *
        * This assumes that the user has set initial conditions on the finest level.
        * Currently uses a fixed number of iterations per step.
@@ -51,18 +64,20 @@ namespace pfasst
       void run()
       {
         for (; this->get_time() < this->get_end_time(); this->advance_time()) {
-          predict = true;  // use predictor for first fine sweep of each step
+          predict = true;
           initial = true;
 
-          // iterate by performing v-cycles
-          for (this->set_iteration(0);
-               this->get_iteration() < this->get_max_iterations();
-               this->advance_iteration()) {
-            cycle_v(this->finest());
-            initial = false;
-          }
+          try {
 
-          perform_sweeps(this->finest().level);
+            for (this->set_iteration(0);
+                 this->get_iteration() < this->get_max_iterations();
+                 this->advance_iteration()) {
+              cycle_v(this->finest());
+              initial = false;
+            }
+            perform_sweeps(this->finest().level);
+
+          } catch (ConvergedException& e) { }
 
           if (this->get_time() + this->get_time_step() < this->get_end_time()) {
             this->get_finest()->advance();
@@ -70,6 +85,22 @@ namespace pfasst
         }
       }
 
+      void setup() override
+      {
+        nsweeps.resize(this->nlevels());
+        fill(nsweeps.begin(), nsweeps.end(), 1);
+        for (auto leviter = this->coarsest(); leviter <= this->finest(); ++leviter) {
+          leviter.current()->set_controller(this);
+          leviter.current()->setup(leviter != this->finest());
+        }
+      }
+
+      void set_nsweeps(vector<size_t> nsweeps)
+      {
+        this->nsweeps = nsweeps;
+      }
+
+    private:
       /**
        * Cycle down: sweep on current (fine), restrict to coarse.
        */
@@ -80,6 +111,10 @@ namespace pfasst
         auto trns = l.transfer();
 
         perform_sweeps(l.level);
+
+        if (l == this->finest() && fine->converged()) {
+          throw ConvergedException();
+        }
 
         trns->restrict(crse, fine, initial);
         trns->fas(this->get_time_step(), crse, fine);
@@ -134,22 +169,7 @@ namespace pfasst
         return l;
       }
 
-      void setup() override
-      {
-        nsweeps.resize(this->nlevels());
-        fill(nsweeps.begin(), nsweeps.end(), 1);
-        for (auto leviter = this->coarsest(); leviter <= this->finest(); ++leviter) {
-          leviter.current()->set_controller(this);
-          leviter.current()->setup(leviter != this->finest());
-        }
-      }
-
-      void set_nsweeps(vector<size_t> nsweeps)
-      {
-        this->nsweeps = nsweeps;
-      }
-
-  };
+  }; // MLSDC
 
 }  // ::pfasst
 
