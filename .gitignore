@@ -1,9 +1,9 @@
 # other stuff
 /doc/build
 /build*
-/dist
 /coverage
 *.info
+/include/pfasst/site_config.hpp
 
 # Created by http://www.gitignore.io
 

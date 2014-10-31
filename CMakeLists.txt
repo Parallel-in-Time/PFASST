@@ -100,6 +100,11 @@ add_subdirectory(3rdparty)
 
 message(STATUS "********************************************************************************")
 message(STATUS "Configuring sources")
+set(PFASST_LOGGING_DEFAULT_CONF_FILE "${CMAKE_INSTALL_PREFIX}/etc/pfasst/default_logging.conf")
+configure_file(
+    "${pfasst_SOURCE_DIR}/cmake/site_config.hpp.in"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/pfasst/site_config.hpp"
+)
 add_subdirectory(include)
 
 if(pfasst_BUILD_EXAMPLES)
@@ -116,18 +121,26 @@ if(pfasst_BUILD_TESTS)
 endif()
 message(STATUS "********************************************************************************")
 
-message(STATUS "Creating 'install' target for header files")
-message(STATUS "  will install them to '${CMAKE_INSTALL_PREFIX}/include/pfasst'")
-install(DIRECTORY include/pfasst/
-    DESTINATION include/pfasst
+message(STATUS "Creating 'install' target")
+message(STATUS "  prefix:              ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "  header files:        <PREFIX>/include/pfasst")
+install(DIRECTORY include/
+    DESTINATION include
     FILES_MATCHING PATTERN "*.hpp"
+                   PATTERN "*.conf"
 )
+
+message(STATUS "  configuration files: <PREFIX>/etc/pfasst")
+install(DIRECTORY etc/
+    DESTINATION etc/pfasst
+)
+
 if(pfasst_BUILD_EXAMPLES AND pfasst_INSTALL_EXAMPLES)
-    message(STATUS "Example programms have been added to 'install' target")
-    message(STATUS "  will install them to '${CMAKE_INSTALL_PREFIX}/bin'")
-    message(STATUS "  example programs:")
+    message(STATUS "  example programs:    <PREFIX>/bin")
+    message(STATUS "  Example programms have been added to 'install' target")
+    message(STATUS "    example programs:")
     foreach(example_program ${examples_to_install})
-        message(STATUS "    - ${example_program}")
+        message(STATUS "      - ${example_program}")
     endforeach()
 endif()
 

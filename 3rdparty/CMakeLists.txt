@@ -5,15 +5,6 @@ set(3rdparty_DEPENDEND_LIBS ${3rdparty_DEPENDEND_LIBS})
 message(STATUS "--------------------------------------------------------------------------------")
 message(STATUS "Boost")
 
-# if(pfasst_BUILD_SHARED_LIBS OR BUILD_SHARED_LIBS)
-#     set(Boost_USE_STATIC_LIBS OFF)
-#     set(pfasst_BUILD_SHARED_LIBS ON)
-#     set(BUILD_SHARED_LIBS ON)
-# else()
-#     set(Boost_USE_STATIC_LIBS ON)
-#     set(pfasst_BUILD_SHARED_LIBS OFF)
-#     set(BUILD_SHARED_LIBS OFF)
-# endif()
 set(Boost_USE_MULTITHREADED ON)
 
 if(${compiler_version_available} AND ${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
@@ -77,7 +68,7 @@ set(EASYLOGGINGPP_SOURCE_URL "https://github.com/easylogging/easyloggingpp/relea
 # message(STATUS "easyloggingpp not found on your system")
 message(STATUS "  going to download sources")
 message(STATUS "    download URL: ${EASYLOGGINGPP_SOURCE_URL}")
-set(easyloggingpp_SOURCE_DIR "${pfasst_BINARY_DIR}/3rdparty/src/easylogging")
+set(easyloggingpp_SOURCE_DIR "${pfasst_BINARY_DIR}/3rdparty/src/easyloggingpp")
 
 ExternalProject_Add(
     easyloggingpp
@@ -87,7 +78,6 @@ ExternalProject_Add(
     TIMEOUT 30
     UPDATE_COMMAND ""
     PATCH_COMMAND ""
-    BUILD_IN_SOURCE ON
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
     TEST_COMMAND ""

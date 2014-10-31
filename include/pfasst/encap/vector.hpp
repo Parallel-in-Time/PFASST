@@ -12,6 +12,7 @@
 #include <cassert>
 
 #include "encapsulation.hpp"
+#include "../logging.hpp"
 
 using namespace std;
 
@@ -27,7 +28,9 @@ namespace pfasst
      */
     template<typename scalar, typename time = time_precision>
     class VectorEncapsulation
-      : public vector<scalar>, public Encapsulation<time>
+      : public vector<scalar>,
+        public Encapsulation<time>,
+        public el::Loggable
     {
       public:
         //! @{
@@ -160,6 +163,15 @@ namespace pfasst
         {
           return std::max(this->cbegin(), this->cend(),
                           [](scalar a, scalar b) {return std::abs(a) < std::abs(b); } );
+        }
+        //! @}
+
+        //! @{
+        virtual void log(el::base::type::ostream_t& os) const
+        {
+          for(auto iter = this->cbegin(); iter != this->cend(); ++iter) {
+            os << scientific << *iter << " ";
+          }
         }
         //! @}
     };
