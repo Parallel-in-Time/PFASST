@@ -16,6 +16,9 @@ using namespace std;
 namespace pfasst
 {
 
+  /**
+   * Multilevel SDC controller.
+   */
   template<typename time = pfasst::time_precision>
   class MLSDC
     : public Controller<time>
@@ -45,7 +48,7 @@ namespace pfasst
 
     public:
       /**
-       * Evolve ODE using MLSDC.
+       * Solve ODE using MLSDC.
        *
        * This assumes that the user has set initial conditions on the finest level.
        * Currently uses a fixed number of iterations per step.
@@ -53,10 +56,9 @@ namespace pfasst
       void run()
       {
         for (; this->get_time() < this->get_end_time(); this->advance_time()) {
-          predict = true;  // use predictor for first fine sweep of each step
+          predict = true;
           initial = true;
 
-          // iterate by performing v-cycles
           for (this->set_iteration(0);
                this->get_iteration() < this->get_max_iterations();
                this->advance_iteration()) {
@@ -74,6 +76,22 @@ namespace pfasst
         }
       }
 
+      virtual void setup() override
+      {
+        nsweeps.resize(this->nlevels());
+        fill(nsweeps.begin(), nsweeps.end(), 1);
+        for (auto leviter = this->coarsest(); leviter <= this->finest(); ++leviter) {
+          leviter.current()->set_controller(this);
+          leviter.current()->setup(leviter != this->finest());
+        }
+      }
+
+      void set_nsweeps(vector<size_t> nsweeps)
+      {
+        this->nsweeps = nsweeps;
+      }
+
+    private:
       /**
        * Cycle down: sweep on current (fine), restrict to coarse.
        */
@@ -84,6 +102,11 @@ namespace pfasst
         auto trns = l.transfer();
 
         perform_sweeps(l.level);
+
+        if (l == this->finest() && fine->converged()) {
+          l.set_converged();
+          return l;
+        }
 
         trns->restrict(crse, fine, initial);
         trns->fas(this->get_time_step(), crse, fine);
@@ -129,30 +152,14 @@ namespace pfasst
       LevelIter cycle_v(LevelIter l)
       {
         if (l.level == 0) {
-          l = cycle_bottom(l);
+          l = bind_if_not_converged(l, cycle_bottom);
         } else {
-          l = cycle_down(l);
-          l = cycle_v(l);
-          l = cycle_up(l);
+          l = bind_if_not_converged(l, cycle_down);
+          l = bind_if_not_converged(l, cycle_v);
+          l = bind_if_not_converged(l, cycle_up);
         }
         return l;
       }
-
-      void setup() override
-      {
-        nsweeps.resize(this->nlevels());
-        fill(nsweeps.begin(), nsweeps.end(), 1);
-        for (auto leviter = this->coarsest(); leviter <= this->finest(); ++leviter) {
-          leviter.current()->set_controller(this);
-          leviter.current()->setup(leviter != this->finest());
-        }
-      }
-
-      void set_nsweeps(vector<size_t> nsweeps)
-      {
-        this->nsweeps = nsweeps;
-      }
-
   };
 
 }  // ::pfasst

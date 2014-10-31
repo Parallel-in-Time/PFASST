@@ -13,6 +13,8 @@
 
 #include "interfaces.hpp"
 
+#define bind_if_not_converged(l, f) (l).converged ? (l) : (f(l));
+
 namespace pfasst
 {
   /**
@@ -129,11 +131,12 @@ namespace pfasst
 
           //! @{
           int level;
+          bool converged;
           //! @}
 
           //! @{
-          LevelIter(int level, Controller* ts)
-            : ts(ts), level(level)
+          LevelIter(int level, bool converged, Controller* ts)
+            : ts(ts), level(level), converged(converged)
           { }
           //! @}
 
@@ -160,6 +163,11 @@ namespace pfasst
           }
           //! @}
 
+          void set_converged(bool converged=true)
+          {
+            this->converged = converged;
+          }
+
           //! @{
           // required by std::iterator
           template<typename R = reference>
@@ -173,8 +181,8 @@ namespace pfasst
           // required by std::bidirectional_iterator_tag
           LevelIter  operator--()                  { level--; return *this; }
           // required by std::random_access_iterator_tag
-          LevelIter  operator- (difference_type i) { return LevelIter(level - i, ts); }
-          LevelIter  operator+ (difference_type i) { return LevelIter(level + i, ts); }
+          LevelIter  operator- (difference_type i) { return LevelIter(level - i, converged, ts); }
+          LevelIter  operator+ (difference_type i) { return LevelIter(level + i, converged, ts); }
           bool       operator<=(LevelIter i)       { return level <= i.level; }
           bool       operator>=(LevelIter i)       { return level >= i.level; }
           bool       operator< (LevelIter i)       { return level <  i.level; }
@@ -183,8 +191,8 @@ namespace pfasst
       };
 
       //! @{
-      LevelIter finest()   { return LevelIter(nlevels() - 1, this); }
-      LevelIter coarsest() { return LevelIter(0, this); }
+      LevelIter finest()   { return LevelIter(nlevels() - 1, false, this); }
+      LevelIter coarsest() { return LevelIter(0, false, this); }
       //! @}
 
       //! @{
