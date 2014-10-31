@@ -406,6 +406,23 @@ namespace pfasst
           dst[0]->mat_apply(dst, dt, this->q_mat_cmpt, this->fs_expl, true);
           dst[0]->mat_apply(dst, dt, this->q_mat_cmpt, this->fs_impl, false);
         }
+
+        /**
+         * @copybrief EncapSweeper::residual()
+         *
+         * @param[in] dt width of time interval to integrate over
+         * @param[in,out] dst residuals
+         */
+        virtual void residual(time dt, vector<shared_ptr<Encapsulation<time>>> dst) const override
+        {
+          for (size_t m=0; m<this->quad->get_num_nodes(); m++) {
+            dst[m]->copy(this->get_start_state());
+            dst[m]->saxpy(-1.0, this->get_state(m));
+            // XXX: add tau corrections
+          }
+          dst[0]->mat_apply(dst, dt, this->q_mat_cmpt, this->fs_expl, false);
+          dst[0]->mat_apply(dst, dt, this->q_mat_cmpt, this->fs_impl, false);
+        }
         //! @}
 
         //! @{
