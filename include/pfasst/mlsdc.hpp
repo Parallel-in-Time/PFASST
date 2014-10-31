@@ -17,16 +17,6 @@ namespace pfasst
 {
 
   /**
-   * Converged exception.
-   *
-   * Thrown when the controller detects that the finest sweeper has converged.
-   */
-  class ConvergedException
-    : public exception
-  {
-  };
-
-  /**
    * Multilevel SDC controller.
    */
   template<typename time = pfasst::time_precision>
@@ -67,17 +57,14 @@ namespace pfasst
           predict = true;
           initial = true;
 
-          try {
+          for (this->set_iteration(0);
+               this->get_iteration() < this->get_max_iterations();
+               this->advance_iteration()) {
+            cycle_v(this->finest());
+            initial = false;
+          }
 
-            for (this->set_iteration(0);
-                 this->get_iteration() < this->get_max_iterations();
-                 this->advance_iteration()) {
-              cycle_v(this->finest());
-              initial = false;
-            }
-            perform_sweeps(this->finest().level);
-
-          } catch (ConvergedException& e) { }
+          perform_sweeps(this->finest().level);
 
           if (this->get_time() + this->get_time_step() < this->get_end_time()) {
             this->get_finest()->advance();
@@ -85,7 +72,7 @@ namespace pfasst
         }
       }
 
-      void setup() override
+      virtual void setup() override
       {
         nsweeps.resize(this->nlevels());
         fill(nsweeps.begin(), nsweeps.end(), 1);
@@ -113,7 +100,8 @@ namespace pfasst
         perform_sweeps(l.level);
 
         if (l == this->finest() && fine->converged()) {
-          throw ConvergedException();
+          l.set_converged();
+          return l;
         }
 
         trns->restrict(crse, fine, initial);
@@ -160,16 +148,15 @@ namespace pfasst
       LevelIter cycle_v(LevelIter l)
       {
         if (l.level == 0) {
-          l = cycle_bottom(l);
+          l = bind_if_not_converged(l, cycle_bottom);
         } else {
-          l = cycle_down(l);
-          l = cycle_v(l);
-          l = cycle_up(l);
+          l = bind_if_not_converged(l, cycle_down);
+          l = bind_if_not_converged(l, cycle_v);
+          l = bind_if_not_converged(l, cycle_up);
         }
         return l;
       }
-
-  }; // MLSDC
+  };
 
 }  // ::pfasst
 
