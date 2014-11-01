@@ -1,6 +1,7 @@
 # Building and Running Tests
 include_directories(
     ${3rdparty_INCLUDES}
+    ${TESTS_3rdparty_INCLUDES}
     ${FFTW_INCLUDE_PATH}
     ${pfasst_INCLUDES}
 )
@@ -24,6 +25,7 @@ foreach(test ${TESTS})
     endif()
     target_link_libraries(${test}
         ${3rdparty_DEPENDEND_LIBS}
+        ${TESTS_3rdparty_DEPENDEND_LIBS}
         ${FFTW_LIBRARIES}
         ${pfasst_DEPENDED_LIBS}
     )
@@ -62,6 +64,7 @@ if(${pfasst_WITH_MPI})
         endif()
         target_link_libraries(${test}
             ${3rdparty_DEPENDEND_LIBS}
+            ${TESTS_3rdparty_DEPENDEND_LIBS}
             ${FFTW_LIBRARIES}
             ${pfasst_DEPENDED_LIBS}
             ${MPI_CXX_LIBRARIES}
