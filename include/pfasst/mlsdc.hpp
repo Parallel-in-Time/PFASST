@@ -74,21 +74,6 @@ namespace pfasst
         }
       }
 
-      void setup() override
-      {
-        nsweeps.resize(this->nlevels());
-        fill(nsweeps.begin(), nsweeps.end(), 1);
-        for (auto leviter = this->coarsest(); leviter <= this->finest(); ++leviter) {
-          leviter.current()->set_controller(this);
-          leviter.current()->setup(leviter != this->finest());
-        }
-      }
-
-      void set_nsweeps(vector<size_t> nsweeps)
-      {
-        this->nsweeps = nsweeps;
-      }
-
     private:
       /**
        * Cycle down: sweep on current (fine), restrict to coarse.
@@ -162,7 +147,23 @@ namespace pfasst
         return l;
       }
 
-  }; // MLSDC
+    public:
+      virtual void setup() override
+      {
+        nsweeps.resize(this->nlevels());
+        fill(nsweeps.begin(), nsweeps.end(), 1);
+        for (auto leviter = this->coarsest(); leviter <= this->finest(); ++leviter) {
+          leviter.current()->set_controller(this);
+          leviter.current()->setup(leviter != this->finest());
+        }
+      }
+
+      void set_nsweeps(vector<size_t> nsweeps)
+      {
+        this->nsweeps = nsweeps;
+      }
+
+  };
 
 }  // ::pfasst
 
