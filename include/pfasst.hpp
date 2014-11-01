@@ -16,8 +16,7 @@ namespace pfasst
     pfasst::log::enable_config_options(0);
     config::init_config();
     config::read_commandline(argc, argv);
-
-    pfasst::log::set_logfile_from_options();
+    PFASST_START_LOG(argc, argv);
   }
 } // ::pfasst
 

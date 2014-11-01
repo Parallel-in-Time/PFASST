@@ -11,12 +11,15 @@ using namespace std;
 
 // enable easy logging of STL containers
 #define _ELPP_STL_LOGGING
-// enable unicode support (just because)
-#define _ELPP_UNICODE
 // disable creation of default log file
 #define _ELPP_NO_DEFAULT_LOG_FILE
 // enable passing `--logging-flags` via command line
 #define _ELPP_LOGGING_FLAGS_FROM_ARG
+
+#ifndef NDEBUG
+  #define _ELPP_DEBUG_ASSERT_FAILURE
+  #define _ELPP_STACKTRACE_ON_CRASH
+#endif
 
 #include <easylogging++.h>
 
@@ -74,8 +77,9 @@ namespace pfasst {
 }  // ::pfasst
 
 #define PFASST_START_LOG(argc, argv)\
+  _START_EASYLOGGINGPP(argc, argv);\
   pfasst::log::load_default_config();\
   pfasst::log::set_logging_flags();\
-  _START_EASYLOGGINGPP(argc, argv)
+  pfasst::log::set_logfile_from_options();
 
 #endif  // _PFASST__LOGGING_HPP_
