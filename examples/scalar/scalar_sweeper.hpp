@@ -4,6 +4,7 @@
 #include <complex>
 #include <vector>
 
+#include <pfasst/logging.hpp>
 #include <pfasst/encap/imex_sweeper.hpp>
 #include <pfasst/encap/vector.hpp>
 
@@ -59,10 +60,10 @@ class ScalarSweeper
      */
     virtual ~ScalarSweeper()
     {
-      cout << "Final error:                    " << scientific << this->error << endl;
-      cout << "Number of explicit evaluations: " << this->n_f_expl_eval << endl;
-      cout << "Number of implicit evaluations: " << this->n_f_impl_eval << endl;
-      cout << "Number of implicit solves:      " << this->n_impl_solve << endl;
+      LOG(INFO) << "Final error:                   " << this->error;
+      LOG(INFO) << "Number of explicit evaluations:" << this->n_f_expl_eval;
+      LOG(INFO) << "Number of implicit evaluations:" << this->n_f_impl_eval;
+      LOG(INFO) << "Number of implicit solves:     " << this->n_impl_solve;
     }
 
     /**
@@ -78,7 +79,7 @@ class ScalarSweeper
 
       this->exact(qex, t);
       double max_err = abs(qend[0] - qex[0]) / abs(qex[0]);
-      cout << "err: " << scientific << max_err << endl;
+      LOG(INFO) << "err:" << max_err;
       this->error = max_err;
     }
 
