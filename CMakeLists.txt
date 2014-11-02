@@ -84,6 +84,8 @@ set(pfasst_DEPENDEND_LIBS)
 
 if(pfasst_BUILD_TESTS)
     enable_testing()
+    set(TESTS_3rdparty_INCLUDES)
+    set(TESTS_3rdparty_DEPENDEND_LIBS)
 endif(pfasst_BUILD_TESTS)
 
 # Add / include 3rd-party libraries

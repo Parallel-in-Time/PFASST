@@ -1,6 +1,7 @@
 # Building and Running Tests
 include_directories(
     ${3rdparty_INCLUDES}
+    ${TESTS_3rdparty_INCLUDES}
     ${pfasst_INCLUDES}
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
@@ -16,6 +17,7 @@ foreach(test ${TESTS})
     add_dependencies(${test} googlemock)
     target_link_libraries(${test}
         ${3rdparty_DEPENDEND_LIBS}
+        ${TESTS_3rdparty_DEPENDEND_LIBS}
         ${pfasst_DEPENDED_LIBS}
     )
     if(pfasst_WITH_GCC_PROF AND ${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
