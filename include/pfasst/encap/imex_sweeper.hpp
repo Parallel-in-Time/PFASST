@@ -117,23 +117,6 @@ namespace pfasst
         //! @}
 
         //! @{
-        virtual shared_ptr<Encapsulation<time>> get_state(size_t m) const override
-        {
-          return this->state[m];
-        }
-
-        virtual shared_ptr<Encapsulation<time>> get_tau(size_t m) const override
-        {
-          return this->fas_corrections[m];
-        }
-
-        virtual shared_ptr<Encapsulation<time>> get_saved_state(size_t m) const override
-        {
-          return this->saved_state[m];
-        }
-        //! @}
-
-        //! @{
         /**
          * @copydoc ISweeper::setup(bool)
          *
