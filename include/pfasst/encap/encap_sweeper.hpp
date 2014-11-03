@@ -112,7 +112,7 @@ namespace pfasst
         {
           for (size_t m = 1; m < this->quadrature->get_num_nodes(); m++) {
             //            this->get_state(m)->copy(this->start_state);
-            this->get_state(m)->copy(this->state[0]);
+            this->state[m]->copy(this->state[0]);
           }
         }
         //! @}
@@ -216,25 +216,29 @@ namespace pfasst
         //! @{
         virtual void post(ICommunicator* comm, int tag) override
         {
-          this->get_state(0)->post(comm, tag);
+          this->start_state->post(comm, tag);
         }
 
         virtual void send(ICommunicator* comm, int tag, bool blocking) override
         {
-          this->get_state(this->get_nodes().size() - 1)->send(comm, tag, blocking);
+          this->end_state->send(comm, tag, blocking);
         }
 
         virtual void recv(ICommunicator* comm, int tag, bool blocking) override
         {
-          this->get_state(0)->recv(comm, tag, blocking);
+          this->start_state->recv(comm, tag, blocking);
+          // XXX
+          this->state.front()->copy(this->start_state);
         }
 
         virtual void broadcast(ICommunicator* comm) override
         {
           if (comm->rank() == comm->size() - 1) {
-            this->get_state(0)->copy(this->get_state(this->get_nodes().size() - 1));
+            this->start_state->copy(this->end_state);
           }
-          this->get_state(0)->broadcast(comm);
+          this->start_state->broadcast(comm);
+          // XXX
+          this->state.front()->copy(this->start_state);
         }
         //! @}
     };
