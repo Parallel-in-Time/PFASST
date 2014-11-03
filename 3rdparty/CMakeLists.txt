@@ -1,6 +1,7 @@
 # Managing 3rd-party libraries and tools
 set(3rdparty_INCLUDES ${3rdparty_INCLUDES})
 set(3rdparty_DEPENDEND_LIBS ${3rdparty_DEPENDEND_LIBS})
+set(pfasst_DEPENDEND_TARGETS ${pfasst_DEPENDEND_TARGETS})
 
 message(STATUS "--------------------------------------------------------------------------------")
 message(STATUS "Boost")
@@ -56,6 +57,7 @@ if(NOT EIGEN3_FOUND)
 
     # Specify include dir
     set(Eigen3_INCLUDE_PATH "${Eigen3_SOURCE_DIR}")
+    list(APPEND pfasst_DEPENDEND_TARGETS Eigen3)
 endif()
 
 list(APPEND 3rdparty_INCLUDES "${Eigen3_INCLUDE_PATH}")
@@ -150,5 +152,6 @@ endif()
 # propagate include lists to parent directory
 set(3rdparty_DEPENDEND_LIBS ${3rdparty_DEPENDEND_LIBS} PARENT_SCOPE)
 set(3rdparty_INCLUDES ${3rdparty_INCLUDES} PARENT_SCOPE)
+set(pfasst_DEPENDEND_TARGETS ${pfasst_DEPENDEND_TARGETS} PARENT_SCOPE)
 set(TESTS_3rdparty_DEPENDEND_LIBS ${TESTS_3rdparty_DEPENDEND_LIBS} PARENT_SCOPE)
 set(TESTS_3rdparty_INCLUDES ${TESTS_3rdparty_INCLUDES} PARENT_SCOPE)

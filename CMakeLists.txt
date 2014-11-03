@@ -81,6 +81,7 @@ set(3rdparty_INCLUDES)
 set(3rdparty_DEPENDEND_LIBS)
 set(pfasst_INCLUDES)
 set(pfasst_DEPENDEND_LIBS)
+set(pfasst_DEPENDEND_TARGETS)
 
 if(pfasst_BUILD_TESTS)
     enable_testing()
