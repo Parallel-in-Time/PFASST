@@ -277,7 +277,7 @@ class QmatTest
   protected:
     size_t nnodes;
     QuadratureType qtype;
-    IQuadrature<long double>* quad;
+    shared_ptr<IQuadrature<long double>> quad;
 
   public:
     virtual void SetUp()
@@ -288,11 +288,6 @@ class QmatTest
       this->quad = quadrature_factory<long double>(nnodes, qtype);
 
       cout << "Quadrature type no. " << int(qtype) << " -- Number of nodes " << nnodes << endl;
-    }
-
-    virtual void TearDown()
-    {
-      delete this->quad;
     }
 };
 

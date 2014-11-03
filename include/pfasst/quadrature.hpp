@@ -29,19 +29,19 @@ namespace pfasst
   namespace quadrature
   {
     template<typename precision = pfasst::time_precision>
-    IQuadrature<precision>* quadrature_factory(const size_t nnodes,
+    shared_ptr<IQuadrature<precision>> quadrature_factory(const size_t nnodes,
                                                const QuadratureType qtype)
     {
       if (qtype == QuadratureType::GaussLegendre) {
-        return new GaussLegendre<precision>(nnodes);
+        return make_shared<GaussLegendre<precision>>(nnodes);
       } else if (qtype == QuadratureType::GaussLobatto) {
-        return new GaussLobatto<precision>(nnodes);
+        return make_shared<GaussLobatto<precision>>(nnodes);
       } else if (qtype == QuadratureType::GaussRadau) {
-        return new GaussRadau<precision>(nnodes);
+        return make_shared<GaussRadau<precision>>(nnodes);
       } else if (qtype == QuadratureType::ClenshawCurtis) {
-        return new ClenshawCurtis<precision>(nnodes);
+        return make_shared<ClenshawCurtis<precision>>(nnodes);
       } else if (qtype == QuadratureType::Uniform) {
-        return new Uniform<precision>(nnodes);
+        return make_shared<Uniform<precision>>(nnodes);
       } else {
         throw ValueError("invalid node type passed to compute_nodes.");
         return nullptr;
