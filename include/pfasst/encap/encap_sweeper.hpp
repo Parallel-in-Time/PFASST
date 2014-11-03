@@ -85,8 +85,8 @@ namespace pfasst
 
         virtual void setup(bool coarse) override
         {
-          auto const nodes = this->get_quadrature()->get_nodes();
-          auto const num_nodes = this->get_quadrature()->get_num_nodes();
+          auto const nodes = this->quadrature->get_nodes();
+          auto const num_nodes = this->quadrature->get_num_nodes();
 
           this->start_state = this->get_factory()->create(pfasst::encap::solution);
           this->end_state = this->get_factory()->create(pfasst::encap::solution);
@@ -99,7 +99,7 @@ namespace pfasst
           }
 
           if (coarse) {
-            size_t num_fas = this->get_quadrature()->left_is_node() ? num_nodes -1 : num_nodes;
+            size_t num_fas = this->quadrature->left_is_node() ? num_nodes -1 : num_nodes;
             for (size_t m = 0; m < num_fas; m++) {
               this->fas_corrections.push_back(this->get_factory()->create(pfasst::encap::solution));
             }
@@ -110,7 +110,7 @@ namespace pfasst
         //! @{
         virtual void spread() override
         {
-          for (size_t m = 1; m < this->get_quadrature()->get_num_nodes(); m++) {
+          for (size_t m = 1; m < this->quadrature->get_num_nodes(); m++) {
             //            this->get_state(m)->copy(this->start_state);
             this->get_state(m)->copy(this->state[0]);
           }
