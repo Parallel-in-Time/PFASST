@@ -16,7 +16,7 @@
 
 #include "advection_diffusion_sweeper.hpp"
 
-error_map run_vanilla_sdc()
+error_map run_vanilla_sdc(double abs_residual_tol)
 {
   pfasst::SDC<> sdc;
 
@@ -35,6 +35,7 @@ error_map run_vanilla_sdc()
 
   sweeper->set_quadrature(quad);
   sweeper->set_factory(factory);
+  sweeper->set_residual_tolerances(abs_residual_tol, 0.0);
 
   sdc.add_level(sweeper);
   sdc.set_duration(0.0, nsteps*dt, dt, niters);
@@ -59,6 +60,6 @@ int main(int argc, char** argv)
   // ... then we initialize all options other default options and parse given parameters ...
   pfasst::init(argc, argv);
 
-  run_vanilla_sdc();
+  run_vanilla_sdc(0.0);
 }
 #endif

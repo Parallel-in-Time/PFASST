@@ -55,6 +55,9 @@ namespace pfasst
               sweeper->sweep();
               sweeper->post_sweep();
             }
+            if (sweeper->converged()) {
+              break;
+            }
           }
           sweeper->post_step();
           sweeper->advance();

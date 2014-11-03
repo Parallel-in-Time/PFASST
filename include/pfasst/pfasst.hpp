@@ -83,6 +83,7 @@ namespace pfasst
         }
       }
 
+    private:
       /**
        * Cycle down: sweep on current (fine), restrict to coarse.
        */
@@ -220,6 +221,7 @@ namespace pfasst
         }
       }
 
+    public:
       void set_comm(ICommunicator* comm)
       {
         this->comm = comm;

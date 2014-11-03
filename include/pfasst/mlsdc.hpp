@@ -16,6 +16,9 @@ using namespace std;
 namespace pfasst
 {
 
+  /**
+   * Multilevel SDC controller.
+   */
   template<typename time = pfasst::time_precision>
   class MLSDC
     : public Controller<time>
@@ -25,8 +28,9 @@ namespace pfasst
 
       typedef typename pfasst::Controller<time>::LevelIter LevelIter;
 
-      bool predict; //<! whether to use a 'predict' sweep
-      bool initial; //<! whether we're sweeping from a new initial condition
+      bool predict;   //<! whether to use a 'predict' sweep
+      bool initial;   //<! whether we're sweeping from a new initial condition
+      bool converged; //<! whether we've converged
 
       void perform_sweeps(size_t level)
       {
@@ -45,7 +49,7 @@ namespace pfasst
 
     public:
       /**
-       * Evolve ODE using MLSDC.
+       * Solve ODE using MLSDC.
        *
        * This assumes that the user has set initial conditions on the finest level.
        * Currently uses a fixed number of iterations per step.
@@ -53,12 +57,12 @@ namespace pfasst
       void run()
       {
         for (; this->get_time() < this->get_end_time(); this->advance_time()) {
-          predict = true;  // use predictor for first fine sweep of each step
+          predict = true;
           initial = true;
+          converged = false;
 
-          // iterate by performing v-cycles
           for (this->set_iteration(0);
-               this->get_iteration() < this->get_max_iterations();
+               this->get_iteration() < this->get_max_iterations() && !converged;
                this->advance_iteration()) {
             cycle_v(this->finest());
             initial = false;
@@ -74,6 +78,7 @@ namespace pfasst
         }
       }
 
+    private:
       /**
        * Cycle down: sweep on current (fine), restrict to coarse.
        */
@@ -84,6 +89,11 @@ namespace pfasst
         auto trns = l.transfer();
 
         perform_sweeps(l.level);
+
+        if (l == this->finest() && fine->converged()) {
+          converged = true;
+          return l;
+        }
 
         trns->restrict(crse, fine, initial);
         trns->fas(this->get_time_step(), crse, fine);
@@ -132,13 +142,17 @@ namespace pfasst
           l = cycle_bottom(l);
         } else {
           l = cycle_down(l);
+          if (converged) {
+            return l;
+          }
           l = cycle_v(l);
           l = cycle_up(l);
         }
         return l;
       }
 
-      void setup() override
+    public:
+      virtual void setup() override
       {
         nsweeps.resize(this->nlevels());
         fill(nsweeps.begin(), nsweeps.end(), 1);
