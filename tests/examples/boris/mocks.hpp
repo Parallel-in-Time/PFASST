@@ -9,6 +9,7 @@
 #include "../examples/boris/physics.hpp"
 #include "../examples/boris/particle_3d.hpp"
 
+using namespace pfasst::examples::boris;
 
 template<
   typename scalar,

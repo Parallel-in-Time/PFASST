@@ -1,15 +1,17 @@
 #include <memory>
 #include <vector>
+using namespace std;
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+using namespace ::testing;
 
 #include "../examples/boris/physics.hpp"
 
-#include "mocks.hpp"
+using namespace pfasst;
+using namespace pfasst::examples::boris;
 
-using namespace std;
-using namespace ::testing;
+#include "mocks.hpp"
 
 typedef MockParticle<double, double> MockParticleT;
 

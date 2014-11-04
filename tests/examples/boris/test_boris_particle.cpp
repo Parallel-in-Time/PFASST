@@ -3,11 +3,11 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+using namespace ::testing;
 
 #include "../examples/boris/particle.hpp"
 #include "../examples/boris/particle_3d.hpp"
-
-using namespace ::testing;
+using namespace pfasst::examples::boris;
 
 typedef ParticleEncapsulation<double, double> ParticleT;
 

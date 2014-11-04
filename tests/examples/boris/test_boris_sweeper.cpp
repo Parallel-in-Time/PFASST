@@ -1,12 +1,15 @@
 #include <memory>
+using namespace std;
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+using namespace ::testing;
 
 #include "../examples/boris/boris_sweeper.hpp"
+using namespace pfasst::examples::boris;
+
 #include "mocks.hpp"
 
-using namespace ::testing;
 
 typedef Position3DEncapsulation<double, double> Position3D;
 typedef Velocity3DEncapsulation<double, double> Velocity3D;

@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <vector>
 #include <map>
+using namespace std;
 
 #include <Eigen/Core>
 
@@ -18,7 +19,6 @@
 #include "particle_3d.hpp"
 #include "physics.hpp"
 
-using namespace std;
 namespace pfasst
 {
   namespace examples
@@ -157,8 +157,8 @@ namespace pfasst
               position_type pos;
               velocity_type vel;
               for (size_t j = 0; j < nnodes; ++j) {
-                pos += this->q_mat(m, j) * this->particles[j]->vel().convert(::dt<time>(dt));
-                vel += this->q_mat(m, j) * this->particles[j]->accel().convert(::dt<time>(dt));
+                pos += this->q_mat(m, j) * this->particles[j]->vel().convert(boris::dt<time>(dt));
+                vel += this->q_mat(m, j) * this->particles[j]->accel().convert(boris::dt<time>(dt));
               }
               pos += this->particles[0]->pos() - this->particles[m]->pos();
               vel += this->particles[0]->vel() - this->particles[m]->vel();
@@ -478,16 +478,16 @@ namespace pfasst
             for (size_t m = 1; m < nnodes; m++) {
               for (size_t l = 0; l < nnodes; l++) {
                 this->s_integrals[m] += this->previous_particles[l]
-                                            ->accel().convert(::dt<time>(dt * this->s_mat(m, l)));
+                                            ->accel().convert(boris::dt<time>(dt * this->s_mat(m, l)));
                 this->ss_integrals[m] += this->previous_particles[l]
-                                             ->accel().convert(::dtdt<time>(dt * dt * this->ss_mat(m, l)));
+                                             ->accel().convert(boris::dtdt<time>(dt * dt * this->ss_mat(m, l)));
               }
             }
 
             this->evaluate(0);
 
             for (size_t m = 0; m < nnodes - 1; m++) {
-              ::dt<time> ds(dt * this->delta_nodes[m+1]);
+              boris::dt<time> ds(dt * this->delta_nodes[m+1]);
 
               //// Update Position (explicit)
               //
@@ -498,9 +498,9 @@ namespace pfasst
               //               + \sum_{l=1}^{m} sx_{m+1,l}^{x} (f_{l}^{k+1} - f_{l}^{k})
               for (size_t l = 0; l <= m; l++) {
                 this->particles[m+1]->pos() += this->particles[l]
-                                                   ->accel().convert(::dtdt<time>(dt * dt * this->sx_mat(m+1, l)));
+                                                   ->accel().convert(boris::dtdt<time>(dt * dt * this->sx_mat(m+1, l)));
                 this->particles[m+1]->pos() -= this->previous_particles[l]
-                                                   ->accel().convert(::dtdt<time>(dt * dt * this->sx_mat(m+1, l)));
+                                                   ->accel().convert(boris::dtdt<time>(dt * dt * this->sx_mat(m+1, l)));
               }
 
               this->particles[m+1]->pos() += this->ss_integrals[m+1];
@@ -572,12 +572,12 @@ namespace pfasst
           //! @}
 
           //! @{
-          virtual void boris_solve(const time tm, const time t_next, const ::dt<time> ds, const size_t m,
+          virtual void boris_solve(const time tm, const time t_next, const boris::dt<time> ds, const size_t m,
                                    const velocity_type& c_k_term)
           {
             UNUSED(t_next);
             velocity_type c_k_term_half = c_k_term / scalar(2.0);
-            ::dt<time> beta(this->particles[m]->alpha() / time(2.0) * ds.v);
+            boris::dt<time> beta(this->particles[m]->alpha() / time(2.0) * ds.v);
             acceleration_type e_mean = (this->get_e_field().evaluate(this->particles, m, tm) + this->particles[m+1]->accel()) / scalar(2.0);
 
             // first Boris' drift
