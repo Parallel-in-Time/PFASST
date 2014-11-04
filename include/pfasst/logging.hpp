@@ -3,7 +3,6 @@
 
 #include "site_config.hpp"
 
-#include <ctime>
 #include <string>
 using namespace std;
 
@@ -30,12 +29,39 @@ using namespace std;
   #define PFASST_LOGGER_INITIALIZED
 #endif
 
+#ifndef PFASST_LOGGER_DEFAULT_GLOBAL_FORMAT
+  /**
+   * format for the default global logger
+   */
+  #define PFASST_LOGGER_DEFAULT_GLOBAL_FORMAT "[%level] %msg"
+#endif
+
+#ifndef PFASST_LOGGER_DEFAULT_GLOBAL_TOFILE
+  #define PFASST_LOGGER_DEFAULT_GLOBAL_TOFILE "false"
+#endif
+#ifndef PFASST_LOGGER_DEFAULT_GLOBAL_TOSTDOUT
+  #define PFASST_LOGGER_DEFAULT_GLOBAL_TOSTDOUT "true"
+#endif
+
+#ifndef PFASST_LOGGER_DEFAULT_DEBUG_FORMAT
+  /**
+   * format for the default global debug logger
+   */
+  #define PFASST_LOGGER_DEFAULT_DEBUG_FORMAT "[%datetime{%Y-%M-%d %H:%m:%s,%g}] %level - %fbase:%line - %msg"
+#endif
+
 namespace pfasst {
   namespace log {
 
     static void load_default_config()
     {
-      el::Loggers::configureFromGlobal(PFASST_LOGGING_DEFAULT_CONF_FILE);
+      el::Configurations defaultConf;
+      defaultConf.setToDefault();
+      defaultConf.set(el::Level::Global, el::ConfigurationType::Format, PFASST_LOGGER_DEFAULT_GLOBAL_FORMAT);
+      defaultConf.set(el::Level::Global, el::ConfigurationType::ToFile, PFASST_LOGGER_DEFAULT_GLOBAL_TOFILE);
+      defaultConf.set(el::Level::Global, el::ConfigurationType::ToStandardOutput, PFASST_LOGGER_DEFAULT_GLOBAL_TOSTDOUT);
+      defaultConf.set(el::Level::Debug, el::ConfigurationType::Format, PFASST_LOGGER_DEFAULT_DEBUG_FORMAT);
+      el::Loggers::reconfigureLogger("default", defaultConf);
     }
 
     static void set_logging_flags()
@@ -48,38 +74,13 @@ namespace pfasst {
       el::Loggers::addFlag(el::LoggingFlag::AutoSpacing);
     }
 
-    static void set_logfile_from_options()
+    static void start_log(int argc, char** argv)
     {
-      time_t now = time(nullptr);
-      char time_str[31];
-      strftime(time_str, sizeof(time_str), "%Y-%m-%dT%H-%M-%S%z", localtime(&now));
-      el::Loggers::reconfigureLogger("data_values",
-                                     el::ConfigurationType::Filename,
-                                     pfasst::config::get_value<string>("data_values_out",
-                                                                       string(time_str) + "_data_values.log"));
-    }
-
-    static void init_config_options(po::options_description& opts)
-    {
-      opts.add_options()
-        ("data_values_out", po::value<string>(), "name of file to write 'data_values' to")
-        ;
-    }
-
-    static void enable_config_options(size_t index = -1)
-    {
-      pfasst::config::Options::get_instance()
-        .register_init_function("Logger",
-                                function<void(po::options_description&)>(pfasst::log::init_config_options),
-                                index);
+      _START_EASYLOGGINGPP(argc, argv);
+      load_default_config();
+      set_logging_flags();
     }
   }  // ::pfasst::log
 }  // ::pfasst
-
-#define PFASST_START_LOG(argc, argv)\
-  _START_EASYLOGGINGPP(argc, argv);\
-  pfasst::log::load_default_config();\
-  pfasst::log::set_logging_flags();\
-  pfasst::log::set_logfile_from_options();
 
 #endif  // _PFASST__LOGGING_HPP_

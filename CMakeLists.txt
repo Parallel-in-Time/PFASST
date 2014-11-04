@@ -127,12 +127,6 @@ message(STATUS "  header files:        <PREFIX>/include/pfasst")
 install(DIRECTORY include/
     DESTINATION include
     FILES_MATCHING PATTERN "*.hpp"
-                   PATTERN "*.conf"
-)
-
-message(STATUS "  configuration files: <PREFIX>/etc/pfasst")
-install(DIRECTORY etc/
-    DESTINATION etc/pfasst
 )
 
 if(pfasst_BUILD_EXAMPLES AND pfasst_INSTALL_EXAMPLES)
