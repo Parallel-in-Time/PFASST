@@ -125,10 +125,6 @@ class MagneticField
 };
 
 
-static_assert(std::is_move_constructible<MagneticField<double, double, Particle3DEncapsulation>>::value, "");
-static_assert(std::is_move_assignable<MagneticField<double, double, Particle3DEncapsulation>>::value, "");
-
-
 template<
   typename scalar,
   typename time,
@@ -189,8 +185,5 @@ class EnergyOperator
     }
     //! @}
 };
-
-static_assert(std::is_move_constructible<EnergyOperator<double, double, Particle3DEncapsulation, ElectricField, MagneticField>>::value, "");
-static_assert(std::is_move_assignable<EnergyOperator<double, double, Particle3DEncapsulation, ElectricField, MagneticField>>::value, "");
 
 #endif  // _EXAMPLES__BORIS__PHYSICS__HPP_

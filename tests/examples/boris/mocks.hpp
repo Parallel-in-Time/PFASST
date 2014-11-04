@@ -7,45 +7,35 @@
 #include <gmock/gmock.h>
 
 #include "../examples/boris/physics.hpp"
-#include "../examples/boris/particle.hpp"
-
-
-template<typename scalar, typename time>
-class MockPositionEncap
-  : public PositionEncapsulation<scalar, time>
-{};
-
-
-template<typename scalar, typename time>
-class MockVelocityEncap
-  : public VelocityEncapsulation<scalar, time>
-{};
-
-
-template<typename scalar, typename time>
-class MockAccelerationEncap
-  : public AccelerationEncapsulation<scalar, time>
-{};
+#include "../examples/boris/particle_3d.hpp"
 
 
 template<
   typename scalar,
   typename time
 >
-class MockParticle
-  : public ParticleEncapsulation<scalar,
-                                 time,
-                                 MockPositionEncap,
-                                 MockVelocityEncap,
-                                 MockAccelerationEncap>
-{
-  protected:
-    typedef ParticleEncapsulation<scalar,
-                                  time,
-                                  MockPositionEncap,
-                                  MockVelocityEncap,
-                                  MockAccelerationEncap> parent_type;
-};
+using MockPositionEncap = Position3DEncapsulation<scalar, time>;
+
+
+template<
+  typename scalar,
+  typename time
+>
+using MockVelocityEncap = Velocity3DEncapsulation<scalar, time>;
+
+
+template<
+  typename scalar,
+  typename time
+>
+using MockAccelerationEncap = Acceleration3DEncapsulation<scalar, time>;
+
+
+template<
+  typename scalar,
+  typename time
+>
+using MockParticle = Particle3DEncapsulation<scalar, time>;
 
 
 template<
@@ -56,13 +46,15 @@ template<
 class MockEField
   : public ElectricField<scalar, time, ParticleT>
 {
-  protected:
+  private:
     typedef ElectricField<scalar, time, MockParticle> parent_type;
 
   public:
     using parent_type::evaluate;
     MOCK_METHOD3_T(evaluate,
-                   typename parent_type::particle_type::acceleration_type(vector<shared_ptr<typename parent_type::particle_type>>, size_t, time));
+                   typename parent_type::particle_type::acceleration_type(vector<shared_ptr<typename parent_type::particle_type>>,
+                                                                          size_t,
+                                                                          time));
 };
 
 
@@ -74,13 +66,15 @@ template<
 class MockBField
   : public MagneticField<scalar, time, MockParticle>
 {
-  protected:
+  private:
     typedef MagneticField<scalar, time, MockParticle> parent_type;
 
   public:
     using parent_type::evaluate;
     MOCK_METHOD3_T(evaluate,
-                   typename parent_type::particle_type::acceleration_type(vector<shared_ptr<typename parent_type::particle_type>>, size_t, time));
+                   typename parent_type::particle_type::acceleration_type(vector<shared_ptr<typename parent_type::particle_type>>,
+                                                                          size_t,
+                                                                          time));
 };
 
 
@@ -90,25 +84,22 @@ template<
 >
 class MockEOperator
   : public EnergyOperator<scalar, time,
-                          MockParticle<scalar, time>,
-                          MockEField<scalar, time, MockParticle>,
-                          MockBField<scalar, time, MockParticle>
+                          MockParticle,
+                          MockEField,
+                          MockBField
                          >
 {
-  protected:
+  private:
     typedef EnergyOperator<scalar, time,
-                           MockParticle<scalar, time>,
-                           MockEField<scalar, time, MockParticle>,
-                           MockBField<scalar, time, MockParticle>
+                           MockParticle,
+                           MockEField,
+                           MockBField
                           > parent_type;
 
   public:
     using parent_type::evaluate;
-    MOCK_METHOD5_T(evaluate, scalar(vector<shared_ptr<typename parent_type::particle_type>>,
-                                    size_t,
-                                    time,
-                                    shared_ptr<const typename parent_type::e_field_type>,
-                                    shared_ptr<const typename parent_type::b_field_type>));
+    MOCK_METHOD2_T(evaluate, scalar(vector<shared_ptr<typename parent_type::particle_type>>,
+                                    time));
 };
 
 #endif  // _TESTS__EXAMPLES__BORIS__MOCKS__HPP_
