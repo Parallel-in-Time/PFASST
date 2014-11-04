@@ -260,6 +260,7 @@ namespace pfasst
             this->exact(*(q.get()), t);
           }
 
+          //! FIXME: there is probably still a bug in the calculation of the exact solution here
           virtual void exact(encap_type& q, const time t)
           {
             typedef complex<scalar> C;
@@ -282,10 +283,10 @@ namespace pfasst
             C omega_minus = 0.5 * (omega_b - sqrt_in_omega);
             C omega_plus = 0.5 * (omega_b + sqrt_in_omega);
 
-            C r_minus = (omega_plus * x0 - v0) / (omega_plus - omega_minus);
+            C r_minus = (omega_plus * x0 + v0) / (omega_plus - omega_minus);
             C r_plus = x0 - r_minus;
 
-            C i_minus = (omega_plus * y0 + u0) / (omega_plus - omega_minus);
+            C i_minus = (omega_plus * y0 - u0) / (omega_plus - omega_minus);
             C i_plus = y0 - i_minus;
 
             C x_y_move = (r_plus + i * i_plus) * exp(- i * omega_plus * (scalar)(t))
