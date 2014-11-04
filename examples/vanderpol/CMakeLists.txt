@@ -1,16 +1,16 @@
 set(examples_to_install ${examples_to_install})
 
-message(STATUS "  scalar")
+message(STATUS "  vanderpol")
 include_directories(
     ${pfasst_INCLUDES}
     ${3rdparty_INCLUDES}
 )
 
-set(scalar_examples
-    scalar_sdc
+set(vanderpol_examples
+    vdp_sdc
 )
 
-foreach(example ${scalar_examples})
+foreach(example ${vanderpol_examples})
     add_executable(${example} ${CMAKE_CURRENT_SOURCE_DIR}/${example}.cpp)
     if(${pfasst_DEPENDEND_TARGETS})
         add_dependencies(${example} ${pfasst_DEPENDEND_TARGETS})
@@ -23,4 +23,4 @@ foreach(example ${scalar_examples})
     endif()
 endforeach(example)
 
-set(examples_to_install ${examples_to_install} ${scalar_examples} PARENT_SCOPE)
+set(examples_to_install ${examples_to_install} ${vanderpol_examples} PARENT_SCOPE)

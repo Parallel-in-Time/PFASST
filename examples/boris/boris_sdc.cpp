@@ -22,8 +22,8 @@ error_map<double> run_boris_sdc()
 
   const double epsilon = -1.0;
 
-  auto nodes      = pfasst::compute_nodes<double>(nnodes, pfasst::QuadratureType::GaussLobatto);
-  auto factory    = make_shared<Particle3DFactory<double, double>>(mass, charge);
+  auto quad    = pfasst::quadrature::quadrature_factory<double>(nnodes, pfasst::quadrature::QuadratureType::GaussLobatto);
+  auto factory = make_shared<Particle3DFactory<double, double>>(mass, charge);
 
   typedef SimplePhysicsEnergyOperator<double, double, Particle3DEncapsulation,
                                       IdealQuadrupolePotential, ConstantMagneticField> energy_operator_type;
@@ -33,7 +33,7 @@ error_map<double> run_boris_sdc()
   auto sweeper    = make_shared<BorisSweeper<double, double, energy_operator_type>>(e_operator, epsilon);
 
   sweeper->set_energy_operator(e_operator);
-  sweeper->set_nodes(nodes);
+  sweeper->set_quadrature(quad);
   sweeper->set_factory(factory);
 
   sdc.add_level(sweeper);

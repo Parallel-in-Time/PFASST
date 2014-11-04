@@ -3,12 +3,10 @@ include_directories(
     ${3rdparty_INCLUDES}
     ${TESTS_3rdparty_INCLUDES}
     ${pfasst_INCLUDES}
-    ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 set(TESTS
-    test_quadrature
-    test_polynomial
+    test_vdp_zeronu_conv
 )
 
 foreach(test ${TESTS})
@@ -27,8 +25,6 @@ foreach(test ${TESTS})
         )
     endif()
     add_test(NAME ${test}
-        COMMAND ${CMAKE_BINARY_DIR}/tests/${test} --gtest_output=xml:${test}_out.xml
+        COMMAND ${CMAKE_BINARY_DIR}/tests/examples/vanderpol/${test} --gtest_output=xml:${test}_out.xml
     )
 endforeach(test)
-
-add_subdirectory(examples)

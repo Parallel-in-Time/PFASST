@@ -165,19 +165,7 @@ class BorisSweeper
     //! @}
 
     //! @{
-    virtual void set_nodes(vector<time> nodes) override
-    {
-      EncapSweeper<time>::set_nodes(nodes);
-
-      // compute delta nodes
-      size_t nnodes = this->nodes.size();
-      this->delta_nodes = vector<time>(nnodes, time(0.0));
-      for (size_t m = 1; m < nnodes; m++) {
-        delta_nodes[m] = nodes[m] - nodes[m - 1];
-      }
-    }
-
-    virtual void set_state(shared_ptr<const Encapsulation<time>> u0, size_t m) override
+    virtual void set_state(shared_ptr<const Encapsulation<time>> u0, size_t m)
     {
       shared_ptr<const encap_type> u0_cast = dynamic_pointer_cast<const encap_type>(u0);
       assert(u0_cast);
@@ -327,9 +315,14 @@ class BorisSweeper
     virtual void setup(bool coarse = false) override
     {
       auto nodes = this->get_nodes();
-      auto is_proper = this->get_is_proper();
       assert(nodes.size() >= 1);
       const size_t nnodes = nodes.size();
+
+      // compute delta nodes
+      this->delta_nodes = vector<time>(nnodes, time(0.0));
+      for (size_t m = 1; m < nnodes; m++) {
+        this->delta_nodes[m] = nodes[m] - nodes[m - 1];
+      }
 
       for (size_t m = 0; m < nnodes; ++m) {
         this->particles.push_back(dynamic_pointer_cast<encap_type>(this->get_factory()->create(pfasst::encap::solution)));
@@ -342,10 +335,7 @@ class BorisSweeper
         }
       }
 
-      auto q_mat_trimmed = compute_quadrature(nodes, nodes, is_proper, QuadratureMatrix::Q);
-      this->q_mat = Matrix<time>(nnodes, nnodes);
-      this->q_mat.fill(time(0.0));
-      this->q_mat.block(1, 0, nnodes - 1, nnodes) = q_mat_trimmed;
+      this->q_mat = this->get_quadrature()->get_q_mat();
       auto qq_mat = this->q_mat * this->q_mat;
       this->s_mat = Matrix<time>(nnodes, nnodes);
       this->s_mat.fill(time(0.0));

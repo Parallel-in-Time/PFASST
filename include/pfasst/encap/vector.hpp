@@ -156,10 +156,10 @@ namespace pfasst
          *
          * This uses std::max with custom comparison function.
          */
-        scalar norm0() const
+        time norm0() const override
         {
-          return std::max(this->cbegin(), this->cend(),
-                          [](scalar a, scalar b) {return std::abs(a) < std::abs(b); } );
+          return std::abs(*std::max_element(this->cbegin(), this->cend(),
+                                            [](scalar a, scalar b) {return std::abs(a) < std::abs(b); } ));
         }
         //! @}
     };

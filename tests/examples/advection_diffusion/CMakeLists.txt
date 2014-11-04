@@ -1,6 +1,7 @@
 # Building and Running Tests
 include_directories(
     ${3rdparty_INCLUDES}
+    ${TESTS_3rdparty_INCLUDES}
     ${FFTW_INCLUDE_PATH}
     ${pfasst_INCLUDES}
 )
@@ -20,15 +21,13 @@ foreach(test ${TESTS})
     add_executable(${test} ${test}.cpp)
     add_dependencies(${test} googlemock)
     if(NOT FFTW_FOUND)
-      add_dependencies(${test} googlemock fftw3)
+      add_dependencies(${test} ${pfasst_DEPENDEND_TARGETS} googlemock fftw3)
     endif()
     target_link_libraries(${test}
         ${3rdparty_DEPENDEND_LIBS}
+        ${TESTS_3rdparty_DEPENDEND_LIBS}
         ${FFTW_LIBRARIES}
         ${pfasst_DEPENDED_LIBS}
-    )
-    set_target_properties(${test}
-        PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/tests/examples/advection_diffusion
     )
     if(pfasst_WITH_GCC_PROF AND ${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
         set_target_properties(${test}
@@ -37,7 +36,7 @@ foreach(test ${TESTS})
         )
     endif()
     add_test(NAME ${test}
-        COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/tests/examples/advection_diffusion/${test} --gtest_output=xml:${test}_out.xml
+        COMMAND ${CMAKE_BINARY_DIR}/tests/examples/advection_diffusion/${test} --gtest_output=xml:${test}_out.xml
     )
 endforeach(test)
 
@@ -48,7 +47,7 @@ if(${pfasst_WITH_MPI})
         add_executable(${test} ${test}.cpp)
         add_dependencies(${test} googlemock)
         if(NOT FFTW_FOUND)
-          add_dependencies(${test} googlemock fftw3)
+          add_dependencies(${test} ${pfasst_DEPENDEND_TARGETS} googlemock fftw3)
         endif()
         if(MPI_COMPILE_FLAGS)
             if(pfasst_WITH_GCC_PROF AND ${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
@@ -65,15 +64,13 @@ if(${pfasst_WITH_MPI})
         endif()
         target_link_libraries(${test}
             ${3rdparty_DEPENDEND_LIBS}
+            ${TESTS_3rdparty_DEPENDEND_LIBS}
             ${FFTW_LIBRARIES}
             ${pfasst_DEPENDED_LIBS}
             ${MPI_CXX_LIBRARIES}
         )
-        set_target_properties(${test}
-            PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/tests/examples/advection_diffusion
-        )
         add_test(NAME ${test}
-            COMMAND ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} 4 ${MPIEXEC_PREFLAGS} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/tests/examples/advection_diffusion/${test} ${MPIEXEC_POSTFLAGS}
+            COMMAND ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} 4 ${MPIEXEC_PREFLAGS} ${CMAKE_BINARY_DIR}/tests/examples/advection_diffusion/${test} ${MPIEXEC_POSTFLAGS}
         )
     endforeach(test)
 endif()

@@ -16,10 +16,8 @@ foreach(test ${TESTS})
     add_dependencies(${test} googlemock)
     target_link_libraries(${test}
         ${3rdparty_DEPENDEND_LIBS}
+        ${TESTS_3rdparty_DEPENDEND_LIBS}
         ${pfasst_DEPENDED_LIBS}
-    )
-    set_target_properties(${test}
-        PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/tests/examples/boris
     )
     if(pfasst_WITH_GCC_PROF AND ${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
         set_target_properties(${test}
@@ -28,6 +26,6 @@ foreach(test ${TESTS})
         )
     endif()
     add_test(NAME ${test}
-        COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/tests/examples/boris/${test} --gtest_output=xml:${test}_out.xml
+        COMMAND ${CMAKE_BINARY_DIR}/tests/examples/boris/${test} --gtest_output=xml:${test}_out.xml
     )
 endforeach(test)

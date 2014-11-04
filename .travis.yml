@@ -12,45 +12,36 @@ notifications:
 #  -> https://github.com/travis-ci/travis-ci/issues/1519
 env:
   matrix:
-    - CMAKE_BUILD_TYPE="Release" WITH_MPI=OFF CXX=clang++ BOOST_VERSION=1.53
-    - CMAKE_BUILD_TYPE="Release" WITH_MPI=OFF CXX=g++ BOOST_VERSION=1.53
-    - CMAKE_BUILD_TYPE="Release" WITH_MPI=ON CXX=g++ BOOST_VERSION=1.53
-    - CMAKE_BUILD_TYPE="Debug" WITH_MPI=OFF CXX=clang++ BOOST_VERSION=1.53
-    - CMAKE_BUILD_TYPE="Debug" WITH_MPI=OFF CXX=g++ BOOST_VERSION=1.53
-    - CMAKE_BUILD_TYPE="Debug" WITH_MPI=ON CXX=g++ BOOST_VERSION=1.53
-    - CMAKE_BUILD_TYPE="Release" WITH_MPI=OFF CXX=clang++ BOOST_VERSION=1.55
-    - CMAKE_BUILD_TYPE="Release" WITH_MPI=OFF CXX=g++ BOOST_VERSION=1.55
-    - CMAKE_BUILD_TYPE="Release" WITH_MPI=ON CXX=g++ BOOST_VERSION=1.55
-    - CMAKE_BUILD_TYPE="Debug" WITH_MPI=OFF CXX=clang++ BOOST_VERSION=1.55
-    - CMAKE_BUILD_TYPE="Debug" WITH_MPI=OFF CXX=g++ BOOST_VERSION=1.55
-    - CMAKE_BUILD_TYPE="Debug" WITH_MPI=ON CXX=g++ BOOST_VERSION=1.55
+    - CMAKE_BUILD_TYPE="Release" WITH_MPI=OFF
+    - CMAKE_BUILD_TYPE="Release" WITH_MPI=ON
+    - CMAKE_BUILD_TYPE="Debug" WITH_MPI=OFF
+    - CMAKE_BUILD_TYPE="Debug" WITH_MPI=ON
+
+compiler:
+  - gcc
+  - clang
 
 before_install:
   # boost packages
-  - if [ "${BOOST_VERSION}" == "1.53" ]; then sudo add-apt-repository ppa:apokluda/boost1.53 --yes; fi
-  - if [ "${BOOST_VERSION}" == "1.55" ]; then sudo add-apt-repository ppa:boost-latest/ppa --yes; fi
+  - sudo add-apt-repository ppa:boost-latest/ppa --yes
   # libstdc++-4.8
   - sudo add-apt-repository ppa:ubuntu-toolchain-r/test --yes
-  # clang++-3.2
-  - if [ "${CXX}" == "clang++" ]; then sudo add-apt-repository --yes ppa:h-rayflood/llvm; fi
   - sudo apt-get update
 
 install:
-  # note: clang needs g++-4.8 it for libstdc++ update
-  - if [ "${CXX}" == "clang++" ]; then sudo apt-get -qq install clang-3.2; fi
-  - if [ "${WITH_MPI}" == "ON" ]; then sudo apt-get -qq install mpich2 libmpich2-dev; fi
   - sudo apt-get install g++-4.8
-  - sudo apt-get install "libboost${BOOST_VERSION}-all-dev" libfftw3-3 libfftw3-dev
+  - sudo apt-get install libfftw3-3 libfftw3-dev
+  - sudo apt-get install libboost1.55-dev libboost1.55-dbg libboost1.55-tools-dev libboost1.55-all-dev
+  - if [ "${WITH_MPI}" == "ON" ]; then sudo apt-get -qq install mpich2 libmpich2-dev; fi
 
 before_script:
   # update compilers
   - if [ "${CXX}" == "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
-  - if [ "${CXX}" == "clang++" ]; then export CXX="clang++-3.2" CC="clang-3.2"; fi
 
 script:
   - mkdir build
   - cd build
-  - cmake -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -Dpfasst_WITH_MPI=${WITH_MPI} -Dpfasst_DISABLE_LIBCXX=ON -Dpfasst_BUILD_TESTS=ON -Dpfasst_BUILD_EXAMPLES=ON ..
-  - make
+  - cmake -DCMAKE_INSTALL_PREFIX=$HOME -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -Dpfasst_WITH_MPI=${WITH_MPI} -Dpfasst_DISABLE_LIBCXX=ON -Dpfasst_BUILD_TESTS=ON -Dpfasst_BUILD_EXAMPLES=ON -DCMAKE_VERBOSE_MAKEFILE=ON ..
+  - make ARGS="-V"
   - make test ARGS="-V"
-  - make run_example_all
+  - make install

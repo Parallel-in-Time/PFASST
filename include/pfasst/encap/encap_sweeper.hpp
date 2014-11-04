@@ -5,6 +5,7 @@
 #ifndef _PFASST_ENCAP_ENCAP_SWEEPER_HPP_
 #define _PFASST_ENCAP_ENCAP_SWEEPER_HPP_
 
+#include <algorithm>
 #include <cstdlib>
 #include <vector>
 #include <memory>
@@ -18,70 +19,73 @@ namespace pfasst
 {
   namespace encap
   {
-
     template<typename time = time_precision>
     class EncapSweeper
       : public ISweeper<time>
     {
-      public:
-        //! @{
-        typedef Encapsulation<time> encap_type;
-        typedef EncapFactory<time> factory_type;
-        //! @}
-
       protected:
         //! @{
-        vector<time> nodes;
-        vector<bool> is_proper;
-        shared_ptr<factory_type> factory;
+        quadrature::IQuadrature<time>* quad;
+        shared_ptr<EncapFactory<time>> factory;
+        shared_ptr<Encapsulation<time>> start_state;
+        shared_ptr<Encapsulation<time>> end_state;
+        vector<shared_ptr<Encapsulation<time>>> residuals;
         //! @}
+
+        int residual_norm_order;
+        time abs_residual_tol, rel_residual_tol;
 
       public:
         //! @{
-        virtual ~EncapSweeper()
+        EncapSweeper()
+          : quad(nullptr), abs_residual_tol(0.0), rel_residual_tol(0.0)
         {}
+
+        virtual ~EncapSweeper()
+        {
+          if (this->quad) delete this->quad;
+        }
         //! @}
 
         //! @{
-        virtual void set_nodes(vector<time> nodes)
+        virtual void spread() override
         {
-          auto augmented = pfasst::augment_nodes(nodes);
-          this->nodes = get<0>(augmented);
-          this->is_proper = get<1>(augmented);
+          for (size_t m = 1; m < this->quad->get_num_nodes(); m++) {
+            //            this->get_state(m)->copy(this->start_state);
+            this->get_state(m)->copy(this->get_state(0));
+          }
+        }
+        //! @}
+
+        //! @{
+        void set_quadrature(quadrature::IQuadrature<time>* quad)
+        {
+          this->quad = quad;
         }
 
-        virtual const vector<time> get_nodes() const
+        const quadrature::IQuadrature<time>* get_quadrature() const
         {
-          return nodes;
+          return this->quad;
         }
 
-        const vector<bool> get_is_proper() const
+        shared_ptr<Encapsulation<time>> get_start_state() const
         {
-          return is_proper;
+          return this->start_state;
         }
 
-        virtual void set_factory(shared_ptr<factory_type> factory)
+        const vector<time> get_nodes() const
+        {
+          return this->quad->get_nodes();
+        }
+
+        void set_factory(shared_ptr<EncapFactory<time>> factory)
         {
           this->factory = factory;
         }
 
-        virtual shared_ptr<factory_type> get_factory() const
+        virtual shared_ptr<EncapFactory<time>> get_factory() const
         {
           return factory;
-        }
-
-        /**
-         * sets solution values at time node index `m`
-         *
-         * @param[in] u0 values to set
-         * @param[in] m 0-based node index
-         *
-         * @note This method must be implemented in derived sweepers.
-         */
-        virtual void set_state(shared_ptr<const encap_type> u0, size_t m)
-        {
-          UNUSED(u0); UNUSED(m);
-          throw NotImplementedYet("sweeper");
         }
 
         /**
@@ -128,7 +132,7 @@ namespace pfasst
 
         virtual shared_ptr<Encapsulation<time>> get_end_state()
         {
-          return this->get_state(this->get_nodes().size() - 1);
+          return this->end_state;
         }
         //! @}
 
@@ -141,13 +145,6 @@ namespace pfasst
         virtual void advance() override
         {
           throw NotImplementedYet("sweeper");
-        }
-
-        virtual void spread() override
-        {
-          for (size_t m = 1; m < nodes.size(); m++) {
-            this->get_state(m)->copy(this->get_state(0));
-          }
         }
 
         /**
@@ -175,10 +172,57 @@ namespace pfasst
          *
          * @note This method must be implemented in derived sweepers.
          */
-        virtual void integrate(time dt, vector<shared_ptr<encap_type>> dst) const
+        virtual void integrate(time dt, vector<shared_ptr<Encapsulation<time>>> dst) const
         {
           UNUSED(dt); UNUSED(dst);
           throw NotImplementedYet("sweeper");
+        }
+        //! @}
+
+        //! @{
+        /**
+         * Set residual tolerances for convergence checking.
+         */
+        void set_residual_tolerances(time abs_residual_tol, time rel_residual_tol, int order=0)
+        {
+          this->abs_residual_tol = abs_residual_tol;
+          this->rel_residual_tol = rel_residual_tol;
+          this->residual_norm_order = order;
+        }
+
+        /**
+         * Compute residual at each SDC node (including FAS corrections).
+         */
+        virtual void residual(time dt, vector<shared_ptr<Encapsulation<time>>> dst) const
+        {
+          throw NotImplementedYet("residual");
+        }
+
+        /**
+         * Return convergence status.
+         *
+         * This is used by controllers to shortcircuit iterations.
+         */
+        virtual bool converged() override
+        {
+          if (this->abs_residual_tol > 0.0 || this->rel_residual_tol > 0.0) {
+            if (this->residuals.size() == 0) {
+              for (auto x: this->get_nodes()) {
+                this->residuals.push_back(this->get_factory()->create(pfasst::encap::solution));
+              }
+            }
+            this->residual(this->get_controller()->get_time_step(), this->residuals);
+            vector<time> rnorms;
+            for (auto r: this->residuals) {
+              rnorms.push_back(r->norm0());
+            }
+            auto rmax = *std::max_element(rnorms.begin(), rnorms.end());
+            if (rmax < this->abs_residual_tol) {
+              return true;
+            }
+            // XXX: check rel norms too
+          }
+          return false;
         }
         //! @}
 

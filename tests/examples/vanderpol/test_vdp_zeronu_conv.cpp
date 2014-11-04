@@ -1,5 +1,6 @@
-/*
- * Tests for the scalar example solving the test equation
+/**
+ * Tests for the van der Pol oscillator for the case nu=0, where it becomes
+ * the linear oscillator and an analytical solution is available
  */
 #include <cmath>
 
@@ -11,19 +12,23 @@ using namespace ::testing;
 #include <pfasst/quadrature.hpp>
 
 #define PFASST_UNIT_TESTING
-#include "../examples/scalar/scalar_sdc.cpp"
+#include "../examples/vanderpol/vdp_sdc.cpp"
 #undef PFASST_UNIT_TESTING
 
 /*
  * parameterized test fixture with number of nodes as parameter
  */
-class ConvergenceTest
+class VdPConvergenceTest
   : public TestWithParam<tuple<size_t, pfasst::quadrature::QuadratureType>>
 {
   protected:
     size_t nnodes; // parameter
 
-    complex<double> lambda;
+    // need nu=0.0, so that there exists an analytical solution
+    const double nu = 0.0;
+    // some initial values for position and velocity
+    const double x0 = 1.0;
+    const double y0 = 0.5;
     double Tend;
     vector<size_t> nsteps;
     size_t nsteps_l;
@@ -41,25 +46,22 @@ class ConvergenceTest
       {
         case pfasst::quadrature::QuadratureType::GaussLobatto:
           this->niters = 2 * this->nnodes - 2;
-          this->Tend = 4.0;
-          this->lambda = complex<double>(-1.0, 1.0);
-          this->nsteps = { 2, 5, 10, 15 };
+          this->Tend = 0.66;
+          this->nsteps = { 7, 9, 11, 13 };
           this->nnodes_in_call = this->nnodes;
           break;
 
         case pfasst::quadrature::QuadratureType::GaussLegendre:
           this->niters = 2 * this->nnodes;
-          this->Tend = 6.0;
-          this->lambda = complex<double>(-1.0, 2.0);
-          this->nsteps = { 2, 4, 6, 8, 10 };
+          this->Tend = 0.88;
+          this->nsteps = { 7, 9, 11, 13 };
           this->nnodes_in_call = this->nnodes + 2;
           break;
 
         case pfasst::quadrature::QuadratureType::GaussRadau:
           this->niters = 2 * this->nnodes - 1;
-          this->Tend = 5.0;
-          this->lambda = complex<double>(-1.0, 2.0);
-          this->nsteps = { 4, 6, 8, 10, 12 };
+          this->Tend = 0.88;
+          this->nsteps = { 7, 9, 11, 13 };
           this->nnodes_in_call = this->nnodes + 1;
           break;
 
@@ -70,17 +72,15 @@ class ConvergenceTest
         // Also: What is the ACTUAL number of quadrature nodes in both cases?
         case pfasst::quadrature::QuadratureType::ClenshawCurtis:
           this->niters = this->nnodes;
-          this->Tend = 1.0;
-          this->lambda = complex<double>(-1.0, 1.0);
-          this->nsteps = {3, 5, 7, 9, 11};
+          this->Tend = 0.65;
+          this->nsteps = { 25, 35, 45, 55 };
           this->nnodes_in_call = this->nnodes + 1;
           break;
 
         case pfasst::quadrature::QuadratureType::Uniform:
           this->niters = this->nnodes;
-          this->Tend = 5.0;
-          this->lambda = complex<double>(-1.0, 1.0);
-          this->nsteps = {3, 5, 7, 9, 11};
+          this->Tend = 0.65;
+          this->nsteps = { 25, 35, 45, 55 };
           this->nnodes_in_call = this->nnodes;
           break;
 
@@ -102,13 +102,13 @@ class ConvergenceTest
       // run to compute errors
       for (size_t i = 0; i <= this->nsteps_l - 1; ++i) {
         this->dt = this->Tend / double(this->nsteps[i]);
-        this->err[i] = run_scalar_sdc(this->nsteps[i], this->dt, this->nnodes_in_call,
-                                      this->niters, this->lambda, this->nodetype);
+        this->err[i] = run_vdp_sdc(this->nsteps[i], this->dt, this->nnodes_in_call,
+                                      this->niters, this->nu, this->x0, this->y0, this->nodetype);
       }
 
       // compute convergence rates
       for (size_t i = 0; i <= this->nsteps_l - 2; ++i) {
-        this->convrate[i] = log10(this->err[i+1] / this->err[i]) /
+        this->convrate[i] = log10(this->err[i+1] / this->err[i]) / 
                               log10(double(this->nsteps[i]) / double(this->nsteps[i + 1]));
       }
     }
@@ -121,57 +121,59 @@ class ConvergenceTest
  * The test below verifies that the code approximately (up to a safety factor) reproduces
  * the theoretically expected rate of convergence
  */
-TEST_P(ConvergenceTest, AllNodes)
+TEST_P(VdPConvergenceTest, AllNodes)
 {
   for (size_t i = 0; i <= nsteps_l - 2; ++i) {
+    /**
+     * Note: Because convergence rates are typically not reproduced exactly in numerical tests, some safety
+     * factors have been introduced in the EXPECT_THAT below... i.e. a convergence of 1.99 is okay for a second order method.
+     */
     switch (this->nodetype)
     {
       case pfasst::quadrature::QuadratureType::GaussLobatto:
         // Expect convergence rate of 2*nodes-2 from collocation formula, doing an identical number
         // of iteration should suffice to reach this as each iteration should increase order by one
-        EXPECT_THAT(convrate[i],
-                    DoubleNear(double(2 * nnodes - 2), 0.99)) << "Convergence rate for "
+        EXPECT_THAT(convrate[i], Ge(double(0.95* 2 * nnodes - 2)))  << "Convergence rate for "
                                                               << this->nnodes
                                                               << " Gauss-Lobatto nodes "
-                                                              << " at node " << i
+                                                              << " for nsteps " << this->nsteps[i]
                                                               << " not within expected range.";
         break;
 
       case pfasst::quadrature::QuadratureType::GaussLegendre:
-        // convergence rates for Legendre nodes should be 2*nodes but are actually better, so
-        // use Ge here
-        EXPECT_THAT(convrate[i], Ge<double>(2 * this->nnodes)) << "Convergence rate for "
+        // convergence rates for Legendre nodes should be 2*nodes
+        EXPECT_THAT(convrate[i], Ge<double>(0.99* 2 * this->nnodes)) << "Convergence rate for "
                                                                << this->nnodes
                                                                << " Gauss-Legendre nodes "
-                                                               << " at node " << i
+                                                               << " for nsteps " << this->nsteps[i]
                                                                << " not within expected range.";
         break;
 
       case pfasst::quadrature::QuadratureType::GaussRadau:
         // convergence rate for Radau nodes should be 2*nodes-1
         // For some case, the convergence rate is ALMOST that value, hence put in the 0.99
-        EXPECT_THAT(convrate[i], Ge<double>(0.99* 2 * this->nnodes - 1)) << "Convergence rate for "
+        EXPECT_THAT(convrate[i], Ge<double>(0.99* 2 * this->nnodes - 1)) << "Convergence rate for " 
                                                                          << this->nnodes
                                                                          << " Gauss-Radu nodes "
-                                                                         << " at node " << i
+                                                                         << " for nsteps " << this->nsteps[i]
                                                                          << " not within expected range.";
         break;
 
       case pfasst::quadrature::QuadratureType::ClenshawCurtis:
         // Clenshaw Curtis should be of order nnodes
-        EXPECT_THAT(convrate[i], Ge<double>(this->nnodes))  << "Convergence rate for "
+        EXPECT_THAT(convrate[i], Ge<double>(0.99 * this->nnodes))  << "Convergence rate for "
                                                             << this->nnodes
                                                             << " Clenshaw-Curtis nodes "
-                                                            << " at node " << i
+                                                            << " for nsteps " << this->nsteps[i]
                                                             << " not within expected range.";
         break;
 
       case pfasst::quadrature::QuadratureType::Uniform:
         // Equidistant nodes should be of order nnodes
-        EXPECT_THAT(convrate[i], Ge<double>(this->nnodes)) << "Convergence rate for "
+        EXPECT_THAT(convrate[i], Ge<double>(0.99 * this->nnodes)) << "Convergence rate for "
                                                            << this->nnodes
                                                            << " equidistant nodes "
-                                                           << " at node " << i
+                                                           << " for nsteps " << this->nsteps[i]
                                                            << " not within expected range.";
         break;
 
@@ -182,13 +184,13 @@ TEST_P(ConvergenceTest, AllNodes)
   }
 }
 
-INSTANTIATE_TEST_CASE_P(ScalarSDC, ConvergenceTest,
-                        Combine(Range<size_t>(2, 7),
+INSTANTIATE_TEST_CASE_P(VanDerPol, VdPConvergenceTest,
+                        Combine(Range<size_t>(2, 4),
                                 Values(pfasst::quadrature::QuadratureType::GaussLobatto,
                                        pfasst::quadrature::QuadratureType::GaussLegendre,
-                                       pfasst::quadrature::QuadratureType::GaussRadau/*,
+                                       pfasst::quadrature::QuadratureType::GaussRadau,
                                        pfasst::quadrature::QuadratureType::ClenshawCurtis,
-                                       pfasst::quadrature::QuadratureType::Uniform*/))
+                                       pfasst::quadrature::QuadratureType::Uniform))
 );
 
 int main(int argc, char** argv)
@@ -196,3 +198,5 @@ int main(int argc, char** argv)
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
+
+

@@ -1,5 +1,4 @@
-set(all_example_runs ${all_example_runs})
-set(all_advec_example_runs)
+set(examples_to_install ${examples_to_install})
 
 message(STATUS "  advection_diffusion")
 include_directories(
@@ -30,26 +29,15 @@ set(all_advec_examples
 foreach(example ${all_advec_examples})
     add_executable(${example} ${CMAKE_CURRENT_SOURCE_DIR}/${example}.cpp)
     if(NOT FFTW_FOUND)
-        add_dependencies(${example} fftw3)
+        add_dependencies(${example} ${pfasst_DEPENDEND_TARGETS} fftw3)
     endif()
     target_link_libraries(${example}
+        ${3rdparty_DEPENDEND_LIBS}
         ${FFTW_LIBRARIES}
     )
-    set_target_properties(${example}
-        PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/examples/advection_diffusion
-    )
-endforeach(example)
-
-message(STATUS "    creating make targets to run examples")
-foreach(example ${advec_examples})
-    add_custom_target(run_example_advec_${example}
-        COMMAND ${example}
-        DEPENDS ${example}
-        WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/examples/advection_diffusion
-        COMMENT "Running Advection-Diffusion example: ${example}" VERBATIM
-    )
-    list(APPEND all_advec_example_runs run_example_advec_${example})
-    message(STATUS "      - run_example_advec_${example}")
+    if(pfasst_INSTALL_EXAMPLES)
+        install(TARGETS ${example} RUNTIME DESTINATION bin)
+    endif()
 endforeach(example)
 
 if(${pfasst_WITH_MPI})
@@ -63,23 +51,6 @@ if(${pfasst_WITH_MPI})
         endif()
         target_link_libraries(${example} ${MPI_CXX_LIBRARIES})
     endforeach(example)
-    message(STATUS "    creating make targets to run MPI examples")
-    foreach(example ${advec_mpi_examples})
-        add_custom_target(run_example_advec_${example}
-            COMMAND ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} 4 ${MPIEXEC_PREFLAGS} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/examples/advection_diffusion/${example} ${MPIEXEC_POSTFLAGS}
-            DEPENDS ${example}
-            WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/examples/advection_diffusion
-            COMMENT "Running Advection-Diffusion example: ${example}" VERBATIM
-        )
-        list(APPEND all_advec_example_runs run_example_advec_${example})
-        message(STATUS "      - run_example_advec_${example}")
-    endforeach(example)
 endif()
 
-add_custom_target(run_example_advec_all
-    DEPENDS ${all_advec_example_runs}
-    COMMENT "Running all Advection-Diffusion examples" VERBATIM
-)
-message(STATUS "    - run_example_advec_all")
-
-set(all_example_runs ${all_example_runs} ${all_advec_example_runs} PARENT_SCOPE)
+set(examples_to_install ${examples_to_install} ${all_advec_examples} PARENT_SCOPE)

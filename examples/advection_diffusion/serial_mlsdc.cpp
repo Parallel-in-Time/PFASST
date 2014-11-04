@@ -39,12 +39,12 @@ error_map run_serial_mlsdc()
    * (according to 'xrat').
    */
   for (size_t l = 0; l < nlevs; l++) {
-    auto nodes    = compute_nodes<double>(nnodes, pfasst::QuadratureType::GaussLobatto);
+    auto quad     = pfasst::quadrature::quadrature_factory(nnodes, pfasst::quadrature::QuadratureType::GaussLobatto);
     auto factory  = make_shared<VectorFactory<double>>(ndofs);
     auto sweeper  = make_shared<AdvectionDiffusionSweeper<>>(ndofs);
     auto transfer = make_shared<SpectralTransfer1D<>>();
 
-    sweeper->set_nodes(nodes);
+    sweeper->set_quadrature(quad);
     sweeper->set_factory(factory);
 
     mlsdc.add_level(sweeper, transfer);
@@ -64,8 +64,9 @@ error_map run_serial_mlsdc()
    * set initial conditions on each level
    */
   auto sweeper = mlsdc.get_finest<AdvectionDiffusionSweeper<>>();
-  auto q0 = sweeper->get_state(0);
+  auto q0 = sweeper->get_start_state();
   sweeper->exact(q0, 0.0);
+  //  sweeper->set_residual_tolerances(1e-5, 0.0);
 
   /*
    * run mlsdc!

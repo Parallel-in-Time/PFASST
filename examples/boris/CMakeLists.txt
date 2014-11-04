@@ -1,5 +1,4 @@
-set(all_example_runs ${all_example_runs})
-set(all_boris_example_runs)
+set(examples_to_install ${examples_to_install})
 
 message(STATUS "  boris")
 include_directories(
@@ -13,29 +12,12 @@ set(boris_examples
 
 foreach(example ${boris_examples})
     add_executable(${example} ${CMAKE_CURRENT_SOURCE_DIR}/${example}.cpp)
-    set_target_properties(${example}
-        PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/examples/boris
+    target_link_libraries(${example}
+        ${3rdparty_DEPENDEND_LIBS}
     )
+    if(pfasst_INSTALL_EXAMPLES)
+        install(TARGETS ${example} RUNTIME DESTINATION bin)
+    endif()
 endforeach(example)
 
-
-message(STATUS "    creating make targets to run examples")
-foreach(example ${boris_examples})
-    add_custom_target(run_example_boris_${example}
-        COMMAND ${example}
-        DEPENDS ${example}
-        WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/examples/boris
-        COMMENT "Running Boris example: ${example}" VERBATIM
-    )
-    list(APPEND all_boris_example_runs run_example_boris_${example})
-    message(STATUS "      - run_example_boris_${example}")
-endforeach(example)
-
-
-add_custom_target(run_example_boris_all
-  DEPENDS ${all_boris_example_runs}
-  COMMENT "Running all Boris examples" VERBATIM
-)
-message(STATUS "    - run_example_boris_all")
-
-set(all_example_runs ${all_boris_example_runs} PARENT_SCOPE)
+set(examples_to_install ${examples_to_install} ${boris_examples} PARENT_SCOPE)

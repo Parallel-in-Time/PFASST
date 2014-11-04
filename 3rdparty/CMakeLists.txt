@@ -1,25 +1,27 @@
 # Managing 3rd-party libraries and tools
 set(3rdparty_INCLUDES ${3rdparty_INCLUDES})
 set(3rdparty_DEPENDEND_LIBS ${3rdparty_DEPENDEND_LIBS})
+set(pfasst_DEPENDEND_TARGETS ${pfasst_DEPENDEND_TARGETS})
 
 message(STATUS "--------------------------------------------------------------------------------")
 message(STATUS "Boost")
 
-if(pfasst_BUILD_SHARED_LIBS OR BUILD_SHARED_LIBS)
-    set(Boost_USE_STATIC_LIBS OFF)
-    set(pfasst_BUILD_SHARED_LIBS ON)
-    set(BUILD_SHARED_LIBS ON)
-else()
-    set(Boost_USE_STATIC_LIBS ON)
-    set(pfasst_BUILD_SHARED_LIBS OFF)
-    set(BUILD_SHARED_LIBS OFF)
-endif()
 set(Boost_USE_MULTITHREADED ON)
 
-find_package(Boost REQUIRED)
+if(${compiler_version_available} AND ${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
+    set(Boost_COMPILER "-clang${CMAKE_CXX_COMPILER_VERSION_MAJOR}${CMAKE_CXX_COMPILER_VERSION_MINOR}")
+endif()
+
+if(${CMAKE_VERBOSE_MAKEFILE})
+    set(Boost_DEBUG ON)
+    set(Boost_DETAILED_FAILURE_MSG ON)
+endif()
+
+find_package(Boost COMPONENTS program_options REQUIRED)
 message(STATUS "Boost include path: ${Boost_INCLUDE_DIRS}")
 message(STATUS "Boost library path: ${Boost_LIBRARY_DIRS}")
 list(APPEND 3rdparty_INCLUDES ${Boost_INCLUDE_DIRS})
+list(APPEND 3rdparty_DEPENDEND_LIBS ${Boost_LIBRARIES})
 
 
 message(STATUS "--------------------------------------------------------------------------------")
@@ -55,6 +57,7 @@ if(NOT EIGEN3_FOUND)
 
     # Specify include dir
     set(Eigen3_INCLUDE_PATH "${Eigen3_SOURCE_DIR}")
+    list(APPEND pfasst_DEPENDEND_TARGETS Eigen3)
 endif()
 
 list(APPEND 3rdparty_INCLUDES "${Eigen3_INCLUDE_PATH}")
@@ -102,6 +105,9 @@ if(pfasst_BUILD_EXAMPLES)
 endif()
 
 if(pfasst_BUILD_TESTS)
+    set(TESTS_3rdparty_INCLUDES ${TESTS_3rdparty_INCLUDES})
+    set(TESTS_3rdparty_DEPENDEND_LIBS ${TESTS_3rdparty_DEPENDEND_LIBS})
+
     message(STATUS "--------------------------------------------------------------------------------")
     set(GMOCK_SOURCE_URL "http://googlemock.googlecode.com/files/gmock-1.7.0.zip")
     message(STATUS "Google Testing Framework (gtest & gmock)")
@@ -117,12 +123,12 @@ if(pfasst_BUILD_TESTS)
       UPDATE_COMMAND ""
       PATCH_COMMAND ""
       CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release
-      -DCMAKE_C_COMPILE=${CMAKE_C_COMPILER}
-      -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-      -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
-      -DGTEST_USE_OWN_TR1_TUPLE=ON
-      -Dgtest_force_shared_crt=ON
-      -Dgmock_build_tests=${gtest_BUILD_TESTS}
+        -DCMAKE_C_COMPILE=${CMAKE_C_COMPILER}
+        -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+        -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+        -DGTEST_USE_OWN_TR1_TUPLE=ON
+        -Dgtest_force_shared_crt=ON
+        -Dgmock_build_tests=OFF
       # Disable install step
       INSTALL_COMMAND ""
       # Wrap download, configure and build steps in a script to log output
@@ -133,16 +139,19 @@ if(pfasst_BUILD_TESTS)
 
     # Specify include dir
     ExternalProject_Get_Property(googlemock source_dir)
-    list(APPEND 3rdparty_INCLUDES ${source_dir}/include ${source_dir}/gtest/include)
+    list(APPEND TESTS_3rdparty_INCLUDES ${source_dir}/include ${source_dir}/gtest/include)
 
     ExternalProject_Get_Property(googlemock binary_dir)
     set(Suffix ".a")
     set(Pthread "-pthread")
 
-    list(APPEND 3rdparty_DEPENDEND_LIBS ${binary_dir}/${CMAKE_FIND_LIBRARY_PREFIXES}gmock${Suffix})
-    list(APPEND 3rdparty_DEPENDEND_LIBS ${Pthread})
+    list(APPEND TESTS_3rdparty_DEPENDEND_LIBS ${binary_dir}/${CMAKE_FIND_LIBRARY_PREFIXES}gmock${Suffix})
+    list(APPEND TESTS_3rdparty_DEPENDEND_LIBS ${Pthread})
 endif()
 
 # propagate include lists to parent directory
 set(3rdparty_DEPENDEND_LIBS ${3rdparty_DEPENDEND_LIBS} PARENT_SCOPE)
 set(3rdparty_INCLUDES ${3rdparty_INCLUDES} PARENT_SCOPE)
+set(pfasst_DEPENDEND_TARGETS ${pfasst_DEPENDEND_TARGETS} PARENT_SCOPE)
+set(TESTS_3rdparty_DEPENDEND_LIBS ${TESTS_3rdparty_DEPENDEND_LIBS} PARENT_SCOPE)
+set(TESTS_3rdparty_INCLUDES ${TESTS_3rdparty_INCLUDES} PARENT_SCOPE)
