@@ -3,9 +3,11 @@
  *
  */
 
-#include<pfasst.hpp>
-#include<pfasst/sdc.hpp>
-#include<pfasst/encap/vector.hpp>
+#include <pfasst.hpp>
+#include <pfasst/config.hpp>
+#include <pfasst/logging.hpp>
+#include <pfasst/sdc.hpp>
+#include <pfasst/encap/vector.hpp>
 
 #include "vdp_sweeper.hpp"
 
@@ -43,7 +45,7 @@ double run_vdp_sdc(const size_t nsteps, const double dt, const size_t nnodes,
 /**
  * Main routine running the scalar example with a preset parameters
  */
-int main(int /*argc*/, char** /*argv*/)
+int main(int argc, char** argv)
 {
   const double x0 = 2.0,
                y0 = 0.0;
@@ -54,7 +56,8 @@ int main(int /*argc*/, char** /*argv*/)
   const double nu     = 5.0;
   const pfasst::quadrature::QuadratureType nodetype = pfasst::quadrature::QuadratureType::GaussLegendre;
 
-  std::cout << "Used timestep: " << dt << std::endl;
+  pfasst::init(argc, argv);
+  LOG(INFO) << "Used timestep:" << dt;
 
   run_vdp_sdc(nsteps, dt, nnodes, niters, nu, x0, y0, nodetype);
 }

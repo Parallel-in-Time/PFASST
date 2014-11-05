@@ -1,20 +1,19 @@
 # Building and Running Tests
 include_directories(
     ${3rdparty_INCLUDES}
-    ${TESTS_3rdparty_INCLUDES}
     ${pfasst_INCLUDES}
-    ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 set(TESTS
-    test_quadrature
-    test_polynomial
+    test_boris_particle
+    test_boris_physics
+#     test_boris_sweeper
 )
 
 foreach(test ${TESTS})
     message(STATUS "  ${test}")
     add_executable(${test} ${test}.cpp)
-    add_dependencies(${test} ${pfasst_DEPENDEND_TARGETS} googlemock)
+    add_dependencies(${test} googlemock)
     target_link_libraries(${test}
         ${3rdparty_DEPENDEND_LIBS}
         ${TESTS_3rdparty_DEPENDEND_LIBS}
@@ -27,8 +26,6 @@ foreach(test ${TESTS})
         )
     endif()
     add_test(NAME ${test}
-        COMMAND ${CMAKE_BINARY_DIR}/tests/${test} --gtest_output=xml:${test}_out.xml
+        COMMAND ${CMAKE_BINARY_DIR}/tests/examples/boris/${test} --gtest_output=xml:${test}_out.xml
     )
 endforeach(test)
-
-add_subdirectory(examples)

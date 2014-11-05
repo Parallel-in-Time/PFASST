@@ -1,6 +1,7 @@
 # Building and Running Tests
 include_directories(
     ${3rdparty_INCLUDES}
+    ${TESTS_3rdparty_INCLUDES}
     ${FFTW_INCLUDE_PATH}
     ${pfasst_INCLUDES}
 )
@@ -20,10 +21,11 @@ foreach(test ${TESTS})
     add_executable(${test} ${test}.cpp)
     add_dependencies(${test} googlemock)
     if(NOT FFTW_FOUND)
-      add_dependencies(${test} googlemock fftw3)
+      add_dependencies(${test} ${pfasst_DEPENDEND_TARGETS} googlemock fftw3)
     endif()
     target_link_libraries(${test}
         ${3rdparty_DEPENDEND_LIBS}
+        ${TESTS_3rdparty_DEPENDEND_LIBS}
         ${FFTW_LIBRARIES}
         ${pfasst_DEPENDED_LIBS}
     )
@@ -45,7 +47,7 @@ if(${pfasst_WITH_MPI})
         add_executable(${test} ${test}.cpp)
         add_dependencies(${test} googlemock)
         if(NOT FFTW_FOUND)
-          add_dependencies(${test} googlemock fftw3)
+          add_dependencies(${test} ${pfasst_DEPENDEND_TARGETS} googlemock fftw3)
         endif()
         if(MPI_COMPILE_FLAGS)
             if(pfasst_WITH_GCC_PROF AND ${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
@@ -62,6 +64,7 @@ if(${pfasst_WITH_MPI})
         endif()
         target_link_libraries(${test}
             ${3rdparty_DEPENDEND_LIBS}
+            ${TESTS_3rdparty_DEPENDEND_LIBS}
             ${FFTW_LIBRARIES}
             ${pfasst_DEPENDED_LIBS}
             ${MPI_CXX_LIBRARIES}

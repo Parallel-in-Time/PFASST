@@ -1,19 +1,11 @@
 # Managing 3rd-party libraries and tools
 set(3rdparty_INCLUDES ${3rdparty_INCLUDES})
 set(3rdparty_DEPENDEND_LIBS ${3rdparty_DEPENDEND_LIBS})
+set(pfasst_DEPENDEND_TARGETS ${pfasst_DEPENDEND_TARGETS})
 
 message(STATUS "--------------------------------------------------------------------------------")
 message(STATUS "Boost")
 
-# if(pfasst_BUILD_SHARED_LIBS OR BUILD_SHARED_LIBS)
-#     set(Boost_USE_STATIC_LIBS OFF)
-#     set(pfasst_BUILD_SHARED_LIBS ON)
-#     set(BUILD_SHARED_LIBS ON)
-# else()
-#     set(Boost_USE_STATIC_LIBS ON)
-#     set(pfasst_BUILD_SHARED_LIBS OFF)
-#     set(BUILD_SHARED_LIBS OFF)
-# endif()
 set(Boost_USE_MULTITHREADED ON)
 
 if(${compiler_version_available} AND ${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
@@ -65,9 +57,43 @@ if(NOT EIGEN3_FOUND)
 
     # Specify include dir
     set(Eigen3_INCLUDE_PATH "${Eigen3_SOURCE_DIR}")
+    list(APPEND pfasst_DEPENDEND_TARGETS Eigen3)
 endif()
 
 list(APPEND 3rdparty_INCLUDES "${Eigen3_INCLUDE_PATH}")
+
+
+message(STATUS "--------------------------------------------------------------------------------")
+message(STATUS "easyloggingpp")
+
+set(EASYLOGGINGPP_SOURCE_URL "https://github.com/easylogging/easyloggingpp/releases/download/v9.75/easyloggingpp_v9.75.tar.gz")
+# message(STATUS "easyloggingpp not found on your system")
+message(STATUS "  going to download sources")
+message(STATUS "    download URL: ${EASYLOGGINGPP_SOURCE_URL}")
+set(easyloggingpp_SOURCE_DIR "${pfasst_BINARY_DIR}/3rdparty/src/easyloggingpp")
+
+ExternalProject_Add(
+    easyloggingpp
+    LIST_SEPARATOR " "
+    URL ${EASYLOGGINGPP_SOURCE_URL}
+    URL_MD5 3e37462b30cb6ee49faeed6a94d1bc1e
+    TIMEOUT 30
+    UPDATE_COMMAND ""
+    PATCH_COMMAND ""
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    TEST_COMMAND ""
+    INSTALL_DIR ""
+    INSTALL_COMMAND ""
+    LOG_DOWNLOAD ON
+    LOG_CONFIGURE OFF
+    LOG_BUILD OFF
+)
+
+# Specify include dir
+set(easyloggingpp_INCLUDE_PATH "${easyloggingpp_SOURCE_DIR}")
+list(APPEND 3rdparty_INCLUDES "${easyloggingpp_INCLUDE_PATH}")
+
 
 if(pfasst_BUILD_EXAMPLES)
     message(STATUS "--------------------------------------------------------------------------------")
@@ -112,6 +138,9 @@ if(pfasst_BUILD_EXAMPLES)
 endif()
 
 if(pfasst_BUILD_TESTS)
+    set(TESTS_3rdparty_INCLUDES ${TESTS_3rdparty_INCLUDES})
+    set(TESTS_3rdparty_DEPENDEND_LIBS ${TESTS_3rdparty_DEPENDEND_LIBS})
+
     message(STATUS "--------------------------------------------------------------------------------")
     set(GMOCK_SOURCE_URL "http://googlemock.googlecode.com/files/gmock-1.7.0.zip")
     message(STATUS "Google Testing Framework (gtest & gmock)")
@@ -127,12 +156,12 @@ if(pfasst_BUILD_TESTS)
       UPDATE_COMMAND ""
       PATCH_COMMAND ""
       CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release
-      -DCMAKE_C_COMPILE=${CMAKE_C_COMPILER}
-      -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-      -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
-      -DGTEST_USE_OWN_TR1_TUPLE=ON
-      -Dgtest_force_shared_crt=ON
-      -Dgmock_build_tests=${gtest_BUILD_TESTS}
+        -DCMAKE_C_COMPILE=${CMAKE_C_COMPILER}
+        -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+        -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+        -DGTEST_USE_OWN_TR1_TUPLE=ON
+        -Dgtest_force_shared_crt=ON
+        -Dgmock_build_tests=OFF
       # Disable install step
       INSTALL_COMMAND ""
       # Wrap download, configure and build steps in a script to log output
@@ -143,16 +172,19 @@ if(pfasst_BUILD_TESTS)
 
     # Specify include dir
     ExternalProject_Get_Property(googlemock source_dir)
-    list(APPEND 3rdparty_INCLUDES ${source_dir}/include ${source_dir}/gtest/include)
+    list(APPEND TESTS_3rdparty_INCLUDES ${source_dir}/include ${source_dir}/gtest/include)
 
     ExternalProject_Get_Property(googlemock binary_dir)
     set(Suffix ".a")
     set(Pthread "-pthread")
 
-    list(APPEND 3rdparty_DEPENDEND_LIBS ${binary_dir}/${CMAKE_FIND_LIBRARY_PREFIXES}gmock${Suffix})
-    list(APPEND 3rdparty_DEPENDEND_LIBS ${Pthread})
+    list(APPEND TESTS_3rdparty_DEPENDEND_LIBS ${binary_dir}/${CMAKE_FIND_LIBRARY_PREFIXES}gmock${Suffix})
+    list(APPEND TESTS_3rdparty_DEPENDEND_LIBS ${Pthread})
 endif()
 
 # propagate include lists to parent directory
 set(3rdparty_DEPENDEND_LIBS ${3rdparty_DEPENDEND_LIBS} PARENT_SCOPE)
 set(3rdparty_INCLUDES ${3rdparty_INCLUDES} PARENT_SCOPE)
+set(pfasst_DEPENDEND_TARGETS ${pfasst_DEPENDEND_TARGETS} PARENT_SCOPE)
+set(TESTS_3rdparty_DEPENDEND_LIBS ${TESTS_3rdparty_DEPENDEND_LIBS} PARENT_SCOPE)
+set(TESTS_3rdparty_INCLUDES ${TESTS_3rdparty_INCLUDES} PARENT_SCOPE)

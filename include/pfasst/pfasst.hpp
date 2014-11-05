@@ -12,6 +12,9 @@ using namespace std;
 namespace pfasst
 {
 
+  /**
+   * implementation of the PFASST algorithm as described in \cite emmett_pfasst_2012
+   */
   template<typename time = pfasst::time_precision>
   class PFASST
     : public MLSDC<time>
@@ -83,6 +86,7 @@ namespace pfasst
         }
       }
 
+    private:
       /**
        * Cycle down: sweep on current (fine), restrict to coarse.
        */
@@ -220,6 +224,7 @@ namespace pfasst
         }
       }
 
+    public:
       void set_comm(ICommunicator* comm)
       {
         this->comm = comm;

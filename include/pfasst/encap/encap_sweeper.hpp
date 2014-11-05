@@ -5,6 +5,7 @@
 #ifndef _PFASST_ENCAP_ENCAP_SWEEPER_HPP_
 #define _PFASST_ENCAP_ENCAP_SWEEPER_HPP_
 
+#include <algorithm>
 #include <cstdlib>
 #include <vector>
 #include <memory>
@@ -30,8 +31,10 @@ namespace pfasst
         shared_ptr<EncapFactory<time>> factory;
         shared_ptr<Encapsulation<time>> start_state;
         shared_ptr<Encapsulation<time>> end_state;
+        vector<shared_ptr<Encapsulation<time>>> residuals;
         //! @}
 
+<<<<<<< HEAD
         //! @{
         /**
          * Solution values \\( U \\) at all time nodes of the current iteration.
@@ -48,10 +51,15 @@ namespace pfasst
          */
         vector<shared_ptr<Encapsulation<time>>> fas_corrections;
         //! @}
+=======
+        int residual_norm_order;
+        time abs_residual_tol, rel_residual_tol;
+>>>>>>> development
 
       public:
 
         //! @{
+<<<<<<< HEAD
         /**
          * Retrieve solution values of current iteration at time node index `m`.
          *
@@ -61,6 +69,11 @@ namespace pfasst
         {
           return this->state[m];
         }
+=======
+        EncapSweeper()
+          : quad(nullptr), abs_residual_tol(0.0), rel_residual_tol(0.0)
+        {}
+>>>>>>> development
 
         /**
          * Retrieve FAS correction of current iteration at time node index `m`.
@@ -210,6 +223,53 @@ namespace pfasst
         {
           UNUSED(dt); UNUSED(dst);
           throw NotImplementedYet("sweeper");
+        }
+        //! @}
+
+        //! @{
+        /**
+         * Set residual tolerances for convergence checking.
+         */
+        void set_residual_tolerances(time abs_residual_tol, time rel_residual_tol, int order=0)
+        {
+          this->abs_residual_tol = abs_residual_tol;
+          this->rel_residual_tol = rel_residual_tol;
+          this->residual_norm_order = order;
+        }
+
+        /**
+         * Compute residual at each SDC node (including FAS corrections).
+         */
+        virtual void residual(time dt, vector<shared_ptr<Encapsulation<time>>> dst) const
+        {
+          throw NotImplementedYet("residual");
+        }
+
+        /**
+         * Return convergence status.
+         *
+         * This is used by controllers to shortcircuit iterations.
+         */
+        virtual bool converged() override
+        {
+          if (this->abs_residual_tol > 0.0 || this->rel_residual_tol > 0.0) {
+            if (this->residuals.size() == 0) {
+              for (auto x: this->get_nodes()) {
+                this->residuals.push_back(this->get_factory()->create(pfasst::encap::solution));
+              }
+            }
+            this->residual(this->get_controller()->get_time_step(), this->residuals);
+            vector<time> rnorms;
+            for (auto r: this->residuals) {
+              rnorms.push_back(r->norm0());
+            }
+            auto rmax = *std::max_element(rnorms.begin(), rnorms.end());
+            if (rmax < this->abs_residual_tol) {
+              return true;
+            }
+            // XXX: check rel norms too
+          }
+          return false;
         }
         //! @}
 

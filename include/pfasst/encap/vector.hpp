@@ -6,14 +6,21 @@
 #define _PFASST_VECTOR_HPP_
 
 #include <cstdlib>
+#include <ctime>
 #include <algorithm>
 #include <memory>
+#include <string>
 #include <vector>
 #include <cassert>
+using namespace std;
 
 #include "encapsulation.hpp"
+#include "../logging.hpp"
+#include "../config.hpp"
 
-using namespace std;
+#ifndef PFASST_LOGGING_DATA_DEFAULT_FILENAME
+  #define PFASST_LOGGING_DATA_DEFAULT_FILENAME "data_values.log"
+#endif
 
 namespace pfasst
 {
@@ -27,7 +34,9 @@ namespace pfasst
      */
     template<typename scalar, typename time = time_precision>
     class VectorEncapsulation
-      : public vector<scalar>, public Encapsulation<time>
+      : public vector<scalar>,
+        public Encapsulation<time>,
+        public el::Loggable
     {
       public:
         //! @{
@@ -156,10 +165,19 @@ namespace pfasst
          *
          * This uses std::max with custom comparison function.
          */
-        scalar norm0() const
+        time norm0() const override
         {
-          return std::max(this->cbegin(), this->cend(),
-                          [](scalar a, scalar b) {return std::abs(a) < std::abs(b); } );
+          return std::abs(*std::max_element(this->cbegin(), this->cend(),
+                                            [](scalar a, scalar b) {return std::abs(a) < std::abs(b); } ));
+        }
+        //! @}
+
+        //! @{
+        virtual void log(el::base::type::ostream_t& os) const
+        {
+          for(auto iter = this->cbegin(); iter != this->cend(); ++iter) {
+            os << scientific << *iter << " ";
+          }
         }
         //! @}
     };
@@ -202,6 +220,36 @@ namespace pfasst
       return *y.get();
     }
 
+
+    static void init_config_options(po::options_description& opts)
+    {
+      opts.add_options()
+        ("data_values_out", po::value<string>(), "name of file to write 'data_values' to")
+        ;
+    }
+
+    static void enable_config_options(size_t index = -1)
+    {
+      pfasst::config::Options::get_instance()
+        .register_init_function("Data Logger",
+                                std::function<void(po::options_description&)>(init_config_options),
+                                index);
+    }
+
+    static void set_logfile_from_options()
+    {
+      time_t now = time(nullptr);
+      char time_str[31];
+      strftime(time_str, sizeof(time_str), "%Y-%m-%dT%H-%M-%S%z", localtime(&now));
+      el::Configurations data_values_conf;
+      data_values_conf.set(el::Level::Global, el::ConfigurationType::Format, "%msg");
+      data_values_conf.set(el::Level::Global, el::ConfigurationType::ToFile, "true");
+      data_values_conf.set(el::Level::Global, el::ConfigurationType::ToStandardOutput, "false");
+      data_values_conf.set(el::Level::Global, el::ConfigurationType::Filename,
+                           pfasst::config::get_value<string>("data_values_out",
+                                                             string(time_str) + PFASST_LOGGING_DATA_DEFAULT_FILENAME));
+      el::Loggers::reconfigureLogger("data_values", data_values_conf);
+    }
   }  // ::pfasst::encap
 }  // ::pfasst
 

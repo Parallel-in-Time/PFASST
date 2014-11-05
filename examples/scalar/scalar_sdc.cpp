@@ -10,11 +10,13 @@
  *
  */
 
-#include<complex>
+#include <complex>
 
-#include<pfasst.hpp>
-#include<pfasst/sdc.hpp>
-#include<pfasst/encap/vector.hpp>
+#include <pfasst.hpp>
+#include <pfasst/config.hpp>
+#include <pfasst/logging.hpp>
+#include <pfasst/sdc.hpp>
+#include <pfasst/encap/vector.hpp>
 
 #include "scalar_sweeper.hpp"
 
@@ -55,7 +57,7 @@ double run_scalar_sdc(const size_t nsteps, const double dt, const size_t nnodes,
 /**
  * Main routine running the scalar example with a preset parameters
  */
-int main(int /*argc*/, char** /*argv*/)
+int main(int argc, char** argv)
 {
   const size_t nsteps = 2;
   const double dt     = 1.0;
@@ -63,6 +65,8 @@ int main(int /*argc*/, char** /*argv*/)
   const size_t niters = 6;
   const complex<double> lambda = complex<double>(-1.0, 1.0);
   const pfasst::quadrature::QuadratureType nodetype = pfasst::quadrature::QuadratureType::GaussLobatto;
+
+  pfasst::init(argc, argv);
 
   run_scalar_sdc(nsteps, dt, nnodes, niters, lambda, nodetype);
 }

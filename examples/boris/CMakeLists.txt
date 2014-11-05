@@ -1,20 +1,17 @@
 set(examples_to_install ${examples_to_install})
 
-message(STATUS "  scalar")
+message(STATUS "  boris")
 include_directories(
-    ${pfasst_INCLUDES}
     ${3rdparty_INCLUDES}
+    ${pfasst_INCLUDES}
 )
 
-set(scalar_examples
-    scalar_sdc
+set(boris_examples
+    boris_sdc
 )
 
-foreach(example ${scalar_examples})
+foreach(example ${boris_examples})
     add_executable(${example} ${CMAKE_CURRENT_SOURCE_DIR}/${example}.cpp)
-    if(${pfasst_DEPENDEND_TARGETS})
-        add_dependencies(${example} ${pfasst_DEPENDEND_TARGETS})
-    endif()
     target_link_libraries(${example}
         ${3rdparty_DEPENDEND_LIBS}
     )
@@ -23,4 +20,4 @@ foreach(example ${scalar_examples})
     endif()
 endforeach(example)
 
-set(examples_to_install ${examples_to_install} ${scalar_examples} PARENT_SCOPE)
+set(examples_to_install ${examples_to_install} ${boris_examples} PARENT_SCOPE)

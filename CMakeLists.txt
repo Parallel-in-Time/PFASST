@@ -49,6 +49,7 @@ elseif(${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
     else()
         message(FATAL_ERROR "No C++11 support for Clang version. Please upgrade Clang to a version supporting C++11.")
     endif()
+    add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-fdiagnostics-show-category=name -fdiagnostics-show-template-tree")
 elseif(${CMAKE_CXX_COMPILER_ID} MATCHES XL)
     # NOTE: This branch is not tested yet (in theory it should work)
     message(WARNING "IMB XL C/C++ support is experimental and not yet tested.")
@@ -81,9 +82,12 @@ set(3rdparty_INCLUDES)
 set(3rdparty_DEPENDEND_LIBS)
 set(pfasst_INCLUDES)
 set(pfasst_DEPENDEND_LIBS)
+set(pfasst_DEPENDEND_TARGETS)
 
 if(pfasst_BUILD_TESTS)
     enable_testing()
+    set(TESTS_3rdparty_INCLUDES)
+    set(TESTS_3rdparty_DEPENDEND_LIBS)
 endif(pfasst_BUILD_TESTS)
 
 # Add / include 3rd-party libraries
@@ -100,6 +104,11 @@ add_subdirectory(3rdparty)
 
 message(STATUS "********************************************************************************")
 message(STATUS "Configuring sources")
+set(WARNING_COMMENT "/*\n * DO NOT ALTER THIS FILE\n *\n * It will get rewritten on CMake's next run\n *\n */")
+configure_file(
+    "${pfasst_SOURCE_DIR}/cmake/site_config.hpp.in"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/pfasst/site_config.hpp"
+)
 add_subdirectory(include)
 
 if(pfasst_BUILD_EXAMPLES)
@@ -116,18 +125,20 @@ if(pfasst_BUILD_TESTS)
 endif()
 message(STATUS "********************************************************************************")
 
-message(STATUS "Creating 'install' target for header files")
-message(STATUS "  will install them to '${CMAKE_INSTALL_PREFIX}/include/pfasst'")
-install(DIRECTORY include/pfasst/
-    DESTINATION include/pfasst
+message(STATUS "Creating 'install' target")
+message(STATUS "  prefix:              ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "  header files:        <PREFIX>/include/pfasst")
+install(DIRECTORY include/
+    DESTINATION include
     FILES_MATCHING PATTERN "*.hpp"
 )
+
 if(pfasst_BUILD_EXAMPLES AND pfasst_INSTALL_EXAMPLES)
-    message(STATUS "Example programms have been added to 'install' target")
-    message(STATUS "  will install them to '${CMAKE_INSTALL_PREFIX}/bin'")
-    message(STATUS "  example programs:")
+    message(STATUS "  example programs:    <PREFIX>/bin")
+    message(STATUS "  Example programms have been added to 'install' target")
+    message(STATUS "    example programs:")
     foreach(example_program ${examples_to_install})
-        message(STATUS "    - ${example_program}")
+        message(STATUS "      - ${example_program}")
     endforeach()
 endif()
 
