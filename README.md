@@ -20,7 +20,7 @@ News
 References
 ----------
 
-XXX
+See \subpage #citelist .
 
 
 Documentation

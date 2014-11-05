@@ -12,6 +12,9 @@ using namespace std;
 namespace pfasst
 {
 
+  /**
+   * implementation of the PFASST algorithm as described in \cite emmett_pfasst_2012
+   */
   template<typename time = pfasst::time_precision>
   class PFASST
     : public MLSDC<time>
