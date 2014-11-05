@@ -62,6 +62,39 @@ endif()
 
 list(APPEND 3rdparty_INCLUDES "${Eigen3_INCLUDE_PATH}")
 
+
+message(STATUS "--------------------------------------------------------------------------------")
+message(STATUS "easyloggingpp")
+
+set(EASYLOGGINGPP_SOURCE_URL "https://github.com/easylogging/easyloggingpp/releases/download/v9.75/easyloggingpp_v9.75.tar.gz")
+# message(STATUS "easyloggingpp not found on your system")
+message(STATUS "  going to download sources")
+message(STATUS "    download URL: ${EASYLOGGINGPP_SOURCE_URL}")
+set(easyloggingpp_SOURCE_DIR "${pfasst_BINARY_DIR}/3rdparty/src/easyloggingpp")
+
+ExternalProject_Add(
+    easyloggingpp
+    LIST_SEPARATOR " "
+    URL ${EASYLOGGINGPP_SOURCE_URL}
+    URL_MD5 3e37462b30cb6ee49faeed6a94d1bc1e
+    TIMEOUT 30
+    UPDATE_COMMAND ""
+    PATCH_COMMAND ""
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    TEST_COMMAND ""
+    INSTALL_DIR ""
+    INSTALL_COMMAND ""
+    LOG_DOWNLOAD ON
+    LOG_CONFIGURE OFF
+    LOG_BUILD OFF
+)
+
+# Specify include dir
+set(easyloggingpp_INCLUDE_PATH "${easyloggingpp_SOURCE_DIR}")
+list(APPEND 3rdparty_INCLUDES "${easyloggingpp_INCLUDE_PATH}")
+
+
 if(pfasst_BUILD_EXAMPLES)
     message(STATUS "--------------------------------------------------------------------------------")
     message(STATUS "FFTW3")

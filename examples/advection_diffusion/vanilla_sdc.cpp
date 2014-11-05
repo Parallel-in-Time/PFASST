@@ -10,7 +10,8 @@
 #include <fftw3.h>
 
 #include <pfasst.hpp>
-#include "pfasst/config.hpp"
+#include <pfasst/logging.hpp>
+#include <pfasst/config.hpp>
 #include <pfasst/sdc.hpp>
 #include <pfasst/encap/vector.hpp>
 
@@ -55,10 +56,12 @@ error_map run_vanilla_sdc(double abs_residual_tol)
 #ifndef PFASST_UNIT_TESTING
 int main(int argc, char** argv)
 {
+  pfasst::encap::enable_config_options();
   // First we want to enable command line options for the Advection-Diffusion Sweeper ...
   AdvectionDiffusionSweeper<>::enable_config_options();
   // ... then we initialize all options other default options and parse given parameters ...
   pfasst::init(argc, argv);
+  pfasst::encap::set_logfile_from_options();
 
   run_vanilla_sdc(0.0);
 }

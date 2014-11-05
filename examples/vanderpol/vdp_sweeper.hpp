@@ -3,6 +3,7 @@
 
 #include <vector>
 
+#include <pfasst/logging.hpp>
 #include <pfasst/encap/imex_sweeper.hpp>
 #include <pfasst/encap/vector.hpp>
 
@@ -82,9 +83,9 @@ class VdpSweeper
      */
     virtual ~VdpSweeper()
     {
-      cout << "Number of explicit evaluations: " << this->n_f_expl_eval << endl;
-      cout << "Number of implicit evaluations: " << this->n_f_impl_eval << endl;
-      cout << "Number of implicit solves:      " << this->n_impl_solve << endl;
+      LOG(INFO) << "Number of explicit evaluations:" << this->n_f_expl_eval;
+      LOG(INFO) << "Number of implicit evaluations:" << this->n_f_impl_eval;
+      LOG(INFO) << "Number of implicit solves:     " << this->n_impl_solve;
       this->output_file.close();
     }
 
@@ -105,7 +106,7 @@ class VdpSweeper
       if (this->nu==0)
       {
         double max_err = max(abs(qend[0] - qex[0])/abs(qex[0]) , abs(qend[1]-qex[1])/abs(qex[1]) );
-        cout << "error: " << max_err << endl;
+        LOG(INFO) << "error:" << max_err;
         this->error = max_err;
       }
       this->output_file << qend[0] << "    " << qend[1] << endl;
