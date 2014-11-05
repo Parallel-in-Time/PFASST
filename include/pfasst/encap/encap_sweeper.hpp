@@ -34,7 +34,6 @@ namespace pfasst
         vector<shared_ptr<Encapsulation<time>>> residuals;
         //! @}
 
-<<<<<<< HEAD
         //! @{
         /**
          * Solution values \\( U \\) at all time nodes of the current iteration.
@@ -51,15 +50,17 @@ namespace pfasst
          */
         vector<shared_ptr<Encapsulation<time>>> fas_corrections;
         //! @}
-=======
+
         int residual_norm_order;
         time abs_residual_tol, rel_residual_tol;
->>>>>>> development
 
       public:
 
+        EncapSweeper()
+          : quadrature(nullptr), abs_residual_tol(0.0), rel_residual_tol(0.0)
+        {}
+
         //! @{
-<<<<<<< HEAD
         /**
          * Retrieve solution values of current iteration at time node index `m`.
          *
@@ -69,11 +70,6 @@ namespace pfasst
         {
           return this->state[m];
         }
-=======
-        EncapSweeper()
-          : quad(nullptr), abs_residual_tol(0.0), rel_residual_tol(0.0)
-        {}
->>>>>>> development
 
         /**
          * Retrieve FAS correction of current iteration at time node index `m`.
@@ -145,7 +141,6 @@ namespace pfasst
           }
         }
 
-
         //! @{
         void set_quadrature(shared_ptr<IQuadrature<time>> quadrature)
         {
@@ -164,7 +159,7 @@ namespace pfasst
 
         const vector<time> get_nodes() const
         {
-          return this->get_quadrature()->get_nodes();
+          return this->quadrature->get_nodes();
         }
 
         void set_factory(shared_ptr<EncapFactory<time>> factory)

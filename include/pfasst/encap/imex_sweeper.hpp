@@ -361,13 +361,13 @@ namespace pfasst
          */
         virtual void residual(time dt, vector<shared_ptr<Encapsulation<time>>> dst) const override
         {
-          for (size_t m=0; m<this->quad->get_num_nodes(); m++) {
+          for (size_t m=0; m<this->quadrature->get_num_nodes(); m++) {
             dst[m]->copy(this->start_state);
             dst[m]->saxpy(-1.0, this->state[m]);
             // XXX: add tau corrections
           }
-          dst[0]->mat_apply(dst, dt, this->quad->get_q_mat(), this->fs_expl, false);
-          dst[0]->mat_apply(dst, dt, this->quad->get_q_mat(), this->fs_impl, false);
+          dst[0]->mat_apply(dst, dt, this->quadrature->get_q_mat(), this->fs_expl, false);
+          dst[0]->mat_apply(dst, dt, this->quadrature->get_q_mat(), this->fs_impl, false);
         }
         //! @}
 
