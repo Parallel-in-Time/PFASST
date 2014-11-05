@@ -100,7 +100,7 @@ add_subdirectory(3rdparty)
 
 message(STATUS "********************************************************************************")
 message(STATUS "Configuring sources")
-set(PFASST_LOGGING_DEFAULT_CONF_FILE "${CMAKE_INSTALL_PREFIX}/etc/pfasst/default_logging.conf")
+set(WARNING_COMMENT "/*\n * DO NOT ALTER THIS FILE\n *\n * It will get rewritten on CMake's next run\n *\n */")
 configure_file(
     "${pfasst_SOURCE_DIR}/cmake/site_config.hpp.in"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/pfasst/site_config.hpp"
