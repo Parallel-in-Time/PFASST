@@ -26,33 +26,45 @@ using namespace std;
   // initialize easyloggingpp
   // FIXME: this might already be called by code using PFASST++
   _INITIALIZE_EASYLOGGINGPP
+  /**
+   * guard symbol to ensure easylogging++ is only initialized once
+   *
+   * When this symbol is defined, it is expected that `_INITIALIZE_EASYLOGGINGPP` has been called once to initialize
+   * easylogging++.
+   *
+   * \note In case the executable using PFASST++ is also using easylogging++ as its logging library and initializing it
+   *     prior to including the PFASST++ headers, please define this symbol prior including any of the PFASST++ headers.
+   */
   #define PFASST_LOGGER_INITIALIZED
 #endif
 
 #ifndef PFASST_LOGGER_DEFAULT_GLOBAL_FORMAT
-  /**
-   * format for the default global logger
-   */
+  //! format for the default global logger
   #define PFASST_LOGGER_DEFAULT_GLOBAL_FORMAT "[%level] %msg"
 #endif
 
 #ifndef PFASST_LOGGER_DEFAULT_GLOBAL_TOFILE
+  //! whether to log to file by default
   #define PFASST_LOGGER_DEFAULT_GLOBAL_TOFILE "false"
 #endif
 #ifndef PFASST_LOGGER_DEFAULT_GLOBAL_TOSTDOUT
+  //! whether to log to stdout by default
   #define PFASST_LOGGER_DEFAULT_GLOBAL_TOSTDOUT "true"
 #endif
 
 #ifndef PFASST_LOGGER_DEFAULT_DEBUG_FORMAT
-  /**
-   * format for the default global debug logger
-   */
+  //! format for the default global debug logger
   #define PFASST_LOGGER_DEFAULT_DEBUG_FORMAT "[%datetime{%Y-%M-%d %H:%m:%s,%g}] %level - %fbase:%line - %msg"
 #endif
 
-namespace pfasst {
-  namespace log {
+namespace pfasst
+{
+  namespace log
+  {
 
+    /**
+     * sets default configuration for default loggers
+     */
     static void load_default_config()
     {
       el::Configurations defaultConf;
@@ -64,6 +76,20 @@ namespace pfasst {
       el::Loggers::reconfigureLogger("default", defaultConf);
     }
 
+    /**
+     * sets some default flags for easylogging++
+     *
+     * Current defaults are:
+     *
+     * - NewLineForContainer
+     * - LogDetailedCrashReason
+     * - ColoredTerminalOutput
+     * - MultiLoggerSupport
+     * - HierarchicalLogging
+     * - AutoSpacing
+     *
+     * \see https://github.com/easylogging/easyloggingpp#logging-flags
+     */
     static void set_logging_flags()
     {
       el::Loggers::addFlag(el::LoggingFlag::NewLineForContainer);
@@ -74,6 +100,15 @@ namespace pfasst {
       el::Loggers::addFlag(el::LoggingFlag::AutoSpacing);
     }
 
+    /**
+     * starts easylogging++ with given arguments and loads configuration
+     *
+     * Usually, you want to pass the command line arguments given to `main()` in here and let easylogging++ figure
+     * out what it needs.
+     *
+     * \param[in] argc number of command line arguments
+     * \param[in] argv command line arguments
+     */
     static void start_log(int argc, char** argv)
     {
       _START_EASYLOGGINGPP(argc, argv);
