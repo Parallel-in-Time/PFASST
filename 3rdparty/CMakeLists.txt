@@ -7,6 +7,7 @@ message(STATUS "----------------------------------------------------------------
 message(STATUS "Boost")
 
 set(Boost_USE_MULTITHREADED ON)
+set(Boost_ADDITIONAL_VERSIONS "1.57" "1.57.0" ${Boost_ADDITIONAL_VERSIONS})
 
 if(${compiler_version_available} AND ${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
     set(Boost_COMPILER "-clang${CMAKE_CXX_COMPILER_VERSION_MAJOR}${CMAKE_CXX_COMPILER_VERSION_MINOR}")
