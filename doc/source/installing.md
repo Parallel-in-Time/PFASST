@@ -5,6 +5,9 @@
 * A recent C++ compiler that supports (most of) the C++11 standard.
   This either implies at least GCC 4.7 (we recommend 4.8 or later) or Clang 3.2 (we recommend 3.3 or later).
 
+* The [Boost](https://boost.org/) libraries at least of version 1.53.0.
+  Especially `boost::program_options` is required.
+
 * The [CMake] build tool (at least version 2.8).
 
 * The [Eigen3] library is required for everything using the \em PFASST++ library.
