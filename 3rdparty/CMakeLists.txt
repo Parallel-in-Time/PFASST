@@ -105,7 +105,7 @@ if(NOT Easyloggingpp_FOUND)
     message(STATUS "Easyloggingpp not found on your system")
     message(STATUS "  going to download sources")
     message(STATUS "    download URL: ${EASYLOGGINGPP_SOURCE_URL}")
-    set(Easyloggingpp_SOURCE_DIR "${pfasst_BINARY_DIR}/3rdparty/src/easyloggingpp")
+    set(Easyloggingpp_SOURCE_DIR "${pfasst_BINARY_DIR}/3rdparty/src/Easyloggingpp")
     ExternalProject_Add(
         Easyloggingpp
         LIST_SEPARATOR " "
