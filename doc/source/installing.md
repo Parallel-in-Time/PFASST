@@ -4,6 +4,8 @@
 
 * A recent C++ compiler that supports (most of) the C++11 standard.
 * The [CMake](http://cmake.org/) build tool.
+* The [Boost](https://boost.org/) libraries at least of version 1.53.0.
+  Especially `boost::program_options` is required.
 
 
 ## Obtaining the Sources

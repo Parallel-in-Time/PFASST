@@ -13,7 +13,7 @@ if(${compiler_version_available} AND ${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
     set(Boost_COMPILER "-clang${CMAKE_CXX_COMPILER_VERSION_MAJOR}${CMAKE_CXX_COMPILER_VERSION_MINOR}")
 endif()
 
-find_package(Boost COMPONENTS program_options REQUIRED)
+find_package(Boost 1.53.0 COMPONENTS program_options REQUIRED)
 set_package_properties(Boost
     PROPERTIES
       DESCRIPTION "C++ libraries"
