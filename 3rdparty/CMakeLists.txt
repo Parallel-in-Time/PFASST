@@ -13,12 +13,14 @@ if(${compiler_version_available} AND ${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
     set(Boost_COMPILER "-clang${CMAKE_CXX_COMPILER_VERSION_MAJOR}${CMAKE_CXX_COMPILER_VERSION_MINOR}")
 endif()
 
-if(${CMAKE_VERBOSE_MAKEFILE})
-    set(Boost_DEBUG ON)
-    set(Boost_DETAILED_FAILURE_MSG ON)
-endif()
-
 find_package(Boost 1.53.0 COMPONENTS program_options REQUIRED)
+set_package_properties(Boost
+    PROPERTIES
+      DESCRIPTION "C++ libraries"
+      URL "http://boost.org/"
+      TYPE REQUIRED
+      PURPOSE "command line parameter parsing"
+)
 message(STATUS "Boost include path: ${Boost_INCLUDE_DIRS}")
 message(STATUS "Boost library path: ${Boost_LIBRARY_DIRS}")
 list(APPEND 3rdparty_INCLUDES ${Boost_INCLUDE_DIRS})
@@ -29,6 +31,13 @@ message(STATUS "----------------------------------------------------------------
 message(STATUS "Eigen3")
 
 find_package(Eigen3)
+set_package_properties(Eigen3
+    PROPERTIES
+      DESCRIPTION "linear algebra library"
+      URL "http://eigen.tuxfamily.org/"
+      TYPE REQUIRED
+      PURPOSE "matrix and vector types and arithmetics"
+)
 
 if(NOT EIGEN3_FOUND)
     set(EIGEN3_SOURCE_URL "http://bitbucket.org/eigen/eigen/get/3.2.2.tar.bz2")
@@ -57,7 +66,16 @@ if(NOT EIGEN3_FOUND)
     )
 
     # Specify include dir
-    set(Eigen3_INCLUDE_PATH "${Eigen3_SOURCE_DIR}")
+    set(Eigen3_INCLUDE_PATH "${Eigen3_SOURCE_DIR}" CACHE PATH "" FORCE)
+
+    mark_as_advanced(Eigen3_INCLUDE_PATH)
+    set(Eigen3_FOUND TRUE)
+    set_property(GLOBAL APPEND PROPERTY PACKAGES_FOUND "Eigen3")
+    get_property(packages_not_found GLOBAL PROPERTY PACKAGES_NOT_FOUND)
+    list(REMOVE_ITEM packages_not_found "Eigen3")
+    set_property(GLOBAL PROPERTY PACKAGES_NOT_FOUND ${packages_not_found})
+    unset(packages_not_found)
+
     list(APPEND pfasst_DEPENDEND_TARGETS Eigen3)
 endif()
 
@@ -65,35 +83,61 @@ list(APPEND 3rdparty_INCLUDES "${Eigen3_INCLUDE_PATH}")
 
 
 message(STATUS "--------------------------------------------------------------------------------")
-message(STATUS "easyloggingpp")
+message(STATUS "Easyloggingpp")
 
-set(EASYLOGGINGPP_SOURCE_URL "https://github.com/easylogging/easyloggingpp/releases/download/v9.75/easyloggingpp_v9.75.tar.gz")
-# message(STATUS "easyloggingpp not found on your system")
-message(STATUS "  going to download sources")
-message(STATUS "    download URL: ${EASYLOGGINGPP_SOURCE_URL}")
-set(easyloggingpp_SOURCE_DIR "${pfasst_BINARY_DIR}/3rdparty/src/easyloggingpp")
-
-ExternalProject_Add(
-    easyloggingpp
-    LIST_SEPARATOR " "
-    URL ${EASYLOGGINGPP_SOURCE_URL}
-    URL_MD5 3e37462b30cb6ee49faeed6a94d1bc1e
-    TIMEOUT 30
-    UPDATE_COMMAND ""
-    PATCH_COMMAND ""
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ""
-    TEST_COMMAND ""
-    INSTALL_DIR ""
-    INSTALL_COMMAND ""
-    LOG_DOWNLOAD ON
-    LOG_CONFIGURE OFF
-    LOG_BUILD OFF
+set(EASYLOGGINGPP_SOURCE_URL
+    "https://github.com/easylogging/easyloggingpp/releases/download/v9.75/easyloggingpp_v9.75.tar.gz"
 )
 
-# Specify include dir
-set(easyloggingpp_INCLUDE_PATH "${easyloggingpp_SOURCE_DIR}")
-list(APPEND 3rdparty_INCLUDES "${easyloggingpp_INCLUDE_PATH}")
+find_package(Easyloggingpp)
+set_package_properties(Easyloggingpp
+    PROPERTIES
+      DESCRIPTION "Easylogging++ logging library"
+      URL "https://github.com/easylogging/easyloggingpp"
+      TYPE REQUIRED
+      PURPOSE "provides functionality for versatile logging"
+)
+
+if(NOT Easyloggingpp_FOUND)
+    unset(Easyloggingpp_INCLUDE_PATH)
+    unset(Easyloggingpp_INCLUDE_PATH CACHE)
+    unset(Easyloggingpp_FOUND)
+    message(STATUS "Easyloggingpp not found on your system")
+    message(STATUS "  going to download sources")
+    message(STATUS "    download URL: ${EASYLOGGINGPP_SOURCE_URL}")
+    set(Easyloggingpp_SOURCE_DIR "${pfasst_BINARY_DIR}/3rdparty/src/Easyloggingpp")
+    ExternalProject_Add(
+        Easyloggingpp
+        LIST_SEPARATOR " "
+        URL ${EASYLOGGINGPP_SOURCE_URL}
+        URL_MD5 3e37462b30cb6ee49faeed6a94d1bc1e
+        TIMEOUT 30
+        UPDATE_COMMAND ""
+        PATCH_COMMAND ""
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ""
+        TEST_COMMAND ""
+        INSTALL_DIR ""
+        INSTALL_COMMAND ""
+        LOG_DOWNLOAD ON
+        LOG_CONFIGURE OFF
+        LOG_BUILD OFF
+    )
+
+    # Specify include dir and hack on CMake internals to overwrite internal not-found flag
+    set(Easyloggingpp_INCLUDE_PATH "${Easyloggingpp_SOURCE_DIR}" CACHE PATH "" FORCE)
+    mark_as_advanced(Easyloggingpp_INCLUDE_PATH)
+    set(Easyloggingpp_FOUND TRUE)
+    set_property(GLOBAL APPEND PROPERTY PACKAGES_FOUND "Easyloggingpp")
+    get_property(packages_not_found GLOBAL PROPERTY PACKAGES_NOT_FOUND)
+    list(REMOVE_ITEM packages_not_found "Easyloggingpp")
+    set_property(GLOBAL PROPERTY PACKAGES_NOT_FOUND ${packages_not_found})
+    unset(packages_not_found)
+
+    list(APPEND pfasst_DEPENDEND_TARGETS Easyloggingpp)
+endif()
+
+list(APPEND 3rdparty_INCLUDES "${Easyloggingpp_INCLUDE_PATH}")
 
 
 if(pfasst_BUILD_EXAMPLES)
@@ -101,6 +145,13 @@ if(pfasst_BUILD_EXAMPLES)
     message(STATUS "FFTW3")
 
     find_package(FFTW)
+    set_package_properties(FFTW
+        PROPERTIES
+          DESCRIPTION "FFTW3"
+          URL "http://fftw.org/"
+          TYPE REQUIRED
+          PURPOSE "fast Fourier transformation"
+    )
 
     if(NOT FFTW_FOUND)
         set(FFTW3_SOURCE_URL "http://fftw.org/fftw-3.3.4.tar.gz")
@@ -129,8 +180,19 @@ if(pfasst_BUILD_EXAMPLES)
             LOG_BUILD ON
         )
         # Specify include dir
-        set(FFTW_INCLUDE_PATH ${fftw3_INSTALL_DIR}/include PARENT_SCOPE)
-        set(FFTW_LIBRARIES ${fftw3_INSTALL_DIR}/lib/libfftw3.a PARENT_SCOPE)
+        set(FFTW_INCLUDE_PATH ${fftw3_INSTALL_DIR}/include CACHE PATH "" FORCE PARENT_SCOPE)
+        set(FFTW_LIBRARIES ${fftw3_INSTALL_DIR}/lib/libfftw3.a CACHE FILEPATH "" FORCE PARENT_SCOPE)
+
+        mark_as_advanced(FFTW_INCLUDE_PATH FFTW_LIBRARIES)
+        set(FFTW_FOUND TRUE)
+        set_property(GLOBAL APPEND PROPERTY PACKAGES_FOUND "FFTW")
+        get_property(packages_not_found GLOBAL PROPERTY PACKAGES_NOT_FOUND)
+        list(REMOVE_ITEM packages_not_found "FFTW")
+        set_property(GLOBAL PROPERTY PACKAGES_NOT_FOUND ${packages_not_found})
+        unset(packages_not_found)
+
+        list(APPEND pfasst_DEPENDEND_LIBS FFTW)
+
     else()
         set(FFTW_INCLUDE_PATH ${FFTW_INCLUDE_PATH} PARENT_SCOPE)
         set(FFTW_LIBRARIES ${FFTW_LIBRARIES} PARENT_SCOPE)

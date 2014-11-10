@@ -5,6 +5,8 @@ list(APPEND CMAKE_MODULE_PATH ${pfasst_SOURCE_DIR}/cmake)
 include(cmake/utility_functions.cmake)
 include(CheckCXXCompilerFlag)
 include(ExternalProject)
+include(CMakeDependentOption)
+include(FeatureSummary)
 
 # Set default ExternalProject root directory
 set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/3rdparty)
@@ -12,7 +14,8 @@ set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/3rdparty)
 option(pfasst_DISABLE_LIBCXX    "Disable use of LLVM's libc++ when compiling with Clang." ON )
 option(pfasst_BUILD_SHARED_LIBS "Build shared libraries."                                 OFF)
 option(pfasst_BUILD_EXAMPLES    "Build example programs."                                 ON )
-option(pfasst_INSTALL_EXAMPLES  "Install example programs."                               OFF)
+CMAKE_DEPENDENT_OPTION(pfasst_INSTALL_EXAMPLES "Install example programs." ON
+    "pfasst_BUILD_EXAMPLES" OFF)
 option(pfasst_BUILD_TESTS       "Build test suite for PFASST."                            ON )
 option(pfasst_WITH_MPI          "Build with MPI enabled."                                 OFF)
 option(pfasst_WITH_GCC_PROF     "Enable excessive debugging & profiling output with GCC." OFF)
@@ -77,6 +80,27 @@ endif()
 
 # Enable all compiler warnings
 add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic")
+
+
+# Set features from options
+add_feature_info(Examples
+    pfasst_BUILD_EXAMPLES
+    "build example programs"
+)
+add_feature_info(Tests
+    pfasst_BUILD_TESTS
+    "build test suite"
+)
+add_feature_info(MPI
+    pfasst_WITH_MPI
+    "build with MPI"
+)
+if(${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
+    add_feature_info(Profiling
+        pfasst_WITH_GCC_PROF
+        "build-in profiling support"
+    )
+endif()
 
 set(3rdparty_INCLUDES)
 set(3rdparty_DEPENDEND_LIBS)
@@ -152,3 +176,8 @@ if(${CMAKE_VERBOSE_MAKEFILE})
   message(STATUS "C++ link flags: ${CMAKE_CXX_LINK_FLAGS}")
   message(STATUS "********************************************************************************")
 endif()
+
+feature_summary(WHAT ENABLED_FEATURES DESCRIPTION "Enabled Features:")
+feature_summary(WHAT DISABLED_FEATURES DESCRIPTION "Disabled Features:")
+feature_summary(WHAT PACKAGES_FOUND DESCRIPTION "Packages Found (or auto-added):")
+feature_summary(WHAT PACKAGES_NOT_FOUND DESCRIPTION "Packages Not Found:")

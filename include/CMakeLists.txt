@@ -23,8 +23,8 @@ endif()
 # add_library(pfasst ${pfasst_SOURCES})
 # target_link_libraries(pfasst
 #   ${3rdparty_DEPENDEND_LIBS}
-#   ${pfasst_DEPENDED_LIBS}
+#   ${pfasst_DEPENDEND_LIBS}
 # )
 
 set(pfasst_INCLUDES ${pfasst_INCLUDES} PARENT_SCOPE)
-set(pfasst_DEPENDED_LIBS ${pfasst_DEPENDED_LIBS} PARENT_SCOPE)
+set(pfasst_DEPENDEND_LIBS ${pfasst_DEPENDEND_LIBS} PARENT_SCOPE)

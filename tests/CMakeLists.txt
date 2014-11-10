@@ -18,7 +18,7 @@ foreach(test ${TESTS})
     target_link_libraries(${test}
         ${3rdparty_DEPENDEND_LIBS}
         ${TESTS_3rdparty_DEPENDEND_LIBS}
-        ${pfasst_DEPENDED_LIBS}
+        ${pfasst_DEPENDEND_LIBS}
     )
     if(pfasst_WITH_GCC_PROF AND ${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
         set_target_properties(${test}
@@ -31,4 +31,6 @@ foreach(test ${TESTS})
     )
 endforeach(test)
 
-add_subdirectory(examples)
+if(${pfasst_BUILD_EXAMPLES})
+    add_subdirectory(examples)
+endif()
