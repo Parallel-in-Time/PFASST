@@ -27,7 +27,7 @@ foreach(test ${TESTS})
         ${3rdparty_DEPENDEND_LIBS}
         ${TESTS_3rdparty_DEPENDEND_LIBS}
         ${FFTW_LIBRARIES}
-        ${pfasst_DEPENDED_LIBS}
+        ${pfasst_DEPENDEND_LIBS}
     )
     if(pfasst_WITH_GCC_PROF AND ${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
         set_target_properties(${test}
@@ -66,7 +66,7 @@ if(${pfasst_WITH_MPI})
             ${3rdparty_DEPENDEND_LIBS}
             ${TESTS_3rdparty_DEPENDEND_LIBS}
             ${FFTW_LIBRARIES}
-            ${pfasst_DEPENDED_LIBS}
+            ${pfasst_DEPENDEND_LIBS}
             ${MPI_CXX_LIBRARIES}
         )
         add_test(NAME ${test}
