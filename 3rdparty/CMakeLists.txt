@@ -18,7 +18,7 @@ if(${CMAKE_VERBOSE_MAKEFILE})
     set(Boost_DETAILED_FAILURE_MSG ON)
 endif()
 
-find_package(Boost COMPONENTS program_options REQUIRED)
+find_package(Boost 1.53.0 COMPONENTS program_options REQUIRED)
 message(STATUS "Boost include path: ${Boost_INCLUDE_DIRS}")
 message(STATUS "Boost library path: ${Boost_LIBRARY_DIRS}")
 list(APPEND 3rdparty_INCLUDES ${Boost_INCLUDE_DIRS})
