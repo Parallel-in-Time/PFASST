@@ -46,12 +46,12 @@ namespace pfasst
           auto fine_factory = fine.get_factory();
 
           auto crse_delta = crse_factory->create(solution);
-          this->restrict(crse_delta, fine.get_state(0));
-          crse_delta->saxpy(-1.0, crse.get_state(0));
+          this->restrict(crse_delta, fine.get_start_state());
+          crse_delta->saxpy(-1.0, crse.get_start_state());
 
           auto fine_delta = fine_factory->create(solution);
           this->interpolate(fine_delta, crse_delta);
-          fine.get_state(0)->saxpy(-1.0, fine_delta);
+          fine.get_start_state()->saxpy(-1.0, fine_delta);
 
           fine.evaluate(0);
         }
@@ -112,7 +112,7 @@ namespace pfasst
         {
           auto& crse = as_encap_sweeper(dst);
           auto& fine = as_encap_sweeper(src);
-          this->restrict(crse.get_state(0), fine.get_state(0));
+          this->restrict(crse.get_start_state(), fine.get_start_state());
         }
 
 
