@@ -12,8 +12,9 @@ using namespace std;
 #include <Eigen/Core>
 
 #include <pfasst.hpp>
-#include <pfasst/encap/encap_sweeper.hpp>
 #include <pfasst/config.hpp>
+#include <pfasst/logging.hpp>
+#include <pfasst/encap/encap_sweeper.hpp>
 
 #include "particle.hpp"
 #include "particle_3d.hpp"
@@ -187,7 +188,7 @@ namespace pfasst
 
           virtual ~BorisSweeper()
           {
-            cout << "f evals: " << this->f_evals << endl;
+            LOG(INFO) << "f evals:" << this->f_evals;
           }
           //! @}
 
@@ -322,13 +323,13 @@ namespace pfasst
             size_t k = this->get_controller()->get_iteration();
             error_index nk(n, k);
 
-            cout << "err: " << n << " " << k
-                 << "\tdrift: " << scientific << e_tuple.err << fixed
-                 << "\tres: " << scientific << e_tuple.res << fixed
-                 << "\t(energy: " << e_end
-                 << "\tpos: " << end->pos()
-                 << "\tvel: " << end->vel()
-                 << "\t" << boolalpha << predict << fixed << ")" << endl;
+            LOG(INFO) << "err:" << n << k
+                      << "\tdrift:" << e_tuple.err
+                      << "\tres:" << e_tuple.res
+                      << "\t(energy:" << e_end
+                      << "\tpos:" << end->pos()
+                      << "\tvel:" << end->vel()
+                      << "\t" << predict << ")";
 
             this->errors.insert(pair<error_index, ErrorTuple<scalar>>(nk, e_tuple));
           }
