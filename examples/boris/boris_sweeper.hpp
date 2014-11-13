@@ -54,7 +54,7 @@ namespace pfasst
       struct ErrorTuple
       {
         ParticleError<scalar> p_err;
-        scalar err;
+        scalar e_drift;
         scalar res;
       };
 
@@ -310,7 +310,7 @@ namespace pfasst
             scalar e_end = this->energy_op.evaluate({this->particles.back()}, t);
 
             ErrorTuple<scalar> e_tuple;
-            e_tuple.err = this->initial_energy - e_end;
+            e_tuple.e_drift = this->initial_energy - e_end;
             e_tuple.p_err.x = ex->pos().x - end->pos().x;
             e_tuple.p_err.y = ex->pos().y - end->pos().y;
             e_tuple.p_err.z = ex->pos().z - end->pos().z;
@@ -324,7 +324,7 @@ namespace pfasst
             error_index nk(n, k);
 
             LOG(INFO) << "err:" << n << k
-                      << "\tdrift:" << e_tuple.err
+                      << "\tdrift:" << e_tuple.e_drift
                       << "\tres:" << e_tuple.res
                       << "\t(energy:" << e_end
                       << "\tpos:" << end->pos()

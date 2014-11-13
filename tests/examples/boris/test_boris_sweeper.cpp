@@ -19,7 +19,7 @@ TEST(EnergyDriftAndResidual, SingleStep)
 
   auto final_error = errors_map.rbegin()->second;
 
-  EXPECT_THAT(final_error.err, DoubleNear(0.0, 2e-12));
+  EXPECT_THAT(final_error.e_drift, DoubleNear(0.0, 2e-12));
   EXPECT_THAT(final_error.res, DoubleNear(0.0, 1.5e-14));
 }
 
@@ -32,7 +32,7 @@ TEST(EnergyDriftAndResidual, MultiStep)
 
   auto final_error = errors_map.rbegin()->second;
 
-  EXPECT_THAT(final_error.err, DoubleNear(0.0, 1.1e-11));
+  EXPECT_THAT(final_error.e_drift, DoubleNear(0.0, 1.1e-11));
   EXPECT_THAT(final_error.res, DoubleNear(0.0, 1.5e-14));
 }
 
