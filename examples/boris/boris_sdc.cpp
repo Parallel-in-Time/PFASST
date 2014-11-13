@@ -15,15 +15,10 @@ namespace pfasst
     namespace boris
     {
       template<typename scalar>
-      error_map<scalar> run_boris_sdc()
+      error_map<scalar> run_boris_sdc(const size_t nsteps, const scalar dt, const size_t nnodes,
+                                      const size_t nparticles, const size_t niters)
       {
         pfasst::SDC<> sdc;
-
-        const size_t nsteps     = pfasst::config::get_value<size_t>("num_steps", 10);
-        const double dt         = pfasst::config::get_value<double>("delta_step", 0.015625);
-        const size_t nnodes     = pfasst::config::get_value<size_t>("num_nodes", 5);
-      //   const size_t nparticles = 1;
-        const size_t niters     = pfasst::config::get_value<size_t>("num_iter", 7);
 
         const double mass = 1.0;
         const double charge = 1.0;
@@ -63,6 +58,7 @@ namespace pfasst
   }  // ::pfasst::examples
 }  // ::pfasst
 
+#ifndef PFASST_UNIT_TESTING
 int main(int argc, char** argv)
 {
   pfasst::examples::boris::enable_config_options<double>();
@@ -70,5 +66,13 @@ int main(int argc, char** argv)
 //   cout << scientific;
   cout << fixed;
   cout.precision(6);
-  pfasst::examples::boris::run_boris_sdc<double>();
+
+  const size_t nsteps     = pfasst::config::get_value<size_t>("num_steps", 10);
+  const double dt         = pfasst::config::get_value<double>("delta_step", 0.015625);
+  const size_t nnodes     = pfasst::config::get_value<size_t>("num_nodes", 5);
+  const size_t nparticles = 1;
+  const size_t niters     = pfasst::config::get_value<size_t>("num_iter", 7);
+
+  pfasst::examples::boris::run_boris_sdc<double>(nsteps, dt, nnodes, nparticles, niters);
 }
+#endif
