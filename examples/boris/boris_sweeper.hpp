@@ -122,6 +122,8 @@ namespace pfasst
           energy_operator_type energy_op;
           scalar epsilon;
           error_map<scalar> errors;
+          bool exact_updated;
+          shared_ptr<encap_type> exact_cache;
 
         protected:
           vector<shared_ptr<encap_type>> particles;
@@ -180,6 +182,7 @@ namespace pfasst
             :   energy_op(energy_operator)
               , epsilon(epsilon)
               , errors()
+              , exact_updated(false)
               , f_evals(0)
           {}
 
@@ -261,45 +264,56 @@ namespace pfasst
             this->exact(*(q.get()), t);
           }
 
-          //! FIXME: there is probably still a bug in the calculation of the exact solution here
           virtual void exact(encap_type& q, const time t)
           {
-            typedef complex<scalar> C;
-            C i(0.0, 1.0);
-            auto initial = this->particles[0];
-            scalar x0 = initial->pos().x,
-                   y0 = initial->pos().y,
-                   z0 = initial->pos().z,
-                   u0 = initial->vel().u,
-                   v0 = initial->vel().v,
-                   w0 = initial->vel().w,
-                   omega_e = this->get_e_field().omega_e,
-                   omega_b = this->get_b_field().omega_b;
-            C c_epsilon = C(this->epsilon, 0.0);
+            UNUSED(t);
+            if (!this->exact_updated) {
+              typedef complex<scalar> C;
+              C i(0.0, 1.0);
+              auto initial = this->particles[0];
+              scalar x0 = initial->pos().x,
+                     y0 = initial->pos().y,
+                     z0 = initial->pos().z,
+                     u0 = initial->vel().u,
+                     v0 = initial->vel().v,
+                     w0 = initial->vel().w,
+                     omega_e = this->get_e_field().omega_e,
+                     omega_b = this->get_b_field().omega_b;
+              time dt = this->get_controller()->get_time_step();
 
-            C omega_tilde = sqrt(-2.0 * c_epsilon) * omega_e;
-            q.pos().z = (z0 * cos(omega_tilde * (scalar)(t)) + w0 / omega_tilde * sin(omega_tilde * (scalar)(t))).real();
+              C omega_tilde = sqrt(-2.0 * this->epsilon) * omega_e;
+              q.pos().z = (z0 * cos(omega_tilde * (scalar)(dt)) + w0 / omega_tilde * sin(omega_tilde * (scalar)(dt))).real();
 
-            C sqrt_in_omega = sqrt(pow(omega_b, 2) + 4.0 * epsilon * pow(omega_e, 2));
-            C omega_minus = 0.5 * (omega_b - sqrt_in_omega);
-            C omega_plus = 0.5 * (omega_b + sqrt_in_omega);
+              C sqrt_in_omega = sqrt(pow(omega_b, 2) + 4.0 * this->epsilon * pow(omega_e, 2));
+              C omega_minus = 0.5 * (omega_b - sqrt_in_omega);
+              C omega_plus = 0.5 * (omega_b + sqrt_in_omega);
 
-            C r_minus = (omega_plus * x0 + v0) / (omega_plus - omega_minus);
-            C r_plus = x0 - r_minus;
+              C r_minus = (omega_plus * x0 + v0) / (omega_plus - omega_minus);
+              C r_plus = x0 - r_minus;
 
-            C i_minus = (omega_plus * y0 - u0) / (omega_plus - omega_minus);
-            C i_plus = y0 - i_minus;
+              C i_minus = (omega_plus * y0 - u0) / (omega_plus - omega_minus);
+              C i_plus = y0 - i_minus;
 
-            C x_y_move = (r_plus + i * i_plus) * exp(- i * omega_plus * (scalar)(t))
-                                                     + (r_minus + i * i_minus) * exp(- i * omega_minus * (scalar)(t));
-            q.pos().x = x_y_move.real();
-            q.pos().y = x_y_move.imag();
+              C x_y_move = (r_plus + i * i_plus) * exp(- i * omega_plus * (scalar)(dt))
+                                                       + (r_minus + i * i_minus) * exp(- i * omega_minus * (scalar)(dt));
+              q.pos().x = x_y_move.real();
+              q.pos().y = x_y_move.imag();
 
-            q.vel().w = (- z0 * omega_tilde * sin(omega_tilde * (scalar)(t)) + w0 * cos(omega_tilde * (scalar)(t))).real();
-            C u_v_move = (- i * omega_plus * (r_plus + i * i_plus)) * exp(-i * omega_plus * (scalar)(t))
-                                       - (i * omega_minus * (r_minus + i * i_minus)) * exp(-i * omega_minus * (scalar)(t));
-            q.vel().u = u_v_move.real();
-            q.vel().v = u_v_move.imag();
+              q.vel().w = (- z0 * omega_tilde * sin(omega_tilde * (scalar)(dt)) + w0 * cos(omega_tilde * (scalar)(dt))).real();
+              C u_v_move = (- i * omega_plus * (r_plus + i * i_plus)) * exp(-i * omega_plus * (scalar)(dt))
+                                         - (i * omega_minus * (r_minus + i * i_minus)) * exp(-i * omega_minus * (scalar)(dt));
+              q.vel().u = u_v_move.real();
+              q.vel().v = u_v_move.imag();
+
+              VLOG(1) << "exact solution at time t=" << t << q;
+
+              this->exact_cache = make_shared<encap_type>(q);
+              this->exact_updated = true;
+            } else {
+              LOG(DEBUG) << "exact solution has been computed previously.";
+              q = *(this->exact_cache.get());
+              VLOG(1) << "exact solution at time t=" << t << q;
+            }
           }
 
           virtual void echo_error(const time t, bool predict = false)
@@ -422,6 +436,7 @@ namespace pfasst
           {
             this->set_state(const_pointer_cast<const encap_type>(this->particles.back()), 0);
             this->energy_evals.front() = this->energy_evals.back();
+            this->exact_updated = false;
           }
 
           void evaluate(size_t m)
