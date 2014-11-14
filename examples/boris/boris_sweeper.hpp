@@ -40,14 +40,20 @@ namespace pfasst
       typedef pair<size_t, size_t> error_index;
 
       template<typename scalar>
-      struct ParticleError
+      class ParticleError :
+        public el::Loggable
       {
-        scalar x;
-        scalar y;
-        scalar z;
-        scalar u;
-        scalar v;
-        scalar w;
+        public:
+          scalar x;
+          scalar y;
+          scalar z;
+          scalar u;
+          scalar v;
+          scalar w;
+
+          virtual void log(el::base::type::ostream_t& os) const override {
+            os << "pos: [" << x << " " << y << " " << z << "]\tvel: [" << y << " " << v << " " << w << "]";
+          }
       };
 
       template<typename scalar>
@@ -191,7 +197,7 @@ namespace pfasst
 
           virtual ~BorisSweeper()
           {
-            LOG(INFO) << "f evals:" << this->f_evals;
+            LOG(INFO) << "number force computations:" << this->f_evals;
           }
           //! @}
 
@@ -337,13 +343,13 @@ namespace pfasst
             size_t k = this->get_controller()->get_iteration();
             error_index nk(n, k);
 
-            LOG(INFO) << "err:" << n << k
-                      << "\tdrift:" << e_tuple.e_drift
-                      << "\tres:" << e_tuple.res
-                      << "\t(energy:" << e_end
-                      << "\tpos:" << end->pos()
-                      << "\tvel:" << end->vel()
-                      << "\t" << predict << ")";
+            LOG(INFO) << "step" << n+1
+                      << "\titer" << k
+                      << "\tres" << e_tuple.res
+                      << "\tdrift" << e_tuple.e_drift
+                      << "\tenergy" << e_end;
+            VLOG(1) << "particle at t_end:" << *end;
+            VLOG(2) << "absolute error:" << e_tuple.p_err;
 
             this->errors.insert(pair<error_index, ErrorTuple<scalar>>(nk, e_tuple));
           }

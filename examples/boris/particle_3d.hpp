@@ -9,6 +9,8 @@
 
 #include <Eigen/Core>
 
+#include <pfasst/logging.hpp>
+
 #include "particle.hpp"
 
 namespace pfasst
@@ -1011,7 +1013,8 @@ namespace pfasst
                                        time,
                                        Position3DEncapsulation,
                                        Velocity3DEncapsulation,
-                                       Acceleration3DEncapsulation>
+                                       Acceleration3DEncapsulation>,
+          public el::Loggable
       {
         private:
           typedef ParticleEncapsulation<scalar,
@@ -1103,6 +1106,10 @@ namespace pfasst
             mat.block(0, 6, 1, 3) = this->m_accel.as_matrix();
             return mat;
           }
+
+          virtual void log(el::base::type::ostream_t& os) const override {
+            os << "pos: [" << this->pos().as_matrix() << "]\tvel: [" << this->vel().as_matrix() << "]\taccel: [" << this->accel().as_matrix() << "]";
+          }
           //! @}
 
           //! @{
@@ -1120,15 +1127,15 @@ namespace pfasst
 
 
 
-      template<
-        typename scalar,
-        typename time = time_precision
-      >
-      ostream& operator<<(ostream& out, const Particle3DEncapsulation<time, scalar>& particle)
-      {
-        out << "pos: " << particle.pos().as_matrix() << "\tvel: " << particle.vel().as_matrix() << "\taccel: " << particle.accel().as_matrix();
-        return out;
-      }
+//       template<
+//         typename scalar,
+//         typename time = time_precision
+//       >
+//       ostream& operator<<(ostream& out, const Particle3DEncapsulation<time, scalar>& particle)
+//       {
+//         out << "pos: " << particle.pos().as_matrix() << "\tvel: " << particle.vel().as_matrix() << "\taccel: " << particle.accel().as_matrix();
+//         return out;
+//       }
 
 
       // XXX: not sure whether this factory is actually useful

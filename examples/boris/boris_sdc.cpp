@@ -2,6 +2,7 @@
 
 #include <pfasst.hpp>
 #include <pfasst/config.hpp>
+#include <pfasst/logging.hpp>
 #include <pfasst/sdc.hpp>
 
 #include "particle_3d.hpp"
@@ -49,7 +50,7 @@ namespace pfasst
         p0->vel().w = 100;
 
         sweeper->set_initial_energy();
-        cout << "Initial Particle: " << *(dynamic_pointer_cast<Particle3DEncapsulation<double, double>>(sweeper->get_state(0))) << endl;
+        LOG(INFO) << OUT::green << "Initial Particle: " << *(dynamic_pointer_cast<Particle3DEncapsulation<double, double>>(sweeper->get_state(0)));
         sdc.run();
 
         return sweeper->get_errors();
@@ -63,9 +64,6 @@ int main(int argc, char** argv)
 {
   pfasst::examples::boris::enable_config_options<double>();
   pfasst::init(argc, argv);
-//   cout << scientific;
-  cout << fixed;
-  cout.precision(6);
 
   const size_t nsteps     = pfasst::config::get_value<size_t>("num_steps", 10);
   const double dt         = pfasst::config::get_value<double>("delta_step", 0.015625);
