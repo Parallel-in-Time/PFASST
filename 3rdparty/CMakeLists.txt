@@ -66,15 +66,8 @@ if(NOT EIGEN3_FOUND)
     )
 
     # Specify include dir
-    set(Eigen3_INCLUDE_PATH "${Eigen3_SOURCE_DIR}")# CACHE PATH "" FORCE)
-
-#     mark_as_advanced(Eigen3_INCLUDE_PATH)
+    set(Eigen3_INCLUDE_PATH "${Eigen3_SOURCE_DIR}")
     set(Eigen3_FOUND TRUE)
-#     set_property(GLOBAL APPEND PROPERTY PACKAGES_FOUND "Eigen3")
-#     get_property(packages_not_found GLOBAL PROPERTY PACKAGES_NOT_FOUND)
-#     list(REMOVE_ITEM packages_not_found "Eigen3")
-#     set_property(GLOBAL PROPERTY PACKAGES_NOT_FOUND ${packages_not_found})
-#     unset(packages_not_found)
 
     list(APPEND pfasst_DEPENDEND_TARGETS Eigen3)
 
@@ -123,15 +116,9 @@ if(NOT EASYLOGGING++_FOUND)
         LOG_BUILD OFF
     )
 
-    # Specify include dir and hack on CMake internals to overwrite internal not-found flag
-    set(Easylogging++_INCLUDE_PATH "${Easylogging++_SOURCE_DIR}")# CACHE PATH "" FORCE)
-#     mark_as_advanced(Easyloggingpp_INCLUDE_PATH)
+    # Specify include dir
+    set(Easylogging++_INCLUDE_PATH "${Easylogging++_SOURCE_DIR}")
     set(EASYLOGGING++_FOUND TRUE)
-#     set_property(GLOBAL APPEND PROPERTY PACKAGES_FOUND "Easylogging++")
-#     get_property(packages_not_found GLOBAL PROPERTY PACKAGES_NOT_FOUND)
-#     list(REMOVE_ITEM packages_not_found "Easylogging++")
-#     set_property(GLOBAL PROPERTY PACKAGES_NOT_FOUND ${packages_not_found})
-#     unset(packages_not_found)
 
     list(APPEND pfasst_DEPENDEND_TARGETS Easylogging++)
 
@@ -181,16 +168,10 @@ if(pfasst_BUILD_EXAMPLES)
             LOG_BUILD ON
         )
         # Specify include dir
-        set(FFTW_INCLUDE_PATH ${fftw3_INSTALL_DIR}/include)# CACHE PATH "" FORCE)
-        set(FFTW_LIBRARIES ${fftw3_INSTALL_DIR}/lib/libfftw3.a)# CACHE FILEPATH "" FORCE)
+        set(FFTW_INCLUDE_PATH ${fftw3_INSTALL_DIR}/include)
+        set(FFTW_LIBRARIES ${fftw3_INSTALL_DIR}/lib/libfftw3.a)
 
-#         mark_as_advanced(FFTW_INCLUDE_PATH FFTW_LIBRARIES)
         set(FFTW_FOUND TRUE)
-#         set_property(GLOBAL APPEND PROPERTY PACKAGES_FOUND "FFTW")
-#         get_property(packages_not_found GLOBAL PROPERTY PACKAGES_NOT_FOUND)
-#         list(REMOVE_ITEM packages_not_found "FFTW")
-#         set_property(GLOBAL PROPERTY PACKAGES_NOT_FOUND ${packages_not_found})
-#         unset(packages_not_found)
 
         list(APPEND pfasst_DEPENDEND_LIBS FFTW)
 
