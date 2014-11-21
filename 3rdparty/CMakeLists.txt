@@ -3,6 +3,8 @@ set(3rdparty_INCLUDES ${3rdparty_INCLUDES})
 set(3rdparty_DEPENDEND_LIBS ${3rdparty_DEPENDEND_LIBS})
 set(pfasst_DEPENDEND_TARGETS ${pfasst_DEPENDEND_TARGETS})
 
+set(3rdparty_DOWNLOAD_TIMEOUT "60")
+
 message(STATUS "--------------------------------------------------------------------------------")
 message(STATUS "Boost")
 
@@ -41,6 +43,8 @@ set_package_properties(Eigen3
 
 if(NOT EIGEN3_FOUND)
     set(EIGEN3_SOURCE_URL "http://bitbucket.org/eigen/eigen/get/3.2.2.tar.bz2")
+    set(EIGEN3_SOURCE_MD5 "fc2e814ae449d16b331f7e1f4e272bd3")
+
     message(STATUS "Eigen3 not found on your system")
     message(STATUS " going to download sources from:")
     message(STATUS "  ${EIGEN3_SOURCE_URL}")
@@ -50,8 +54,8 @@ if(NOT EIGEN3_FOUND)
         Eigen3
         LIST_SEPARATOR " "
         URL ${EIGEN3_SOURCE_URL}
-        URL_MD5 fc2e814ae449d16b331f7e1f4e272bd3
-        TIMEOUT 30
+        URL_MD5 ${EIGEN3_SOURCE_MD5}
+        TIMEOUT ${3rdparty_DOWNLOAD_TIMEOUT}
         UPDATE_COMMAND ""
         PATCH_COMMAND ""
         BUILD_IN_SOURCE ON
@@ -94,16 +98,18 @@ set_package_properties(Easylogging++
 )
 
 if(NOT EASYLOGGING++_FOUND)
+    set(Easylogging++_SOURCE_DIR "${pfasst_BINARY_DIR}/3rdparty/src/Easylogging++")
+    set(EASYLOGGING++_SOURCE_MD5 "3e37462b30cb6ee49faeed6a94d1bc1e")
+
     message(STATUS "Easylogging++ not found on your system")
     message(STATUS " going to download sources from:")
     message(STATUS "   ${EASYLOGGING++_SOURCE_URL}")
-    set(Easylogging++_SOURCE_DIR "${pfasst_BINARY_DIR}/3rdparty/src/Easylogging++")
     ExternalProject_Add(
         Easylogging++
         LIST_SEPARATOR " "
         URL ${EASYLOGGING++_SOURCE_URL}
-        URL_MD5 3e37462b30cb6ee49faeed6a94d1bc1e
-        TIMEOUT 30
+        URL_MD5 ${Easylogging++_SOURCE_MD5}
+        TIMEOUT ${3rdparty_DOWNLOAD_TIMEOUT}
         UPDATE_COMMAND ""
         PATCH_COMMAND ""
         CONFIGURE_COMMAND ""
@@ -143,6 +149,8 @@ if(pfasst_BUILD_EXAMPLES)
 
     if(NOT FFTW_FOUND)
         set(FFTW3_SOURCE_URL "http://fftw.org/fftw-3.3.4.tar.gz")
+        set(FFTW3_SOURCE_MD5 "2edab8c06b24feeb3b82bbb3ebf3e7b3")
+
         message(STATUS "FFTW3 not found on your system")
         message(STATUS " going to download and compile it from sources retrieved from:")
         message(STATUS "  ${FFTW3_SOURCE_URL}")
@@ -153,8 +161,8 @@ if(pfasst_BUILD_EXAMPLES)
             fftw3
             LIST_SEPARATOR " "
             URL ${FFTW3_SOURCE_URL}
-            URL_MD5 2edab8c06b24feeb3b82bbb3ebf3e7b3
-            TIMEOUT 30
+            URL_MD5 ${FFTW3_SOURCE_MD5}
+            TIMEOUT ${3rdparty_DOWNLOAD_TIMEOUT}
             UPDATE_COMMAND ""
             PATCH_COMMAND ""
             BUILD_IN_SOURCE ON
@@ -189,6 +197,8 @@ if(pfasst_BUILD_TESTS)
 
     message(STATUS "--------------------------------------------------------------------------------")
     set(GMOCK_SOURCE_URL "http://googlemock.googlecode.com/files/gmock-1.7.0.zip")
+    set(GMOCK_SOURCE_MD5 "073b984d8798ea1594f5e44d85b20d66")
+
     message(STATUS "Google Testing Framework (gtest & gmock)")
     message(STATUS " going to download and compile it from sources retrieved from:")
     message(STATUS "   ${GMOCK_SOURCE_URL}")
@@ -197,8 +207,8 @@ if(pfasst_BUILD_TESTS)
     ExternalProject_Add(
       googlemock
       URL ${GMOCK_SOURCE_URL}
-      URL_MD5 073b984d8798ea1594f5e44d85b20d66
-      TIMEOUT 30
+      URL_MD5 ${GMOCK_SOURCE_MD5}
+      TIMEOUT ${3rdparty_DOWNLOAD_TIMEOUT}
       UPDATE_COMMAND ""
       PATCH_COMMAND ""
       CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release
