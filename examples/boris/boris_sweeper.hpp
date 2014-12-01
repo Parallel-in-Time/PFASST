@@ -343,7 +343,8 @@ namespace pfasst
             size_t k = this->get_controller()->get_iteration();
             error_index nk(n, k);
 
-            LOG(INFO) << "step" << n+1
+            LOG(INFO) << scientific << setprecision(5)
+                      << "step" << n+1
                       << "\titer" << k
                       << "\tres" << e_tuple.res
                       << "\tdrift" << e_tuple.e_drift

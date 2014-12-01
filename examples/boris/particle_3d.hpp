@@ -164,7 +164,12 @@ namespace pfasst
 
           virtual scalar norm0() const
           {
-            return scalar(sqrt(this->x * this->x + this->y * this->y + this->z * this->z));
+            return scalar(sqrt(this->norm_squared()));
+          }
+
+          virtual scalar norm_squared() const
+          {
+            return scalar(this->x * this->x + this->y * this->y + this->z * this->z);
           }
           //! @}
 
@@ -340,13 +345,22 @@ namespace pfasst
             return *this;
           }
           //! @}
+
+          //! @{
+          virtual void log(el::base::type::ostream_t& os) const override
+          {
+            ParticleComponentEncapsulation<scalar, time>::log(os);
+            os << "Position([" << this->x << ", " << this->y << ", " << this->z << "])";
+            os.unsetf(ios_base::floatfield);
+          }
+          //! @}
       };
 
-
       template<typename scalar, typename time>
-      ostream& operator<<(ostream& out, const Position3DEncapsulation<scalar, time>& pos)
+      ostream& operator<<(ostream& out, const shared_ptr<Position3DEncapsulation<scalar, time>>& pos)
       {
-        out << pos.as_matrix();
+        out << "<" << pos.get() << ">";
+        pos->log(out);
         return out;
       }
 
@@ -668,13 +682,33 @@ namespace pfasst
                           "Velocity can only be devided by arithmetic types.");
             return this_type(first.u / value, first.v / value, first.w / value);
           }
+
+          //! vel /= value
+          this_type& operator/=(const scalar value)
+          {
+            static_assert(is_arithmetic<scalar>::value,
+                          "Velocity can only be multiplied by arithmetic types.");
+            this->u /= value;
+            this->v /= value;
+            this->w /= value;
+            return *this;
+          }
+
+          //! @{
+          virtual void log(el::base::type::ostream_t& os) const
+          {
+            ParticleComponentEncapsulation<scalar, time>::log(os);
+            os << "Velocity([" << this->u << ", " << this->v << ", " << this->w << "])";
+            os.unsetf(ios_base::floatfield);
+          }
+          //! @}
       };
 
-
       template<typename scalar, typename time>
-      ostream& operator<<(ostream& out, const Velocity3DEncapsulation<scalar, time>& vel)
+      ostream& operator<<(ostream& out, const shared_ptr<Velocity3DEncapsulation<scalar, time>>& vel)
       {
-        out << vel.as_matrix();
+        out << "<" << vel.get() << ">";
+        vel->log(out);
         return out;
       }
 
@@ -994,12 +1028,22 @@ namespace pfasst
             this->c -= second.c;
             return *this;
           }
+
+          //! @{
+          virtual void log(el::base::type::ostream_t& os) const
+          {
+            ParticleComponentEncapsulation<scalar, time>::log(os);
+            os << "Acceleration([" << this->a << ", " << this->b << ", " << this->c << "])";
+            os.unsetf(ios_base::floatfield);
+          }
+          //! @}
       };
 
       template<typename scalar, typename time>
-      ostream& operator<<(ostream& out, const Acceleration3DEncapsulation<scalar, time>& accel)
+      ostream& operator<<(ostream& out, const shared_ptr<Acceleration3DEncapsulation<scalar, time>>& accel)
       {
-        out << accel.as_matrix();
+        out << "<" << accel.get() << ">";
+        accel->log(out);
         return out;
       }
 
@@ -1013,8 +1057,7 @@ namespace pfasst
                                        time,
                                        Position3DEncapsulation,
                                        Velocity3DEncapsulation,
-                                       Acceleration3DEncapsulation>,
-          public el::Loggable
+                                       Acceleration3DEncapsulation>
       {
         private:
           typedef ParticleEncapsulation<scalar,
@@ -1106,10 +1149,6 @@ namespace pfasst
             mat.block(0, 6, 1, 3) = this->m_accel.as_matrix();
             return mat;
           }
-
-          virtual void log(el::base::type::ostream_t& os) const override {
-            os << "pos: [" << this->pos().as_matrix() << "]\tvel: [" << this->vel().as_matrix() << "]\taccel: [" << this->accel().as_matrix() << "]";
-          }
           //! @}
 
           //! @{
@@ -1125,17 +1164,13 @@ namespace pfasst
           //! @}
       };
 
-
-
-//       template<
-//         typename scalar,
-//         typename time = time_precision
-//       >
-//       ostream& operator<<(ostream& out, const Particle3DEncapsulation<time, scalar>& particle)
-//       {
-//         out << "pos: " << particle.pos().as_matrix() << "\tvel: " << particle.vel().as_matrix() << "\taccel: " << particle.accel().as_matrix();
-//         return out;
-//       }
+      template<typename scalar, typename time>
+      ostream& operator<<(ostream& out, const shared_ptr<Particle3DEncapsulation<scalar, time>>& p)
+      {
+        out << "<" << p.get() << ">";
+        p->log(out);
+        return out;
+      }
 
 
       // XXX: not sure whether this factory is actually useful

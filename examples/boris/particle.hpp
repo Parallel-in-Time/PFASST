@@ -10,6 +10,7 @@ using namespace std;
 #include <Eigen/Dense>
 
 #include <pfasst/globals.hpp>
+#include <pfasst/logging.hpp>
 #include <pfasst/interfaces.hpp>
 #include <pfasst/encap/encapsulation.hpp>
 
@@ -37,13 +38,22 @@ namespace pfasst
        * @tparam scalar underlying fundamental type
        */
       template<typename scalar>
-      struct dt
+      class dt :
+        public el::Loggable
       {
-        scalar v;
+        public:
+          scalar v;
 
-        dt() : dt(scalar(0.0)) {}
-        dt(const scalar value) : v(value) {}
-        virtual ~dt() {}
+          dt() : dt(scalar(0.0)) {}
+          dt(const scalar value) : v(value) {}
+          virtual ~dt() {}
+
+          virtual void log(el::base::type::ostream_t& os) const
+          {
+            os << fixed << setprecision(5);
+            os << "dt(" << this->v << ")";
+            os.unsetf(ios_base::floatfield);
+          }
       };
 
 
@@ -56,13 +66,22 @@ namespace pfasst
        * @tparam scalar underlying fundamental type
        */
       template<typename scalar>
-      struct dtdt
+      class dtdt :
+        public el::Loggable
       {
-        scalar v;
+        public:
+          scalar v;
 
-        dtdt() : dtdt(scalar(0.0)) {}
-        dtdt(const scalar value) : v(value) {}
-        virtual ~dtdt() {}
+          dtdt() : dtdt(scalar(0.0)) {}
+          dtdt(const scalar value) : v(value) {}
+          virtual ~dtdt() {}
+
+          virtual void log(el::base::type::ostream_t& os) const
+          {
+            os << fixed << setprecision(5);
+            os << "dtdt(" << this->v << ")";
+            os.unsetf(ios_base::floatfield);
+          }
       };
 
 
@@ -71,7 +90,8 @@ namespace pfasst
         typename time = time_precision
       >
       class ParticleComponentEncapsulation
-        : public Encapsulation<time>
+        :   public Encapsulation<time>
+          , public el::Loggable
       {
         public:
           //! @{
@@ -116,6 +136,13 @@ namespace pfasst
           {
             UNUSED(index);
             throw NotImplementedYet("operator[] for ParticleComponent");
+          }
+          //! @}
+
+          //! @{
+          virtual void log(el::base::type::ostream_t& os) const
+          {
+            os << fixed << setprecision(5);
           }
           //! @}
       };
@@ -183,7 +210,8 @@ namespace pfasst
         template <typename, typename> class AccelerationT = AccelerationEncapsulation
       >
       class ParticleEncapsulation
-        : public Encapsulation<time>
+        :   public Encapsulation<time>
+          , public el::Loggable
       {
         public:
           //! @{
@@ -307,7 +335,30 @@ namespace pfasst
                 acceleration_type& accel()        { return this->m_accel; }
           const acceleration_type& accel() const  { return this->m_accel; }
           //! @}
+
+          //! @{
+          virtual void log(el::base::type::ostream_t& os) const
+          {
+            os << fixed << setprecision(5);
+            os << "Particle(";
+            this->pos().log(os);
+            os << ", ";
+            this->vel().log(os);
+            os << ", ";
+            this->accel().log(os);
+            os << ")";
+            os.unsetf(ios_base::floatfield);
+          }
+          //! @}
       };
+
+      template<typename scalar, typename time>
+      ostream& operator<<(ostream& out, const shared_ptr<ParticleEncapsulation<scalar, time>>& p)
+      {
+        p->log(out);
+        out << "<" << p.get() << ">";
+        return out;
+      }
     }  // ::pfasst::examples::boris
   }  // ::pfasst::examples
 }  // ::pfasst
