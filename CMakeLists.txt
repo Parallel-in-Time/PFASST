@@ -177,7 +177,4 @@ if(${CMAKE_VERBOSE_MAKEFILE})
   message(STATUS "********************************************************************************")
 endif()
 
-feature_summary(WHAT ENABLED_FEATURES DESCRIPTION "Enabled Features:")
-feature_summary(WHAT DISABLED_FEATURES DESCRIPTION "Disabled Features:")
-feature_summary(WHAT PACKAGES_FOUND DESCRIPTION "Packages Found (or auto-added):")
-feature_summary(WHAT PACKAGES_NOT_FOUND DESCRIPTION "Packages Not Found:")
+feature_summary(WHAT ALL)

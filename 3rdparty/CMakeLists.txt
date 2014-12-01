@@ -3,6 +3,8 @@ set(3rdparty_INCLUDES ${3rdparty_INCLUDES})
 set(3rdparty_DEPENDEND_LIBS ${3rdparty_DEPENDEND_LIBS})
 set(pfasst_DEPENDEND_TARGETS ${pfasst_DEPENDEND_TARGETS})
 
+set(3rdparty_DOWNLOAD_TIMEOUT "60")
+
 message(STATUS "--------------------------------------------------------------------------------")
 message(STATUS "Boost")
 
@@ -35,23 +37,25 @@ set_package_properties(Eigen3
     PROPERTIES
       DESCRIPTION "linear algebra library"
       URL "http://eigen.tuxfamily.org/"
-      TYPE REQUIRED
+      TYPE OPTIONAL
       PURPOSE "matrix and vector types and arithmetics"
 )
 
 if(NOT EIGEN3_FOUND)
     set(EIGEN3_SOURCE_URL "http://bitbucket.org/eigen/eigen/get/3.2.2.tar.bz2")
+    set(EIGEN3_SOURCE_MD5 "fc2e814ae449d16b331f7e1f4e272bd3")
+
     message(STATUS "Eigen3 not found on your system")
-    message(STATUS "  going to download sources")
-    message(STATUS "    download URL: ${EIGEN3_SOURCE_URL}")
+    message(STATUS " going to download sources from:")
+    message(STATUS "  ${EIGEN3_SOURCE_URL}")
     set(Eigen3_SOURCE_DIR "${pfasst_BINARY_DIR}/3rdparty/src/Eigen3")
 
     ExternalProject_Add(
         Eigen3
         LIST_SEPARATOR " "
         URL ${EIGEN3_SOURCE_URL}
-        URL_MD5 fc2e814ae449d16b331f7e1f4e272bd3
-        TIMEOUT 30
+        URL_MD5 ${EIGEN3_SOURCE_MD5}
+        TIMEOUT ${3rdparty_DOWNLOAD_TIMEOUT}
         UPDATE_COMMAND ""
         PATCH_COMMAND ""
         BUILD_IN_SOURCE ON
@@ -66,52 +70,46 @@ if(NOT EIGEN3_FOUND)
     )
 
     # Specify include dir
-    set(Eigen3_INCLUDE_PATH "${Eigen3_SOURCE_DIR}" CACHE PATH "" FORCE)
-
-    mark_as_advanced(Eigen3_INCLUDE_PATH)
+    set(Eigen3_INCLUDE_PATH "${Eigen3_SOURCE_DIR}")
     set(Eigen3_FOUND TRUE)
-    set_property(GLOBAL APPEND PROPERTY PACKAGES_FOUND "Eigen3")
-    get_property(packages_not_found GLOBAL PROPERTY PACKAGES_NOT_FOUND)
-    list(REMOVE_ITEM packages_not_found "Eigen3")
-    set_property(GLOBAL PROPERTY PACKAGES_NOT_FOUND ${packages_not_found})
-    unset(packages_not_found)
 
     list(APPEND pfasst_DEPENDEND_TARGETS Eigen3)
+
+    msg_not_installed("Eigen3")
 endif()
 
 list(APPEND 3rdparty_INCLUDES "${Eigen3_INCLUDE_PATH}")
 
 
 message(STATUS "--------------------------------------------------------------------------------")
-message(STATUS "Easyloggingpp")
+message(STATUS "Easylogging++")
 
-set(EASYLOGGINGPP_SOURCE_URL
+set(EASYLOGGING++_SOURCE_URL
     "https://github.com/easylogging/easyloggingpp/releases/download/v9.75/easyloggingpp_v9.75.tar.gz"
 )
 
-find_package(Easyloggingpp)
-set_package_properties(Easyloggingpp
+find_package(Easylogging++)
+set_package_properties(Easylogging++
     PROPERTIES
-      DESCRIPTION "Easylogging++ logging library"
+      DESCRIPTION "logging library"
       URL "https://github.com/easylogging/easyloggingpp"
-      TYPE REQUIRED
+      TYPE OPTIONAL
       PURPOSE "provides functionality for versatile logging"
 )
 
-if(NOT Easyloggingpp_FOUND)
-    unset(Easyloggingpp_INCLUDE_PATH)
-    unset(Easyloggingpp_INCLUDE_PATH CACHE)
-    unset(Easyloggingpp_FOUND)
-    message(STATUS "Easyloggingpp not found on your system")
-    message(STATUS "  going to download sources")
-    message(STATUS "    download URL: ${EASYLOGGINGPP_SOURCE_URL}")
-    set(Easyloggingpp_SOURCE_DIR "${pfasst_BINARY_DIR}/3rdparty/src/Easyloggingpp")
+if(NOT EASYLOGGING++_FOUND)
+    set(Easylogging++_SOURCE_DIR "${pfasst_BINARY_DIR}/3rdparty/src/Easylogging++")
+    set(EASYLOGGING++_SOURCE_MD5 "3e37462b30cb6ee49faeed6a94d1bc1e")
+
+    message(STATUS "Easylogging++ not found on your system")
+    message(STATUS " going to download sources from:")
+    message(STATUS "   ${EASYLOGGING++_SOURCE_URL}")
     ExternalProject_Add(
-        Easyloggingpp
+        Easylogging++
         LIST_SEPARATOR " "
-        URL ${EASYLOGGINGPP_SOURCE_URL}
-        URL_MD5 3e37462b30cb6ee49faeed6a94d1bc1e
-        TIMEOUT 30
+        URL ${EASYLOGGING++_SOURCE_URL}
+        URL_MD5 ${Easylogging++_SOURCE_MD5}
+        TIMEOUT ${3rdparty_DOWNLOAD_TIMEOUT}
         UPDATE_COMMAND ""
         PATCH_COMMAND ""
         CONFIGURE_COMMAND ""
@@ -124,20 +122,16 @@ if(NOT Easyloggingpp_FOUND)
         LOG_BUILD OFF
     )
 
-    # Specify include dir and hack on CMake internals to overwrite internal not-found flag
-    set(Easyloggingpp_INCLUDE_PATH "${Easyloggingpp_SOURCE_DIR}" CACHE PATH "" FORCE)
-    mark_as_advanced(Easyloggingpp_INCLUDE_PATH)
-    set(Easyloggingpp_FOUND TRUE)
-    set_property(GLOBAL APPEND PROPERTY PACKAGES_FOUND "Easyloggingpp")
-    get_property(packages_not_found GLOBAL PROPERTY PACKAGES_NOT_FOUND)
-    list(REMOVE_ITEM packages_not_found "Easyloggingpp")
-    set_property(GLOBAL PROPERTY PACKAGES_NOT_FOUND ${packages_not_found})
-    unset(packages_not_found)
+    # Specify include dir
+    set(Easylogging++_INCLUDE_PATH "${Easylogging++_SOURCE_DIR}")
+    set(EASYLOGGING++_FOUND TRUE)
 
-    list(APPEND pfasst_DEPENDEND_TARGETS Easyloggingpp)
+    list(APPEND pfasst_DEPENDEND_TARGETS Easylogging++)
+
+    msg_not_installed("Easylogging++")
 endif()
 
-list(APPEND 3rdparty_INCLUDES "${Easyloggingpp_INCLUDE_PATH}")
+list(APPEND 3rdparty_INCLUDES "${Easylogging++_INCLUDE_PATH}")
 
 
 if(pfasst_BUILD_EXAMPLES)
@@ -149,15 +143,17 @@ if(pfasst_BUILD_EXAMPLES)
         PROPERTIES
           DESCRIPTION "FFTW3"
           URL "http://fftw.org/"
-          TYPE REQUIRED
+          TYPE OPTIONAL
           PURPOSE "fast Fourier transformation"
     )
 
     if(NOT FFTW_FOUND)
         set(FFTW3_SOURCE_URL "http://fftw.org/fftw-3.3.4.tar.gz")
+        set(FFTW3_SOURCE_MD5 "2edab8c06b24feeb3b82bbb3ebf3e7b3")
+
         message(STATUS "FFTW3 not found on your system")
-        message(STATUS "  going to download and compile it from sources")
-        message(STATUS "    download URL: ${FFTW3_SOURCE_URL}")
+        message(STATUS " going to download and compile it from sources retrieved from:")
+        message(STATUS "  ${FFTW3_SOURCE_URL}")
         set(fftw3_SOURCE_DIR "${pfasst_BINARY_DIR}/3rdparty/src/fftw3")
         set(fftw3_INSTALL_DIR "${pfasst_BINARY_DIR}/3rdparty/src/fftw3-install")
 
@@ -165,8 +161,8 @@ if(pfasst_BUILD_EXAMPLES)
             fftw3
             LIST_SEPARATOR " "
             URL ${FFTW3_SOURCE_URL}
-            URL_MD5 2edab8c06b24feeb3b82bbb3ebf3e7b3
-            TIMEOUT 30
+            URL_MD5 ${FFTW3_SOURCE_MD5}
+            TIMEOUT ${3rdparty_DOWNLOAD_TIMEOUT}
             UPDATE_COMMAND ""
             PATCH_COMMAND ""
             BUILD_IN_SOURCE ON
@@ -180,19 +176,14 @@ if(pfasst_BUILD_EXAMPLES)
             LOG_BUILD ON
         )
         # Specify include dir
-        set(FFTW_INCLUDE_PATH ${fftw3_INSTALL_DIR}/include CACHE PATH "" FORCE PARENT_SCOPE)
-        set(FFTW_LIBRARIES ${fftw3_INSTALL_DIR}/lib/libfftw3.a CACHE FILEPATH "" FORCE PARENT_SCOPE)
+        set(FFTW_INCLUDE_PATH ${fftw3_INSTALL_DIR}/include)
+        set(FFTW_LIBRARIES ${fftw3_INSTALL_DIR}/lib/libfftw3.a)
 
-        mark_as_advanced(FFTW_INCLUDE_PATH FFTW_LIBRARIES)
         set(FFTW_FOUND TRUE)
-        set_property(GLOBAL APPEND PROPERTY PACKAGES_FOUND "FFTW")
-        get_property(packages_not_found GLOBAL PROPERTY PACKAGES_NOT_FOUND)
-        list(REMOVE_ITEM packages_not_found "FFTW")
-        set_property(GLOBAL PROPERTY PACKAGES_NOT_FOUND ${packages_not_found})
-        unset(packages_not_found)
 
         list(APPEND pfasst_DEPENDEND_LIBS FFTW)
 
+        msg_not_installed("FFTW3")
     else()
         set(FFTW_INCLUDE_PATH ${FFTW_INCLUDE_PATH} PARENT_SCOPE)
         set(FFTW_LIBRARIES ${FFTW_LIBRARIES} PARENT_SCOPE)
@@ -206,16 +197,18 @@ if(pfasst_BUILD_TESTS)
 
     message(STATUS "--------------------------------------------------------------------------------")
     set(GMOCK_SOURCE_URL "http://googlemock.googlecode.com/files/gmock-1.7.0.zip")
+    set(GMOCK_SOURCE_MD5 "073b984d8798ea1594f5e44d85b20d66")
+
     message(STATUS "Google Testing Framework (gtest & gmock)")
-    message(STATUS "  going to download and compile it from sources")
-    message(STATUS "    download URL: ${GMOCK_SOURCE_URL}")
+    message(STATUS " going to download and compile it from sources retrieved from:")
+    message(STATUS "   ${GMOCK_SOURCE_URL}")
 
     # Add gmock
     ExternalProject_Add(
       googlemock
       URL ${GMOCK_SOURCE_URL}
-      URL_MD5 073b984d8798ea1594f5e44d85b20d66
-      TIMEOUT 30
+      URL_MD5 ${GMOCK_SOURCE_MD5}
+      TIMEOUT ${3rdparty_DOWNLOAD_TIMEOUT}
       UPDATE_COMMAND ""
       PATCH_COMMAND ""
       CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release
