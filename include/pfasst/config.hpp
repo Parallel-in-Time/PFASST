@@ -125,7 +125,14 @@ namespace pfasst
     static string pretty_print()
     {
       stringstream s;
-      s << Options::get_instance().get_all_options();
+      s << "Logging Options:" << endl
+        << "  -v [ --verbose ]       activates maximum verbosity" << endl
+        << "  --v=arg                activates verbosity upto verbose level 2" << endl
+        << "                         (valid range: 0-9)" << endl
+        << "  -vmodule=arg           actives verbose logging for specific module" << endl
+        << "                         (see [1] for details)" << endl;
+      s << Options::get_instance().get_all_options() << endl;
+      s << "[1]: https://github.com/easylogging/easyloggingpp#vmodule";
       return s.str();
     }
 

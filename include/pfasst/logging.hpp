@@ -6,6 +6,37 @@
 #include <string>
 using namespace std;
 
+struct OUT
+{
+  public:
+    static const string black;
+    static const string red;
+    static const string green;
+    static const string yellow;
+    static const string blue;
+    static const string magenta;
+    static const string cyan;
+    static const string white;
+
+    static const string bold;
+    static const string underline;
+
+    static const string reset;
+};
+
+const string OUT::black = "\033[30m";
+const string OUT::red = "\033[31m";
+const string OUT::green = "\033[32m";
+const string OUT::yellow = "\033[33m";
+const string OUT::blue = "\033[34m";
+const string OUT::magenta = "\033[35m";
+const string OUT::cyan = "\033[36m";
+const string OUT::white = "\033[37m";
+const string OUT::bold = "\033[1m";
+const string OUT::underline = "\033[4m";
+const string OUT::reset = "\033[0m";
+
+
 #include "config.hpp"
 
 // enable easy logging of STL containers
@@ -18,6 +49,10 @@ using namespace std;
 #ifndef NDEBUG
   #define _ELPP_DEBUG_ASSERT_FAILURE
   #define _ELPP_STACKTRACE_ON_CRASH
+#endif
+
+#ifdef PFASST_NO_LOGGING
+  #define _ELPP_DISABLE_LOGS
 #endif
 
 #include <easylogging++.h>
@@ -38,42 +73,54 @@ using namespace std;
   #define PFASST_LOGGER_INITIALIZED
 #endif
 
-#ifndef PFASST_LOGGER_DEFAULT_GLOBAL_FORMAT
-  //! format for the default global logger
-  #define PFASST_LOGGER_DEFAULT_GLOBAL_FORMAT "[%level] %msg"
+#ifndef PFASST_LOGGER_DEFAULT_GLOBAL_MILLISECOND_WIDTH
+  //! precision of milliseconds to be printed
+  #define PFASST_LOGGER_DEFAULT_GLOBAL_MILLISECOND_WIDTH "4"
 #endif
 
-#ifndef PFASST_LOGGER_DEFAULT_GLOBAL_TOFILE
-  //! whether to log to file by default
-  #define PFASST_LOGGER_DEFAULT_GLOBAL_TOFILE "false"
-#endif
-#ifndef PFASST_LOGGER_DEFAULT_GLOBAL_TOSTDOUT
-  //! whether to log to stdout by default
-  #define PFASST_LOGGER_DEFAULT_GLOBAL_TOSTDOUT "true"
-#endif
-
-#ifndef PFASST_LOGGER_DEFAULT_DEBUG_FORMAT
-  //! format for the default global debug logger
-  #define PFASST_LOGGER_DEFAULT_DEBUG_FORMAT "[%datetime{%Y-%M-%d %H:%m:%s,%g}] %level - %fbase:%line - %msg"
-#endif
 
 namespace pfasst
 {
   namespace log
   {
-
     /**
      * sets default configuration for default loggers
      */
     static void load_default_config()
     {
+      const string TIMESTAMP = OUT::white + "%datetime{%H:%m:%s,%g}" + OUT::reset + " ";
+      const string LEVEL = "[%level]";
+      const string VLEVEL = "[VERB%vlevel]";
+      const string POSITION = "%fbase:%line";
+      const string MESSAGE = "%msg";
+
       el::Configurations defaultConf;
       defaultConf.setToDefault();
-      defaultConf.set(el::Level::Global, el::ConfigurationType::Format, PFASST_LOGGER_DEFAULT_GLOBAL_FORMAT);
-      defaultConf.set(el::Level::Global, el::ConfigurationType::ToFile, PFASST_LOGGER_DEFAULT_GLOBAL_TOFILE);
-      defaultConf.set(el::Level::Global, el::ConfigurationType::ToStandardOutput, PFASST_LOGGER_DEFAULT_GLOBAL_TOSTDOUT);
-      defaultConf.set(el::Level::Debug, el::ConfigurationType::Format, PFASST_LOGGER_DEFAULT_DEBUG_FORMAT);
-      el::Loggers::reconfigureLogger("default", defaultConf);
+
+      defaultConf.setGlobally(el::ConfigurationType::Format, "%msg");
+      defaultConf.setGlobally(el::ConfigurationType::ToFile, "false");
+      defaultConf.setGlobally(el::ConfigurationType::ToStandardOutput, "true");
+      defaultConf.setGlobally(el::ConfigurationType::MillisecondsWidth, PFASST_LOGGER_DEFAULT_GLOBAL_MILLISECOND_WIDTH);
+
+      defaultConf.set(el::Level::Info, el::ConfigurationType::Format,
+                      TIMESTAMP + OUT::blue + LEVEL + " " + MESSAGE + OUT::reset);
+
+      defaultConf.set(el::Level::Debug, el::ConfigurationType::Format,
+                      TIMESTAMP + LEVEL + " " + POSITION + " " + MESSAGE + OUT::reset);
+
+      defaultConf.set(el::Level::Warning, el::ConfigurationType::Format,
+                      TIMESTAMP + OUT::magenta + LEVEL + " " + MESSAGE + OUT::reset);
+
+      defaultConf.set(el::Level::Error, el::ConfigurationType::Format,
+                      TIMESTAMP + OUT::red + LEVEL + " " + MESSAGE + OUT::reset);
+
+      defaultConf.set(el::Level::Fatal, el::ConfigurationType::Format,
+                      TIMESTAMP + OUT::red + OUT::bold + LEVEL + " " + POSITION + " " + MESSAGE + OUT::reset);
+
+      defaultConf.set(el::Level::Verbose, el::ConfigurationType::Format,
+                      TIMESTAMP + OUT::white + VLEVEL + " " + MESSAGE + OUT::reset);
+
+      el::Loggers::reconfigureAllLoggers(defaultConf);
     }
 
     /**
@@ -83,9 +130,9 @@ namespace pfasst
      *
      * - NewLineForContainer
      * - LogDetailedCrashReason
+     * - DisableApplicationAbortOnFatalLog
      * - ColoredTerminalOutput
      * - MultiLoggerSupport
-     * - HierarchicalLogging
      * - AutoSpacing
      *
      * \see https://github.com/easylogging/easyloggingpp#logging-flags
@@ -94,11 +141,31 @@ namespace pfasst
     {
       el::Loggers::addFlag(el::LoggingFlag::NewLineForContainer);
       el::Loggers::addFlag(el::LoggingFlag::LogDetailedCrashReason);
+      el::Loggers::addFlag(el::LoggingFlag::DisableApplicationAbortOnFatalLog);
       el::Loggers::addFlag(el::LoggingFlag::ColoredTerminalOutput);
       el::Loggers::addFlag(el::LoggingFlag::MultiLoggerSupport);
-      el::Loggers::addFlag(el::LoggingFlag::HierarchicalLogging);
+      el::Loggers::addFlag(el::LoggingFlag::CreateLoggerAutomatically);
       el::Loggers::addFlag(el::LoggingFlag::AutoSpacing);
     }
+
+#ifdef NDEBUG
+    static void test_logging_levels() {}
+#else
+    static void test_logging_levels()
+    {
+      cout << "### Example of different Logging Levels:" << endl;
+      LOG(INFO) << "info";
+      LOG(DEBUG) << "debug";
+      LOG(WARNING) << "warning";
+      LOG(ERROR) << "error";
+      LOG(FATAL) << "fatal error";
+      LOG(TRACE) << "trace";
+      for (size_t level = 0; level <= 9; ++level) {
+        VLOG(level) << "verbose level" << level;
+      }
+      cout << "### End Example Logging Levels" << endl << endl;
+    }
+#endif
 
     /**
      * starts easylogging++ with given arguments and loads configuration
@@ -112,8 +179,8 @@ namespace pfasst
     static void start_log(int argc, char** argv)
     {
       _START_EASYLOGGINGPP(argc, argv);
-      load_default_config();
       set_logging_flags();
+      load_default_config();
     }
   }  // ::pfasst::log
 }  // ::pfasst
