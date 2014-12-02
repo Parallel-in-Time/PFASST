@@ -1,0 +1,3 @@
+
+$(SUBDIR)::
+	cd $@ && make

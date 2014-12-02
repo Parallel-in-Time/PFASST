@@ -1,0 +1,30 @@
+#
+# settings
+#
+CXX      := mpic++
+STACK    ?= $(PFASST)/stack
+CXXFLAGS ?= -std=c++11 -I$(PFASST)/include -I$(STACK)/include -I$(STACK)/include/eigen3
+
+TESTLIBS  += -pthread -lboost_program_options -L$(STACK)/lib -Wl,-rpath=$(STACK)/lib -lgmock
+MPINPROCS ?= 4
+
+all: $(TESTS) $(MPITESTS)
+
+#
+# compile, eg, build/test-quadrature.test from test-quadrature.cpp
+#
+build/%.test: %.cpp
+	mkdir -p build
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(TESTLIBS)
+
+#
+# run tests
+#
+$(TESTS):: $(addsuffix .test,$(addprefix build/,$(TESTS)))
+	build/$@.test
+
+#
+# run mpi tests
+#
+$(MPITESTS):: $(addsuffix .test,$(addprefix build/,$(MPITESTS)))
+	mpirun -n $(MPINPROCS) build/$@.test
