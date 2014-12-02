@@ -133,7 +133,6 @@ class AdvectionDiffusionSweeper
 
       auto n = this->get_controller()->get_step();
       auto k = this->get_controller()->get_iteration();
-      CLOG(INFO, "data_values") << n << k << qend;
       LOG(INFO) << "err:" << n << k << max << "(" << qend.size() << "," << predict << ")";
 
       this->errors.insert(pair<pair<size_t, size_t>, double>(pair<size_t, size_t>(n, k), max));
