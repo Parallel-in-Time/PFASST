@@ -108,12 +108,10 @@ namespace pfasst
           }
 
           if (coarse) {
-            size_t num_fas = this->quadrature->left_is_node() ? num_nodes - 1 : num_nodes;
-            for (size_t m = 0; m < num_fas; m++) {
+            for (size_t m = 0; m < num_nodes; m++) {
               this->fas_corrections.push_back(this->get_factory()->create(pfasst::encap::solution));
             }
           }
-
         }
 
         //! @{

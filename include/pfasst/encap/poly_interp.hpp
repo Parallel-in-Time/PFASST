@@ -70,7 +70,6 @@ namespace pfasst
 
           if (interp_initial) {
             this->interpolate_initial(dst, src);
-            return;
           }
 
           size_t nfine = fine.get_nodes().size();
@@ -131,7 +130,6 @@ namespace pfasst
 
           if (restrict_initial) {
             this->restrict_initial(dst, src);
-            return;
           }
 
           int trat = (int(num_fine) - 1) / (int(num_crse) - 1);
@@ -167,11 +165,11 @@ namespace pfasst
           auto crse_factory = crse.get_factory();
           auto fine_factory = fine.get_factory();
 
-          EncapVecT crse_int(ncrse - 1), fine_int(nfine - 1), rstr_int(ncrse - 1);
+          EncapVecT crse_int(ncrse), fine_int(nfine), rstr_int(ncrse);
 
-          for (size_t m = 0; m < ncrse - 1; m++) { crse_int[m] = crse_factory->create(solution); }
-          for (size_t m = 0; m < ncrse - 1; m++) { rstr_int[m] = crse_factory->create(solution); }
-          for (size_t m = 0; m < nfine - 1; m++) { fine_int[m] = fine_factory->create(solution); }
+          for (size_t m = 0; m < ncrse; m++) { crse_int[m] = crse_factory->create(solution); }
+          for (size_t m = 0; m < ncrse; m++) { rstr_int[m] = crse_factory->create(solution); }
+          for (size_t m = 0; m < nfine; m++) { fine_int[m] = fine_factory->create(solution); }
 
           // compute '0 to node' integral on the coarse level
           crse.integrate(dt, crse_int);
@@ -181,27 +179,27 @@ namespace pfasst
 
           // restrict '0 to node' fine integral
           int trat = (int(nfine) - 1) / (int(ncrse) - 1);
-          for (size_t m = 1; m < ncrse; m++) {
-            this->restrict(rstr_int[m - 1], fine_int[m * trat - 1]);
+          for (size_t m = 0; m < ncrse; m++) {
+            this->restrict(rstr_int[m], fine_int[m * trat]);
           }
 
           // compute 'node to node' tau correction
-          EncapVecT tau(ncrse - 1), rstr_and_crse(2 * (ncrse - 1));
-          for (size_t m = 0; m < ncrse - 1; m++) { tau[m] = crse.get_tau(m); }
-          for (size_t m = 0; m < ncrse - 1; m++) { rstr_and_crse[m] = rstr_int[m]; }
-          for (size_t m = 0; m < ncrse - 1; m++) { rstr_and_crse[ncrse - 1 + m] = crse_int[m]; }
+          EncapVecT tau(ncrse), rstr_and_crse(2 * ncrse);
+          for (size_t m = 0; m < ncrse; m++) { tau[m] = crse.get_tau(m); }
+          for (size_t m = 0; m < ncrse; m++) { rstr_and_crse[m] = rstr_int[m]; }
+          for (size_t m = 0; m < ncrse; m++) { rstr_and_crse[ncrse + m] = crse_int[m]; }
 
           if (fmat.rows() == 0) {
-            fmat.resize(ncrse - 1, 2 * (ncrse - 1));
+            fmat.resize(ncrse, 2 * ncrse);
             fmat.fill(0.0);
 
-            for (size_t m = 0; m < ncrse - 1; m++) {
+            for (size_t m = 0; m < ncrse; m++) {
               fmat(m, m) = 1.0;
-              fmat(m, ncrse - 1 + m) = -1.0;
+              fmat(m, ncrse + m) = -1.0;
 
               for (size_t n = 0; n < m; n++) {
                 fmat(m, n) = -1.0;
-                fmat(m, ncrse - 1 + n) = 1.0;
+                fmat(m, ncrse + n) = 1.0;
               }
             }
           }
