@@ -8,10 +8,10 @@ LDFLAGS  ?= -L$(STACK)/lib -Wl,-rpath=$(STACK)/lib -lboost_program_options -lfft
 all: vanilla_sdc mpi_pfasst serial_mlsdc
 
 vanilla_sdc: vanilla_sdc.cpp
-	g++ -o $@ $(CXXFLAGS) $^ $(LDFLAGS)
+	$(CXX) -o $@ $(CXXFLAGS) $^ $(LDFLAGS)
 
 serial_mlsdc: serial_mlsdc.cpp
-	g++ -o $@ $(CXXFLAGS) $^ $(LDFLAGS)
+	$(CXX) -o $@ $(CXXFLAGS) $^ $(LDFLAGS)
 
 mpi_pfasst: mpi_pfasst.cpp
-	mpic++ -o $@ $(CXXFLAGS) $^ $(LDFLAGS)
+	$(CXX) -o $@ $(CXXFLAGS) $^ $(LDFLAGS)
