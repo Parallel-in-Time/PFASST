@@ -118,7 +118,6 @@ namespace pfasst
         virtual void spread() override
         {
           for (size_t m = 1; m < this->quadrature->get_num_nodes(); m++) {
-            //            this->get_state(m)->copy(this->start_state);
             this->state[m]->copy(this->state[0]);
           }
         }
@@ -274,6 +273,9 @@ namespace pfasst
         virtual void recv(ICommunicator* comm, int tag, bool blocking) override
         {
           this->start_state->recv(comm, tag, blocking);
+          if (this->quadrature->left_is_node()) {
+            this->state[0]->copy(this->start_state);
+          }
         }
 
         virtual void broadcast(ICommunicator* comm) override

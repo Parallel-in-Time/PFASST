@@ -168,11 +168,10 @@ namespace pfasst
           time dt = this->get_controller()->get_time_step();
           if (initial_only) {
             if (this->quadrature->left_is_node()) {
-            this->f_expl_eval(this->fs_expl[0], this->start_state, t0);
-            this->f_impl_eval(this->fs_impl[0], this->start_state, t0);
-
+              this->f_expl_eval(this->fs_expl[0], this->state[0], t0);
+              this->f_impl_eval(this->fs_impl[0], this->state[0], t0);
             } else {
-
+              throw NotImplementedYet("reevaluate");
             }
           } else {
             for (size_t m = 0; m < this->quadrature->get_num_nodes(); m++) {
