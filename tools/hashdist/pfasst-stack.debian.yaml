@@ -8,7 +8,6 @@ parameters:
   debug: false
 
 packages:
-  gcc:
   mpi:
     use: mpich
   fftw:
@@ -18,6 +17,8 @@ packages:
   boost:
     toolset: gcc
     address_model: 64
+  cmake:
+  easylogging:
 
 package_dirs:
 - pkgs

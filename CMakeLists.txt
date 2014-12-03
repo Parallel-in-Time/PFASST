@@ -8,6 +8,8 @@ include(ExternalProject)
 include(CMakeDependentOption)
 include(FeatureSummary)
 
+list(APPEND CMAKE_FIND_ROOT_PATH ${pfasst_SOURCE_DIR}/stack)
+
 # Set default ExternalProject root directory
 set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/3rdparty)
 
