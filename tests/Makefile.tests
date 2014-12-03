@@ -1,8 +1,8 @@
 #
 # settings
 #
-CXX      := mpic++
 STACK    ?= $(PFASST)/stack
+CXX      := $(STACK)/bin/mpic++
 CXXFLAGS ?= -std=c++11 -I$(PFASST)/include -I$(STACK)/include -I$(STACK)/include/eigen3
 
 TESTLIBS  += -pthread -lboost_program_options -L$(STACK)/lib -Wl,-rpath=$(STACK)/lib -lgmock

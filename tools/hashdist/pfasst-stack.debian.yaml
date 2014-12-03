@@ -8,8 +8,9 @@ parameters:
   debug: false
 
 packages:
+  gcc:
   mpi:
-    use: host-mpi
+    use: mpich
   fftw:
   eigen:
   gtest:
