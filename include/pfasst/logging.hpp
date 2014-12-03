@@ -55,7 +55,7 @@ const string OUT::reset = "\033[0m";
   #define _ELPP_DISABLE_LOGS
 #endif
 
-#include <easylogging++.h>
+#include <pfasst/easylogging++.h>
 
 #ifndef PFASST_LOGGER_INITIALIZED
   // initialize easyloggingpp
