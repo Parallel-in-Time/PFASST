@@ -12,7 +12,8 @@ set(scalar_examples
 
 foreach(example ${scalar_examples})
     add_executable(${example} ${CMAKE_CURRENT_SOURCE_DIR}/${example}.cpp)
-    if(${pfasst_DEPENDEND_TARGETS})
+    string(LENGTH pfasst_DEPENDEND_TARGETS temp)
+    if(${temp} GREATER 0)
         add_dependencies(${example} ${pfasst_DEPENDEND_TARGETS})
     endif()
     target_link_libraries(${example}
