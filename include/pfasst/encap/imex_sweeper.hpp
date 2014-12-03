@@ -39,8 +39,6 @@ namespace pfasst
       : public pfasst::encap::EncapSweeper<time>
     {
       protected:
-        vector<time> aug_nodes;
-
 
         //! @{
         /**
@@ -53,49 +51,13 @@ namespace pfasst
          * iteration.
          */
         vector<shared_ptr<Encapsulation<time>>> fs_expl;
+        shared_ptr<Encapsulation<time>> fs_expl_start;
 
         /**
          * Values of the implicit part of the right hand side \\( F_{impl}(t,u) \\) at all time nodes of the current
          * iteration.
          */
         vector<shared_ptr<Encapsulation<time>>> fs_impl;
-        //! @}
-
-        //! @{
-        /**
-         * Augmented solution and function values.
-         *
-         * For quadrature rules that do not include the left end point (0.0), we add a virtual (augmented) node.
-         */
-        vector<shared_ptr<Encapsulation<time>>> aug_state;
-        vector<shared_ptr<Encapsulation<time>>> aug_fs_impl;
-        vector<shared_ptr<Encapsulation<time>>> aug_fs_expl;
-        //! @}
-
-        //! @{
-        /**
-         * Quadrature matrix containing weights for node-to-node integration for the explicit part.
-         *
-         * @see IMEXSweeper::setup(bool) for a short description
-         */
-        Matrix<time> s_mat_expl;
-
-        /**
-         * Quadrature matrix containing weights for node-to-node integration of the implicit part.
-         *
-         * @see IMEXSweeper::setup(bool) for a short description
-         */
-        Matrix<time> s_mat_impl;
-
-        /**
-         * Augmented quadrature matrix.
-         */
-        Matrix<time> s_mat_augm;
-
-        /**
-         * Compact quadrature matrix.
-         */
-        Matrix<time> q_mat_cmpt;
         //! @}
 
         /**
@@ -119,110 +81,25 @@ namespace pfasst
         //! @{
         /**
          * @copydoc ISweeper::setup(bool)
-         *
-         * To reduce computational overhead, we precompute the partial integration matrices
-         * IMEXSweeper::s_mat_expl \\( (\\tilde{s}^{expl})_{m,j} \\) and IMEXSweeper::s_mat_impl
-         * \\( (\\tilde{s}^{impl})_{m,j} \\) by incorporating known values of the SDC sweep
-         * equation.
-         *
-         * Let \\( F = F_{impl} + F_{expl} \\), \\( f = F_{impl} \\), \\( g = F_{expl} \\) and
-         * \\( \\Delta t_m = t_{m+1} - t_m \\).
-         * @f{eqnarray*}{
-         *   u_{m+1}^{k+1} &=& u_m^k + \Delta t_m \left( f_{m+1}^{k+1} - f_{m+1}^k \right)
-         *                     + \Delta t_m \left( g_m^{k+1} - g_m^k \right)
-         *                     + \sum_{j=1}^M s_{m,j} F_j^k \\
-         *                 &=& u_m^k + \Delta t_m f_{m+1}^{k+1} + \Delta t_m g_m^{k+1}
-         *                     + \sum_{j=1}^M s_{m,j} F_j^k
-         *                     - \Delta t_m \left( f_{m+1}^k - g_m^k \right) \\
-         *                 &=& u_m^k + \Delta t_m f_{m+1}^{k+1} + \Delta t_m g_m^{k+1}
-         *                     + \sum_{j=1}^M s_{m,j} f_j^k - \Delta t_m f_{m+1}^k
-         *                     + \sum_{j=1}^M s_{m,j} g_j^k - \Delta t_m g_m^k \\
-         *                 &=& u_m^k + \Delta t_m f_{m+1}^{k+1} + \Delta t_m g_m^{k+1}
-         *                     + \sum_{j=1}^M \tilde{s}_{m,j}^{impl} f_j^k
-         *                     + \sum_{j=1}^M \tilde{s}_{m,j}^{expl} g_j^k
-         * @f}
-         * with
-         * @f[
-         *  \tilde{s}_{m,j}^{impl} =
-         *    \begin{cases}
-         *      s_{m,j} - \Delta t_m &\mbox{if } j \equiv m+1 \\
-         *      s_{m,j} &\mbox{else}
-         *    \end{cases} \\
-         *  \tilde{s}_{m,j}^{expl} =
-         *    \begin{cases}
-         *      s_{m,j} - \Delta t_m &\mbox{if } j \equiv m \\
-         *      s_{m,j} &\mbox{else}
-         *    \end{cases} \\
-         * @f]
-         *
-         * This procedure can be derived from the so called \\( Q_{\\Delta} \\) notation.
          */
         virtual void setup(bool coarse) override
         {
           pfasst::encap::EncapSweeper<time>::setup(coarse);
 
-          //
-          // nodes
-          //
-          auto const nodes = this->quadrature->get_nodes();
           auto const num_nodes = this->quadrature->get_num_nodes();
+          auto const num_s_integrals = this->quadrature->left_is_node() ? num_nodes - 1 : num_nodes;
 
-          this->aug_nodes = nodes;
-          if (!this->quadrature->left_is_node()) {
-            this->aug_nodes.insert(this->aug_nodes.begin(), 0.0);
-          }
-          auto const num_aug_nodes = aug_nodes.size();
-
-          //
-          // quadrature matrices
-          //
-          auto const s_mat = this->quadrature->get_s_mat();
-          auto const q_mat = this->quadrature->get_q_mat();
-          this->s_mat_augm = Matrix<time>::Zero(num_aug_nodes-1, num_aug_nodes);
-          if (this->quadrature->left_is_node()) {
-            this->s_mat_augm.block(0, 0, num_nodes-1, num_nodes) = s_mat.block(1, 0, num_nodes-1, num_nodes);
-            this->q_mat_cmpt = q_mat.block(1, 0, num_nodes-1, num_nodes);
-          } else {
-            this->s_mat_augm.block(0, 1, num_nodes, num_nodes) = s_mat.block(0, 0, num_nodes, num_nodes);
-            this->q_mat_cmpt = q_mat;
-          }
-
-          this->s_mat_expl = s_mat_augm;
-          this->s_mat_impl = s_mat_augm;
-          for (size_t m = 0; m < aug_nodes.size() - 1; m++) {
-            time ds = aug_nodes[m + 1] - aug_nodes[m];
-            this->s_mat_expl(m, m)     -= ds;
-            this->s_mat_impl(m, m + 1) -= ds;
-          }
-
-          //
-          // allocate
-          //
           for (size_t m = 0; m < num_nodes; m++) {
             this->fs_expl.push_back(this->get_factory()->create(pfasst::encap::function));
             this->fs_impl.push_back(this->get_factory()->create(pfasst::encap::function));
           }
-
-          for (size_t m = 0; m < num_aug_nodes-1; m++) {
+          for (size_t m = 0; m < num_s_integrals; m++) {
             this->s_integrals.push_back(this->get_factory()->create(pfasst::encap::solution));
           }
 
-          //
-          // augment
-          //
-          this->aug_state = this->state;
-          this->aug_fs_expl = this->fs_expl;
-          this->aug_fs_impl = this->fs_impl;
-
-          if (!this->quadrature->left_is_node()) {
-            this->aug_state.insert(this->aug_state.begin(), this->start_state);
-            this->aug_fs_expl.insert(this->aug_fs_expl.begin(), this->get_factory()->create(pfasst::encap::function));
-            // XXX: this should really be a nullptr... but then we need to some fancy mat_apply magic
-            this->aug_fs_impl.insert(this->aug_fs_impl.begin(), this->get_factory()->create(pfasst::encap::function));
+          if (! this->quadrature->left_is_node()) {
+            this->fs_expl_start = this->get_factory()->create(pfasst::encap::function);
           }
-
-          assert(this->fs_expl.size() == this->quadrature->get_num_nodes());
-          assert(this->fs_impl.size() == this->quadrature->get_num_nodes());
         }
 
         /**
@@ -235,34 +112,16 @@ namespace pfasst
          */
         virtual void predict(bool initial) override
         {
-          time dt = this->get_controller()->get_time_step();
-          time t  = this->get_controller()->get_time();
-
-          if (initial) {
-            this->aug_state[0]->copy(this->start_state);
-            this->f_expl_eval(this->aug_fs_expl[0], this->aug_state[0], t);
-            if (this->quadrature->left_is_node()) {
-              this->f_impl_eval(this->aug_fs_impl[0], this->aug_state[0], t);
-            }
-          }
-
-          shared_ptr<Encapsulation<time>> rhs = this->get_factory()->create(pfasst::encap::solution);
-
-          // step across all nodes
-          for (size_t m = 0; m < this->aug_nodes.size() - 1; ++m) {
-            time ds = dt * (this->aug_nodes[m+1] - this->aug_nodes[m]);
-            rhs->copy(this->aug_state[m]);
-            rhs->saxpy(ds, this->aug_fs_expl[m]);
-            this->impl_solve(this->aug_fs_impl[m + 1], this->aug_state[m + 1], t, ds, rhs);
-            this->f_expl_eval(this->aug_fs_expl[m + 1], this->aug_state[m + 1], t + ds);
-            t += ds;
-          }
-
-          // set end state
-          if (this->quadrature->right_is_node()) {
-            this->end_state->copy(this->aug_state.back());
+          if (this->quadrature->left_is_node()) {
+            this->predict_with_left(initial);
           } else {
-            this->integrate_end_state(dt);
+            this->predict_without_left(initial);
+          }
+
+          if (this->quadrature->right_is_node()) {
+            this->end_state->copy(this->state.back());
+          } else {
+            this->integrate_end_state(this->get_controller()->get_time_step());
           }
         }
 
@@ -274,35 +133,16 @@ namespace pfasst
          */
         virtual void sweep() override
         {
-          time dt = this->get_controller()->get_time_step();
-          time t  = this->get_controller()->get_time();
-
-          this->s_integrals[0]->mat_apply(this->s_integrals, dt, this->s_mat_expl, this->aug_fs_expl, true);
-          this->s_integrals[0]->mat_apply(this->s_integrals, dt, this->s_mat_impl, this->aug_fs_impl, false);
-          if (this->fas_corrections.size() > 0) {
-            for (size_t m = 0; m < this->s_integrals.size(); m++) {
-              this->s_integrals[m]->saxpy(1.0, this->fas_corrections[m]);
-            }
-          }
-
-          shared_ptr<Encapsulation<time>> rhs = this->get_factory()->create(pfasst::encap::solution);
-
-          // step across all nodes
-          for (size_t m = 0; m < this->aug_nodes.size() - 1; ++m) {
-            time ds = dt * (aug_nodes[m+1] - aug_nodes[m]);
-            rhs->copy(this->aug_state[m]);
-            rhs->saxpy(ds, this->aug_fs_expl[m]);
-            rhs->saxpy(1.0, this->s_integrals[m]);
-            this->impl_solve(this->aug_fs_impl[m + 1], this->aug_state[m + 1], t, ds, rhs);
-            this->f_expl_eval(this->aug_fs_expl[m + 1], this->aug_state[m + 1], t + ds);
-            t += ds;
-          }
-
-          // set end state
-          if (this->quadrature->right_is_node()) {
-            this->end_state->copy(this->aug_state.back());
+          if (this->quadrature->left_is_node()) {
+            this->sweep_with_left();
           } else {
-            this->integrate_end_state(dt);
+            this->sweep_without_left();
+          }
+
+          if (this->quadrature->right_is_node()) {
+            this->end_state->copy(this->state.back());
+          } else {
+            this->integrate_end_state(this->get_controller()->get_time_step());
           }
         }
 
@@ -311,34 +151,36 @@ namespace pfasst
          */
         virtual void advance() override
         {
-          // solutions
           this->start_state->copy(this->end_state);
-          if (this->quadrature->left_is_node()) {
-            this->aug_state[0]->copy(this->end_state);
-          }
-          // functions
           if (this->quadrature->left_is_node() && this->quadrature->right_is_node()) {
-            this->aug_fs_expl[0]->copy(this->aug_fs_expl.back());
-            this->aug_fs_impl[0]->copy(this->aug_fs_impl.back());
-          } else if (this->quadrature->right_is_node()) {
-            this->aug_fs_expl[0]->copy(this->fs_expl.back());
-          } else {
-            time t0 = this->get_controller()->get_time();
-            time dt = this->get_controller()->get_time_step();
-            this->f_expl_eval(this->aug_fs_expl[0], this->start_state, t0+dt);
+            this->state[0]->copy(this->start_state);
+            this->fs_expl.front()->copy(this->fs_expl.back());
+            this->fs_impl.front()->copy(this->fs_impl.back());
           }
         }
 
         /**
-         * @copybrief EncapSweeper::evaluate()
+         * @copybrief EncapSweeper::reevaluate()
          */
-        virtual void evaluate(size_t m) override
+        virtual void reevaluate(bool initial_only) override
         {
           time t0 = this->get_controller()->get_time();
           time dt = this->get_controller()->get_time_step();
-          time t =  t0 + dt * this->quadrature->get_nodes()[m];
-          this->f_expl_eval(this->fs_expl[m], this->state[m], t);
-          this->f_impl_eval(this->fs_impl[m], this->state[m], t);
+          if (initial_only) {
+            if (this->quadrature->left_is_node()) {
+            this->f_expl_eval(this->fs_expl[0], this->start_state, t0);
+            this->f_impl_eval(this->fs_impl[0], this->start_state, t0);
+
+            } else {
+
+            }
+          } else {
+            for (size_t m = 0; m < this->quadrature->get_num_nodes(); m++) {
+              time t =  t0 + dt * this->quadrature->get_nodes()[m];
+              this->f_expl_eval(this->fs_expl[m], this->state[m], t);
+              this->f_impl_eval(this->fs_impl[m], this->state[m], t);
+            }
+          }
         }
 
         /**
@@ -349,8 +191,9 @@ namespace pfasst
          */
         virtual void integrate(time dt, vector<shared_ptr<Encapsulation<time>>> dst) const override
         {
-          dst[0]->mat_apply(dst, dt, this->q_mat_cmpt, this->fs_expl, true);
-          dst[0]->mat_apply(dst, dt, this->q_mat_cmpt, this->fs_impl, false);
+          auto const q_mat = this->quadrature->get_q_mat();
+          dst[0]->mat_apply(dst, dt, q_mat, this->fs_expl, true);
+          dst[0]->mat_apply(dst, dt, q_mat, this->fs_impl, false);
         }
 
         /**
@@ -361,7 +204,7 @@ namespace pfasst
          */
         virtual void residual(time dt, vector<shared_ptr<Encapsulation<time>>> dst) const override
         {
-          for (size_t m=0; m<this->quadrature->get_num_nodes(); m++) {
+          for (size_t m = 0; m < this->quadrature->get_num_nodes(); m++) {
             dst[m]->copy(this->start_state);
             dst[m]->saxpy(-1.0, this->state[m]);
             // XXX: add tau corrections
@@ -436,6 +279,146 @@ namespace pfasst
           throw NotImplementedYet("imex (impl_solve)");
         }
         //! @}
+
+
+      private:
+        void predict_with_left(bool initial)
+        {
+          time dt = this->get_controller()->get_time_step();
+          time t  = this->get_controller()->get_time();
+
+          if (initial) {
+            this->state[0]->copy(this->start_state);
+            this->f_expl_eval(this->fs_expl[0], this->state[0], t);
+            this->f_impl_eval(this->fs_impl[0], this->state[0], t);
+          }
+
+          shared_ptr<Encapsulation<time>> rhs = this->get_factory()->create(pfasst::encap::solution);
+
+          auto const nodes = this->quadrature->get_nodes();
+
+          // step across all nodes
+          for (size_t m = 0; m < nodes.size() - 1; ++m) {
+            time ds = dt * (nodes[m+1] - nodes[m]);
+            rhs->copy(this->state[m]);
+            rhs->saxpy(ds, this->fs_expl[m]);
+            this->impl_solve(this->fs_impl[m + 1], this->state[m + 1], t, ds, rhs);
+            this->f_expl_eval(this->fs_expl[m + 1], this->state[m + 1], t + ds);
+            t += ds;
+          }
+        }
+
+        void predict_without_left(bool initial)
+        {
+          time dt = this->get_controller()->get_time_step();
+          time t  = this->get_controller()->get_time();
+          time ds;
+
+          shared_ptr<Encapsulation<time>> rhs = this->get_factory()->create(pfasst::encap::solution);
+
+          auto const nodes = this->quadrature->get_nodes();
+
+          // step to first node
+          ds = dt * nodes[0];
+          this->f_expl_eval(this->fs_expl_start, this->start_state, t);
+          rhs->copy(this->start_state);
+          rhs->saxpy(ds, this->fs_expl_start);
+          this->impl_solve(this->fs_impl[0], this->state[0], t, ds, rhs);
+          this->f_expl_eval(this->fs_expl[0], this->state[0], t + ds);
+
+          // step across all nodes
+          for (size_t m = 0; m < nodes.size() - 1; ++m) {
+            ds = dt * (nodes[m+1] - nodes[m]);
+            rhs->copy(this->state[m]);
+            rhs->saxpy(ds, this->fs_expl[m]);
+            this->impl_solve(this->fs_impl[m+1], this->state[m+1], t, ds, rhs);
+            this->f_expl_eval(this->fs_expl[m+1], this->state[m+1], t + ds);
+            t += ds;
+          }
+        }
+
+        void sweep_with_left()
+        {
+          auto const nodes = this->quadrature->get_nodes();
+          auto const dt    = this->get_controller()->get_time_step();
+          auto const s_mat = this->quadrature->get_s_mat().block(1, 0, nodes.size()-1, nodes.size());
+          time ds;
+
+          this->s_integrals[0]->mat_apply(this->s_integrals, dt, s_mat, this->fs_expl, true);
+          this->s_integrals[0]->mat_apply(this->s_integrals, dt, s_mat, this->fs_impl, false);
+          for (size_t m = 0; m < nodes.size() - 1; ++m) {
+            ds = dt * (nodes[m+1] - nodes[m]);
+            this->s_integrals[m]->saxpy(-ds, this->fs_expl[m]);
+            this->s_integrals[m]->saxpy(-ds, this->fs_impl[m+1]);
+          }
+          if (this->fas_corrections.size() > 0) {
+            for (size_t m = 0; m < this->s_integrals.size(); m++) {
+              this->s_integrals[m]->saxpy(1.0, this->fas_corrections[m]);
+            }
+          }
+
+          shared_ptr<Encapsulation<time>> rhs = this->get_factory()->create(pfasst::encap::solution);
+
+          // step across all nodes
+          auto t = this->get_controller()->get_time();
+          for (size_t m = 0; m < nodes.size() - 1; ++m) {
+            ds = dt * (nodes[m+1] - nodes[m]);
+            rhs->copy(this->state[m]);
+            rhs->saxpy(ds, this->fs_expl[m]);
+            rhs->saxpy(1.0, this->s_integrals[m]);
+            this->impl_solve(this->fs_impl[m + 1], this->state[m + 1], t, ds, rhs);
+            this->f_expl_eval(this->fs_expl[m + 1], this->state[m + 1], t + ds);
+            t += ds;
+          }
+        }
+
+        void sweep_without_left()
+        {
+          auto const nodes = this->quadrature->get_nodes();
+          auto const dt    = this->get_controller()->get_time_step();
+          auto const s_mat = this->quadrature->get_s_mat();
+          time ds;
+
+          this->s_integrals[0]->mat_apply(this->s_integrals, dt, s_mat, this->fs_expl, true);
+          this->s_integrals[0]->mat_apply(this->s_integrals, dt, s_mat, this->fs_impl, false);
+          ds = dt * nodes[0];
+          this->s_integrals[0]->saxpy(-ds, this->fs_expl_start);
+          this->s_integrals[0]->saxpy(-ds, this->fs_impl[0]);
+          for (size_t m = 0; m < nodes.size() - 1; ++m) {
+            ds = dt * (nodes[m+1] - nodes[m]);
+            this->s_integrals[m+1]->saxpy(-ds, this->fs_expl[m]);
+            this->s_integrals[m+1]->saxpy(-ds, this->fs_impl[m+1]);
+          }
+          if (this->fas_corrections.size() > 0) {
+            for (size_t m = 0; m < this->s_integrals.size(); m++) {
+              this->s_integrals[m]->saxpy(1.0, this->fas_corrections[m]);
+            }
+          }
+
+          shared_ptr<Encapsulation<time>> rhs = this->get_factory()->create(pfasst::encap::solution);
+
+          // step to first node
+          auto t = this->get_controller()->get_time();
+          ds = dt * nodes[0];
+          this->f_expl_eval(this->fs_expl_start, this->start_state, t);
+          rhs->copy(this->start_state);
+          rhs->saxpy(ds, this->fs_expl_start);
+          rhs->saxpy(1.0, this->s_integrals[0]);
+          this->impl_solve(this->fs_impl[0], this->state[0], t, ds, rhs);
+          this->f_expl_eval(this->fs_expl[0], this->state[0], t + ds);
+
+          // step across all nodes
+          for (size_t m = 0; m < nodes.size() - 1; ++m) {
+            ds = dt * (nodes[m+1] - nodes[m]);
+            rhs->copy(this->state[m]);
+            rhs->saxpy(ds, this->fs_expl[m]);
+            rhs->saxpy(1.0, this->s_integrals[m+1]);
+            this->impl_solve(this->fs_impl[m+1], this->state[m+1], t, ds, rhs);
+            this->f_expl_eval(this->fs_expl[m+1], this->state[m+1], t + ds);
+            t += ds;
+          }
+        }
+
     };
 
   }  // ::pfasst::encap
