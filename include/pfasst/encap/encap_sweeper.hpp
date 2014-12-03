@@ -108,7 +108,7 @@ namespace pfasst
           }
 
           if (coarse) {
-            size_t num_fas = this->quadrature->left_is_node() ? num_nodes -1 : num_nodes;
+            size_t num_fas = this->quadrature->left_is_node() ? num_nodes - 1 : num_nodes;
             for (size_t m = 0; m < num_fas; m++) {
               this->fas_corrections.push_back(this->get_factory()->create(pfasst::encap::solution));
             }
@@ -190,18 +190,12 @@ namespace pfasst
         }
 
         /**
-         * evaluates the right hand side at given time node
-         *
-         * This evaluates the right hand side at the given time node with index `m` as returned by
-         * pfasst::encap::EncapSweeper::get_nodes:
-         *
-         * @param[in] m index of the time node to evaluate at
+         * Re-evaluate function values.
          *
          * @note This method must be implemented in derived sweepers.
          */
-        virtual void evaluate(size_t m)
+        virtual void reevaluate(bool initial_only=false)
         {
-          UNUSED(m);
           throw NotImplementedYet("sweeper");
         }
 
@@ -282,8 +276,6 @@ namespace pfasst
         virtual void recv(ICommunicator* comm, int tag, bool blocking) override
         {
           this->start_state->recv(comm, tag, blocking);
-          // XXX
-          this->state.front()->copy(this->start_state);
         }
 
         virtual void broadcast(ICommunicator* comm) override
@@ -292,8 +284,6 @@ namespace pfasst
             this->start_state->copy(this->end_state);
           }
           this->start_state->broadcast(comm);
-          // XXX
-          this->state.front()->copy(this->start_state);
         }
         //! @}
     };
