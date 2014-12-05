@@ -380,7 +380,7 @@ namespace pfasst
 
             // building rules for Q_E and Q_I:
             //  Q_E is striclty lower diagonal matrix with delta nodes of column index
-            //  Q_I is lower diagonal matrix with first row and column all zero and delta nodes of 
+            //  Q_I is lower diagonal matrix with first row and column all zero and delta nodes of
             //      column index minus one
             Matrix<time> qe_mat = Matrix<time>(nnodes, nnodes);
             qe_mat.fill(time(0.0));
@@ -423,7 +423,7 @@ namespace pfasst
             this->energy_evals.front() = this->energy_evals.back();
           }
 
-          virtual void evaluate(size_t m) override
+          void evaluate(size_t m)
           {
       //       Vector3d<scalar> vel; vel.fill(scalar(0.0));
       //       Vector3d<scalar> B; B.fill(scalar(0.0));
@@ -446,6 +446,13 @@ namespace pfasst
       //       b = dot(vel, B);
       //       this->particles[m]->accel() = this->particles[m]->alpha() * (e + acceleration_type(b));
             this->f_evals++;
+          }
+
+          virtual void reevaluate(bool initial) override
+          {
+            for (size_t m = 0; m < this->get_quadrature()->get_num_nodes(); m++) {
+              this->evaluate(m);
+            }
           }
 
           virtual void predict(bool initial) override

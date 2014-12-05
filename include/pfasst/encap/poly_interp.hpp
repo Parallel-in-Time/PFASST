@@ -46,14 +46,14 @@ namespace pfasst
           auto fine_factory = fine.get_factory();
 
           auto crse_delta = crse_factory->create(solution);
-          this->restrict(crse_delta, fine.get_state(0));
-          crse_delta->saxpy(-1.0, crse.get_state(0));
+          this->restrict(crse_delta, fine.get_start_state());
+          crse_delta->saxpy(-1.0, crse.get_start_state());
 
           auto fine_delta = fine_factory->create(solution);
           this->interpolate(fine_delta, crse_delta);
-          fine.get_state(0)->saxpy(-1.0, fine_delta);
+          fine.get_start_state()->saxpy(-1.0, fine_delta);
 
-          fine.evaluate(0);
+          fine.reevaluate(true);
         }
 
 
@@ -68,6 +68,10 @@ namespace pfasst
             tmat = pfasst::quadrature::compute_interp<time>(fine.get_nodes(), crse.get_nodes());
           }
 
+          if (interp_initial) {
+            this->interpolate_initial(dst, src);
+          }
+
           size_t nfine = fine.get_nodes().size();
           size_t ncrse = crse.get_nodes().size();
 
@@ -80,20 +84,15 @@ namespace pfasst
           for (size_t m = 0; m < ncrse; m++) { fine_delta[m] = fine_factory->create(solution); }
 
           auto crse_delta = crse_factory->create(solution);
-          size_t m0 = interp_initial ? 0 : 1;
-          for (size_t m = m0; m < ncrse; m++) {
+          for (size_t m = 0; m < ncrse; m++) {
             crse_delta->copy(crse.get_state(m));
             crse_delta->saxpy(-1.0, crse.get_saved_state(m));
             interpolate(fine_delta[m], crse_delta);
           }
 
-          if (!interp_initial) {
-            fine_delta[0]->zero();
-          }
-
           fine.get_state(0)->mat_apply(fine_state, 1.0, tmat, fine_delta, false);
 
-          for (size_t m = m0; m < nfine; m++) { fine.evaluate(m); }
+          fine.reevaluate();
         }
 
 
@@ -112,7 +111,8 @@ namespace pfasst
         {
           auto& crse = as_encap_sweeper(dst);
           auto& fine = as_encap_sweeper(src);
-          this->restrict(crse.get_state(0), fine.get_state(0));
+          this->restrict(crse.get_start_state(), fine.get_start_state());
+          crse.reevaluate(true);
         }
 
 
@@ -128,17 +128,20 @@ namespace pfasst
           auto const num_crse = crse_nodes.size();
           auto const num_fine = fine_nodes.size();
 
+          if (restrict_initial) {
+            this->restrict_initial(dst, src);
+          }
+
           int trat = (int(num_fine) - 1) / (int(num_crse) - 1);
 
-          int m0 = restrict_initial ? 0 : 1;
-          for (size_t m = m0; m < num_crse; m++) {
+          for (size_t m = 0; m < num_crse; m++) {
             if (crse_nodes[m] != fine_nodes[m * trat]) {
               throw NotImplementedYet("coarse nodes must be nested");
             }
             this->restrict(crse.get_state(m), fine.get_state(m * trat));
           }
 
-          for (size_t m = m0; m < num_crse; m++) { crse.evaluate(m); }
+          crse.reevaluate();
         }
 
 
@@ -162,11 +165,11 @@ namespace pfasst
           auto crse_factory = crse.get_factory();
           auto fine_factory = fine.get_factory();
 
-          EncapVecT crse_int(ncrse - 1), fine_int(nfine - 1), rstr_int(ncrse - 1);
+          EncapVecT crse_int(ncrse), fine_int(nfine), rstr_int(ncrse);
 
-          for (size_t m = 0; m < ncrse - 1; m++) { crse_int[m] = crse_factory->create(solution); }
-          for (size_t m = 0; m < ncrse - 1; m++) { rstr_int[m] = crse_factory->create(solution); }
-          for (size_t m = 0; m < nfine - 1; m++) { fine_int[m] = fine_factory->create(solution); }
+          for (size_t m = 0; m < ncrse; m++) { crse_int[m] = crse_factory->create(solution); }
+          for (size_t m = 0; m < ncrse; m++) { rstr_int[m] = crse_factory->create(solution); }
+          for (size_t m = 0; m < nfine; m++) { fine_int[m] = fine_factory->create(solution); }
 
           // compute '0 to node' integral on the coarse level
           crse.integrate(dt, crse_int);
@@ -176,27 +179,27 @@ namespace pfasst
 
           // restrict '0 to node' fine integral
           int trat = (int(nfine) - 1) / (int(ncrse) - 1);
-          for (size_t m = 1; m < ncrse; m++) {
-            this->restrict(rstr_int[m - 1], fine_int[m * trat - 1]);
+          for (size_t m = 0; m < ncrse; m++) {
+            this->restrict(rstr_int[m], fine_int[m * trat]);
           }
 
           // compute 'node to node' tau correction
-          EncapVecT tau(ncrse - 1), rstr_and_crse(2 * (ncrse - 1));
-          for (size_t m = 0; m < ncrse - 1; m++) { tau[m] = crse.get_tau(m); }
-          for (size_t m = 0; m < ncrse - 1; m++) { rstr_and_crse[m] = rstr_int[m]; }
-          for (size_t m = 0; m < ncrse - 1; m++) { rstr_and_crse[ncrse - 1 + m] = crse_int[m]; }
+          EncapVecT tau(ncrse), rstr_and_crse(2 * ncrse);
+          for (size_t m = 0; m < ncrse; m++) { tau[m] = crse.get_tau(m); }
+          for (size_t m = 0; m < ncrse; m++) { rstr_and_crse[m] = rstr_int[m]; }
+          for (size_t m = 0; m < ncrse; m++) { rstr_and_crse[ncrse + m] = crse_int[m]; }
 
           if (fmat.rows() == 0) {
-            fmat.resize(ncrse - 1, 2 * (ncrse - 1));
+            fmat.resize(ncrse, 2 * ncrse);
             fmat.fill(0.0);
 
-            for (size_t m = 0; m < ncrse - 1; m++) {
+            for (size_t m = 0; m < ncrse; m++) {
               fmat(m, m) = 1.0;
-              fmat(m, ncrse - 1 + m) = -1.0;
+              fmat(m, ncrse + m) = -1.0;
 
               for (size_t n = 0; n < m; n++) {
                 fmat(m, n) = -1.0;
-                fmat(m, ncrse - 1 + n) = 1.0;
+                fmat(m, ncrse + n) = 1.0;
               }
             }
           }
