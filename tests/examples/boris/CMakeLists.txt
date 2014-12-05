@@ -13,7 +13,7 @@ set(TESTS
 foreach(test ${TESTS})
     message(STATUS "  ${test}")
     add_executable(${test} ${test}.cpp)
-    add_dependencies(${test} googlemock)
+    add_dependencies(${test} ${pfasst_DEPENDEND_TARGETS} ${pfasst_TESTS_DEPENDEND_TARGETS})
     target_link_libraries(${test}
         ${3rdparty_DEPENDEND_LIBS}
         ${TESTS_3rdparty_DEPENDEND_LIBS}
