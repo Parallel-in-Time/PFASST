@@ -1,7 +1,7 @@
 extends:
 - name: hashstack
   urls: ['https://github.com/hashdist/hashstack.git']
-  key: 'git:445e198b35facf04521fe3d48747a0eec05ca91c'
+  key: 'git:aaadba64fe2ab6e48c65f4a7af67a2f4f58476da'
   file: debian.yaml
 
 parameters:
@@ -18,7 +18,3 @@ packages:
     toolset: gcc
     address_model: 64
   cmake:
-  easylogging:
-
-package_dirs:
-- pkgs
