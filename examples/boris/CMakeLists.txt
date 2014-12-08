@@ -5,6 +5,7 @@ include_directories(
     ${3rdparty_INCLUDES}
     ${pfasst_INCLUDES}
 )
+add_subdirectory(bindings)
 
 set(boris_examples
     boris_sdc
@@ -15,6 +16,7 @@ foreach(example ${boris_examples})
     target_link_libraries(${example}
         ${3rdparty_DEPENDEND_LIBS}
     )
+    add_dependencies(${example} ${pfasst_DEPENDEND_TARGETS})
     if(pfasst_INSTALL_EXAMPLES)
         install(TARGETS ${example} RUNTIME DESTINATION bin)
     endif()
