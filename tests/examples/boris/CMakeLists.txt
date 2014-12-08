@@ -5,7 +5,7 @@ include_directories(
 )
 
 set(TESTS
-    test_boris_particle
+    test_boris_particle_util
     test_boris_physics
     test_boris_sweeper
 )
