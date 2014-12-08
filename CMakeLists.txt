@@ -107,6 +107,7 @@ set(3rdparty_DEPENDEND_LIBS)
 set(pfasst_INCLUDES)
 set(pfasst_DEPENDEND_LIBS)
 set(pfasst_DEPENDEND_TARGETS)
+set(pfasst_TESTS_DEPENDEND_TARGETS)
 
 if(pfasst_BUILD_TESTS)
     enable_testing()
@@ -125,6 +126,10 @@ message(STATUS "Configuring 3rd party libraries")
 #  - FFTW_INCLUDE_PATH (if pfasst_BUILD_EXAMPLES)
 #  - FFTW_LIBRARIES (if pfasst_BUILD_EXAMPLES)
 add_subdirectory(3rdparty)
+
+list(LENGTH pfasst_DEPENDEND_LIBS pfasst_NUM_DEPENDEND_LIBS)
+list(LENGTH pfasst_DEPENDEND_TARGETS pfasst_NUM_DEPENDEND_TARGETS)
+list(LENGTH pfasst_TESTS_DEPENDEND_TARGETS pfasst_TESTS_NUM_DEPENDEND_TARGETS)
 
 message(STATUS "********************************************************************************")
 message(STATUS "Configuring sources")
