@@ -102,7 +102,7 @@ namespace pfasst
 
 
     template<typename T>
-    static T get_value(const string& name, const T& default_val)
+    inline static T get_value(const string& name, const T& default_val)
     {
       return Options::get_instance().get_variables_map().count(name) 
               ? Options::get_instance().get_variables_map()[name].as<T>() : default_val;
@@ -110,19 +110,19 @@ namespace pfasst
 
 
     template<typename T>
-    static T get_value(const string& name)
+    inline static T get_value(const string& name)
     {
       return Options::get_instance().get_variables_map()[name].as<T>();
     }
 
 
-    static bool no_params_given()
+    inline static bool no_params_given()
     {
       return Options::get_instance().get_variables_map().empty();
     }
 
 
-    static string pretty_print()
+    inline static string pretty_print()
     {
       stringstream s;
       s << "Logging Options:" << endl
@@ -140,7 +140,7 @@ namespace pfasst
     /**
      * @returns empty string if params are set and `if_no_params` is `true`
      */
-    static string print_help(bool if_no_params = false)
+    inline static string print_help(bool if_no_params = false)
     {
       if (!if_no_params || (if_no_params && no_params_given())) {
         return pretty_print();
@@ -150,14 +150,14 @@ namespace pfasst
     }
 
 
-    static void init_global_options(po::options_description& opts)
+    inline static void init_global_options(po::options_description& opts)
     {
       opts.add_options()
         ("help,h", "display this help message");
     }
 
 
-    static void init_config()
+    inline static void init_config()
     {
       Options::get_instance()
         .register_init_function("Global Options",
@@ -168,7 +168,7 @@ namespace pfasst
     }
 
 
-    static void read_commandline(int argc, char* argv[], bool exit_on_help = true)
+    inline static void read_commandline(int argc, char* argv[], bool exit_on_help = true)
     {
       po::parsed_options parsed = po::command_line_parser(argc, argv)
                                     .options(Options::get_instance().get_all_options())
@@ -188,7 +188,7 @@ namespace pfasst
     /**
      * @throws invalid_argument if the given file could not be opened
      */
-    static void read_config_file(string file_name)
+    inline static void read_config_file(string file_name)
     {
       ifstream ifs(file_name.c_str(), ios_base::in);
       if (!ifs) {
