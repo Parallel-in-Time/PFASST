@@ -14,7 +14,12 @@ set(TESTS
 foreach(test ${TESTS})
     message(STATUS "  ${test}")
     add_executable(${test} ${test}.cpp)
-    add_dependencies(${test} ${pfasst_DEPENDEND_TARGETS} ${pfasst_TESTS_DEPENDEND_TARGETS})
+    if(${pfasst_NUM_DEPENDEND_TARGETS} GREATER 0)
+        add_dependencies(${test} ${pfasst_DEPENDEND_TARGETS})
+    endif()
+    if(${pfasst_TESTS_NUM_DEPENDEND_TARGETS} GREATER 0)
+        add_dependencies(${test} ${pfasst_TESTS_DEPENDEND_TARGETS})
+    endif()
     target_link_libraries(${test}
         ${3rdparty_DEPENDEND_LIBS}
         ${TESTS_3rdparty_DEPENDEND_LIBS}
