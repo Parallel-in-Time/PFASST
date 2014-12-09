@@ -2,6 +2,7 @@
 set(3rdparty_INCLUDES ${3rdparty_INCLUDES})
 set(3rdparty_DEPENDEND_LIBS ${3rdparty_DEPENDEND_LIBS})
 set(pfasst_DEPENDEND_TARGETS ${pfasst_DEPENDEND_TARGETS})
+set(pfasst_TESTS_DEPENDEND_TARGETS ${pfasst_TESTS_DEPENDEND_TARGETS})
 
 set(3rdparty_DOWNLOAD_TIMEOUT "60")
 
@@ -196,51 +197,68 @@ if(pfasst_BUILD_TESTS)
     set(TESTS_3rdparty_DEPENDEND_LIBS ${TESTS_3rdparty_DEPENDEND_LIBS})
 
     message(STATUS "--------------------------------------------------------------------------------")
-    set(GMOCK_SOURCE_URL "http://googlemock.googlecode.com/files/gmock-1.7.0.zip")
-    set(GMOCK_SOURCE_MD5 "073b984d8798ea1594f5e44d85b20d66")
-
     message(STATUS "Google Testing Framework (gtest & gmock)")
-    message(STATUS " going to download and compile it from sources retrieved from:")
-    message(STATUS "   ${GMOCK_SOURCE_URL}")
 
-    # Add gmock
-    ExternalProject_Add(
-      googlemock
-      URL ${GMOCK_SOURCE_URL}
-      URL_MD5 ${GMOCK_SOURCE_MD5}
-      TIMEOUT ${3rdparty_DOWNLOAD_TIMEOUT}
-      UPDATE_COMMAND ""
-      PATCH_COMMAND ""
-      CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release
-        -DCMAKE_C_COMPILE=${CMAKE_C_COMPILER}
-        -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-        -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
-        -DGTEST_USE_OWN_TR1_TUPLE=ON
-        -Dgtest_force_shared_crt=ON
-        -Dgmock_build_tests=OFF
-      # Disable install step
-      INSTALL_COMMAND ""
-      # Wrap download, configure and build steps in a script to log output
-      LOG_DOWNLOAD ON
-      LOG_CONFIGURE ON
-      LOG_BUILD ON
+    find_package(GMock)
+    set_package_properties(GMock
+        PROPERTIES
+          DESCRIPTION "GMock"
+          URL "https://code.google.com/p/googlemock/"
+          TYPE OPTIONAL
+          PURPOSE "Google testing and mocking framework"
     )
 
-    # Specify include dir
-    ExternalProject_Get_Property(googlemock source_dir)
-    list(APPEND TESTS_3rdparty_INCLUDES ${source_dir}/include ${source_dir}/gtest/include)
+    if(NOT GMOCK_FOUND)
+        set(GMOCK_SOURCE_URL "http://googlemock.googlecode.com/files/gmock-1.7.0.zip")
+        set(GMOCK_SOURCE_MD5 "073b984d8798ea1594f5e44d85b20d66")
 
-    ExternalProject_Get_Property(googlemock binary_dir)
-    set(Suffix ".a")
-    set(Pthread "-pthread")
+        message(STATUS " going to download and compile it from sources retrieved from:")
+        message(STATUS "   ${GMOCK_SOURCE_URL}")
 
-    list(APPEND TESTS_3rdparty_DEPENDEND_LIBS ${binary_dir}/${CMAKE_FIND_LIBRARY_PREFIXES}gmock${Suffix})
-    list(APPEND TESTS_3rdparty_DEPENDEND_LIBS ${Pthread})
+        # Add gmock
+        ExternalProject_Add(
+          googlemock
+          URL ${GMOCK_SOURCE_URL}
+          URL_MD5 ${GMOCK_SOURCE_MD5}
+          TIMEOUT ${3rdparty_DOWNLOAD_TIMEOUT}
+          UPDATE_COMMAND ""
+          PATCH_COMMAND ""
+          CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_C_COMPILE=${CMAKE_C_COMPILER}
+            -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+            -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+            -DGTEST_USE_OWN_TR1_TUPLE=ON
+            -Dgtest_force_shared_crt=ON
+            -Dgmock_build_tests=OFF
+          # Disable install step
+          INSTALL_COMMAND ""
+          # Wrap download, configure and build steps in a script to log output
+          LOG_DOWNLOAD ON
+          LOG_CONFIGURE ON
+          LOG_BUILD ON
+        )
+
+        # Specify include dir
+        ExternalProject_Get_Property(googlemock source_dir)
+        list(APPEND TESTS_3rdparty_INCLUDES ${source_dir}/include ${source_dir}/gtest/include)
+
+        ExternalProject_Get_Property(googlemock binary_dir)
+        set(Suffix ".a")
+        set(Pthread "-pthread")
+        list(APPEND TESTS_3rdparty_DEPENDEND_LIBS ${binary_dir}/${CMAKE_FIND_LIBRARY_PREFIXES}gmock${Suffix})
+        list(APPEND TESTS_3rdparty_DEPENDEND_LIBS ${Pthread})
+        list(APPEND pfasst_TESTS_DEPENDEND_TARGETS googlemock)
+    else()
+        string(REGEX REPLACE "so$" "a" GMOCK_LIBRARIES ${GMOCK_LIBRARIES})
+        list(APPEND TESTS_3rdparty_DEPENDEND_LIBS ${GMOCK_LIBRARIES} "-pthread")
+        list(APPEND TESTS_3rdparty_INCLUDES ${GMOCK_INCLUDE_DIRS})
+    endif(NOT GMOCK_FOUND)
 endif()
 
 # propagate include lists to parent directory
 set(3rdparty_DEPENDEND_LIBS ${3rdparty_DEPENDEND_LIBS} PARENT_SCOPE)
 set(3rdparty_INCLUDES ${3rdparty_INCLUDES} PARENT_SCOPE)
 set(pfasst_DEPENDEND_TARGETS ${pfasst_DEPENDEND_TARGETS} PARENT_SCOPE)
+set(pfasst_TESTS_DEPENDEND_TARGETS ${pfasst_TESTS_DEPENDEND_TARGETS} PARENT_SCOPE)
 set(TESTS_3rdparty_DEPENDEND_LIBS ${TESTS_3rdparty_DEPENDEND_LIBS} PARENT_SCOPE)
 set(TESTS_3rdparty_INCLUDES ${TESTS_3rdparty_INCLUDES} PARENT_SCOPE)
