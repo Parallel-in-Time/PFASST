@@ -10,7 +10,7 @@
 #include <vector>
 using namespace std;
 
-#include <easylogging++.h>
+// #include <pfasst/easylogging++.h>
 
 
 namespace examples
@@ -27,7 +27,7 @@ namespace examples
       typename precision
     >
     class Particle
-      : public el::Loggable
+//       : public el::Loggable
     {
       protected:
         size_t _dim;
@@ -55,7 +55,7 @@ namespace examples
         void set_charge(const precision& charge);
         void set_mass(const precision& mass);
 
-        virtual void log(el::base::type::ostream_t& os) const;
+//         virtual void log(el::base::type::ostream_t& os) const;
     };
   }  // ::examples::boris
 }  // ::examples

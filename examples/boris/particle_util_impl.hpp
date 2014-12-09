@@ -1,5 +1,6 @@
 #include "particle_util.hpp"
 
+#include <algorithm>
 #include <cassert>
 using namespace std;
 
@@ -46,6 +47,31 @@ namespace examples
 
 
     template<typename precision>
+    static ParticleComponent<precision> cmp_wise_mul(const ParticleComponent<precision>& first,
+                                                     const ParticleComponent<precision>& second)
+    {
+      ParticleComponent<precision> out(first);
+      assert(out.size() == first.size());
+      for (size_t i = 0; i < out.size(); ++i) {
+        out[i] = first[i] * second[i];
+      }
+      return out;
+    }
+
+    template<typename precision>
+    static ParticleComponent<precision> cmp_wise_div(const ParticleComponent<precision>& first,
+                                                     const ParticleComponent<precision>& second)
+    {
+      ParticleComponent<precision> out(first);
+      assert(out.size() == first.size());
+      for (size_t i = 0; i < out.size(); ++i) {
+        out[i] = first[i] / second[i];
+      }
+      return out;
+    }
+
+
+    template<typename precision>
     static precision distance(const Particle<precision>& first, const Particle<precision>& second)
     {
       assert(first.DIM() == second.DIM());
@@ -79,6 +105,42 @@ namespace examples
                                                    const shared_ptr<Particle<precision>>&      reference)
     {
       return distance_to_reference(*cloud, *reference);
+    }
+
+
+    template<typename precision>
+    static precision norm0(const ParticleComponent<precision>& data)
+    {
+      precision norm = precision(0.0);
+      for (auto elem : data) {
+        norm += elem * elem;
+      }
+      return sqrt(norm);
+    }
+
+    template<typename precision>
+    static vector<precision> norm0(const ParticleCloudComponent<precision>& data)
+    {
+      vector<precision> norm(data.size(), precision(0.0));
+      for (size_t p = 0; p < data.size(); ++p) {
+        norm[p] = norm0(data[p]);
+      }
+      return norm;
+    }
+
+
+    template<typename precision>
+    static void zero(ParticleCloudComponent<precision>& data)
+    {
+      for (auto p : data) {
+        fill(p.begin(), p.end(), precision(0.0));
+      }
+    }
+
+    template<typename precision>
+    static void zero(shared_ptr<ParticleCloudComponent<precision>>& data)
+    {
+      zero(*data.get());
     }
 
 
@@ -121,6 +183,7 @@ namespace examples
     template<typename precision, typename ValueT>
     ParticleComponent<precision> operator+(const ParticleComponent<precision>& vec, const ValueT& value)
     {
+      static_assert(is_arithmetic<ValueT>::value, "");
       ParticleComponent<precision> dest(vec);
       assert(dest.size() == vec.size());
       for (size_t i = 0; i < dest.size(); ++i) {
@@ -132,6 +195,7 @@ namespace examples
     template<typename precision, typename ValueT>
     ParticleCloudComponent<precision> operator+(const ParticleCloudComponent<precision>& vec, const ValueT& value)
     {
+      static_assert(is_arithmetic<ValueT>::value, "");
       ParticleCloudComponent<precision> dest(vec);
       assert(dest->size() == vec->size());
       for (size_t index = 0; index < dest.size(); ++index) {
@@ -143,12 +207,14 @@ namespace examples
     template<typename precision, typename ValueT>
     ParticleComponent<precision> operator+(const ValueT& value, const ParticleComponent<precision>& vec)
     {
+      static_assert(is_arithmetic<ValueT>::value, "");
       return vec + value;
     }
 
     template<typename precision, typename ValueT>
     ParticleCloudComponent<precision> operator+(const ValueT& value, const ParticleCloudComponent<precision>& vec)
     {
+      static_assert(is_arithmetic<ValueT>::value, "");
       return vec + value;
     }
     // OPERATORS: ADD
@@ -191,6 +257,7 @@ namespace examples
     template<typename precision, typename ValueT>
     ParticleComponent<precision>& operator+=(ParticleComponent<precision>& vec, const ValueT& value)
     {
+      static_assert(is_arithmetic<ValueT>::value, "");
       for (size_t i = 0; i < vec.size(); ++i) {
         vec[i] += value;
       }
@@ -200,6 +267,7 @@ namespace examples
     template<typename precision, typename ValueT>
     ParticleCloudComponent<precision>& operator+=(ParticleCloudComponent<precision>& vec, const ValueT& value)
     {
+      static_assert(is_arithmetic<ValueT>::value, "");
       for (size_t i = 0; i < vec.size(); ++i) {
         vec[i] += value;
       }
@@ -246,6 +314,7 @@ namespace examples
     template<typename precision, typename ValueT>
     ParticleComponent<precision> operator-(const ParticleComponent<precision>& vec, const ValueT& value)
     {
+      static_assert(is_arithmetic<ValueT>::value, "");
       ParticleComponent<precision> dest(vec);
       assert(dest.size() == vec.size());
       for (size_t i = 0; i < dest.size(); ++i) {
@@ -257,6 +326,7 @@ namespace examples
     template<typename precision, typename ValueT>
     ParticleCloudComponent<precision> operator-(const ParticleCloudComponent<precision>& vec, const ValueT& value)
     {
+      static_assert(is_arithmetic<ValueT>::value, "");
       ParticleCloudComponent<precision> dest(vec);
       assert(dest.size() == vec.size());
       for (size_t i = 0; i < dest.size(); ++i) {
@@ -268,12 +338,14 @@ namespace examples
     template<typename precision, typename ValueT>
     ParticleComponent<precision> operator-(const ValueT& value, const ParticleComponent<precision>& vec)
     {
+      static_assert(is_arithmetic<ValueT>::value, "");
       return vec - value;
     }
 
     template<typename precision, typename ValueT>
     ParticleCloudComponent<precision> operator-(const ValueT& value, const ParticleCloudComponent<precision>& vec)
     {
+      static_assert(is_arithmetic<ValueT>::value, "");
       return vec - value;
     }
     // OPERATORS: MINUS
@@ -315,6 +387,7 @@ namespace examples
     template<typename precision, typename ValueT>
     ParticleComponent<precision>& operator-=(ParticleComponent<precision>& vec, const ValueT& value)
     {
+      static_assert(is_arithmetic<ValueT>::value, "");
       for (size_t i = 0; i < vec.size(); ++i) {
         vec[i] -= value;
       }
@@ -324,6 +397,7 @@ namespace examples
     template<typename precision, typename ValueT>
     ParticleCloudComponent<precision>& operator-=(ParticleCloudComponent<precision>& vec, const ValueT& value)
     {
+      static_assert(is_arithmetic<ValueT>::value, "");
       for (size_t i = 0; i < vec.size(); ++i) {
         vec[i] -= value;
       }
@@ -335,8 +409,9 @@ namespace examples
     ////
     // OPERATORS: MUL
     template<typename precision, typename ValueT>
-    ParticleComponent<precision>  operator*(const ParticleComponent<precision>& vec, const ValueT& value)
+    ParticleComponent<precision> operator*(const ParticleComponent<precision>& vec, const ValueT& value)
     {
+      static_assert(is_arithmetic<ValueT>::value, "");
       ParticleComponent<precision> dest(vec);
       assert(dest.size() == vec.size());
       for (size_t i = 0; i < dest.size(); ++i) {
@@ -346,8 +421,9 @@ namespace examples
     }
 
     template<typename precision, typename ValueT>
-    ParticleCloudComponent<precision>  operator*(const ParticleCloudComponent<precision>& vec, const ValueT& value)
+    ParticleCloudComponent<precision> operator*(const ParticleCloudComponent<precision>& vec, const ValueT& value)
     {
+      static_assert(is_arithmetic<ValueT>::value, "");
       ParticleCloudComponent<precision> dest(vec);
       assert(dest.size() == vec.size());
       for (size_t i = 0; i < dest.size(); ++i) {
@@ -356,15 +432,30 @@ namespace examples
       return dest;
     }
 
-    template<typename precision, typename ValueT>
-    ParticleComponent<precision>  operator*(const ValueT& value, const ParticleComponent<precision>& vec)
+    template<typename precision>
+    ParticleCloudComponent<precision> operator*(const ParticleCloudComponent<precision>& vec,
+                                                const AttributeValues<precision>& values)
     {
+      assert(vec.size() == values.size());
+      ParticleCloudComponent<precision> dest(vec);
+      assert(dest.size() == vec.size());
+      for (size_t i = 0; i < dest.size(); ++i) {
+        dest[i] *= values[i];
+      }
+      return dest;
+    }
+
+    template<typename precision, typename ValueT>
+    ParticleComponent<precision> operator*(const ValueT& value, const ParticleComponent<precision>& vec)
+    {
+      static_assert(is_arithmetic<ValueT>::value, "");
       return vec * value;
     }
 
     template<typename precision, typename ValueT>
-    ParticleCloudComponent<precision>  operator*(const ValueT& value, const ParticleCloudComponent<precision>& vec)
+    ParticleCloudComponent<precision> operator*(const ValueT& value, const ParticleCloudComponent<precision>& vec)
     {
+      static_assert(is_arithmetic<ValueT>::value, "");
       return vec * value;
     }
     // OPERATORS: MUL
@@ -375,6 +466,7 @@ namespace examples
     template<typename precision, typename ValueT>
     ParticleComponent<precision>& operator*=(ParticleComponent<precision>& vec, const ValueT& value)
     {
+      static_assert(is_arithmetic<ValueT>::value, "");
       for (size_t i = 0; i < vec.size(); ++i) {
         vec[i] *= value;
       }
@@ -384,6 +476,7 @@ namespace examples
     template<typename precision, typename ValueT>
     ParticleCloudComponent<precision>& operator*=(ParticleCloudComponent<precision>& vec, const ValueT& value)
     {
+      static_assert(is_arithmetic<ValueT>::value, "");
       for (size_t i = 0; i < vec.size(); ++i) {
         vec[i] *= value;
       }
@@ -397,6 +490,7 @@ namespace examples
     template<typename precision, typename ValueT>
     ParticleComponent<precision>  operator/(const ParticleComponent<precision>& vec, const ValueT& value)
     {
+      static_assert(is_arithmetic<ValueT>::value, "");
       ParticleComponent<precision> dest(vec);
       assert(dest.size() == vec.size());
       for (size_t i = 0; i < dest.size(); ++i) {
@@ -408,10 +502,24 @@ namespace examples
     template<typename precision, typename ValueT>
     ParticleCloudComponent<precision>  operator/(const ParticleCloudComponent<precision>& vec, const ValueT& value)
     {
+      static_assert(is_arithmetic<ValueT>::value, "");
       ParticleCloudComponent<precision> dest(vec);
       assert(dest.size() == vec.size());
       for (size_t i = 0; i < dest.size(); ++i) {
         dest[i] /= value;
+      }
+      return dest;
+    }
+
+    template<typename precision>
+    ParticleCloudComponent<precision> operator/(const ParticleCloudComponent<precision>& vec,
+                                                const AttributeValues<precision>& values)
+    {
+      assert(vec.size() == values.size());
+      ParticleCloudComponent<precision> dest(vec);
+      assert(dest.size() == vec.size());
+      for (size_t i = 0; i < dest.size(); ++i) {
+        dest[i] /= values[i];
       }
       return dest;
     }
@@ -423,6 +531,7 @@ namespace examples
     template<typename precision, typename ValueT>
     ParticleComponent<precision>& operator/=(ParticleComponent<precision>& vec, const ValueT& value)
     {
+      static_assert(is_arithmetic<ValueT>::value, "");
       for (size_t i = 0; i < vec.size(); ++i) {
         vec[i] /= value;
       }
@@ -432,6 +541,7 @@ namespace examples
     template<typename precision, typename ValueT>
     ParticleCloudComponent<precision>& operator/=(ParticleCloudComponent<precision>& vec, const ValueT& value)
     {
+      static_assert(is_arithmetic<ValueT>::value, "");
       for (size_t i = 0; i < vec.size(); ++i) {
         vec[i] /= value;
       }

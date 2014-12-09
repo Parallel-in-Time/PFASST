@@ -1,5 +1,6 @@
 #include "particle_cloud.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <string>
 using namespace std;
@@ -24,6 +25,30 @@ namespace examples
     template<typename precision>
     ParticleCloud<precision>::~ParticleCloud()
     {}
+
+    template<typename precision>
+    void ParticleCloud<precision>::zero()
+    {
+      fill(this->_positions.begin(), this->_positions.end(), vector<precision>(this->dim(), precision(0.0)));
+      fill(this->_velocities.begin(), this->_velocities.end(), vector<precision>(this->dim(), precision(0.0)));
+      fill(this->_charges.begin(), this->_charges.end(), precision(0.0));
+      fill(this->_masses.begin(), this->_masses.end(), precision(0.0));
+    }
+
+    template<typename precision>
+    void ParticleCloud<precision>::copy(shared_ptr<pfasst::encap::Encapsulation<precision>> other)
+    {
+      shared_ptr<ParticleCloud<precision>> other_c = dynamic_pointer_cast<ParticleCloud<precision>>(other);
+      assert(other_c);
+      this->_dim = other_c->dim();
+      this->_num_particles = other_c->size();
+      this->_positions = other_c->positions();
+      this->_velocities = other_c->velocities();
+      this->_charges = other_c->charges();
+      this->_masses = other_c->masses();
+      this->_default_charge = other_c->_default_charge;
+      this->_default_mass = other_c->_default_mass;
+    }
 
     template<typename precision>
     void ParticleCloud<precision>::extend(const size_t new_size)
@@ -94,6 +119,12 @@ namespace examples
     }
 
     template<typename precision>
+    size_t ParticleCloud<precision>::dim() const
+    {
+      return this->_dim;
+    }
+
+    template<typename precision>
     ParticleCloudComponent<precision>& ParticleCloud<precision>::positions()
     {
       return this->_positions;
@@ -145,6 +176,36 @@ namespace examples
       particle->set_charge(this->_charges[index]);
       particle->set_mass(this->_masses[index]);
       return particle;
+    }
+
+
+    template<typename precision>
+    ParticleCloudFactory<precision>::ParticleCloudFactory(const size_t num_particles, const size_t dim,
+                                               const precision default_charge, const precision default_mass)
+      :   _num_particles(num_particles)
+        , _dim(dim)
+        , _default_charge(default_charge)
+        , _default_mass(default_mass)
+    {}
+
+    template<typename precision>
+    size_t ParticleCloudFactory<precision>::num_particles() const
+    {
+      return this->_num_particles;
+    }
+
+    template<typename precision>
+    size_t ParticleCloudFactory<precision>::dim() const
+    {
+      return this->_dim;
+    }
+
+    template<typename precision>
+    shared_ptr<pfasst::encap::Encapsulation<precision>>
+    ParticleCloudFactory<precision>::create(const pfasst::encap::EncapType)
+    {
+      return make_shared<ParticleCloud<precision>>(this->_num_particles, this->_dim,
+                                                   this->_default_charge, this->_default_mass);
     }
   }  // ::examples::boris
 }  // ::examples

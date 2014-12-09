@@ -23,6 +23,14 @@ namespace examples
     static ParticleCloudComponent<precision> cross_prod(const ParticleCloudComponent<precision>& first,
                                                         const ParticleComponent<precision>&      second);
 
+    template<typename precision>
+    static ParticleComponent<precision> cmp_wise_mul(const ParticleComponent<precision>& first,
+                                                     const ParticleComponent<precision>& second);
+
+    template<typename precision>
+    static ParticleComponent<precision> cmp_wise_div(const ParticleComponent<precision>& first,
+                                                     const ParticleComponent<precision>& second);
+
 
     template<typename precision>
     static precision distance(const Particle<precision>& first,
@@ -37,6 +45,20 @@ namespace examples
     template<typename precision>
     static vector<precision> distance_to_reference(const shared_ptr<ParticleCloud<precision>>& cloud,
                                                    const shared_ptr<Particle<precision>>&      reference);
+
+
+    template<typename precision>
+    static precision norm0(const ParticleComponent<precision>& data);
+
+    template<typename precision>
+    static vector<precision> norm0(const ParticleCloudComponent<precision>& data);
+
+
+    template<typename precision>
+    static void zero(ParticleCloudComponent<precision>& data);
+
+    template<typename precision>
+    static void zero(shared_ptr<ParticleCloudComponent<precision>>& data);
 
 
     template<typename precision>
@@ -121,6 +143,9 @@ namespace examples
     template<typename precision, typename ValueT>
     ParticleCloudComponent<precision>  operator* (const ParticleCloudComponent<precision>& vec,
                                                   const ValueT&                            value );
+    template<typename precision>
+    ParticleCloudComponent<precision>  operator* (const ParticleCloudComponent<precision>& vec,
+                                                  const AttributeValues<precision>&        value );
     template<typename precision, typename ValueT>
     ParticleComponent<precision>       operator* (const ValueT&                            value,
                                                   const ParticleComponent<precision>&      vec   );
@@ -141,6 +166,9 @@ namespace examples
     template<typename precision, typename ValueT>
     ParticleCloudComponent<precision>  operator/ (const ParticleCloudComponent<precision>& vec,
                                                   const ValueT&                            value );
+    template<typename precision>
+    ParticleCloudComponent<precision>  operator/ (const ParticleCloudComponent<precision>& vec,
+                                                  const AttributeValues<precision>&        value );
 
     template<typename precision, typename ValueT>
     ParticleComponent<precision>&      operator/=(      ParticleComponent<precision>&      vec,

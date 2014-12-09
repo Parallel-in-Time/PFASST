@@ -88,13 +88,13 @@ namespace examples
     {
       this->_mass = mass;
     }
-
+/*
     template<typename precision>
     void Particle<precision>::log(el::base::type::ostream_t& os) const
     {
       os << fixed << setprecision(LOG_PRECISION);
 //       os << "Particle(q=" << this->_charge << ", m=" << this->_mass << ", pos=" << this->_pos << ", vel=" << this->_vel << ")";
       os.unsetf(ios_base::floatfield);
-    }
+    }*/
   }  // ::examples::boris
 }  // ::examples
