@@ -6,7 +6,7 @@ include_directories(
 
 set(TESTS
     test_boris_particle_util
-    test_boris_physics
+#     test_boris_physics
     test_boris_sweeper
 )
 
@@ -34,3 +34,5 @@ foreach(test ${TESTS})
         COMMAND ${CMAKE_BINARY_DIR}/tests/examples/boris/${test} --gtest_output=xml:${test}_out.xml
     )
 endforeach(test)
+
+target_link_libraries(test_boris_sweeper simple_physics_solver)
