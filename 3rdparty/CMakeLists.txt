@@ -82,59 +82,6 @@ endif()
 list(APPEND 3rdparty_INCLUDES "${Eigen3_INCLUDE_PATH}")
 
 
-message(STATUS "--------------------------------------------------------------------------------")
-message(STATUS "Easylogging++")
-
-set(EASYLOGGING++_SOURCE_URL
-    "https://github.com/easylogging/easyloggingpp/releases/download/v9.75/easyloggingpp_v9.75.tar.gz"
-)
-
-find_package(Easylogging++)
-set_package_properties(Easylogging++
-    PROPERTIES
-      DESCRIPTION "logging library"
-      URL "https://github.com/easylogging/easyloggingpp"
-      TYPE OPTIONAL
-      PURPOSE "provides functionality for versatile logging"
-)
-
-if(NOT EASYLOGGING++_FOUND)
-    set(Easylogging++_SOURCE_DIR "${pfasst_BINARY_DIR}/3rdparty/src/Easylogging++")
-    set(EASYLOGGING++_SOURCE_MD5 "3e37462b30cb6ee49faeed6a94d1bc1e")
-
-    message(STATUS "Easylogging++ not found on your system")
-    message(STATUS " going to download sources from:")
-    message(STATUS "   ${EASYLOGGING++_SOURCE_URL}")
-    ExternalProject_Add(
-        Easylogging++
-        LIST_SEPARATOR " "
-        URL ${EASYLOGGING++_SOURCE_URL}
-        URL_MD5 ${Easylogging++_SOURCE_MD5}
-        TIMEOUT ${3rdparty_DOWNLOAD_TIMEOUT}
-        UPDATE_COMMAND ""
-        PATCH_COMMAND ""
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND ""
-        TEST_COMMAND ""
-        INSTALL_DIR ""
-        INSTALL_COMMAND ""
-        LOG_DOWNLOAD ON
-        LOG_CONFIGURE OFF
-        LOG_BUILD OFF
-    )
-
-    # Specify include dir
-    set(Easylogging++_INCLUDE_PATH "${Easylogging++_SOURCE_DIR}")
-    set(EASYLOGGING++_FOUND TRUE)
-
-    list(APPEND pfasst_DEPENDEND_TARGETS Easylogging++)
-
-    msg_not_installed("Easylogging++")
-endif()
-
-list(APPEND 3rdparty_INCLUDES "${Easylogging++_INCLUDE_PATH}")
-
-
 if(pfasst_BUILD_EXAMPLES)
     message(STATUS "--------------------------------------------------------------------------------")
     message(STATUS "FFTW3")
