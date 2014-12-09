@@ -49,7 +49,7 @@ TEST(ErrorTest, VanillaSDC)
     }
 
     EXPECT_THAT(err, testing::Pointwise(DoubleLess(), tol));
-    ASSERT_EQ(max_iter, 3);
+    ASSERT_EQ(max_iter, (size_t)3);
   }
 
   {
@@ -66,7 +66,7 @@ TEST(ErrorTest, VanillaSDC)
     }
 
     EXPECT_THAT(err, testing::Pointwise(DoubleLess(), tol));
-    ASSERT_EQ(max_iter, 2);
+    ASSERT_EQ(max_iter, (size_t)2);
   }
 }
 
