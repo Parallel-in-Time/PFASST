@@ -6,6 +6,7 @@
 #include <iostream>
 #include <tuple>
 #include <vector>
+using namespace std;
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
@@ -14,8 +15,7 @@
 #include "../examples/advection_diffusion/vanilla_sdc.cpp"
 #include "../examples/advection_diffusion/serial_mlsdc.cpp"
 #undef PFASST_UNIT_TESTING
-
-using namespace std;
+using namespace pfasst::examples::advection_diffusion;
 
 
 MATCHER(DoubleNear, "")
