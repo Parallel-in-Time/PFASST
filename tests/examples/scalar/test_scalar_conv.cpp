@@ -2,10 +2,10 @@
  * Tests for the scalar example solving the test equation
  */
 #include <cmath>
+using namespace std;
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-
 using namespace ::testing;
 
 #include <pfasst/quadrature.hpp>
@@ -13,6 +13,7 @@ using namespace ::testing;
 #define PFASST_UNIT_TESTING
 #include "../examples/scalar/scalar_sdc.cpp"
 #undef PFASST_UNIT_TESTING
+using namespace pfasst::examples::scalar;
 
 /*
  * parameterized test fixture with number of nodes as parameter
