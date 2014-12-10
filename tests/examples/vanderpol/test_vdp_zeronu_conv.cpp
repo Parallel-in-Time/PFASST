@@ -3,10 +3,10 @@
  * the linear oscillator and an analytical solution is available
  */
 #include <cmath>
+using namespace std;
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-
 using namespace ::testing;
 
 #include <pfasst/quadrature.hpp>
@@ -14,6 +14,7 @@ using namespace ::testing;
 #define PFASST_UNIT_TESTING
 #include "../examples/vanderpol/vdp_sdc.cpp"
 #undef PFASST_UNIT_TESTING
+using namespace pfasst::examples::vdp;
 
 /*
  * parameterized test fixture with number of nodes as parameter
