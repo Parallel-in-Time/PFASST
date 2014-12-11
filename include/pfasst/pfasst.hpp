@@ -76,6 +76,7 @@ namespace pfasst
                this->advance_iteration()) {
             post();
             cycle_v(this->finest());
+            fence();
           }
 
           this->get_finest()->post_step();
@@ -98,8 +99,9 @@ namespace pfasst
 
         perform_sweeps(l.level);
 
-        if (l == this->finest()) {
-          // note: convergence tests belong here
+        if (l == this->finest() && fine->converged()) {
+          this->comm->set_status(true);
+          //          return l;
         }
 
         fine->send(comm, tag(l), false);
@@ -222,6 +224,11 @@ namespace pfasst
         for (auto l = this->coarsest() + 1; l <= this->finest(); ++l) {
           l.current()->post(comm, tag(l));
         }
+      }
+
+      void fence()
+      {
+        this->comm->fence_status();
       }
 
     public:
