@@ -78,11 +78,24 @@ const string OUT::reset = "\033[0m";
   #define PFASST_LOGGER_DEFAULT_GLOBAL_MILLISECOND_WIDTH "4"
 #endif
 
+#ifndef VLOG_FUNC_START
+  #define VLOG_FUNC_START(scope) \
+    pfasst::log::stack_position++; \
+    VLOG(1) << std::string(pfasst::log::stack_position - 1, ' ') << "START:" << std::string(scope) + "::" + std::string(__func__) + "() "
+#endif
+
+#ifndef VLOG_FUNC_END
+  #define VLOG_FUNC_END(scope) \
+    pfasst::log::stack_position--; \
+    VLOG(1) << std::string(pfasst::log::stack_position, ' ') << "...   " << std::string(scope) + "::" + std::string(__func__) + "() DONE";
+#endif
 
 namespace pfasst
 {
   namespace log
   {
+    static size_t stack_position;
+
     /**
      * sets default configuration for default loggers
      */
@@ -181,6 +194,7 @@ namespace pfasst
       _START_EASYLOGGINGPP(argc, argv);
       set_logging_flags();
       load_default_config();
+      pfasst::log::stack_position = 0;
     }
   }  // ::pfasst::log
 }  // ::pfasst

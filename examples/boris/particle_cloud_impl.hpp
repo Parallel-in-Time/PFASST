@@ -5,6 +5,9 @@
 #include <string>
 using namespace std;
 
+#include <pfasst/logging.hpp>
+
+
 namespace pfasst
 {
   namespace examples
@@ -24,6 +27,7 @@ namespace pfasst
           , _default_mass(default_mass)
       {
         this->zero();
+        VLOG(2) << this->_num_particles << "particles D" << this->_dim;
       }
 
       template<typename precision>
@@ -33,10 +37,12 @@ namespace pfasst
       template<typename precision>
       void ParticleCloud<precision>::zero()
       {
+        VLOG_FUNC_START("ParticleCloud");
         fill(this->_positions.begin(), this->_positions.end(), vector<precision>(this->dim(), precision(0.0)));
         fill(this->_velocities.begin(), this->_velocities.end(), vector<precision>(this->dim(), precision(0.0)));
-        fill(this->_charges.begin(), this->_charges.end(), precision(0.0));
-        fill(this->_masses.begin(), this->_masses.end(), precision(0.0));
+        fill(this->_charges.begin(), this->_charges.end(), this->_default_charge);
+        fill(this->_masses.begin(), this->_masses.end(), this->_default_mass);
+        VLOG_FUNC_END("ParticleCloud");
       }
 
       template<typename precision>

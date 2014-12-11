@@ -172,7 +172,9 @@ namespace pfasst
               , errors()
               , exact_updated(false)
               , f_evals(0)
-          {}
+          {
+            VLOG_FUNC_START("BorisSweeper");
+          }
 
           BorisSweeper(const BorisSweeper<scalar, time>& other) = delete;
           BorisSweeper(BorisSweeper<scalar, time>&& other) = delete;
@@ -180,6 +182,7 @@ namespace pfasst
           virtual ~BorisSweeper()
           {
             LOG(INFO) << "number force computations:" << this->f_evals;
+            VLOG_FUNC_END("BorisSweeper");
           }
           //! @}
 
@@ -213,7 +216,9 @@ namespace pfasst
 
           virtual void set_initial_energy()
           {
+            VLOG_FUNC_START("BorisSweeper");
             this->initial_energy = this->impl_solver->energy(this->particles.front(), this->get_controller()->get_time());
+            VLOG_FUNC_END("BorisSweeper");
           }
           //! @}
 
@@ -287,35 +292,35 @@ namespace pfasst
 
           virtual void echo_error(const time t, bool predict = false)
           {
-            auto end = this->particles.back();
-            shared_ptr<encap_type> ex = make_shared<encap_type>();
-            this->exact(ex, t);
-            scalar e_end = this->impl_solver->energy(this->particles.back(), t);
-
-            ErrorTuple<scalar> e_tuple;
-            e_tuple.e_drift = this->initial_energy - e_end;
-            e_tuple.p_err.x = ex->positions()[0][0] - end->positions()[0][0];
-            e_tuple.p_err.y = ex->positions()[0][1] - end->positions()[0][1];
-            e_tuple.p_err.z = ex->positions()[0][2] - end->positions()[0][2];
-            e_tuple.p_err.u = ex->velocities()[0][0] - end->velocities()[0][0];
-            e_tuple.p_err.v = ex->velocities()[0][1] - end->velocities()[0][1];
-            e_tuple.p_err.w = ex->velocities()[0][2] - end->velocities()[0][2];
-            e_tuple.res = this->compute_residual();
-
-            size_t n = this->get_controller()->get_step();
-            size_t k = this->get_controller()->get_iteration();
-            error_index nk(n, k);
-
-            LOG(INFO) << scientific << setprecision(5)
-                      << "step" << n+1
-                      << "\titer" << k
-                      << "\tres" << e_tuple.res
-                      << "\tdrift" << e_tuple.e_drift
-                      << "\tenergy" << e_end;
-  //           VLOG(1) << "particle at t_end:" << *end;
-            VLOG(2) << "absolute error:" << e_tuple.p_err;
-
-            this->errors.insert(pair<error_index, ErrorTuple<scalar>>(nk, e_tuple));
+//             auto end = this->particles.back();
+//             shared_ptr<encap_type> ex = make_shared<encap_type>();
+//             this->exact(ex, t);
+//             scalar e_end = this->impl_solver->energy(this->particles.back(), t);
+// 
+//             ErrorTuple<scalar> e_tuple;
+//             e_tuple.e_drift = this->initial_energy - e_end;
+//             e_tuple.p_err.x = ex->positions()[0][0] - end->positions()[0][0];
+//             e_tuple.p_err.y = ex->positions()[0][1] - end->positions()[0][1];
+//             e_tuple.p_err.z = ex->positions()[0][2] - end->positions()[0][2];
+//             e_tuple.p_err.u = ex->velocities()[0][0] - end->velocities()[0][0];
+//             e_tuple.p_err.v = ex->velocities()[0][1] - end->velocities()[0][1];
+//             e_tuple.p_err.w = ex->velocities()[0][2] - end->velocities()[0][2];
+//             e_tuple.res = this->compute_residual();
+// 
+//             size_t n = this->get_controller()->get_step();
+//             size_t k = this->get_controller()->get_iteration();
+//             error_index nk(n, k);
+// 
+//             LOG(INFO) << scientific << setprecision(5)
+//                       << "step" << n+1
+//                       << "\titer" << k
+//                       << "\tres" << e_tuple.res
+//                       << "\tdrift" << e_tuple.e_drift
+//                       << "\tenergy" << e_end;
+//   //           VLOG(1) << "particle at t_end:" << *end;
+//             VLOG(2) << "absolute error:" << e_tuple.p_err;
+// 
+//             this->errors.insert(pair<error_index, ErrorTuple<scalar>>(nk, e_tuple));
           }
 
           virtual error_map<scalar> get_errors() const
@@ -327,6 +332,7 @@ namespace pfasst
           //! @{
           virtual void setup(bool coarse = false) override
           {
+            VLOG_FUNC_START("BorisSweeper") << "coarse=" << coarse;
             auto nodes = this->get_nodes();
             assert(nodes.size() >= 1);
             const size_t nnodes = nodes.size();
@@ -341,10 +347,10 @@ namespace pfasst
             for (size_t m = 0; m < nnodes; ++m) {
               this->particles.push_back(dynamic_pointer_cast<encap_type>(this->get_factory()->create(pfasst::encap::solution)));
               this->previous_particles.push_back(dynamic_pointer_cast<encap_type>(this->get_factory()->create(pfasst::encap::solution)));
-              this->forces.push_back(acceleration_type(this->particles[0]->size()));
-              this->previous_forces.push_back(acceleration_type(this->particles[0]->size()));
-              this->s_integrals.push_back(velocity_type(this->particles[0]->size()));
-              this->ss_integrals.push_back(position_type(this->particles[0]->size()));
+              this->forces.push_back(cloud_component_factory<scalar>(this->particles[m]->size(), this->particles[m]->dim()));
+              this->previous_forces.push_back(cloud_component_factory<scalar>(this->particles[m]->size(), this->particles[m]->dim()));
+              this->s_integrals.push_back(cloud_component_factory<scalar>(this->particles[m]->size(), this->particles[m]->dim()));
+              this->ss_integrals.push_back(cloud_component_factory<scalar>(this->particles[m]->size(), this->particles[m]->dim()));
               if (coarse) {
                 this->tau_corrections.push_back(dynamic_pointer_cast<encap_type>(this->get_factory()->create(pfasst::encap::solution)));
               }
@@ -402,17 +408,21 @@ namespace pfasst
             }
 
             UNUSED(coarse);
+            VLOG_FUNC_END("BorisSweeper");
           }
 
           virtual void advance() override
           {
+            VLOG_FUNC_START("BorisSweeper");
             this->set_state(const_pointer_cast<const encap_type>(this->particles.back()), 0);
             this->energy_evals.front() = this->energy_evals.back();
             this->exact_updated = false;
+            VLOG_FUNC_END("BorisSweeper");
           }
 
           virtual void evaluate(size_t m)
           {
+            VLOG_FUNC_START("BorisSweeper") << "node=" << m;
             time t = this->get_controller()->get_time() + this->get_controller()->get_time_step() * this->delta_nodes[m];
   //           Vector3d<scalar> vel; vel.fill(scalar(0.0));
   //           Vector3d<scalar> B; B.fill(scalar(0.0));
@@ -436,21 +446,24 @@ namespace pfasst
 
             this->forces[m] = this->impl_solver->force_evaluate(this->particles[m], t);
             this->f_evals++;
+            VLOG_FUNC_END("BorisSweeper");
           }
 
           virtual void predict(bool initial) override
           {
+            VLOG_FUNC_START("BorisSweeper") << "initial=" << initial;
             UNUSED(initial);
             this->spread();
             for (size_t m = 0; m < this->particles.size(); ++m) {
               this->evaluate(m);
             }
             this->save();
+            VLOG_FUNC_END("BorisSweeper");
           }
 
           virtual void sweep() override
           {
-            cout << "sweep" << endl;
+            VLOG_FUNC_START("BorisSweeper");
             const auto   nodes  = this->get_nodes();
             const size_t nnodes = nodes.size();
             assert(nnodes >= 1);
@@ -459,7 +472,7 @@ namespace pfasst
 
             this->impl_solver->energy(this->particles.front(), t);
 
-            velocity_type c_k_term;
+            velocity_type c_k_term = cloud_component_factory<scalar>(this->particles[0]->size(), this->particles[0]->dim());
 
             // compute integrals
             for(size_t i = 0; i < nnodes; ++i) {
@@ -468,9 +481,7 @@ namespace pfasst
             }
             // starting at m=1 as m=0 will only add zeros
             for (size_t m = 1; m < nnodes; m++) {
-              cout << "  m=" << m << endl;
               for (size_t l = 0; l < nnodes; l++) {
-                cout << "    l=" << l << endl;
                 this->s_integrals[m] += this->previous_forces[l] * dt * this->s_mat(m, l);
                 this->ss_integrals[m] += this->previous_forces[l] * dt * dt * this->ss_mat(m, l);
               }
@@ -514,10 +525,12 @@ namespace pfasst
             }
             this->save();
             this->echo_error(t + dt);
+            VLOG_FUNC_END("BorisSweeper");
           }
 
           virtual void save(bool initial_only=false) override
           {
+            VLOG_FUNC_START("BorisSweeper") << "initial_only=" << initial_only;
             if (initial_only) {
               this->previous_particles[0] = make_shared<encap_type>(*(this->particles[0].get()));
               this->previous_forces[0] = this->forces[0];
@@ -527,13 +540,16 @@ namespace pfasst
                 this->previous_forces[m] = this->forces[m];
               }
             }
+            VLOG_FUNC_END("BorisSweeper");
           }
 
           virtual void spread() override
           {
+            VLOG_FUNC_START("BorisSweeper");
             for (size_t m = 1; m < this->particles.size(); ++m) {
               this->set_state(const_pointer_cast<const encap_type>(this->particles[0]), m);
             }
+            VLOG_FUNC_END("BorisSweeper");
           }
           //! @}
 
@@ -567,6 +583,7 @@ namespace pfasst
           virtual void boris_solve(const time tm, const time t_next, const time ds, const size_t m,
                                    const velocity_type& c_k_term)
           {
+            VLOG_FUNC_START("BorisSweeper") << "tm=" << tm << ", t_next=" << t_next << ", node=" << m;
             UNUSED(t_next);
             velocity_type c_k_term_half = c_k_term / scalar(2.0);
             AttributeValues<scalar> beta = cmp_wise_div(this->particles[m]->charges(), this->particles[m]->masses()) / scalar(2.0) * ds;
@@ -597,6 +614,7 @@ namespace pfasst
   //           assert(abs(v_minus.norm0() - v_plus.norm0()) <= 10e-8);
 
             this->particles[m+1]->velocities() = v_plus + e_forces_mean * beta + c_k_term_half;
+            VLOG_FUNC_END("BorisSweeper");
           }
           //! @}
       };

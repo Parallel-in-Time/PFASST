@@ -12,6 +12,17 @@ namespace pfasst
     namespace boris
     {
       template<typename precision>
+      static ParticleCloudComponent<precision> cloud_component_factory(const size_t num_particles, const size_t dim)
+      {
+        ParticleCloudComponent<precision> out(num_particles);
+        for (size_t p = 0; p < out.size(); ++p) {
+          out[p].resize(dim);
+        }
+        return out;
+      }
+
+
+      template<typename precision>
       static ParticleComponent<precision> cross_prod(const ParticleComponent<precision>& first,
                                                      const ParticleComponent<precision>& second)
       {
