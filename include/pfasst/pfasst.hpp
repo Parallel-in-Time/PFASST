@@ -5,6 +5,7 @@
 #ifndef _PFASST_PFASST_HPP_
 #define _PFASST_PFASST_HPP_
 
+#include "logging.hpp"
 #include "mlsdc.hpp"
 
 using namespace std;
@@ -77,6 +78,16 @@ namespace pfasst
             post();
             cycle_v(this->finest());
             fence();
+
+            auto rank = this->comm->rank();
+            if (this->comm->get_converged(rank)) {
+              if ((rank == 0) || (rank > 0 && this->comm->get_converged(rank-1))) {
+                LOG(DEBUG) << "rank " << rank << " converged; previous converged; breaking iterations";
+                break;
+              } else {
+                LOG(DEBUG) << "rank " << rank << " converged; previous hasn't converged; continuing iterations";
+              }
+            }
           }
 
           this->get_finest()->post_step();
@@ -84,6 +95,8 @@ namespace pfasst
           if (nblock < nblocks - 1) {
             broadcast();
           }
+
+          this->comm->clear_converged();
         }
       }
 
@@ -100,8 +113,7 @@ namespace pfasst
         perform_sweeps(l.level);
 
         if (l == this->finest() && fine->converged()) {
-          this->comm->set_status(true);
-          //          return l;
+          this->comm->set_converged(true);
         }
 
         fine->send(comm, tag(l), false);

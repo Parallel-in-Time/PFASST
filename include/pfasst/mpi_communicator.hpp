@@ -37,7 +37,7 @@ namespace pfasst
         //! @{
         int _rank;
         int _size;
-        vector<int> status;
+        vector<int> status, _status;
         //! @}
 
       public:
@@ -70,7 +70,9 @@ namespace pfasst
           MPI_Comm_rank(this->comm, &(this->_rank));
 
           status.resize(this->_size);
-          auto err = MPI_Win_create(status.data(), this->_size * sizeof(int),
+          _status.resize(this->_size);
+          this->clear_converged();
+          auto err = MPI_Win_create(_status.data(), this->_size * sizeof(int),
                                     sizeof(int), MPI_INFO_NULL, this->comm,
                                     &this->status_window);
           if (err != MPI_SUCCESS) {
@@ -79,18 +81,29 @@ namespace pfasst
           MPI_Win_fence(MPI_MODE_NOPRECEDE, this->status_window);
         }
 
-        virtual void set_status(bool converged) override
+        virtual void set_converged(bool converged) override
         {
           LOG(DEBUG) << "mpi rank " << this->_rank << " set converged to " << converged;
-          this->status[this->_rank] = converged ? 1 : 0;
+          this->_status[this->_rank] = converged ? 1 : 0;
           for (int dst = 0; dst < this->_size; dst++) {
             if (dst == this->_rank) { continue; }
-            auto err = MPI_Put(this->status.data()+this->_rank, 1, MPI_INT,
+            auto err = MPI_Put(this->_status.data()+this->_rank, 1, MPI_INT,
                                dst, this->_rank, 1, MPI_INT, this->status_window);
             if (err != MPI_SUCCESS) {
               throw MPIError();
             }
           }
+        }
+
+        virtual bool get_converged(int rank) override
+        {
+          return this->status[rank];
+        }
+
+        virtual void clear_converged() override
+        {
+          std::fill(status.begin(), status.end(), 0);
+          std::fill(_status.begin(), _status.end(), 0);
         }
 
         virtual void fence_status() override
@@ -99,6 +112,11 @@ namespace pfasst
           if (err != MPI_SUCCESS) {
             throw MPIError();
           }
+
+          // XXX: find first non-converged processor and flag all preceeding processors as not
+          // converged...
+          std::copy(_status.begin(), _status.end(), status.begin());
+          // status.copy(_status);
         }
 
         int size() { return this->_size; }

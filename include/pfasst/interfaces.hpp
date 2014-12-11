@@ -73,7 +73,9 @@ namespace pfasst
       virtual ~ICommunicator() { }
       virtual int size() = 0;
       virtual int rank() = 0;
-      virtual void set_status(bool converged) = 0;
+      virtual void set_converged(bool converged) = 0;
+      virtual bool get_converged(int rank) = 0;
+      virtual void clear_converged() = 0;
       virtual void fence_status() = 0;
   };
 
