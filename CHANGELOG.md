@@ -33,8 +33,17 @@ DOI: tbd
 * In sweepers: `state(0)` is not assumed to be same as `start_state`.
   ([#132][])
 
+* Examples are now in their own namespace `pfasst::examples::`
+  ([#138][])
+
 * Bunch of CMake-related fixes and extentions.
   ([#83][], [#96][], [#101][], [#109][], [#112][], [#119][], [#121][], [#131][], [#133][], [#135][])
+
+* Example of using PFASST++ with a Makefile project (see advection-diffusion example).
+  ([#129][])
+
+* Support for [HashDist](https://github.com/hashdist/hashdist) to provide dependencies.
+  ([#129][])
 
 * A few corrections and extentions to the documentation.
   ([#117][], [#120][])
@@ -57,11 +66,12 @@ DOI: tbd
 [#120]: https://github.com/Parallel-in-Time/PFASST/pull/120
 [#121]: https://github.com/Parallel-in-Time/PFASST/pull/121
 [#123]: https://github.com/Parallel-in-Time/PFASST/pull/123
+[#129]: https://github.com/Parallel-in-Time/PFASST/pull/129
 [#131]: https://github.com/Parallel-in-Time/PFASST/pull/131
 [#132]: https://github.com/Parallel-in-Time/PFASST/pull/132
 [#133]: https://github.com/Parallel-in-Time/PFASST/pull/133
 [#135]: https://github.com/Parallel-in-Time/PFASST/pull/135
-
+[#138]: https://github.com/Parallel-in-Time/PFASST/pull/138
 
 ### Contributors
 
