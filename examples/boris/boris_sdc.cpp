@@ -33,7 +33,7 @@ namespace pfasst
 
         shared_ptr<bindings::WrapperInterface<double, double>> impl_solver = \
           make_shared<bindings::WrapperSimplePhysicsSolver<double, double>>();
-        bindings::setup(impl_solver);
+        bindings::setup(dynamic_pointer_cast<bindings::WrapperSimplePhysicsSolver<double, double>>(impl_solver));
         auto sweeper = make_shared<BorisSweeper<double, double>>(impl_solver);
 
         sweeper->set_quadrature(quad);
@@ -45,9 +45,9 @@ namespace pfasst
 
         auto p0 = dynamic_pointer_cast<ParticleCloud<double>>(sweeper->get_state(0));
         cout << p0->size() << endl;
-  //       p0[0]->pos()[0] = 10;
-  //       p0[0]->vel()[0] = 100;
-  //       p0[0]->vel()[2] = 100;
+        p0->positions()[0][0] = 10;
+        p0->positions()[0][0] = 100;
+        p0->positions()[0][2] = 100;
 
         sweeper->set_initial_energy();
   //       LOG(INFO) << OUT::green << "Initial Particle: " << *(dynamic_pointer_cast<ParticleCloud<double>>(sweeper->get_state(0)));

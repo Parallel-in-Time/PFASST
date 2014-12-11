@@ -190,7 +190,7 @@ namespace pfasst
 
         template<typename scalar, typename time>
         void
-        WrapperSimplePhysicsSolver<scalar, time>::set_config(shared_ptr<solver::SimplePhysicsSolverConfig>& config)
+        WrapperSimplePhysicsSolver<scalar, time>::set_config(shared_ptr<solver::SimplePhysicsSolverConfig> config)
         {
           this->config = config;
         }

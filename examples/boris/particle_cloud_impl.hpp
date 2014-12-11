@@ -22,7 +22,9 @@ namespace pfasst
           , _masses(num_particles, default_mass)
           , _default_charge(default_charge)
           , _default_mass(default_mass)
-      {}
+      {
+        this->zero();
+      }
 
       template<typename precision>
       ParticleCloud<precision>::~ParticleCloud()

@@ -95,9 +95,9 @@ namespace simple_physics_solver
                         const SimplePhysicsSolverConfig* config,
                         double* forces)
   {
-    double* external = new double[num_particles * DIM];
-    double* internal = new double[num_particles * DIM];
-    double* phis = new double[num_particles];
+    double external[num_particles * DIM];
+    double internal[num_particles * DIM];
+    double phis[num_particles];
     evaluate_external_e_field(positions, charges, masses, num_particles, t, config, external);
     evaluate_internal_e_field(positions, charges, masses, num_particles, t, config, internal, phis);
     for (size_t i = 0; i < num_particles; ++i) {
@@ -105,9 +105,6 @@ namespace simple_physics_solver
         forces[i * DIM + d] = external[i * DIM + d] + internal[i * DIM + d];
       }
     }
-    delete[] external;
-    delete[] internal;
-    delete[] phis;
   }
 
 
@@ -145,8 +142,8 @@ namespace simple_physics_solver
 
     double cross_prod[DIM];
 
-    double* exyz = new double[num_particles * DIM];
-    double* phis = new double[num_particles];
+    double exyz[num_particles * DIM];
+    double phis[num_particles];
 
     evaluate_internal_e_field(positions, charges, masses, num_particles, t, config, exyz, phis);
 
@@ -157,8 +154,6 @@ namespace simple_physics_solver
         e_kin += masses[i] / double(2.0) * cross_prod[m];
       }
     }
-    delete[] exyz;
-    delete[] phis;
 
     return e_kin + e_pot;
   }

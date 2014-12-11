@@ -66,7 +66,7 @@ namespace pfasst
 
             virtual ParticleComponent<scalar> get_b_field_vector() override;
 
-            virtual void set_config(shared_ptr<solver::SimplePhysicsSolverConfig>& config);
+            virtual void set_config(shared_ptr<solver::SimplePhysicsSolverConfig> config);
             virtual scalar omega_b() const;
             virtual scalar omega_e() const;
             virtual scalar epsilon() const;

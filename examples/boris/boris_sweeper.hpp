@@ -341,8 +341,10 @@ namespace pfasst
             for (size_t m = 0; m < nnodes; ++m) {
               this->particles.push_back(dynamic_pointer_cast<encap_type>(this->get_factory()->create(pfasst::encap::solution)));
               this->previous_particles.push_back(dynamic_pointer_cast<encap_type>(this->get_factory()->create(pfasst::encap::solution)));
-              this->s_integrals.push_back(velocity_type());
-              this->ss_integrals.push_back(position_type());
+              this->forces.push_back(acceleration_type(this->particles[0]->size()));
+              this->previous_forces.push_back(acceleration_type(this->particles[0]->size()));
+              this->s_integrals.push_back(velocity_type(this->particles[0]->size()));
+              this->ss_integrals.push_back(position_type(this->particles[0]->size()));
               if (coarse) {
                 this->tau_corrections.push_back(dynamic_pointer_cast<encap_type>(this->get_factory()->create(pfasst::encap::solution)));
               }
@@ -448,6 +450,7 @@ namespace pfasst
 
           virtual void sweep() override
           {
+            cout << "sweep" << endl;
             const auto   nodes  = this->get_nodes();
             const size_t nnodes = nodes.size();
             assert(nnodes >= 1);
@@ -465,7 +468,9 @@ namespace pfasst
             }
             // starting at m=1 as m=0 will only add zeros
             for (size_t m = 1; m < nnodes; m++) {
+              cout << "  m=" << m << endl;
               for (size_t l = 0; l < nnodes; l++) {
+                cout << "    l=" << l << endl;
                 this->s_integrals[m] += this->previous_forces[l] * dt * this->s_mat(m, l);
                 this->ss_integrals[m] += this->previous_forces[l] * dt * dt * this->ss_mat(m, l);
               }
@@ -515,9 +520,11 @@ namespace pfasst
           {
             if (initial_only) {
               this->previous_particles[0] = make_shared<encap_type>(*(this->particles[0].get()));
+              this->previous_forces[0] = this->forces[0];
             } else {
               for (size_t m = 0; m < this->previous_particles.size(); m++) {
                 this->previous_particles[m] = make_shared<encap_type>(*(this->particles[m].get()));
+                this->previous_forces[m] = this->forces[m];
               }
             }
           }
