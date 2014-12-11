@@ -14,74 +14,77 @@ using namespace std;
 namespace solver = simple_physics_solver;
 
 
-namespace examples
+namespace pfasst
 {
-  namespace boris
+  namespace examples
   {
-    namespace bindings
+    namespace boris
     {
-      template<
-        typename scalar,
-        typename time
-      >
-      class WrapperSimplePhysicsSolver
-        : public WrapperInterface<scalar, time>
+      namespace bindings
       {
-        private:
-          shared_ptr<solver::SimplePhysicsSolverConfig> config;
+        template<
+          typename scalar,
+          typename time
+        >
+        class WrapperSimplePhysicsSolver
+          : public WrapperInterface<scalar, time>
+        {
+          private:
+            shared_ptr<solver::SimplePhysicsSolverConfig> config;
 
-        public:
-          typedef shared_ptr<ParticleCloud<scalar>> particle_cloud_type;
+          public:
+            typedef shared_ptr<ParticleCloud<scalar>> particle_cloud_type;
 
-        protected:
-          virtual size_t vector_to_array(const vector<scalar>& vec, scalar* arr);
-          virtual size_t vector2d_to_array(const vector<vector<scalar>>& vec, scalar* arr);
+          protected:
+            virtual size_t vector_to_array(const vector<scalar>& vec, scalar* arr);
+            virtual size_t vector2d_to_array(const vector<vector<scalar>>& vec, scalar* arr);
 
-          virtual size_t pack_positions(const particle_cloud_type& particles, scalar* packed) override;
+            virtual size_t pack_positions(const particle_cloud_type& particles, scalar* packed) override;
 
-          virtual size_t pack_velocities(const particle_cloud_type& particles, scalar* packed) override;
+            virtual size_t pack_velocities(const particle_cloud_type& particles, scalar* packed) override;
 
-          virtual size_t pack_charges(const particle_cloud_type& particles, scalar* packed) override;
+            virtual size_t pack_charges(const particle_cloud_type& particles, scalar* packed) override;
 
-          virtual size_t pack_masses(const particle_cloud_type& particles, scalar* packed) override;
+            virtual size_t pack_masses(const particle_cloud_type& particles, scalar* packed) override;
 
-          virtual size_t pack_all(const particle_cloud_type& particles,
-                                  scalar* packed_positions, scalar* packed_velocities,
-                                  scalar* packed_charges, scalar* packed_masses) override;
+            virtual size_t pack_all(const particle_cloud_type& particles,
+                                    scalar* packed_positions, scalar* packed_velocities,
+                                    scalar* packed_charges, scalar* packed_masses) override;
 
-          virtual vector<scalar> unpack_1d(const scalar* packed, const size_t num_particles);
-          virtual ParticleCloudComponent<scalar> unpack_2d(const scalar* packed,
-                                                           const size_t num_particles);
+            virtual vector<scalar> unpack_1d(const scalar* packed, const size_t num_particles);
+            virtual ParticleCloudComponent<scalar> unpack_2d(const scalar* packed,
+                                                             const size_t num_particles);
 
-        public:
-          WrapperSimplePhysicsSolver();
-          virtual ~WrapperSimplePhysicsSolver();
+          public:
+            WrapperSimplePhysicsSolver();
+            virtual ~WrapperSimplePhysicsSolver();
 
-          virtual ParticleCloudComponent<scalar> e_field_evaluate(const particle_cloud_type& particles, const time t) override;
-          virtual ParticleCloudComponent<scalar> b_field_evaluate(const particle_cloud_type& particles, const time t) override;
-          virtual ParticleCloudComponent<scalar> force_evaluate(const particle_cloud_type& particles, const time t) override;
-          virtual scalar energy(const particle_cloud_type& particles, const time t) override;
+            virtual ParticleCloudComponent<scalar> e_field_evaluate(const particle_cloud_type& particles, const time t) override;
+            virtual ParticleCloudComponent<scalar> b_field_evaluate(const particle_cloud_type& particles, const time t) override;
+            virtual ParticleCloudComponent<scalar> force_evaluate(const particle_cloud_type& particles, const time t) override;
+            virtual scalar energy(const particle_cloud_type& particles, const time t) override;
 
-          virtual ParticleComponent<scalar> get_b_field_vector() override;
+            virtual ParticleComponent<scalar> get_b_field_vector() override;
 
-          virtual void set_config(shared_ptr<solver::SimplePhysicsSolverConfig>& config);
-          virtual scalar omega_b() const;
-          virtual scalar omega_e() const;
-          virtual scalar epsilon() const;
-      };
+            virtual void set_config(shared_ptr<solver::SimplePhysicsSolverConfig>& config);
+            virtual scalar omega_b() const;
+            virtual scalar omega_e() const;
+            virtual scalar epsilon() const;
+        };
 
 
-      template<typename scalar, typename time>
-      void setup(shared_ptr<WrapperSimplePhysicsSolver<scalar, time>> wrapper);
+        template<typename scalar, typename time>
+        void setup(shared_ptr<WrapperSimplePhysicsSolver<scalar, time>> wrapper);
 
-      template<typename scalar, typename time, typename ArgT>
-      void setup(shared_ptr<WrapperSimplePhysicsSolver<scalar, time>> wrapper, ArgT arg);
+        template<typename scalar, typename time, typename ArgT>
+        void setup(shared_ptr<WrapperSimplePhysicsSolver<scalar, time>> wrapper, ArgT arg);
 
-      template<typename scalar, typename time, typename ArgT, typename... ArgsT>
-      void setup(shared_ptr<WrapperSimplePhysicsSolver<scalar, time>> wrapper, ArgT arg, ArgsT... args);
-    }  // ::examples::boris::bindings
-  }  // ::examples::boris
-}  // ::examples
+        template<typename scalar, typename time, typename ArgT, typename... ArgsT>
+        void setup(shared_ptr<WrapperSimplePhysicsSolver<scalar, time>> wrapper, ArgT arg, ArgsT... args);
+      }  // ::pfasst::examples::boris::bindings
+    }  // ::pfasst::examples::boris
+  }  // ::pfasst::examples
+}  // ::pfasst
 
 #include "wrapper_simple_physics_solver_impl.hpp"
 

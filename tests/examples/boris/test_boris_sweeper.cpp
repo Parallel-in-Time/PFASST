@@ -8,7 +8,7 @@ using namespace ::testing;
 #include "../examples/boris/boris_sweeper.hpp"
 #include "../examples/boris/boris_sdc.cpp"
 #undef PFASST_UNIT_TESTING
-using namespace examples::boris;
+using namespace pfasst::examples::boris;
 
 
 TEST(EnergyDriftAndResidual, SingleStep)

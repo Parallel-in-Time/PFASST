@@ -11,64 +11,67 @@ using namespace std;
 #define UNUSED(expr) (void)(expr)
 
 
-namespace examples
+namespace pfasst
 {
-  namespace boris
+  namespace examples
   {
-    namespace bindings
+    namespace boris
     {
-      template<
-        typename scalar,
-        typename time
-      >
-      class WrapperInterface
+      namespace bindings
       {
-        public:
-          typedef shared_ptr<ParticleCloud<scalar>> particle_cloud_type;
+        template<
+          typename scalar,
+          typename time
+        >
+        class WrapperInterface
+        {
+          public:
+            typedef shared_ptr<ParticleCloud<scalar>> particle_cloud_type;
 
-        protected:
-          virtual size_t pack_positions(const particle_cloud_type& particles, scalar* packed) = 0;
-          virtual size_t pack_velocities(const particle_cloud_type& particles, scalar* packed) = 0;
-          virtual size_t pack_charges(const particle_cloud_type& particles, scalar* packed) = 0;
-          virtual size_t pack_masses(const particle_cloud_type& particles, scalar* packed) = 0;
-          virtual size_t pack_all(const particle_cloud_type& particles,
-                                  scalar* packed_positions, scalar* packed_velocities,
-                                  scalar* packed_charges, scalar* packed_masses) = 0;
+          protected:
+            virtual size_t pack_positions(const particle_cloud_type& particles, scalar* packed) = 0;
+            virtual size_t pack_velocities(const particle_cloud_type& particles, scalar* packed) = 0;
+            virtual size_t pack_charges(const particle_cloud_type& particles, scalar* packed) = 0;
+            virtual size_t pack_masses(const particle_cloud_type& particles, scalar* packed) = 0;
+            virtual size_t pack_all(const particle_cloud_type& particles,
+                                    scalar* packed_positions, scalar* packed_velocities,
+                                    scalar* packed_charges, scalar* packed_masses) = 0;
 
-        public:
-          virtual ~WrapperInterface() {}
+          public:
+            virtual ~WrapperInterface() {}
 
-          virtual ParticleCloudComponent<scalar>
-          e_field_evaluate(const particle_cloud_type& particles, const time t) = 0;
+            virtual ParticleCloudComponent<scalar>
+            e_field_evaluate(const particle_cloud_type& particles, const time t) = 0;
 
-          virtual ParticleCloudComponent<scalar>
-          b_field_evaluate(const particle_cloud_type& particles, const time t) = 0;
+            virtual ParticleCloudComponent<scalar>
+            b_field_evaluate(const particle_cloud_type& particles, const time t) = 0;
 
-          virtual ParticleCloudComponent<scalar>
-          force_evaluate(const particle_cloud_type& particles, const time t) = 0;
+            virtual ParticleCloudComponent<scalar>
+            force_evaluate(const particle_cloud_type& particles, const time t) = 0;
 
-          virtual ParticleComponent<scalar> get_b_field_vector() = 0;
+            virtual ParticleComponent<scalar> get_b_field_vector() = 0;
 
-          virtual scalar energy(const particle_cloud_type& particles, const time t) = 0;
+            virtual scalar energy(const particle_cloud_type& particles, const time t) = 0;
 
-          virtual scalar omega_b() const = 0;
-          virtual scalar omega_e() const = 0;
-          virtual scalar epsilon() const = 0;
-      };
+            virtual scalar omega_b() const = 0;
+            virtual scalar omega_e() const = 0;
+            virtual scalar epsilon() const = 0;
+        };
 
-      template<typename scalar, typename time>
-      void setup(shared_ptr<WrapperInterface<scalar, time>> wrapper)
-      {}
+        template<typename scalar, typename time>
+        void setup(shared_ptr<WrapperInterface<scalar, time>> wrapper)
+        {}
 
-      template<typename scalar, typename time, typename ArgT>
-      void setup(shared_ptr<WrapperInterface<scalar, time>> wrapper, ArgT arg)
-      {}
+        template<typename scalar, typename time, typename ArgT>
+        void setup(shared_ptr<WrapperInterface<scalar, time>> wrapper, ArgT arg)
+        {}
 
-      template<typename scalar, typename time, typename ArgT, typename... ArgsT>
-      void setup(shared_ptr<WrapperInterface<scalar, time>> wrapper, ArgT arg, ArgsT... args)
-      {}
-    }  // ::examples::boris::bindings
-  }  // ::examples::boris
-}  // ::examples
+        template<typename scalar, typename time, typename ArgT, typename... ArgsT>
+        void setup(shared_ptr<WrapperInterface<scalar, time>> wrapper, ArgT arg, ArgsT... args)
+        {}
+      }  // ::pfasst::examples::boris::bindings
+    }  // ::pfasst::examples::boris
+  }  // ::pfasst::examples
+}  // ::pfasst
 
 #endif  // _EXAMPLES__BORIS__BINDINGS__WRAPPER_INTERFACE_HPP_
