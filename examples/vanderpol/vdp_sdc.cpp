@@ -1,8 +1,7 @@
 /**
+ * \file vdp_sdc.cpp
  * Run SDC for the van der Pol oscillator.
- *
  */
-
 #include <pfasst.hpp>
 #include <pfasst/config.hpp>
 #include <pfasst/logging.hpp>
@@ -11,35 +10,45 @@
 
 #include "vdp_sweeper.hpp"
 
-double run_vdp_sdc(const size_t nsteps, const double dt, const size_t nnodes,
-                   const size_t niters, const double nu, const double x0,
-                   const double y0, const pfasst::quadrature::QuadratureType nodetype)
+namespace pfasst
 {
-  pfasst::SDC<> sdc;
+  namespace examples
+  {
+    namespace vdp
+    {
+      double run_vdp_sdc(const size_t nsteps, const double dt, const size_t nnodes,
+                         const size_t niters, const double nu, const double x0,
+                         const double y0, const quadrature::QuadratureType nodetype)
+      {
+        SDC<> sdc;
 
-  auto quad = pfasst::quadrature::quadrature_factory(nnodes, nodetype);
+        auto quad = quadrature::quadrature_factory(nnodes, nodetype);
 
-  // van der Pol oscillator (as first order system) has two components
-  auto factory = make_shared<pfasst::encap::VectorFactory<double>>(2);
-  // input is parameter nu and initial values for position and velocity
-  auto sweeper = make_shared<VdpSweeper<>>(nu, x0, y0);
+        // van der Pol oscillator (as first order system) has two components
+        auto factory = make_shared<encap::VectorFactory<double>>(2);
+        // input is parameter nu and initial values for position and velocity
+        auto sweeper = make_shared<VdpSweeper<>>(nu, x0, y0);
 
-  sweeper->set_quadrature(quad);
-  sweeper->set_factory(factory);
+        sweeper->set_quadrature(quad);
+        sweeper->set_factory(factory);
 
-  sdc.add_level(sweeper);
+        sdc.add_level(sweeper);
 
-  // Final time Tend = dt*nsteps
-  sdc.set_duration(0.0, dt*nsteps, dt, niters);
-  sdc.setup();
+        // Final time Tend = dt*nsteps
+        sdc.set_duration(0.0, dt*nsteps, dt, niters);
+        sdc.setup();
 
-  auto q0 = sweeper->get_start_state();
-  sweeper->exact(q0, 0.0);
+        auto q0 = sweeper->get_start_state();
+        sweeper->exact(q0, 0.0);
 
-  sdc.run();
+        sdc.run();
 
-  return sweeper->get_errors();
-}
+        return sweeper->get_errors();
+      }
+    }  // ::pfasst::examples::vdp
+  }  // ::pfasst::examples
+}  // ::pfasst
+
 
 #ifndef PFASST_UNIT_TESTING
 /**
@@ -59,6 +68,6 @@ int main(int argc, char** argv)
   pfasst::init(argc, argv);
   LOG(INFO) << "Used timestep:" << dt;
 
-  run_vdp_sdc(nsteps, dt, nnodes, niters, nu, x0, y0, nodetype);
+  pfasst::examples::vdp::run_vdp_sdc(nsteps, dt, nnodes, niters, nu, x0, y0, nodetype);
 }
 #endif

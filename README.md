@@ -10,7 +10,10 @@ spectral deferred correction* (MLSDC) algorithms.
 News
 ----
 
-* August 29, 2014: PFASST v0.2.0 release. Please sse the [release notes](#releases) for more 
+* December 12, 2014: PFASST v0.3.0 release. Please see the [release notes](#releases) for more
+  information.
+
+* August 29, 2014: PFASST v0.2.0 release. Please see the [release notes](#releases) for more
   information.
 
 * July 25, 2014: PFASST v0.1.0 released.  Please see the [release notes](#releases) for more
@@ -41,20 +44,27 @@ Currently, it features the following content:
 Releases
 --------
 
+* **v0.3.0** The Big Cleanup Release (2014/12/12)
+
+  A lot of internal cleanup and usability enhancements.  
+  DOI: [10.5281/zenodo.13221][DOI_v030]  
+  See \subpage #page_changelog "the Changelog" for details.
+
 * **v0.2.0** MPI-PFASST Release (2014/08/29)
 
-  Implementation of PFASST with MPI.
-  DOI: [10.5281/zenodo.11517][DOI_v020]
+  Implementation of PFASST with MPI.  
+  DOI: [10.5281/zenodo.11517][DOI_v020]  
   See \subpage #page_changelog "the Changelog" for details.
 
 * **v0.1.0** First Release (2014/07/25)
 
-  Initial release with basic implementations of SDC and MLSDC.
-  DOI: [10.5281/zenodo.11047][DOI_v010]
+  Initial release with basic implementations of SDC and MLSDC.  
+  DOI: [10.5281/zenodo.11047][DOI_v010]  
   See \subpage #page_changelog "the Changelog" for details.
 
 [DOI_v010]: http://dx.doi.org/10.5281/zenodo.11047
 [DOI_v020]: http://dx.doi.org/10.5281/zenodo.11517
+[DOI_v030]: http://dx.doi.org/10.5281/zenodo.13221
 
 Release tags will be signed by one of the following PGP keys:
 

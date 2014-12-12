@@ -5,83 +5,92 @@
  */
 
 #include <memory>
+using namespace std;
 
 #include <fftw3.h>
 
 #include <pfasst.hpp>
 #include <pfasst/mlsdc.hpp>
 #include <pfasst/encap/vector.hpp>
+using namespace pfasst::encap;
 
 #include "advection_diffusion_sweeper.hpp"
 #include "spectral_transfer_1d.hpp"
 
-using namespace pfasst;
-using namespace pfasst::encap;
 
-error_map run_serial_mlsdc()
+namespace pfasst
 {
-  MLSDC<> mlsdc;
+  namespace examples
+  {
+    namespace advection_diffusion
+    {
+      error_map run_serial_mlsdc()
+      {
+        MLSDC<> mlsdc;
 
-  const size_t nlevs  = 2;
-  const size_t nsteps = 4;
-  const double dt     = 0.01;
-  const size_t niters = 4;
-  const int    xrat   = 2;
-  const int    trat   = 2;
+        const size_t nlevs  = 2;
+        const size_t nsteps = 4;
+        const double dt     = 0.01;
+        const size_t niters = 4;
+        const int    xrat   = 2;
+        const int    trat   = 2;
 
-  size_t nnodes = 5;
-  size_t ndofs  = 128;
+        size_t nnodes = 5;
+        size_t ndofs  = 128;
 
-  /*
-   * build space/time discretisation levels and add them to mlsdc
-   * controller.  this loop adds the finest level first, and
-   * subsequently refines in time (accoring to 'trat') and space
-   * (according to 'xrat').
-   */
-  for (size_t l = 0; l < nlevs; l++) {
-    auto quad     = pfasst::quadrature::quadrature_factory(nnodes, pfasst::quadrature::QuadratureType::GaussLobatto);
-    auto factory  = make_shared<VectorFactory<double>>(ndofs);
-    auto sweeper  = make_shared<AdvectionDiffusionSweeper<>>(ndofs);
-    auto transfer = make_shared<SpectralTransfer1D<>>();
+        /*
+         * build space/time discretisation levels and add them to mlsdc
+         * controller.  this loop adds the finest level first, and
+         * subsequently refines in time (accoring to 'trat') and space
+         * (according to 'xrat').
+         */
+        for (size_t l = 0; l < nlevs; l++) {
+          auto quad     = quadrature::quadrature_factory(nnodes, quadrature::QuadratureType::GaussLobatto);
+          auto factory  = make_shared<VectorFactory<double>>(ndofs);
+          auto sweeper  = make_shared<AdvectionDiffusionSweeper<>>(ndofs);
+          auto transfer = make_shared<SpectralTransfer1D<>>();
 
-    sweeper->set_quadrature(quad);
-    sweeper->set_factory(factory);
+          sweeper->set_quadrature(quad);
+          sweeper->set_factory(factory);
 
-    mlsdc.add_level(sweeper, transfer);
+          mlsdc.add_level(sweeper, transfer);
 
-    ndofs  = ndofs / xrat;
-    nnodes = (nnodes - 1) / trat + 1;
-  }
+          ndofs  = ndofs / xrat;
+          nnodes = (nnodes - 1) / trat + 1;
+        }
 
-  /*
-   * set up the mlsdc controller (which in turn calls 'setup' on the
-   * sweepers that were added above).  this stage typically
-   * preallocates various buffers that the sweepers need.
-   */
-  mlsdc.setup();
+        /*
+         * set up the mlsdc controller (which in turn calls 'setup' on the
+         * sweepers that were added above).  this stage typically
+         * preallocates various buffers that the sweepers need.
+         */
+        mlsdc.setup();
 
-  /*
-   * set initial conditions on each level
-   */
-  auto sweeper = mlsdc.get_finest<AdvectionDiffusionSweeper<>>();
-  auto q0 = sweeper->get_start_state();
-  sweeper->exact(q0, 0.0);
-  //  sweeper->set_residual_tolerances(1e-5, 0.0);
+        /*
+         * set initial conditions on each level
+         */
+        auto sweeper = mlsdc.get_finest<AdvectionDiffusionSweeper<>>();
+        auto q0 = sweeper->get_start_state();
+        sweeper->exact(q0, 0.0);
+        //  sweeper->set_residual_tolerances(1e-5, 0.0);
 
-  /*
-   * run mlsdc!
-   */
-  mlsdc.set_duration(0.0, nsteps*dt, dt, niters);
-  mlsdc.run();
+        /*
+         * run mlsdc!
+         */
+        mlsdc.set_duration(0.0, nsteps*dt, dt, niters);
+        mlsdc.run();
 
-  fftw_cleanup();
+        fftw_cleanup();
 
-  return sweeper->get_errors();
-}
+        return sweeper->get_errors();
+      }
+    }  // ::pfasst::examples::advection_diffusion
+  }  // ::pfasst::examples
+}  // ::pfasst
 
 #ifndef PFASST_UNIT_TESTING
 int main(int /*argc*/, char** /*argv*/)
 {
-  run_serial_mlsdc();
+  pfasst::examples::advection_diffusion::run_serial_mlsdc();
 }
 #endif

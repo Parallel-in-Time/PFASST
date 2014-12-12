@@ -11,6 +11,7 @@
  */
 
 #include <complex>
+using namespace std;
 
 #include <pfasst.hpp>
 #include <pfasst/config.hpp>
@@ -20,38 +21,47 @@
 
 #include "scalar_sweeper.hpp"
 
-double run_scalar_sdc(const size_t nsteps, const double dt, const size_t nnodes,
-                      const size_t niters, const complex<double> lambda,
-                      const pfasst::quadrature::QuadratureType nodetype)
+namespace pfasst
 {
-  pfasst::SDC<> sdc;
+  namespace examples
+  {
+    namespace scalar
+    {
+      double run_scalar_sdc(const size_t nsteps, const double dt, const size_t nnodes,
+                            const size_t niters, const complex<double> lambda,
+                            const quadrature::QuadratureType nodetype)
+      {
+        SDC<> sdc;
 
-  // For test equation, set initial value to \\( 1+0i \\)
-  const complex<double> y0 = complex<double>(1.0, 0.0);
+        // For test equation, set initial value to \\( 1+0i \\)
+        const complex<double> y0 = complex<double>(1.0, 0.0);
 
-  auto quad = pfasst::quadrature::quadrature_factory(nnodes, nodetype);
+        auto quad = quadrature::quadrature_factory(nnodes, nodetype);
 
-  // This is a scalar example, so we use the encap::VectorFactory with fixed length of 1 and
-  //  complex type.
-  auto factory = make_shared<pfasst::encap::VectorFactory<complex<double>>>(1);
-  auto sweeper = make_shared<ScalarSweeper<>>(lambda, y0);
+        // This is a scalar example, so we use the encap::VectorFactory with fixed length of 1 and
+        //  complex type.
+        auto factory = make_shared<encap::VectorFactory<complex<double>>>(1);
+        auto sweeper = make_shared<ScalarSweeper<>>(lambda, y0);
 
-  sweeper->set_quadrature(quad);
-  sweeper->set_factory(factory);
+        sweeper->set_quadrature(quad);
+        sweeper->set_factory(factory);
 
-  sdc.add_level(sweeper);
+        sdc.add_level(sweeper);
 
-  // Final time Tend = dt*nsteps
-  sdc.set_duration(0.0, dt*nsteps, dt, niters);
-  sdc.setup();
+        // Final time Tend = dt*nsteps
+        sdc.set_duration(0.0, dt*nsteps, dt, niters);
+        sdc.setup();
 
-  auto q0 = sweeper->get_start_state();
-  sweeper->exact(q0, 0.0);
+        auto q0 = sweeper->get_start_state();
+        sweeper->exact(q0, 0.0);
 
-  sdc.run();
+        sdc.run();
 
-  return sweeper->get_errors();
-}
+        return sweeper->get_errors();
+      }
+    }  // ::pfasst::examples::scalar
+  }  // ::pfasst::examples
+}  // ::pfasst
 
 #ifndef PFASST_UNIT_TESTING
 /**
@@ -68,6 +78,6 @@ int main(int argc, char** argv)
 
   pfasst::init(argc, argv);
 
-  run_scalar_sdc(nsteps, dt, nnodes, niters, lambda, nodetype);
+  pfasst::examples::scalar::run_scalar_sdc(nsteps, dt, nnodes, niters, lambda, nodetype);
 }
 #endif
