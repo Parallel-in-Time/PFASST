@@ -1,6 +1,6 @@
 # Changelog                                                                        {#page_changelog}
 
-## v0.3.0 -- The Big Cleanup (2014/12/XX)
+## v0.3.0 -- The Big Cleanup (2014/12/12)
 
 DOI: tbd
 

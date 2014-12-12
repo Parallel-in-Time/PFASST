@@ -10,7 +10,10 @@ spectral deferred correction* (MLSDC) algorithms.
 News
 ----
 
-* August 29, 2014: PFASST v0.2.0 release. Please sse the [release notes](#releases) for more 
+* December 12, 2014: PFASST v0.3.0 release. Please see the [release notes](#releases) for more
+  information.
+
+* August 29, 2014: PFASST v0.2.0 release. Please see the [release notes](#releases) for more
   information.
 
 * July 25, 2014: PFASST v0.1.0 released.  Please see the [release notes](#releases) for more
@@ -40,6 +43,12 @@ Currently, it features the following content:
 
 Releases
 --------
+
+* **v0.3.0** The Big Cleanup Release (2014/12/12)
+
+  A lot of internal cleanup and usability enhancements.
+  DOI: tbd
+  See \subpage #page_changelog "the Changelog" for details.
 
 * **v0.2.0** MPI-PFASST Release (2014/08/29)
 
