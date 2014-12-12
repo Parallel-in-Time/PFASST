@@ -29,8 +29,7 @@ namespace pfasst
   namespace quadrature
   {
     template<typename precision = pfasst::time_precision>
-    shared_ptr<IQuadrature<precision>> quadrature_factory(const size_t nnodes,
-                                               const QuadratureType qtype)
+    shared_ptr<IQuadrature<precision>> quadrature_factory(const size_t nnodes, const QuadratureType qtype)
     {
       if (qtype == QuadratureType::GaussLegendre) {
         return make_shared<GaussLegendre<precision>>(nnodes);
@@ -112,7 +111,7 @@ namespace pfasst
     // note: GCC fails with "error: explicit template specialization cannot have a storage class"
     //       if this template specialization is also declared 'static'; Clang does not care.
     template<>
-    const pfasst::quadrature::QuadratureType get_value(const string& name)
+    inline pfasst::quadrature::QuadratureType get_value(const string& name)
     {
       const string type = Options::get_instance().get_variables_map()[name].as<string>();
       if (type == "gauss-lobatto") {
@@ -133,8 +132,8 @@ namespace pfasst
     // note: GCC fails with "error: explicit template specialization cannot have a storage class"
     //       if this template specialization is also declared 'static'; Clang does not care.
     template<>
-    const pfasst::quadrature::QuadratureType get_value(const string& name,
-                                                       const pfasst::quadrature::QuadratureType& default_value)
+    inline pfasst::quadrature::QuadratureType get_value(const string& name,
+                                                        const pfasst::quadrature::QuadratureType& default_value)
     {
       if (Options::get_instance().get_variables_map().count(name) == 1) {
         return pfasst::config::get_value<pfasst::quadrature::QuadratureType>(name);

@@ -9,7 +9,7 @@
 
 namespace pfasst
 {
-  static void init(int argc, char** argv)
+  inline static void init(int argc, char** argv)
   {
     SDC<>::enable_config_options(0);
     Quadrature::enable_config_options(0);

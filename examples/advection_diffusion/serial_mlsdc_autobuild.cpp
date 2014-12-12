@@ -7,11 +7,12 @@
  * controller.
  */
 
-#include <cstdlib>
 #include <cassert>
+#include <cstdlib>
 #include <memory>
-#include <vector>
 #include <string>
+#include <vector>
+using namespace std;
 
 #include <fftw3.h>
 
@@ -19,13 +20,13 @@
 #include <pfasst/mlsdc.hpp>
 #include <pfasst/encap/automagic.hpp>
 #include <pfasst/encap/vector.hpp>
+using namespace pfasst;
+using namespace pfasst::encap;
 
 #include "advection_diffusion_sweeper.hpp"
 #include "spectral_transfer_1d.hpp"
-
-using namespace std;
-using namespace pfasst;
-using namespace pfasst::encap;
+using pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper;
+using pfasst::examples::advection_diffusion::SpectralTransfer1D;
 
 
 int main(int /*argc*/, char** /*argv*/)
