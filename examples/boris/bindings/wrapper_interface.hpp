@@ -60,15 +60,22 @@ namespace pfasst
 
         template<typename scalar, typename time>
         void setup(shared_ptr<WrapperInterface<scalar, time>> wrapper)
-        {}
+        {
+          UNUSED(wrapper);
+        }
 
         template<typename scalar, typename time, typename ArgT>
         void setup(shared_ptr<WrapperInterface<scalar, time>> wrapper, ArgT arg)
-        {}
+        {
+          UNUSED(wrapper); UNUSED(arg);
+        }
 
         template<typename scalar, typename time, typename ArgT, typename... ArgsT>
         void setup(shared_ptr<WrapperInterface<scalar, time>> wrapper, ArgT arg, ArgsT... args)
-        {}
+        {
+          setup(wrapper, arg);
+          setup(wrapper, args...);
+        }
       }  // ::pfasst::examples::boris::bindings
     }  // ::pfasst::examples::boris
   }  // ::pfasst::examples

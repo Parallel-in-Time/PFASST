@@ -119,19 +119,24 @@ namespace pfasst
           size_t num_particles = particles->size();
           assert(DIM == particles->dim());
 
-          scalar packed_positions[num_particles * DIM];
-          scalar packed_masses[num_particles];
-          scalar packed_charges[num_particles];
+          scalar* packed_positions = new scalar[num_particles * DIM];
+          scalar* packed_masses = new scalar[num_particles];
+          scalar* packed_charges = new scalar[num_particles];
           this->pack_positions(particles, packed_positions);
           this->pack_masses(particles, packed_masses);
           this->pack_charges(particles, packed_charges);
 
-          scalar packed_forces[num_particles * DIM];
+          scalar* packed_forces = new scalar[num_particles * DIM];
           solver::evaluate_e_field(packed_positions, packed_charges, packed_masses, num_particles, t,
                                    this->config.get(), packed_forces);
 
+          delete[] packed_positions;
+          delete[] packed_masses;
+          delete[] packed_charges;
+          auto forces = this->unpack_2d(packed_forces, num_particles);
+          delete[] packed_forces;
           VLOG_FUNC_END("WrapperSimplePhysicsSolver");
-          return this->unpack_2d(packed_forces, num_particles);
+          return forces;
         }
 
         template<typename scalar, typename time>
@@ -142,19 +147,24 @@ namespace pfasst
           size_t num_particles = particles->size();
           assert(DIM == particles->dim());
 
-          scalar packed_velocities[num_particles * DIM];
-          scalar packed_masses[num_particles];
-          scalar packed_charges[num_particles];
+          scalar* packed_velocities = new scalar[num_particles * DIM];
+          scalar* packed_masses = new scalar[num_particles];
+          scalar* packed_charges = new scalar[num_particles];
           this->pack_velocities(particles, packed_velocities);
           this->pack_masses(particles, packed_masses);
           this->pack_charges(particles, packed_charges);
 
-          scalar packed_forces[num_particles * DIM];
+          scalar* packed_forces = new scalar[num_particles * DIM];
           solver::evaluate_b_field(packed_velocities, packed_charges, packed_masses, num_particles, t,
                                    this->config.get(), packed_forces);
 
+          delete[] packed_velocities;
+          delete[] packed_masses;
+          delete[] packed_charges;
+          auto forces = this->unpack_2d(packed_forces, num_particles);
+          delete[] packed_forces;
           VLOG_FUNC_END("WrapperSimplePhysicsSolver");
-          return this->unpack_2d(packed_forces, num_particles);
+          return forces;
         }
 
         template<typename scalar, typename time>
@@ -176,26 +186,33 @@ namespace pfasst
           size_t num_particles = particles->size();
           assert(DIM == particles->dim());
 
-          scalar packed_velocities[num_particles * DIM];
-          scalar packed_positions[num_particles * DIM];
-          scalar packed_masses[num_particles];
-          scalar packed_charges[num_particles];
+          scalar* packed_velocities = new scalar[num_particles * DIM];
+          scalar* packed_positions = new scalar[num_particles * DIM];
+          scalar* packed_masses = new scalar[num_particles];
+          scalar* packed_charges = new scalar[num_particles];
           this->pack_positions(particles, packed_positions);
           this->pack_velocities(particles, packed_velocities);
           this->pack_masses(particles, packed_masses);
           this->pack_charges(particles, packed_charges);
 
+          auto energy = solver::compute_energy(packed_positions, packed_velocities, packed_charges, packed_masses,
+                                               num_particles, t, this->config.get());
+          delete[] packed_velocities;
+          delete[] packed_positions;
+          delete[] packed_masses;
+          delete[] packed_charges;
           VLOG_FUNC_END("WrapperSimplePhysicsSolver")
-          return solver::compute_energy(packed_positions, packed_velocities, packed_charges, packed_masses,
-                                        num_particles, t, this->config.get());
+          return energy;
         }
 
         template<typename scalar, typename time>
         ParticleComponent<scalar> WrapperSimplePhysicsSolver<scalar, time>::get_b_field_vector()
         {
-          scalar packed_vec[DIM];
+          scalar* packed_vec = new scalar[DIM];
           solver::get_b_field_vector(this->config.get(), packed_vec);
-          return this->unpack_1d(packed_vec, DIM);
+          auto vec = this->unpack_1d(packed_vec, DIM);
+          delete[] packed_vec;
+          return vec;
         }
 
         template<typename scalar, typename time>
