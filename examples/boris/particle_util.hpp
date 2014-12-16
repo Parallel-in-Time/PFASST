@@ -18,6 +18,7 @@ namespace pfasst
       template<typename precision>
       static ParticleCloudComponent<precision> cloud_component_factory(const size_t num_particles, const size_t dim);
 
+
       template<typename precision>
       static ParticleComponent<precision>      cross_prod(const ParticleComponent<precision>&      first,
                                                           const ParticleComponent<precision>&      second);
@@ -58,6 +59,9 @@ namespace pfasst
       template<typename precision>
       static vector<precision> norm0(const ParticleCloudComponent<precision>& data);
 
+
+      template<typename precision>
+      static void zero(ParticleComponent<precision>& data);
 
       template<typename precision>
       static void zero(ParticleCloudComponent<precision>& data);

@@ -156,6 +156,7 @@ namespace pfasst
 
           scalar compute_residual()
           {
+            VLOG_FUNC_START("BorisSweeper");
             const auto   nodes  = this->get_nodes();
             const size_t nnodes = nodes.size();
             time dt = this->get_controller()->get_time_step();
@@ -163,11 +164,11 @@ namespace pfasst
             scalar max_residual = 0.0;
 
             for (size_t m = 1; m < nnodes; ++m) {
-              position_type pos;
-              velocity_type vel;
+              position_type pos = cloud_component_factory<scalar>(this->particles[0]->size(), this->particles[0]->dim());
+              velocity_type vel = cloud_component_factory<scalar>(this->particles[0]->size(), this->particles[0]->dim());
               for (size_t j = 0; j < nnodes; ++j) {
                 pos += this->q_mat(m, j) * dt * this->particles[j]->velocities();
-                vel += this->q_mat(m, j) * dt * this->forces[j];
+                vel += this->q_mat(m, j) * dt * this->build_rhs(j);
               }
               pos += this->particles[0]->positions() - this->particles[m]->positions();
               vel += this->particles[0]->velocities() - this->particles[m]->velocities();
@@ -180,6 +181,7 @@ namespace pfasst
               }
             }
 
+            VLOG_FUNC_END("BorisSweeper");
             return max_residual;
           }
 
@@ -326,7 +328,7 @@ namespace pfasst
               e_tuple.p_err.u = ex->velocities()[0][0] - end->velocities()[0][0];
               e_tuple.p_err.v = ex->velocities()[0][1] - end->velocities()[0][1];
               e_tuple.p_err.w = ex->velocities()[0][2] - end->velocities()[0][2];
-//               e_tuple.res = this->compute_residual();
+              e_tuple.res = this->compute_residual();
 
               size_t n = this->get_controller()->get_step();
               size_t k = this->get_controller()->get_iteration();
@@ -434,6 +436,9 @@ namespace pfasst
               this->st_mat.row(i) = qt_mat.row(i) - qt_mat.row(i - 1);
             }
 
+            cout << "S:" << this->s_mat << endl;
+            cout << "SS:" << this->ss_mat << endl;
+
             UNUSED(coarse);
             VLOG_FUNC_END("BorisSweeper");
           }
@@ -442,9 +447,13 @@ namespace pfasst
           {
             VLOG_FUNC_START("BorisSweeper");
             this->set_state(const_pointer_cast<const encap_type>(this->particles.back()), 0);
+            VLOG_INDENT(3) << "particles:" << this->particles;
             this->energy_evals.front() = this->energy_evals.back();
+            VLOG_INDENT(3) << "energies:" << this->energy_evals;
             this->forces.front() = this->forces.back();
+            VLOG_INDENT(3) << "forces:" << this->forces;
             this->b_vecs.front() = this->b_vecs.back();
+            VLOG_INDENT(3) << "b_vecs:" << this->b_vecs;
             this->exact_updated = false;
             VLOG_FUNC_END("BorisSweeper");
           }
@@ -454,25 +463,6 @@ namespace pfasst
             VLOG_FUNC_START("BorisSweeper") << "node=" << m;
             time t = this->get_controller()->get_time() + this->get_controller()->get_time_step() * this->delta_nodes[m];
             VLOG_INDENT(2) << "particles:" << this->particles[m];
-  //           Vector3d<scalar> vel; vel.fill(scalar(0.0));
-  //           Vector3d<scalar> B; B.fill(scalar(0.0));
-  //           Vector3d<scalar> b; b.fill(scalar(0.0));
-  //           Eigen::Matrix<scalar, 3, 6> mat;
-  //           mat << - this->epsilon * pow(this->get_e_field().omega_e, 2), 0, 0, 0, this->get_b_field().omega_b, 0,
-  //                  0, - this->epsilon * pow(this->get_e_field().omega_e, 2), 0, - this->get_b_field().omega_b, 0, 0,
-  //                  0, 0, 2 * this->epsilon * pow(this->get_e_field().omega_e, 2), 0, 0, 0;
-  //           Eigen::Matrix<scalar, 6, 1> u_vec;
-  //           u_vec.block(0, 0, 3, 1) = this->particles[m]->pos().as_matrix().transpose();
-  //           u_vec.block(3, 0, 3, 1) = this->particles[m]->vel().as_matrix().transpose();
-
-  //           Eigen::Matrix<scalar, 3, 1> f; f.fill(scalar(0.0));
-  //           f = mat * u_vec;
-  //           this->particles[m]->accel() = acceleration_type(f);
-  //           auto e = this->get_e_field().evaluate(this->particles, m, t);
-  //           vel = this->particles[m]->vel().as_matrix().transpose().array();
-  //           B = this->get_b_field().get_field_vector().transpose().array() / this->particles[m]->alpha();
-  //           b = dot(vel, B);
-  //           this->particles[m]->accel() = this->particles[m]->alpha() * (e + acceleration_type(b));
 
             this->forces[m] = this->impl_solver->e_field_evaluate(this->particles[m], t);
             VLOG_INDENT(3) << "e_forces:" << this->forces[m];
@@ -502,42 +492,58 @@ namespace pfasst
             assert(nnodes >= 1);
             time t  = this->get_controller()->get_time();
             time dt = this->get_controller()->get_time_step();
+            VLOG_INDENT(1) << "t=" << t << ", dt=" << dt;
+            VLOG_INDENT(2) << "nodes=" << nodes;
 
             this->impl_solver->energy(this->particles.front(), t);
 
             velocity_type c_k_term = cloud_component_factory<scalar>(this->particles[0]->size(), this->particles[0]->dim());
 
             // compute integrals
-            for(size_t i = 0; i < nnodes; ++i) {
-              zero(this->s_integrals[i]);
-              zero(this->ss_integrals[i]);
-            }
+//             for(size_t i = 0; i < nnodes; ++i) {
+            zero(this->s_integrals);
+            zero(this->ss_integrals);
+//             }
+            VLOG_INDENT(3) << "s_int:" << this->s_integrals;
+            VLOG_INDENT(3) << "ss_int:" << this->ss_integrals;
             // starting at m=1 as m=0 will only add zeros
             for (size_t m = 1; m < nnodes; m++) {
               for (size_t l = 0; l < nnodes; l++) {
-                this->s_integrals[m] += this->build_rhs(l, true) * dt * this->s_mat(m, l);
-                this->ss_integrals[m] += this->build_rhs(l, true) * dt * dt * this->ss_mat(m, l);
+                auto rhs = this->build_rhs(l);
+                this->s_integrals[m] += rhs * dt * this->s_mat(m, l);
+                this->ss_integrals[m] += rhs * dt * dt * this->ss_mat(m, l);
               }
             }
+            VLOG_INDENT(3) << "s_int:" << this->s_integrals;
+            VLOG_INDENT(3) << "ss_int:" << this->ss_integrals;
 
             this->evaluate(0);
 
             for (size_t m = 0; m < nnodes - 1; m++) {
               time ds = dt * this->delta_nodes[m+1];
+              VLOG_INDENT(1) << "node" << m << ", ds=" << ds;
+              pfasst::log::stack_position++;
 
               //// Update Position (explicit)
               //
               // x_{m+1}^{k+1} = x_{m}^{k+1}
               this->particles[m+1]->positions() = this->particles[m]->positions();
+              VLOG_INDENT(3) << "pos =" << this->particles[m+1]->positions();
               //               + delta_nodes_{m+1} * v_{0}
               this->particles[m+1]->positions() += this->particles[0]->velocities() * ds;
+              VLOG_INDENT(3) << "   +=" << this->particles[0]->velocities() << "*" << ds;
               //               + \sum_{l=1}^{m} sx_{m+1,l}^{x} (f_{l}^{k+1} - f_{l}^{k})
               for (size_t l = 0; l <= m; l++) {
-                this->particles[m+1]->positions() += this->build_rhs(l) * dt * dt * this->sx_mat(m+1, l);
-                this->particles[m+1]->positions() -= this->build_rhs(l, true) * dt * dt * this->sx_mat(m+1, l);
+                auto rhs_this = this->build_rhs(l);
+                auto rhs_prev = this->build_rhs(l, true);
+                this->particles[m+1]->positions() += rhs_this * dt * dt * this->sx_mat(m+1, l);
+                VLOG_INDENT(3) << "   +=" << rhs_this << "*" << dt * dt << "*" << this->sx_mat(m+1, l);
+                this->particles[m+1]->positions() -= rhs_prev * dt * dt * this->sx_mat(m+1, l);
+                VLOG_INDENT(3) << "   -=" << rhs_prev << "*" << dt * dt << "*" << this->sx_mat(m+1, l);
               }
 
               this->particles[m+1]->positions() += this->ss_integrals[m+1];
+              VLOG_INDENT(3) << "   +=" << this->ss_integrals[m+1];
               VLOG_INDENT(3) << "new positions:" << this->particles[m+1]->positions();
 
               // evaluate electric field with new position
@@ -549,14 +555,14 @@ namespace pfasst
               //                 - delta_nodes_{m} / 2 * f_{m+1}^{k}
               auto t1 = this->build_rhs(m+1, true);
               c_k_term -= (0.5 * t1 * ds);
-//               VLOG_INDENT(3) << "  -= 0.5 *" << t1 << "*" << ds << "  =>" << c_k_term;
+              VLOG_INDENT(3) << "  -= 0.5 *" << t1 << "*" << ds << "  =>" << c_k_term;
               //                 - delta_nodes_{m} / 2 * f_{m}^{k}
               auto t2 = this->build_rhs(m, true);
               c_k_term -= (0.5 * t2 * ds);
-//               VLOG_INDENT(3) << "  -= 0.5 *" << t2 << "*" << ds << "  =>" << c_k_term;
+              VLOG_INDENT(3) << "  -= 0.5 *" << t2 << "*" << ds << "  =>" << c_k_term;
               //                 + s_integral[m]
               c_k_term += this->s_integrals[m+1];
-//               VLOG_INDENT(3) << "  +=" << this->s_integrals[m+1];
+              VLOG_INDENT(3) << "  +=" << this->s_integrals[m+1];
               VLOG_INDENT(3) << " ==>" << c_k_term;
 
               // doing Boris' magic
@@ -565,6 +571,7 @@ namespace pfasst
 
               // TODO XXX BUG
 //               this->forces[m+1] += this->impl_solver->b_field_evaluate(this->particles[m+1], t);
+              pfasst::log::stack_position--;
             }
             this->save();
             this->echo_error(t + dt);
@@ -573,17 +580,24 @@ namespace pfasst
 
           virtual void save(bool initial_only=false) override
           {
-            VLOG_FUNC_START("BorisSweeper") << "initial_only=" << initial_only;
+            VLOG_FUNC_START("BorisSweeper") << "initial_only=" << boolalpha << initial_only;
             if (initial_only) {
               this->previous_particles[0] = make_shared<encap_type>(*(this->particles[0].get()));
               this->previous_forces[0] = this->forces[0];
               this->previous_b_vecs[0] = this->b_vecs[0];
             } else {
               for (size_t m = 0; m < this->previous_particles.size(); m++) {
+                VLOG_INDENT(3) << "node" << m;
+                VLOG_INDENT(3) << "  particle:" << this->particles[m];
                 this->previous_particles[m] = make_shared<encap_type>(*(this->particles[m].get()));
-                this->previous_forces[m] = this->forces[m];
-                this->previous_b_vecs[m] = this->b_vecs[m];
+                VLOG_INDENT(3) << "  previous_particle:" << this->previous_particles[m];
               }
+              VLOG_INDENT(3) << "forces:" << this->forces;
+              this->previous_forces = this->forces;
+              VLOG_INDENT(3) << "previous_forces:" << this->previous_forces;
+              VLOG_INDENT(3) << "b_vecs:" << this->b_vecs;
+              this->previous_b_vecs = this->b_vecs;
+              VLOG_INDENT(3) << "previous_b_vecs:" << this->previous_b_vecs;
             }
             VLOG_FUNC_END("BorisSweeper");
           }
@@ -628,17 +642,21 @@ namespace pfasst
           virtual void boris_solve(const time tm, const time t_next, const time ds, const size_t m,
                                    const velocity_type& c_k_term)
           {
-            VLOG_FUNC_START("BorisSweeper") << "tm=" << tm << ", t_next=" << t_next << ", node=" << m;
+            VLOG_FUNC_START("BorisSweeper") << "tm=" << tm << ", t_next=" << t_next << ", ds=" << ds << ", node=" << m;
             UNUSED(t_next);
             velocity_type c_k_term_half = c_k_term / scalar(2.0);
+            VLOG_INDENT(3) << "c_k_term/2 =" << c_k_term_half;
             AttributeValues<scalar> beta = cmp_wise_div(this->particles[m]->charges(), this->particles[m]->masses()) / scalar(2.0) * ds;
+            VLOG_INDENT(3) << "beta =" << beta;
             acceleration_type e_forces_mean = (this->forces[m] + this->forces[m+1]) / scalar(2.0);
+            VLOG_INDENT(3) << "e_mean =" << e_forces_mean << " (<=" << this->forces[m] << " +" << this->forces[m+1] << " / 2)";
 
             // first Boris' drift
             //   v^{-} = v^{k}
             velocity_type v_minus = this->particles[m]->velocities();
             //           + \beta * E_{mean} + c^{k} / 2
             v_minus += e_forces_mean * beta + c_k_term_half;
+            VLOG_INDENT(3) << "v- =" << v_minus;
 
             // Boris' kick
             velocity_type boris_t(beta.size());
@@ -647,6 +665,7 @@ namespace pfasst
               boris_t[p] = b_field_vector * beta[p];
             }
             velocity_type v_prime = v_minus + cross_prod(v_minus, boris_t);
+            VLOG_INDENT(3) << "v' =" << v_prime;
 
             // final Boris' drift
             vector<scalar> boris_t_sqr(boris_t.size());
@@ -655,6 +674,7 @@ namespace pfasst
             }
             velocity_type boris_s = (scalar(2.0) * boris_t) / (scalar(1.0) + boris_t_sqr);
             velocity_type v_plus = v_minus + cross_prod(v_prime, boris_s);
+            VLOG_INDENT(3) << "v+ =" << v_plus;
 
   //           assert(abs(v_minus.norm0() - v_plus.norm0()) <= 10e-8);
 

@@ -145,10 +145,18 @@ namespace pfasst
 
 
       template<typename precision>
+      static void zero(ParticleComponent<precision>& data)
+      {
+        for (auto iter = data.begin(); iter != data.end(); ++iter) {
+          *iter = precision(0.0);
+        }
+      }
+
+      template<typename precision>
       static void zero(ParticleCloudComponent<precision>& data)
       {
-        for (auto p : data) {
-          fill(p.begin(), p.end(), precision(0.0));
+        for (auto iter = data.begin(); iter != data.end(); ++iter) {
+          zero(*iter);
         }
       }
 
