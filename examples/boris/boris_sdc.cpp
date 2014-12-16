@@ -44,7 +44,6 @@ namespace pfasst
         sdc.setup();
 
         auto p0 = dynamic_pointer_cast<ParticleCloud<double>>(sweeper->get_state(0));
-        cout << p0->size() << endl;
         p0->positions()[0][0] = 10;
         p0->velocities()[0][0] = 100;
         p0->velocities()[0][2] = 100;

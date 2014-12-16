@@ -119,7 +119,7 @@ namespace pfasst
           size_t num_particles = particles->size();
           assert(DIM == particles->dim());
 
-//           VLOG_INDENT(3) << "positions:" << particles->positions();
+//           VLOG(3) << LOG_INDENT << "positions:" << particles->positions();
 
           scalar* packed_positions = new scalar[num_particles * DIM];
           scalar* packed_masses = new scalar[num_particles];
@@ -212,7 +212,7 @@ namespace pfasst
 
           auto energy = solver::compute_energy(packed_positions, packed_velocities, packed_charges, packed_masses,
                                                num_particles, t, this->config.get());
-          VLOG_INDENT(2) << "energy =" << energy;
+          VLOG(2) << LOG_INDENT << "energy =" << energy;
           delete[] packed_velocities;
           delete[] packed_positions;
           delete[] packed_masses;

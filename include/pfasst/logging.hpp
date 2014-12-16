@@ -82,21 +82,20 @@ const string OUT::reset = "\033[0m";
 #ifndef VLOG_FUNC_START
   #define VLOG_FUNC_START(scope) \
     pfasst::log::stack_position++; \
-    LOG(DEBUG) << std::string((pfasst::log::stack_position - 1) * 2, ' ') << "START:" << std::string(scope) + "::" + std::string(__func__) + "() "
+    VLOG(9) << std::string((pfasst::log::stack_position - 1) * 2, ' ') << "START:" << std::string(scope) + "::" + std::string(__func__) + "() "
 #endif
 
 #ifndef VLOG_FUNC_END
   #define VLOG_FUNC_END(scope) \
     pfasst::log::stack_position--; \
-    LOG(DEBUG) << std::string(pfasst::log::stack_position * 2, ' ') << "DONE: " << std::string(scope) + "::" + std::string(__func__) + "()";
+    VLOG(9) << std::string(pfasst::log::stack_position * 2, ' ') << "DONE: " << std::string(scope) + "::" + std::string(__func__) + "()";
 #endif
 
 #ifndef LOG_PRECISION
   #define LOG_PRECISION 5
 #endif
 
-#define VLOG_INDENT(level) \
-  VLOG(level) << string(pfasst::log::stack_position * 2, ' ')
+#define LOG_INDENT string(pfasst::log::stack_position * 2, ' ')
 
 
 namespace pfasst
@@ -128,8 +127,7 @@ namespace pfasst
                       TIMESTAMP + OUT::blue + LEVEL + " " + MESSAGE + OUT::reset);
 
       defaultConf.set(el::Level::Debug, el::ConfigurationType::Format,
-//                       TIMESTAMP + LEVEL + " " + POSITION + " " + MESSAGE + OUT::reset);
-                      TIMESTAMP + OUT::white + LEVEL + " " + MESSAGE + OUT::reset);
+                      TIMESTAMP + LEVEL + " " + POSITION + " " + MESSAGE + OUT::reset);
 
       defaultConf.set(el::Level::Warning, el::ConfigurationType::Format,
                       TIMESTAMP + OUT::magenta + LEVEL + " " + MESSAGE + OUT::reset);
@@ -141,7 +139,7 @@ namespace pfasst
                       TIMESTAMP + OUT::red + OUT::bold + LEVEL + " " + POSITION + " " + MESSAGE + OUT::reset);
 
       defaultConf.set(el::Level::Verbose, el::ConfigurationType::Format,
-                      TIMESTAMP + VLEVEL + " " + MESSAGE + OUT::reset);
+                      TIMESTAMP + OUT::white + VLEVEL + " " + MESSAGE + OUT::reset);
 
       el::Loggers::reconfigureAllLoggers(defaultConf);
     }
