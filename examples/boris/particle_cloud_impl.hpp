@@ -27,7 +27,7 @@ namespace pfasst
           , _default_mass(default_mass)
       {
         this->zero();
-        VLOG(2) << this->_num_particles << "particles D" << this->_dim;
+//         VLOG(2) << this->_num_particles << "particles D" << this->_dim;
       }
 
       template<typename precision>
@@ -37,12 +37,12 @@ namespace pfasst
       template<typename precision>
       void ParticleCloud<precision>::zero()
       {
-        VLOG_FUNC_START("ParticleCloud");
+//         VLOG_FUNC_START("ParticleCloud");
         fill(this->_positions.begin(), this->_positions.end(), vector<precision>(this->dim(), precision(0.0)));
         fill(this->_velocities.begin(), this->_velocities.end(), vector<precision>(this->dim(), precision(0.0)));
         fill(this->_charges.begin(), this->_charges.end(), this->_default_charge);
         fill(this->_masses.begin(), this->_masses.end(), this->_default_mass);
-        VLOG_FUNC_END("ParticleCloud");
+//         VLOG_FUNC_END("ParticleCloud");
       }
 
       template<typename precision>
@@ -186,6 +186,22 @@ namespace pfasst
         particle->set_charge(this->_charges[index]);
         particle->set_mass(this->_masses[index]);
         return particle;
+      }
+
+      template<typename precision>
+      void ParticleCloud<precision>::log(el::base::type::ostream_t& os) const
+      {
+        os << fixed << setprecision(LOG_PRECISION);
+        os << "ParticleCloud(n=" << this->_num_particles << ", particles=" << this->particles() << ")";
+        os.unsetf(ios_base::floatfield);
+      }
+
+
+      template<typename precision>
+      inline MAKE_LOGGABLE(shared_ptr<ParticleCloud<precision>>, sp_cloud, os)
+      {
+        sp_cloud->log(os);
+        return os;
       }
 
 

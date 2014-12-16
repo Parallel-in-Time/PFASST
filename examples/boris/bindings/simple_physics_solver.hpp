@@ -21,7 +21,7 @@ namespace simple_physics_solver
       double external_e_field_matrix[3][3];
       double b_field_matrix[3][3];
 
-      SimplePhysicsSolverConfig(const double omega_e = double(4.9), const double omega_b = double(25.0),
+      SimplePhysicsSolverConfig(const double omega_e = double(-4.9), const double omega_b = double(25.0),
                                 const double epsilon = double(-1.0), const double sigma = double(0.1));
       virtual ~SimplePhysicsSolverConfig();
   };
@@ -56,9 +56,13 @@ namespace simple_physics_solver
 
   namespace internal
   {
-    static void cross_prod(const double* first, const double* second, double* cross_prod);
+    inline void cross_prod(const double first[DIM], const double second[DIM], double cross_prod[DIM]);
 
-    static void scale_mat_mul_vec(const double mat[DIM][DIM], const double vec[DIM], const double factor, double* prod);
+    inline double scalar_prod(const double first[DIM], const double second[DIM]);
+
+    inline void scale_mat_mul_vec(const double mat[DIM][DIM], const double vec[DIM], const double factor, double prod[DIM]);
+
+    inline void print_vec(const double vec[DIM]);
   }  // ::simple_physics_solver::internal
 }  // ::simple_physics_solver
 

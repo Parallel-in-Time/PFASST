@@ -11,6 +11,18 @@ namespace pfasst
   {
     namespace boris
     {
+      template<typename T>
+      inline el::base::type::ostream_t& operator<<(el::base::type::ostream_t& os, const vector<T> vec) {
+        os << "[";
+        for (auto iter = vec.cbegin(); iter != vec.cend(); ++iter) {
+          os << *iter;
+          if (iter != vec.cend() - 1) { os << " "; }
+        }
+        os << "]";
+        return os;
+      }
+
+
       template<typename precision>
       Particle<precision>::Particle(const size_t dim)
         : Particle(dim, precision(1.0), precision(1.0))
@@ -90,13 +102,21 @@ namespace pfasst
         this->_mass = mass;
       }
 
-//       template<typename precision>
-//       void Particle<precision>::log(el::base::type::ostream_t& os) const
-//       {
-//         os << fixed << setprecision(LOG_PRECISION);
-//         os << "Particle(q=" << this->_charge << ", m=" << this->_mass << ", pos=" << this->_pos << ", vel=" << this->_vel << ")";
-//         os.unsetf(ios_base::floatfield);
-//       }
+      template<typename precision>
+      void Particle<precision>::log(el::base::type::ostream_t& os) const
+      {
+        os << fixed << setprecision(LOG_PRECISION);
+        os << "Particle(q=" << this->_charge << ", m=" << this->_mass << ", pos=" << this->_pos << ", vel=" << this->_vel << ")";
+        os.unsetf(ios_base::floatfield);
+      }
+
+
+      template<typename precision>
+      inline el::base::type::ostream_t& operator<<(el::base::type::ostream_t& os, const shared_ptr<Particle<precision>>& sp_particle)
+      {
+        sp_particle->log(os);
+        return os;
+      }
     }  // ::pfasst::examples::boris
   }  // ::pfasst::examples
 }  // ::pfasst

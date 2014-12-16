@@ -57,6 +57,7 @@ const string OUT::reset = "\033[0m";
 
 #include <pfasst/easylogging++.h>
 
+
 #ifndef PFASST_LOGGER_INITIALIZED
   // initialize easyloggingpp
   // FIXME: this might already be called by code using PFASST++
@@ -81,14 +82,22 @@ const string OUT::reset = "\033[0m";
 #ifndef VLOG_FUNC_START
   #define VLOG_FUNC_START(scope) \
     pfasst::log::stack_position++; \
-    VLOG(1) << std::string(pfasst::log::stack_position - 1, ' ') << "START:" << std::string(scope) + "::" + std::string(__func__) + "() "
+    LOG(DEBUG) << std::string((pfasst::log::stack_position - 1) * 2, ' ') << "START:" << std::string(scope) + "::" + std::string(__func__) + "() "
 #endif
 
 #ifndef VLOG_FUNC_END
   #define VLOG_FUNC_END(scope) \
     pfasst::log::stack_position--; \
-    VLOG(1) << std::string(pfasst::log::stack_position, ' ') << "...   " << std::string(scope) + "::" + std::string(__func__) + "() DONE";
+    LOG(DEBUG) << std::string(pfasst::log::stack_position * 2, ' ') << "DONE: " << std::string(scope) + "::" + std::string(__func__) + "()";
 #endif
+
+#ifndef LOG_PRECISION
+  #define LOG_PRECISION 5
+#endif
+
+#define VLOG_INDENT(level) \
+  VLOG(level) << string(pfasst::log::stack_position * 2, ' ')
+
 
 namespace pfasst
 {
@@ -119,7 +128,8 @@ namespace pfasst
                       TIMESTAMP + OUT::blue + LEVEL + " " + MESSAGE + OUT::reset);
 
       defaultConf.set(el::Level::Debug, el::ConfigurationType::Format,
-                      TIMESTAMP + LEVEL + " " + POSITION + " " + MESSAGE + OUT::reset);
+//                       TIMESTAMP + LEVEL + " " + POSITION + " " + MESSAGE + OUT::reset);
+                      TIMESTAMP + OUT::white + LEVEL + " " + MESSAGE + OUT::reset);
 
       defaultConf.set(el::Level::Warning, el::ConfigurationType::Format,
                       TIMESTAMP + OUT::magenta + LEVEL + " " + MESSAGE + OUT::reset);
@@ -131,7 +141,7 @@ namespace pfasst
                       TIMESTAMP + OUT::red + OUT::bold + LEVEL + " " + POSITION + " " + MESSAGE + OUT::reset);
 
       defaultConf.set(el::Level::Verbose, el::ConfigurationType::Format,
-                      TIMESTAMP + OUT::white + VLEVEL + " " + MESSAGE + OUT::reset);
+                      TIMESTAMP + VLEVEL + " " + MESSAGE + OUT::reset);
 
       el::Loggers::reconfigureAllLoggers(defaultConf);
     }
@@ -152,7 +162,7 @@ namespace pfasst
      */
     inline static void set_logging_flags()
     {
-      el::Loggers::addFlag(el::LoggingFlag::NewLineForContainer);
+//       el::Loggers::addFlag(el::LoggingFlag::NewLineForContainer);
       el::Loggers::addFlag(el::LoggingFlag::LogDetailedCrashReason);
       el::Loggers::addFlag(el::LoggingFlag::DisableApplicationAbortOnFatalLog);
       el::Loggers::addFlag(el::LoggingFlag::ColoredTerminalOutput);

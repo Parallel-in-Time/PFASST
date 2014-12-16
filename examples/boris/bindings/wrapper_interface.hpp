@@ -6,6 +6,8 @@
 #include <utility>
 using namespace std;
 
+#include <pfasst/logging.hpp>
+
 #include "../particle_cloud.hpp"
 
 #define UNUSED(expr) (void)(expr)
@@ -24,6 +26,7 @@ namespace pfasst
           typename time
         >
         class WrapperInterface
+          : public el::Loggable
         {
           public:
             typedef shared_ptr<ParticleCloud<scalar>> particle_cloud_type;
@@ -50,12 +53,15 @@ namespace pfasst
             force_evaluate(const particle_cloud_type& particles, const time t) = 0;
 
             virtual ParticleComponent<scalar> get_b_field_vector() = 0;
+            virtual ParticleCloudComponent<scalar> b_field_vecs(const particle_cloud_type& particles, const time t) = 0;
 
             virtual scalar energy(const particle_cloud_type& particles, const time t) = 0;
 
             virtual scalar omega_b() const = 0;
             virtual scalar omega_e() const = 0;
             virtual scalar epsilon() const = 0;
+
+            virtual void log(el::base::type::ostream_t& os) const = 0;
         };
 
         template<typename scalar, typename time>

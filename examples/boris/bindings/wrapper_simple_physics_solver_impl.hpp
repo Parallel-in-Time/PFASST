@@ -119,6 +119,8 @@ namespace pfasst
           size_t num_particles = particles->size();
           assert(DIM == particles->dim());
 
+//           VLOG_INDENT(3) << "positions:" << particles->positions();
+
           scalar* packed_positions = new scalar[num_particles * DIM];
           scalar* packed_masses = new scalar[num_particles];
           scalar* packed_charges = new scalar[num_particles];
@@ -169,6 +171,19 @@ namespace pfasst
 
         template<typename scalar, typename time>
         ParticleCloudComponent<scalar>
+        WrapperSimplePhysicsSolver<scalar, time>::b_field_vecs(const particle_cloud_type& particles, const time t)
+        {
+          VLOG_FUNC_START("WrapperSimplePhysicsSolver") << "time=" << t;
+          auto b_vecs = cloud_component_factory<scalar>(particles->size(), particles->dim());
+          for (size_t p = 0; p < particles->size(); ++p) {
+            b_vecs[p] = this->get_b_field_vector() / particles->charges()[p] / particles->masses()[p];
+          }
+          VLOG_FUNC_END("WrapperSimplePhysicsSolver");
+          return b_vecs;
+        }
+
+        template<typename scalar, typename time>
+        ParticleCloudComponent<scalar>
         WrapperSimplePhysicsSolver<scalar, time>::force_evaluate(const particle_cloud_type& particles, const time t)
         {
           VLOG_FUNC_START("WrapperSimplePhysicsSolver") << "time=" << t;
@@ -197,6 +212,7 @@ namespace pfasst
 
           auto energy = solver::compute_energy(packed_positions, packed_velocities, packed_charges, packed_masses,
                                                num_particles, t, this->config.get());
+          VLOG_INDENT(2) << "energy =" << energy;
           delete[] packed_velocities;
           delete[] packed_positions;
           delete[] packed_masses;
@@ -241,6 +257,12 @@ namespace pfasst
         WrapperSimplePhysicsSolver<scalar, time>::epsilon() const
         {
           return this->config->epsilon;
+        }
+
+        template<typename precision, typename time>
+        void WrapperSimplePhysicsSolver<precision, time>::log(el::base::type::ostream_t& os) const
+        {
+          os << "WrapperSimplePhysicsSolver()";
         }
 
 

@@ -46,11 +46,11 @@ namespace pfasst
         auto p0 = dynamic_pointer_cast<ParticleCloud<double>>(sweeper->get_state(0));
         cout << p0->size() << endl;
         p0->positions()[0][0] = 10;
-        p0->positions()[0][0] = 100;
-        p0->positions()[0][2] = 100;
+        p0->velocities()[0][0] = 100;
+        p0->velocities()[0][2] = 100;
 
         sweeper->set_initial_energy();
-  //       LOG(INFO) << OUT::green << "Initial Particle: " << *(dynamic_pointer_cast<ParticleCloud<double>>(sweeper->get_state(0)));
+        LOG(INFO) << OUT::green << "Initial Particle: " << *(dynamic_pointer_cast<ParticleCloud<double>>(sweeper->get_state(0)));
         sdc.run();
 
         return sweeper->get_errors();
@@ -65,11 +65,11 @@ int main(int argc, char** argv)
   pfasst::examples::boris::enable_config_options<double>();
   pfasst::init(argc, argv);
 
-  const size_t nsteps     = pfasst::config::get_value<size_t>("num_steps", 10);
+  const size_t nsteps     = pfasst::config::get_value<size_t>("num_steps", 1);
   const double dt         = pfasst::config::get_value<double>("delta_step", 0.015625);
   const size_t nnodes     = pfasst::config::get_value<size_t>("num_nodes", 5);
-  const size_t nparticles = 1;
-  const size_t niters     = pfasst::config::get_value<size_t>("num_iter", 7);
+  const size_t nparticles = pfasst::config::get_value<size_t>("num_particles", 1);
+  const size_t niters     = pfasst::config::get_value<size_t>("num_iter", 2);
 
   pfasst::examples::boris::run_boris_sdc<double>(nsteps, dt, nnodes, nparticles, niters);
 }

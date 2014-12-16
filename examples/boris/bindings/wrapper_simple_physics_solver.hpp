@@ -7,7 +7,6 @@
 using namespace std;
 
 #include "../particle_cloud.hpp"
-
 #include "wrapper_interface.hpp"
 
 #include "simple_physics_solver.hpp"
@@ -65,11 +64,14 @@ namespace pfasst
             virtual scalar energy(const particle_cloud_type& particles, const time t) override;
 
             virtual ParticleComponent<scalar> get_b_field_vector() override;
+            virtual ParticleCloudComponent<scalar> b_field_vecs(const particle_cloud_type& particles, const time t) override;
 
             virtual void set_config(shared_ptr<solver::SimplePhysicsSolverConfig> config);
             virtual scalar omega_b() const;
             virtual scalar omega_e() const;
             virtual scalar epsilon() const;
+
+            virtual void log(el::base::type::ostream_t& os) const;
         };
 
 

@@ -1,15 +1,11 @@
 #ifndef _EXAMPLES__BORIS__PARTICLE_HPP_
 #define _EXAMPLES__BORIS__PARTICLE_HPP_
 
-#ifndef LOG_PRECISION
-  #define LOG_PRECISION 5
-#endif
-
 #include <memory>
 #include <vector>
 using namespace std;
 
-// #include <pfasst/easylogging++.h>
+#include <pfasst/logging.hpp>
 
 
 namespace pfasst
@@ -23,12 +19,15 @@ namespace pfasst
       >
       using ParticleComponent = vector<precision>;
 
+      template<typename T>
+      inline el::base::type::ostream_t& operator<<(el::base::type::ostream_t& os, const vector<T> vec);
+
 
       template<
         typename precision
       >
       class Particle
-//         : public el::Loggable
+        : public el::Loggable
       {
         protected:
           size_t _dim;
@@ -56,12 +55,18 @@ namespace pfasst
           void set_charge(const precision& charge);
           void set_mass(const precision& mass);
 
-//           virtual void log(el::base::type::ostream_t& os) const;
+          virtual void log(el::base::type::ostream_t& os) const;
       };
+
+
+      template<typename precision>
+      inline el::base::type::ostream_t& operator<<(el::base::type::ostream_t& os,
+                                                   const shared_ptr<Particle<precision>>& sp_particle);
     }  // ::pfasst::examples::boris
   }  // ::pfasst::examples
 }  // ::pfasst
 
+#include "particle_util.hpp"
 #include "particle_impl.hpp"
 
 #endif  // _EXAMPLES__BORIS__PARTICLE_HPP_

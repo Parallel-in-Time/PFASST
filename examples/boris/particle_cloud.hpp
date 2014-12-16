@@ -5,9 +5,8 @@
 #include <vector>
 using namespace std;
 
-// #include <pfasst/easylogging++.h>
-
 #include <pfasst/encap/encapsulation.hpp>
+#include <pfasst/logging.hpp>
 
 #include "particle.hpp"
 
@@ -27,7 +26,8 @@ namespace pfasst
 
       template<typename precision>
       class ParticleCloud
-        : public encap::Encapsulation<precision>
+        :   public encap::Encapsulation<precision>
+          , public el::Loggable
       {
         private:
           size_t _dim;
@@ -67,7 +67,13 @@ namespace pfasst
           shared_ptr<Particle<precision>> at(const size_t index) const;
           // !! EXPENSIVE !!
           vector<shared_ptr<Particle<precision>>> particles() const;
+
+          virtual void log(el::base::type::ostream_t& os) const;
       };
+
+
+      template<typename precision>
+      inline MAKE_LOGGABLE(shared_ptr<ParticleCloud<precision>>, sp_cloud, os);
 
 
       template<typename precision>
@@ -92,6 +98,7 @@ namespace pfasst
 }  // ::pfasst
 
 
+#include "particle_util.hpp"
 #include "particle_cloud_impl.hpp"
 
 #endif  // _EXAMPLES__BORIS__PARTICLE_CLOUD_HPP_
