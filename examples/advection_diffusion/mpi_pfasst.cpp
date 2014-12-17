@@ -33,6 +33,7 @@ namespace pfasst
     {
       error_map run_mpi_pfasst()
       {
+        // const size_t nsteps = 8;
         const size_t nsteps = 4;
         const double dt     = 0.01;
         const size_t niters = 4;

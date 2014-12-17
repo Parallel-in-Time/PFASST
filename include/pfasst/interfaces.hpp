@@ -103,7 +103,7 @@ namespace pfasst
         if (this->comm->rank() == 0) {
           return false;
         }
-        return this->get_converged(this->comm->rank()-1);
+        return !this->get_converged(this->comm->rank()-1);
       }
 
       virtual bool keep_iterating()

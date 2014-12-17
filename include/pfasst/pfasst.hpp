@@ -237,11 +237,6 @@ namespace pfasst
         }
       }
 
-      void fence()
-      {
-        this->comm->fence_status();
-      }
-
     public:
       void set_comm(ICommunicator* comm)
       {
