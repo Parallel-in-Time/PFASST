@@ -309,6 +309,7 @@ namespace pfasst
 
         void predict_without_left(bool initial)
         {
+          UNUSED(initial);
           time dt = this->get_controller()->get_time_step();
           time t  = this->get_controller()->get_time();
           time ds;

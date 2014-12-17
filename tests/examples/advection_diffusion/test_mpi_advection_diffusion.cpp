@@ -6,10 +6,10 @@
 #include <iostream>
 #include <tuple>
 #include <vector>
+using namespace std;
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-
 using namespace ::testing;
 
 #include <mpi.h>
@@ -17,8 +17,8 @@ using namespace ::testing;
 #define PFASST_UNIT_TESTING
 #include "../examples/advection_diffusion/mpi_pfasst.cpp"
 #undef PFASST_UNIT_TESTING
+using namespace pfasst::examples::advection_diffusion;
 
-using namespace std;
 
 TEST(ErrorTest, MPIPFASST)
 {

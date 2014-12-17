@@ -86,7 +86,7 @@ namespace pfasst
     /**
      * sets default configuration for default loggers
      */
-    static void load_default_config()
+    inline static void load_default_config()
     {
       const string TIMESTAMP = OUT::white + "%datetime{%H:%m:%s,%g}" + OUT::reset + " ";
       const string LEVEL = "[%level]";
@@ -137,7 +137,7 @@ namespace pfasst
      *
      * \see https://github.com/easylogging/easyloggingpp#logging-flags
      */
-    static void set_logging_flags()
+    inline static void set_logging_flags()
     {
       el::Loggers::addFlag(el::LoggingFlag::NewLineForContainer);
       el::Loggers::addFlag(el::LoggingFlag::LogDetailedCrashReason);
@@ -149,9 +149,9 @@ namespace pfasst
     }
 
 #ifdef NDEBUG
-    static void test_logging_levels() {}
+    inline static void test_logging_levels() {}
 #else
-    static void test_logging_levels()
+    inline static void test_logging_levels()
     {
       cout << "### Example of different Logging Levels:" << endl;
       LOG(INFO) << "info";
@@ -176,7 +176,7 @@ namespace pfasst
      * \param[in] argc number of command line arguments
      * \param[in] argv command line arguments
      */
-    static void start_log(int argc, char** argv)
+    inline static void start_log(int argc, char** argv)
     {
       _START_EASYLOGGINGPP(argc, argv);
       set_logging_flags();

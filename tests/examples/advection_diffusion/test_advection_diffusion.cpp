@@ -6,6 +6,7 @@
 #include <iostream>
 #include <tuple>
 #include <vector>
+using namespace std;
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
@@ -14,8 +15,7 @@
 #include "../examples/advection_diffusion/vanilla_sdc.cpp"
 #include "../examples/advection_diffusion/serial_mlsdc.cpp"
 #undef PFASST_UNIT_TESTING
-
-using namespace std;
+using namespace pfasst::examples::advection_diffusion;
 
 
 MATCHER(DoubleNear, "")
@@ -49,7 +49,7 @@ TEST(ErrorTest, VanillaSDC)
     }
 
     EXPECT_THAT(err, testing::Pointwise(DoubleLess(), tol));
-    ASSERT_EQ(max_iter, 3);
+    ASSERT_EQ(max_iter, (size_t)3);
   }
 
   {
@@ -66,7 +66,7 @@ TEST(ErrorTest, VanillaSDC)
     }
 
     EXPECT_THAT(err, testing::Pointwise(DoubleLess(), tol));
-    ASSERT_EQ(max_iter, 2);
+    ASSERT_EQ(max_iter, (size_t)2);
   }
 }
 

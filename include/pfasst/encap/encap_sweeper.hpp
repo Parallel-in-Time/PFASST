@@ -193,6 +193,7 @@ namespace pfasst
          */
         virtual void reevaluate(bool initial_only=false)
         {
+          UNUSED(initial_only);
           throw NotImplementedYet("sweeper");
         }
 
@@ -228,6 +229,7 @@ namespace pfasst
          */
         virtual void residual(time dt, vector<shared_ptr<Encapsulation<time>>> dst) const
         {
+          UNUSED(dt); UNUSED(dst);
           throw NotImplementedYet("residual");
         }
 
@@ -241,6 +243,7 @@ namespace pfasst
           if (this->abs_residual_tol > 0.0 || this->rel_residual_tol > 0.0) {
             if (this->residuals.size() == 0) {
               for (auto x: this->get_nodes()) {
+                UNUSED(x);
                 this->residuals.push_back(this->get_factory()->create(pfasst::encap::solution));
               }
             }
