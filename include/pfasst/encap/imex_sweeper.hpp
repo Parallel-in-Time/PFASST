@@ -206,7 +206,12 @@ namespace pfasst
           for (size_t m = 0; m < this->quadrature->get_num_nodes(); m++) {
             dst[m]->copy(this->start_state);
             dst[m]->saxpy(-1.0, this->state[m]);
-            // XXX: add tau corrections
+          }
+          if (this->fas_corrections.size() > 0) {
+            size_t m0 = this->quadrature->left_is_node() ? 1 : 0;
+            for (size_t m = m0; m < this->quadrature->get_num_nodes(); m++) {
+                dst[m]->saxpy(1.0, this->fas_corrections[m-m0]);
+            }
           }
           dst[0]->mat_apply(dst, dt, this->quadrature->get_q_mat(), this->fs_expl, false);
           dst[0]->mat_apply(dst, dt, this->quadrature->get_q_mat(), this->fs_impl, false);
