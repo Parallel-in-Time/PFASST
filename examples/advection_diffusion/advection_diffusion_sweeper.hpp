@@ -138,7 +138,7 @@ namespace pfasst
 
             auto n = this->get_controller()->get_step();
             auto k = this->get_controller()->get_iteration();
-            LOG(INFO) << "err:" << n << k << max << "(" << qend.size() << "," << predict << ")";
+            LOG(INFO) << "err: " << n << " " << k << " " << max << " (" << qend.size() << "," << predict << ")";
 
             this->errors.insert(pair<pair<size_t, size_t>, double>(pair<size_t, size_t>(n, k), max));
           }

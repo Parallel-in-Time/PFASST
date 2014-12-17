@@ -30,6 +30,8 @@ namespace pfasst
         }
     };
 
+    class MPIStatus;
+
 
     class MPICommunicator
       : public ICommunicator
@@ -37,13 +39,11 @@ namespace pfasst
         //! @{
         int _rank;
         int _size;
-        vector<int> status, _status;
         //! @}
 
       public:
         //! @{
         MPI_Comm comm;
-        MPI_Win  status_window;
         //! @}
 
         //! @{
@@ -54,12 +54,6 @@ namespace pfasst
         {
           set_comm(comm);
         }
-
-        virtual ~MPICommunicator()
-        {
-          MPI_Win_fence(MPI_MODE_NOSUCCEED, this->status_window);
-          MPI_Win_free(&this->status_window);
-        }
         //! @}
 
         //! @{
@@ -69,59 +63,94 @@ namespace pfasst
           MPI_Comm_size(this->comm, &(this->_size));
           MPI_Comm_rank(this->comm, &(this->_rank));
 
-          status.resize(this->_size);
-          _status.resize(this->_size);
-          this->clear_converged();
-          auto err = MPI_Win_create(_status.data(), this->_size * sizeof(int),
-                                    sizeof(int), MPI_INFO_NULL, this->comm,
-                                    &this->status_window);
-          if (err != MPI_SUCCESS) {
-            throw MPIError();
-          }
-          MPI_Win_fence(MPI_MODE_NOPRECEDE, this->status_window);
-        }
-
-        virtual void set_converged(bool converged) override
-        {
-          LOG(DEBUG) << "mpi rank " << this->_rank << " set converged to " << converged;
-          this->_status[this->_rank] = converged ? 1 : 0;
-          for (int dst = 0; dst < this->_size; dst++) {
-            if (dst == this->_rank) { continue; }
-            auto err = MPI_Put(this->_status.data()+this->_rank, 1, MPI_INT,
-                               dst, this->_rank, 1, MPI_INT, this->status_window);
-            if (err != MPI_SUCCESS) {
-              throw MPIError();
-            }
-          }
-        }
-
-        virtual bool get_converged(int rank) override
-        {
-          return this->status[rank];
-        }
-
-        virtual void clear_converged() override
-        {
-          std::fill(status.begin(), status.end(), 0);
-          std::fill(_status.begin(), _status.end(), 0);
-        }
-
-        virtual void fence_status() override
-        {
-          auto err = MPI_Win_fence(0, this->status_window);
-          if (err != MPI_SUCCESS) {
-            throw MPIError();
-          }
-
-          // XXX: find first non-converged processor and flag all preceeding processors as not
-          // converged...
-          std::copy(_status.begin(), _status.end(), status.begin());
-          // status.copy(_status);
+          shared_ptr<MPIStatus> status = make_shared<MPIStatus>();
+          this->status = status;
+          this->status->set_comm(this);
         }
 
         int size() { return this->_size; }
         int rank() { return this->_rank; }
-        //! @
+        //! @}
+    };
+
+
+    class MPIStatus
+      : public IStatus
+    {
+        vector<bool> converged;
+        MPICommunicator* mpi;
+
+      public:
+
+        virtual void set_comm(ICommunicator* comm)
+        {
+          this->comm = comm;
+          this->converged.resize(comm->size());
+
+          this->mpi = dynamic_cast<MPICommunicator*>(comm); assert(this->mpi);
+        }
+
+        virtual void clear() override
+        {
+          std::fill(converged.begin(), converged.end(), false);
+        }
+
+        virtual void set_converged(bool converged) override
+        {
+          LOG(DEBUG) << "mpi rank " << this->comm->rank() << " set converged to " << converged;
+          this->converged.at(this->comm->rank()) = converged;
+        }
+
+        virtual bool get_converged(int rank) override
+        {
+          return this->converged.at(rank);
+        }
+
+        virtual void post()
+        {
+          // we'll use blocking send/recv for status info
+        }
+
+        virtual void send()
+        {
+          if (mpi->size() == 1) { return; }
+          if (mpi->rank() == mpi->size() - 1) { return; }
+          // if (get_converged(mpi->rank())) { return; }
+
+          int iconverged = converged.at(mpi->rank()) ? 1 : 0;
+
+          LOG(DEBUG) << "mpi rank " << this->comm->rank() << " status send " << iconverged;
+
+          int err = MPI_Send(&iconverged, sizeof(int), MPI_INT,
+                             (mpi->rank() + 1) % mpi->size(), 1, mpi->comm);
+
+          if (err != MPI_SUCCESS) {
+            throw MPIError();
+          }
+        }
+
+        virtual void recv()
+        {
+          if (mpi->size() == 1) { return; }
+          if (mpi->rank() == 0) { return; }
+          if (get_converged(mpi->rank()-1)) {
+            LOG(DEBUG) << "mpi rank " << this->comm->rank() << " skipping status recv";
+            return;
+          }
+
+          MPI_Status stat;
+          int iconverged;
+          int err = MPI_Recv(&iconverged, sizeof(iconverged), MPI_INT,
+                             (mpi->rank() - 1) % mpi->size(), 1, mpi->comm, &stat);
+
+          if (err != MPI_SUCCESS) {
+            throw MPIError();
+          }
+
+          converged.at(mpi->rank()-1) = iconverged == 1 ? true : false;
+
+          LOG(DEBUG) << "mpi rank " << this->comm->rank() << " status recv " << iconverged;
+        }
     };
 
   }  // ::pfasst::mpi

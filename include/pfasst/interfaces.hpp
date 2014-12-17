@@ -67,17 +67,55 @@ namespace pfasst
       }
   };
 
+  class IStatus;
+
   class ICommunicator
   {
     public:
       virtual ~ICommunicator() { }
       virtual int size() = 0;
       virtual int rank() = 0;
+
+      shared_ptr<IStatus> status;
+  };
+
+  class IStatus
+  {
+    protected:
+      ICommunicator* comm;
+
+    public:
+      virtual ~IStatus() { }
+      virtual void clear() = 0;
       virtual void set_converged(bool converged) = 0;
       virtual bool get_converged(int rank) = 0;
-      virtual void clear_converged() = 0;
-      virtual void fence_status() = 0;
+      virtual void post() = 0;
+      virtual void send() = 0;
+      virtual void recv() = 0;
+
+      virtual void set_comm(ICommunicator* comm)
+      {
+        this->comm = comm;
+      }
+
+      virtual bool previous_is_iterating()
+      {
+        if (this->comm->rank() == 0) {
+          return false;
+        }
+        return this->get_converged(this->comm->rank()-1);
+      }
+
+      virtual bool keep_iterating()
+      {
+        if (this->comm->rank() == 0) {
+          return !this->get_converged(0);
+        }
+        return !this->get_converged(this->comm->rank()) || !this->get_converged(this->comm->rank()-1);
+      }
   };
+
+
 
   /**
    * abstract SDC sweeper.

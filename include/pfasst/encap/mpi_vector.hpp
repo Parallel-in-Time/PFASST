@@ -55,7 +55,6 @@ namespace pfasst
           auto& mpi = as_mpi(comm);
           if (mpi.size() == 1) { return; }
           if (mpi.rank() == 0) { return; }
-          if (mpi.get_converged(mpi.rank()-1)) { return; }
 
           int err = MPI_Irecv(this->data(), sizeof(scalar) * this->size(), MPI_CHAR,
                               (mpi.rank() - 1) % mpi.size(), tag, mpi.comm, &recv_request);
@@ -69,7 +68,6 @@ namespace pfasst
           auto& mpi = as_mpi(comm);
           if (mpi.size() == 1) { return; }
           if (mpi.rank() == 0) { return; }
-          if (mpi.get_converged(mpi.rank()-1)) { return; }
 
           int err;
           if (blocking) {

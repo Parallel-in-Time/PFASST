@@ -21,9 +21,9 @@ using namespace std;
 
 #include "advection_diffusion_sweeper.hpp"
 #include "spectral_transfer_1d.hpp"
+
 using namespace pfasst::encap;
 using namespace pfasst::mpi;
-
 
 namespace pfasst
 {
@@ -67,6 +67,7 @@ namespace pfasst
         pf.set_comm(&comm);
         pf.set_duration(0.0, nsteps * dt, dt, niters);
         pf.set_nsweeps({2, 1});
+        // pf.get_finest<AdvectionDiffusionSweeper<>>()->set_residual_tolerances(1e-8, 0.0);
         pf.run();
 
         auto fine = pf.get_finest<AdvectionDiffusionSweeper<>>();

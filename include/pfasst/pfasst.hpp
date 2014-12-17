@@ -73,21 +73,13 @@ namespace pfasst
           }
 
           for (this->set_iteration(0);
-               this->get_iteration() < this->get_max_iterations();
+               this->get_iteration() < this->get_max_iterations() && this->comm->status->keep_iterating();
                this->advance_iteration()) {
-            post();
-            cycle_v(this->finest());
-            fence();
 
-            auto rank = this->comm->rank();
-            if (this->comm->get_converged(rank)) {
-              if ((rank == 0) || (rank > 0 && this->comm->get_converged(rank-1))) {
-                LOG(DEBUG) << "rank " << rank << " converged; previous converged; breaking iterations";
-                break;
-              } else {
-                LOG(DEBUG) << "rank " << rank << " converged; previous hasn't converged; continuing iterations";
-              }
+            if (this->comm->status->previous_is_iterating()) {
+              post();
             }
+            cycle_v(this->finest());
           }
 
           this->get_finest()->post_step();
@@ -96,7 +88,7 @@ namespace pfasst
             broadcast();
           }
 
-          this->comm->clear_converged();
+          this->comm->status->clear();
         }
       }
 
@@ -113,7 +105,7 @@ namespace pfasst
         perform_sweeps(l.level);
 
         if (l == this->finest() && fine->converged()) {
-          this->comm->set_converged(true);
+          this->comm->status->set_converged(true);
         }
 
         fine->send(comm, tag(l), false);
@@ -142,8 +134,10 @@ namespace pfasst
 
         trns->interpolate(fine, crse, true);
 
-        fine->recv(comm, tag(l), false);
-        trns->interpolate_initial(fine, crse);
+        if (this->comm->status->previous_is_iterating()) {
+          fine->recv(comm, tag(l), false);
+          trns->interpolate_initial(fine, crse);
+        }
 
         if (l < this->finest()) {
           perform_sweeps(l.level);
@@ -159,9 +153,13 @@ namespace pfasst
       {
         auto crse = l.current();
 
-        crse->recv(comm, tag(l), true);
+        if (this->comm->status->previous_is_iterating()) {
+          crse->recv(comm, tag(l), true);
+        }
+        this->comm->status->recv();
         this->perform_sweeps(l.level);
         crse->send(comm, tag(l), true);
+        this->comm->status->send();
         return l + 1;
       }
 
@@ -233,6 +231,7 @@ namespace pfasst
 
       void post()
       {
+        this->comm->status->post();
         for (auto l = this->coarsest() + 1; l <= this->finest(); ++l) {
           l.current()->post(comm, tag(l));
         }
