@@ -5,6 +5,9 @@
 *.info
 /include/pfasst/site_config.hpp
 
+.python-version
+/run
+
 # Created by http://www.gitignore.io
 
 ### C ###
@@ -37,24 +40,14 @@
 # Compiled Object files
 *.slo
 *.lo
-*.o
-*.obj
 
 # Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
 
 # Compiled Static libraries
 *.lai
 *.la
-*.a
-*.lib
 
 # Executables
-*.exe
-*.out
-*.app
 
 
 ### Eclipse ###
@@ -123,7 +116,6 @@ tramp
 
 
 ### Linux ###
-*~
 
 # KDE directory preferences
 .directory

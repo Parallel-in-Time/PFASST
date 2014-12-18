@@ -41,7 +41,7 @@ namespace pfasst
           Particle(const size_t dim, const precision charge, const precision mass);
           virtual ~Particle();
 
-                size_t DIM() const;
+                size_t dim() const;
                 ParticleComponent<precision>& pos();
           const ParticleComponent<precision>& pos() const;
                 ParticleComponent<precision>& vel();
@@ -66,7 +66,7 @@ namespace pfasst
   }  // ::pfasst::examples
 }  // ::pfasst
 
-#include "particle_util.hpp"
+// #include "particle_util.hpp"
 #include "particle_impl.hpp"
 
 #endif  // _EXAMPLES__BORIS__PARTICLE_HPP_

@@ -97,7 +97,7 @@ namespace pfasst
         {
           ParticleCloudComponent<scalar> out(num_particles);
           for (size_t p = 0; p < num_particles; ++p) {
-            out[p] = this->unpack_1d(packed + p, DIM);
+            out[p] = this->unpack_1d(packed + (p * DIM), DIM);
           }
           return out;
         }

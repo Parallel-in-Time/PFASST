@@ -2,10 +2,14 @@
 
 #include <algorithm>
 #include <cassert>
+#include <random>
 #include <string>
 using namespace std;
 
+#include <pfasst/site_config.hpp>
 #include <pfasst/logging.hpp>
+
+#include "particle_util.hpp"
 
 
 namespace pfasst
@@ -175,6 +179,7 @@ namespace pfasst
         for (auto elem : this->_positions) {
           center += elem;
         }
+        return center / this->_num_particles;
       }
 
       template<typename precision>
@@ -189,11 +194,113 @@ namespace pfasst
       }
 
       template<typename precision>
+      shared_ptr<Particle<precision>> ParticleCloud<precision>::at(const size_t index) const
+      {
+        assert(this->size() > index);
+        return this->operator[](index);
+      }
+
+      template<typename precision>
+      void ParticleCloud<precision>::set_at(const size_t index, const shared_ptr<Particle<precision>>& particle)
+      {
+        assert(this->size() > index);
+        assert(particle->dim() == this->dim());
+        this->_positions[index] = particle->pos();
+        this->_velocities[index] = particle->vel();
+        this->_masses[index] = particle->mass();
+        this->_charges[index] = particle->charge();
+      }
+
+      template<typename precision>
+      void ParticleCloud<precision>::distribute_around_center(const shared_ptr<Particle<precision>>& center)
+      {
+        VLOG_FUNC_START("ParticleCloud") << "center:" << center;
+        assert(this->size() > 0);
+
+        precision scale = 25.0;
+
+        #ifdef PFASST_DEFAULT_RANDOM_SEED
+          default_random_engine rd_gen(PFASST_RANDOM_SEED);
+        #else
+          default_random_engine rd_gen();
+        #endif
+        VLOG(3) << LOG_INDENT << "center pos:" << center->pos();
+        VLOG(3) << LOG_INDENT << "center vel:" << center->vel();
+        precision max_pos = max(center->pos());
+        precision max_vel = max(center->vel());
+        uniform_real_distribution<precision> dist_pos(- max_pos / scale, max_pos / scale);
+        uniform_real_distribution<precision> dist_vel(- max_vel / scale, max_vel / scale);
+        VLOG(3) << LOG_INDENT << "random distribution range for position: [-" << (max_pos / scale) << ", " << (max_pos / scale) << "]";
+        VLOG(3) << LOG_INDENT << "random distribution range for velocity: [-" << (max_vel / scale) << ", " << (max_vel / scale) << "]";
+
+        size_t p = 0;
+
+        if (this->size() % 2 == 1) {
+          this->set_at(p, center);
+          VLOG(4) << LOG_INDENT << "setting p=0 to center:" << this->at(0);
+          p++;
+        }
+        for (;p < this->size(); p += 2) {
+          VLOG(4) << LOG_INDENT << "setting p=" << p << "and p=" << p+1;
+          ParticleComponent<precision> pos_rand(this->dim());
+          ParticleComponent<precision> vel_rand(this->dim());
+          for (size_t d = 0; d < this->dim(); ++d) {
+            pos_rand[d] = dist_pos(rd_gen);
+            vel_rand[d] = dist_vel(rd_gen);
+          }
+          this->_positions[p] = center->pos() + pos_rand;
+          this->_positions[p+1] = center->pos() - pos_rand;
+          this->_velocities[p] = center->vel() + vel_rand;
+          this->_velocities[p+1] = center->vel() - vel_rand;
+          VLOG(4) << LOG_INDENT << "p=" << p << ":" << this->at(p);
+          VLOG(4) << LOG_INDENT << "p=" << p+1 << ":" << this->at(p+1);
+        }
+        VLOG(2) << LOG_INDENT << "center after distribute:" << this->center_of_mass();
+      }
+
+      template<typename precision>
       void ParticleCloud<precision>::log(el::base::type::ostream_t& os) const
       {
         os << fixed << setprecision(LOG_PRECISION);
         os << "ParticleCloud(n=" << this->_num_particles << ", particles=" << this->particles() << ")";
         os.unsetf(ios_base::floatfield);
+      }
+
+
+      template<typename precision>
+      static precision distance(const Particle<precision>& first, const Particle<precision>& second)
+      {
+        assert(first.dim() == second.dim());
+        vector<precision> diff = first.pos() - second.pos();
+        precision dist = precision(0.0);
+        for (size_t i = 0; i < first.dim(); ++i) {
+          dist += diff[i] * diff[i];
+        }
+        return sqrt(dist);
+      }
+
+      template<typename precision>
+      static precision distance(const shared_ptr<Particle<precision>> first, const shared_ptr<Particle<precision>> second)
+      {
+        return distance(*(first.get()), *(second.get()));
+      }
+
+      template<typename precision>
+      static vector<precision> distance_to_reference(const ParticleCloud<precision>& cloud,
+                                                     const Particle<precision>&      reference)
+      {
+        vector<precision> distances(cloud.size());
+        for (size_t i = 0; i < distances.size(); ++i) {
+          distances[i] = distance(*cloud[i], reference);
+        }
+        return distances;
+      }
+
+      template<typename precision>
+      static vector<precision> distance_to_reference(const shared_ptr<ParticleCloud<precision>>& cloud,
+                                                     const shared_ptr<Particle<precision>>&      reference)
+      {
+        return distance_to_reference(*cloud, *reference);
       }
 
 

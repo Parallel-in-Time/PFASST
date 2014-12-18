@@ -65,11 +65,29 @@ namespace pfasst
           ParticleComponent<precision> center_of_mass() const;
           shared_ptr<Particle<precision>> operator[](const size_t index) const;
           shared_ptr<Particle<precision>> at(const size_t index) const;
+          void set_at(const size_t index, const shared_ptr<Particle<precision>>& particle);
           // !! EXPENSIVE !!
           vector<shared_ptr<Particle<precision>>> particles() const;
 
+          void distribute_around_center(const shared_ptr<Particle<precision>>& center);
+
           virtual void log(el::base::type::ostream_t& os) const;
       };
+
+
+      template<typename precision>
+      static precision distance(const Particle<precision>& first,
+                                const Particle<precision>& second);
+      template<typename precision>
+      static precision distance(const shared_ptr<Particle<precision>>& first,
+                                const shared_ptr<Particle<precision>>& second);
+
+      template<typename precision>
+      static vector<precision> distance_to_reference(const ParticleCloud<precision>& cloud,
+                                                     const Particle<precision>&      reference);
+      template<typename precision>
+      static vector<precision> distance_to_reference(const shared_ptr<ParticleCloud<precision>>& cloud,
+                                                     const shared_ptr<Particle<precision>>&      reference);
 
 
       template<typename precision>
@@ -98,7 +116,7 @@ namespace pfasst
 }  // ::pfasst
 
 
-#include "particle_util.hpp"
+// #include "particle_util.hpp"
 #include "particle_cloud_impl.hpp"
 
 #endif  // _EXAMPLES__BORIS__PARTICLE_CLOUD_HPP_

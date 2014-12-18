@@ -175,8 +175,8 @@ namespace pfasst
 
               for (size_t j = 0; j < pos.size(); ++j) {
                 for (size_t d = 0; d < pos[j].size(); ++d) {
-                  max_residual = max(max_residual, abs(pos[j][d]));
-                  max_residual = max(max_residual, abs(vel[j][d]));
+                  max_residual = std::max(max_residual, abs(pos[j][d]));
+                  max_residual = std::max(max_residual, abs(vel[j][d]));
                 }
               }
             }
@@ -238,7 +238,13 @@ namespace pfasst
           virtual void set_initial_energy()
           {
             VLOG_FUNC_START("BorisSweeper");
-            this->initial_energy = this->impl_solver->energy(this->particles.front(), this->get_controller()->get_time());
+            auto p0 = this->particles.front();
+            this->initial_energy = this->impl_solver->energy(p0, this->get_controller()->get_time());
+            for (size_t p = 0; p < p0->size(); ++p) {
+              cout << "data,0,0," << p << "," << fixed << setprecision(LOG_PRECISION)
+                   << p0->positions()[p][0] << "," << p0->positions()[p][1] << "," << p0->positions()[p][2] << ","
+                   << p0->velocities()[p][0] << "," << p0->velocities()[p][1] << "," << p0->velocities()[p][2] << endl;
+            }
             VLOG_FUNC_END("BorisSweeper");
           }
           //! @}
@@ -314,40 +320,49 @@ namespace pfasst
 
           virtual void echo_error(const time t, bool predict = false)
           {
+            auto end = this->particles.back();
+            ErrorTuple<scalar> e_tuple;
+            scalar e_end = this->impl_solver->energy(end, t);
+            e_tuple.e_drift = abs(this->initial_energy - e_end);
+            e_tuple.res = this->compute_residual();
+
+            size_t n = this->get_controller()->get_step();
+            size_t k = this->get_controller()->get_iteration();
+            error_index nk(n, k);
+
+            LOG(INFO) << scientific << setprecision(5)
+                      << "step" << n+1
+                      << "\titer" << k
+                      << "\tres" << e_tuple.res
+                      << "\tdrift" << e_tuple.e_drift
+                      << fixed << setprecision(2)
+                      << "\tenergy" << e_end;
+            VLOG(1) << LOG_INDENT << "particle at t_end:" << end;
+
+            // exact anlytical solution only valid for 1-particle-system
             if (this->particles[0]->size() == 1) {
-              auto end = this->particles.back();
               shared_ptr<encap_type> ex = dynamic_pointer_cast<encap_type>(this->get_factory()->create(pfasst::encap::solution));
               this->exact(ex, t);
-              scalar e_end = this->impl_solver->energy(this->particles.back(), t);
 
-              ErrorTuple<scalar> e_tuple;
-              e_tuple.e_drift = this->initial_energy - e_end;
               e_tuple.p_err.x = ex->positions()[0][0] - end->positions()[0][0];
               e_tuple.p_err.y = ex->positions()[0][1] - end->positions()[0][1];
               e_tuple.p_err.z = ex->positions()[0][2] - end->positions()[0][2];
               e_tuple.p_err.u = ex->velocities()[0][0] - end->velocities()[0][0];
               e_tuple.p_err.v = ex->velocities()[0][1] - end->velocities()[0][1];
               e_tuple.p_err.w = ex->velocities()[0][2] - end->velocities()[0][2];
-              e_tuple.res = this->compute_residual();
 
-              size_t n = this->get_controller()->get_step();
-              size_t k = this->get_controller()->get_iteration();
-              error_index nk(n, k);
-
-              LOG(INFO) << scientific << setprecision(5)
-                        << "step" << n+1
-                        << "\titer" << k
-                        << "\tres" << e_tuple.res
-                        << "\tdrift" << e_tuple.e_drift
-                        << "\tenergy" << e_end;
-              VLOG(1) << LOG_INDENT << "particle at t_end:" << *end;
               VLOG(2) << LOG_INDENT << "absolute error:" << e_tuple.p_err;
-
-              this->errors.insert(pair<error_index, ErrorTuple<scalar>>(nk, e_tuple));
-            } else {
-              // no-op
-              // exact anlytical solution only valid for 1-particle-system
             }
+            this->errors.insert(pair<error_index, ErrorTuple<scalar>>(nk, e_tuple));
+
+            for (size_t p = 0; p < end->size(); ++p) {
+              cout << "data," << n+1 << "," << k << "," << p << "," << fixed << setprecision(LOG_PRECISION)
+                   << end->positions()[p][0] << "," << end->positions()[p][1] << "," << end->positions()[p][2] << ","
+                   << end->velocities()[p][0] << "," << end->velocities()[p][1] << "," << end->velocities()[p][2] << endl;
+            }
+            auto center = end->center_of_mass();
+              cout << "data," << n+1 << "," << k << ",-1," << fixed << setprecision(LOG_PRECISION)
+                   << center[0] << "," << center[1] << "," << center[2] << ",0,0,0" << endl;
           }
 
           virtual error_map<scalar> get_errors() const
@@ -497,16 +512,15 @@ namespace pfasst
             velocity_type c_k_term = cloud_component_factory<scalar>(this->particles[0]->size(), this->particles[0]->dim());
 
             // compute integrals
-//             for(size_t i = 0; i < nnodes; ++i) {
             zero(this->s_integrals);
             zero(this->ss_integrals);
-//             }
             VLOG(3) << LOG_INDENT << "s_int:" << this->s_integrals;
             VLOG(3) << LOG_INDENT << "ss_int:" << this->ss_integrals;
             // starting at m=1 as m=0 will only add zeros
             for (size_t m = 1; m < nnodes; m++) {
               for (size_t l = 0; l < nnodes; l++) {
                 auto rhs = this->build_rhs(l);
+                VLOG(3) << LOG_INDENT << "l=" << l << " -> rhs:" << rhs;
                 this->s_integrals[m] += rhs * dt * this->s_mat(m, l);
                 this->ss_integrals[m] += rhs * dt * dt * this->ss_mat(m, l);
               }

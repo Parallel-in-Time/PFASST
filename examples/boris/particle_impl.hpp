@@ -45,7 +45,7 @@ namespace pfasst
       {}
 
       template<typename precision>
-      size_t Particle<precision>::DIM() const
+      size_t Particle<precision>::dim() const
       {
         return this->_dim;
       }
@@ -106,7 +106,8 @@ namespace pfasst
       void Particle<precision>::log(el::base::type::ostream_t& os) const
       {
         os << fixed << setprecision(LOG_PRECISION);
-        os << "Particle(q=" << this->_charge << ", m=" << this->_mass << ", pos=" << this->_pos << ", vel=" << this->_vel << ")";
+//         os << "Particle(q=" << this->_charge << ", m=" << this->_mass << ", pos=" << this->_pos << ", vel=" << this->_vel << ")";
+        os << "Particle(pos=" << this->_pos << ", vel=" << this->_vel << ")";
         os.unsetf(ios_base::floatfield);
       }
 

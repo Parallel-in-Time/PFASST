@@ -21,10 +21,15 @@ CMAKE_DEPENDENT_OPTION(pfasst_INSTALL_EXAMPLES "Install example programs." ON
 option(pfasst_BUILD_TESTS       "Build test suite for PFASST."                            ON )
 option(pfasst_WITH_MPI          "Build with MPI enabled."                                 OFF)
 option(pfasst_WITH_GCC_PROF     "Enable excessive debugging & profiling output with GCC." OFF)
+option(pfasst_DEFAULT_RAND_SEED "Using a hardcoded random seed"                           OFF)
 
 if(${pfasst_WITH_MPI})
     find_package(MPI REQUIRED)
     message(STATUS "Using MPI C++ Compiler: ${MPI_CXX_COMPILER}")
+endif()
+
+if(pfasst_DEFAULT_RAND_SEED)
+    set(pfasst_RANDOM_SEED "42")
 endif()
 
 # Check for C++11 support
@@ -103,6 +108,12 @@ if(${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
         "build-in profiling support"
     )
 endif()
+if(pfasst_RANDOM_SEED)
+    add_feature_info(DefaultRandomSeed
+        pfasst_RANDOM_SEED
+        "using specific default random seed ${pfasst_RANDOM_SEED}"
+    )
+endif()
 
 set(3rdparty_INCLUDES)
 set(3rdparty_DEPENDEND_LIBS)
@@ -136,6 +147,9 @@ list(LENGTH pfasst_TESTS_DEPENDEND_TARGETS pfasst_TESTS_NUM_DEPENDEND_TARGETS)
 message(STATUS "********************************************************************************")
 message(STATUS "Configuring sources")
 set(WARNING_COMMENT "/*\n * DO NOT ALTER THIS FILE\n *\n * It will get rewritten on CMake's next run\n *\n */")
+if(pfasst_RANDOM_SEED)
+    add_definitions(-DPFASST_DEFAULT_RANDOM_SEED)
+endif()
 configure_file(
     "${pfasst_SOURCE_DIR}/cmake/site_config.hpp.in"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/pfasst/site_config.hpp"

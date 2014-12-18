@@ -43,10 +43,13 @@ namespace pfasst
         sdc.set_duration(0.0, nsteps*dt, dt, niters);
         sdc.setup();
 
-        auto p0 = dynamic_pointer_cast<ParticleCloud<double>>(sweeper->get_state(0));
-        p0->positions()[0][0] = 10;
-        p0->velocities()[0][0] = 100;
-        p0->velocities()[0][2] = 100;
+        shared_ptr<Particle<double>> center = make_shared<Particle<double>>();
+        center->pos()[0] = 10;
+        center->vel()[0] = 100;
+        center->vel()[2] = 100;
+
+        shared_ptr<ParticleCloud<double>> q0 = dynamic_pointer_cast<ParticleCloud<double>>(sweeper->get_state(0));
+        q0->distribute_around_center(center);
 
         sweeper->set_initial_energy();
         LOG(INFO) << OUT::green << "Initial Particle: " << *(dynamic_pointer_cast<ParticleCloud<double>>(sweeper->get_state(0)));
