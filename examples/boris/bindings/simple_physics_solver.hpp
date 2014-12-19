@@ -8,6 +8,7 @@ using namespace std;
   #define DIM 3
 #endif
 
+
 namespace simple_physics_solver
 {
   class SimplePhysicsSolverConfig

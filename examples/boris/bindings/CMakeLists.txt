@@ -1,4 +1,3 @@
-
 add_library(simple_physics_solver
     simple_physics_solver.cpp
 )

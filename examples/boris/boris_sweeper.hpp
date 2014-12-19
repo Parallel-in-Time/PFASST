@@ -5,8 +5,9 @@
 #include <cmath>
 #include <complex>
 #include <cstdlib>
-#include <vector>
+#include <iostream>
 #include <map>
+#include <vector>
 using namespace std;
 
 #include <Eigen/Core>
@@ -137,6 +138,8 @@ namespace pfasst
           Matrix<time> qx_mat;
           Matrix<time> qt_mat;
 
+          ofstream data_stream;
+
           acceleration_type build_rhs(const size_t m, const bool previous = false) const
           {
 //             VLOG_FUNC_START("BorisSweeper") << "m=" << m << ", previous=" << boolalpha << previous;
@@ -188,13 +191,16 @@ namespace pfasst
 
         public:
           //! @{
-          BorisSweeper(shared_ptr<bindings::WrapperInterface<scalar, time>>& impl_solver)
+          BorisSweeper(shared_ptr<bindings::WrapperInterface<scalar, time>>& impl_solver,
+                       const string& data_file)
             :   impl_solver(impl_solver)
               , errors()
               , exact_updated(false)
               , f_evals(0)
+              , data_stream(data_file, ios::out | ios::trunc)
           {
             VLOG_FUNC_START("BorisSweeper");
+            assert(data_stream.is_open() && data_stream.good());
           }
 
           BorisSweeper(const BorisSweeper<scalar, time>& other) = delete;
@@ -240,11 +246,17 @@ namespace pfasst
             VLOG_FUNC_START("BorisSweeper");
             auto p0 = this->particles.front();
             this->initial_energy = this->impl_solver->energy(p0, this->get_controller()->get_time());
+            LOG(INFO) << OUT::green << "Initial Energy:" << this->initial_energy;
             for (size_t p = 0; p < p0->size(); ++p) {
-              cout << "data,0,0," << p << "," << fixed << setprecision(LOG_PRECISION)
-                   << p0->positions()[p][0] << "," << p0->positions()[p][1] << "," << p0->positions()[p][2] << ","
-                   << p0->velocities()[p][0] << "," << p0->velocities()[p][1] << "," << p0->velocities()[p][2] << endl;
+              this->data_stream << "0,0," << p << ","
+                                << fixed << setprecision(LOG_PRECISION)
+                                << p0->positions()[p][0] << "," << p0->positions()[p][1] << "," << p0->positions()[p][2] << ","
+                                << p0->velocities()[p][0] << "," << p0->velocities()[p][1] << "," << p0->velocities()[p][2] << endl;
             }
+            auto center = p0->center_of_mass();
+            this->data_stream << "0,0,-1,"
+                              << fixed << setprecision(LOG_PRECISION)
+                              << center[0] << "," << center[1] << "," << center[2] << ",0,0,0" << endl;
             VLOG_FUNC_END("BorisSweeper");
           }
           //! @}
@@ -356,13 +368,15 @@ namespace pfasst
             this->errors.insert(pair<error_index, ErrorTuple<scalar>>(nk, e_tuple));
 
             for (size_t p = 0; p < end->size(); ++p) {
-              cout << "data," << n+1 << "," << k << "," << p << "," << fixed << setprecision(LOG_PRECISION)
-                   << end->positions()[p][0] << "," << end->positions()[p][1] << "," << end->positions()[p][2] << ","
-                   << end->velocities()[p][0] << "," << end->velocities()[p][1] << "," << end->velocities()[p][2] << endl;
+              this->data_stream << n+1 << "," << k << "," << p << ","
+                                << fixed << setprecision(LOG_PRECISION)
+                                << end->positions()[p][0] << "," << end->positions()[p][1] << "," << end->positions()[p][2] << ","
+                                << end->velocities()[p][0] << "," << end->velocities()[p][1] << "," << end->velocities()[p][2] << endl;
             }
             auto center = end->center_of_mass();
-              cout << "data," << n+1 << "," << k << ",-1," << fixed << setprecision(LOG_PRECISION)
-                   << center[0] << "," << center[1] << "," << center[2] << ",0,0,0" << endl;
+            this->data_stream << n+1 << "," << k << ",-1,"
+                              << fixed << setprecision(LOG_PRECISION)
+                              << center[0] << "," << center[1] << "," << center[2] << ",0,0,0" << endl;
           }
 
           virtual error_map<scalar> get_errors() const

@@ -26,15 +26,15 @@ namespace pfasst
         const double mass = 1.0;
         const double charge = 1.0;
 
-        const double epsilon = config::get_value<scalar>("epsilon", -1.0);
-
         auto quad    = quadrature::quadrature_factory<double>(nnodes, quadrature::QuadratureType::GaussLobatto);
         auto factory = make_shared<ParticleCloudFactory<double>>(nparticles, 3, mass, charge);
 
         shared_ptr<bindings::WrapperInterface<double, double>> impl_solver = \
           make_shared<bindings::WrapperSimplePhysicsSolver<double, double>>();
         bindings::setup(dynamic_pointer_cast<bindings::WrapperSimplePhysicsSolver<double, double>>(impl_solver));
-        auto sweeper = make_shared<BorisSweeper<double, double>>(impl_solver);
+
+        string data_file = "s" + to_string(nsteps) + "_i" + to_string(niters) + "_dt" + to_string(dt) + "_m" + to_string(nnodes) + "_p" + to_string(nparticles) + ".csv";
+        auto sweeper = make_shared<BorisSweeper<double, double>>(impl_solver, data_file);
 
         sweeper->set_quadrature(quad);
         sweeper->set_factory(factory);
@@ -50,9 +50,9 @@ namespace pfasst
 
         shared_ptr<ParticleCloud<double>> q0 = dynamic_pointer_cast<ParticleCloud<double>>(sweeper->get_state(0));
         q0->distribute_around_center(center);
+        LOG(INFO) << OUT::green << "Initial Particle: " << *(dynamic_pointer_cast<ParticleCloud<double>>(sweeper->get_state(0)));
 
         sweeper->set_initial_energy();
-        LOG(INFO) << OUT::green << "Initial Particle: " << *(dynamic_pointer_cast<ParticleCloud<double>>(sweeper->get_state(0)));
         sdc.run();
 
         return sweeper->get_errors();
