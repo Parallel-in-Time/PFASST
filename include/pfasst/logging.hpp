@@ -57,6 +57,7 @@ const string OUT::reset = "\033[0m";
 
 #include <pfasst/easylogging++.h>
 
+
 #ifndef PFASST_LOGGER_INITIALIZED
   // initialize easyloggingpp
   // FIXME: this might already be called by code using PFASST++
@@ -78,11 +79,31 @@ const string OUT::reset = "\033[0m";
   #define PFASST_LOGGER_DEFAULT_GLOBAL_MILLISECOND_WIDTH "4"
 #endif
 
+#ifndef VLOG_FUNC_START
+  #define VLOG_FUNC_START(scope) \
+    pfasst::log::stack_position++; \
+    VLOG(9) << std::string((pfasst::log::stack_position - 1) * 2, ' ') << "START:" << std::string(scope) + "::" + std::string(__func__) + "() "
+#endif
+
+#ifndef VLOG_FUNC_END
+  #define VLOG_FUNC_END(scope) \
+    pfasst::log::stack_position--; \
+    VLOG(9) << std::string(pfasst::log::stack_position * 2, ' ') << "DONE: " << std::string(scope) + "::" + std::string(__func__) + "()";
+#endif
+
+#ifndef LOG_PRECISION
+  #define LOG_PRECISION 5
+#endif
+
+#define LOG_INDENT string(pfasst::log::stack_position * 2, ' ')
+
 
 namespace pfasst
 {
   namespace log
   {
+    static size_t stack_position;
+
     /**
      * sets default configuration for default loggers
      */
@@ -139,7 +160,7 @@ namespace pfasst
      */
     inline static void set_logging_flags()
     {
-      el::Loggers::addFlag(el::LoggingFlag::NewLineForContainer);
+//       el::Loggers::addFlag(el::LoggingFlag::NewLineForContainer);
       el::Loggers::addFlag(el::LoggingFlag::LogDetailedCrashReason);
       el::Loggers::addFlag(el::LoggingFlag::DisableApplicationAbortOnFatalLog);
       el::Loggers::addFlag(el::LoggingFlag::ColoredTerminalOutput);
@@ -181,6 +202,7 @@ namespace pfasst
       _START_EASYLOGGINGPP(argc, argv);
       set_logging_flags();
       load_default_config();
+      pfasst::log::stack_position = 0;
     }
   }  // ::pfasst::log
 }  // ::pfasst
