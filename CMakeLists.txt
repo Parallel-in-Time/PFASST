@@ -21,7 +21,7 @@ CMAKE_DEPENDENT_OPTION(pfasst_INSTALL_EXAMPLES "Install example programs." ON
 option(pfasst_BUILD_TESTS       "Build test suite for PFASST."                            ON )
 option(pfasst_WITH_MPI          "Build with MPI enabled."                                 OFF)
 option(pfasst_WITH_GCC_PROF     "Enable excessive debugging & profiling output with GCC." OFF)
-option(pfasst_DEFAULT_RAND_SEED "Using a hardcoded random seed"                           OFF)
+option(pfasst_DEFAULT_RAND_SEED "Using a hardcoded random seed"                           ON )
 
 if(${pfasst_WITH_MPI})
     find_package(MPI REQUIRED)
