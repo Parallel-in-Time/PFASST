@@ -6,6 +6,8 @@
 #include <string>
 using namespace std;
 
+#include <boost/format.hpp>
+
 #include <pfasst/site_config.hpp>
 #include <pfasst/logging.hpp>
 
@@ -31,7 +33,6 @@ namespace pfasst
           , _default_mass(default_mass)
       {
         this->zero();
-//         VLOG(2) << this->_num_particles << "particles D" << this->_dim;
       }
 
       template<typename precision>
@@ -41,12 +42,10 @@ namespace pfasst
       template<typename precision>
       void ParticleCloud<precision>::zero()
       {
-//         VLOG_FUNC_START("ParticleCloud");
         fill(this->_positions.begin(), this->_positions.end(), vector<precision>(this->dim(), precision(0.0)));
         fill(this->_velocities.begin(), this->_velocities.end(), vector<precision>(this->dim(), precision(0.0)));
         fill(this->_charges.begin(), this->_charges.end(), this->_default_charge);
         fill(this->_masses.begin(), this->_masses.end(), this->_default_mass);
-//         VLOG_FUNC_END("ParticleCloud");
       }
 
       template<typename precision>
@@ -214,7 +213,8 @@ namespace pfasst
       template<typename precision>
       void ParticleCloud<precision>::distribute_around_center(const shared_ptr<Particle<precision>>& center)
       {
-        VLOG_FUNC_START("ParticleCloud") << "center:" << center;
+        VLOG_FUNC_START("ParticleCloud") << " center:" << center;
+        VLOG(3) << LOG_INDENT << "distributing " << this->size() << " particles around center " << center;
         assert(this->size() > 0);
 
         precision scale = 25.0;
@@ -224,24 +224,22 @@ namespace pfasst
         #else
           default_random_engine rd_gen();
         #endif
-        VLOG(3) << LOG_INDENT << "center pos:" << center->pos();
-        VLOG(3) << LOG_INDENT << "center vel:" << center->vel();
         precision max_pos = max(center->pos());
         precision max_vel = max(center->vel());
         uniform_real_distribution<precision> dist_pos(- max_pos / scale, max_pos / scale);
         uniform_real_distribution<precision> dist_vel(- max_vel / scale, max_vel / scale);
-        VLOG(3) << LOG_INDENT << "random distribution range for position: [-" << (max_pos / scale) << ", " << (max_pos / scale) << "]";
-        VLOG(3) << LOG_INDENT << "random distribution range for velocity: [-" << (max_vel / scale) << ", " << (max_vel / scale) << "]";
+        VLOG(4) << LOG_INDENT << "random displacement range for";
+        VLOG(4) << LOG_INDENT << " ... position: " << boost::format("[%.4f, %.4f]") % dist_pos.min() % dist_pos.max();
+        VLOG(4) << LOG_INDENT << " ... velocity: " << boost::format("[%.4f, %.4f]") % dist_vel.min() % dist_vel.max();
 
         size_t p = 0;
 
         if (this->size() % 2 == 1) {
           this->set_at(p, center);
-          VLOG(4) << LOG_INDENT << "setting p=0 to center:" << this->at(0);
+          VLOG(5) << LOG_INDENT << "setting p=0 to center";
           p++;
         }
         for (;p < this->size(); p += 2) {
-          VLOG(4) << LOG_INDENT << "setting p=" << p << "and p=" << p+1;
           ParticleComponent<precision> pos_rand(this->dim());
           ParticleComponent<precision> vel_rand(this->dim());
           for (size_t d = 0; d < this->dim(); ++d) {
@@ -252,10 +250,10 @@ namespace pfasst
           this->_positions[p+1] = center->pos() - pos_rand;
           this->_velocities[p] = center->vel() + vel_rand;
           this->_velocities[p+1] = center->vel() - vel_rand;
-          VLOG(4) << LOG_INDENT << "p=" << p << ":" << this->at(p);
-          VLOG(4) << LOG_INDENT << "p=" << p+1 << ":" << this->at(p+1);
+          VLOG(5) << LOG_INDENT << "p=" << p << ": " << this->at(p);
+          VLOG(5) << LOG_INDENT << "p=" << p+1 << ": " << this->at(p+1);
         }
-        VLOG(2) << LOG_INDENT << "center after distribute:" << this->center_of_mass();
+        VLOG(3) << LOG_INDENT << "center after distribute: " << this->center_of_mass();
       }
 
       template<typename precision>

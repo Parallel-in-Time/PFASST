@@ -3,14 +3,18 @@
 
 #include <cassert>
 #include <cmath>
+#include <cstdio>
 #include <complex>
 #include <cstdlib>
+#include <ios>
 #include <iostream>
 #include <map>
 #include <vector>
 using namespace std;
 
 #include <Eigen/Core>
+
+#include <boost/format.hpp>
 
 #include <pfasst.hpp>
 #include <pfasst/config.hpp>
@@ -140,26 +144,28 @@ namespace pfasst
 
           ofstream data_stream;
 
+          string FORMAT_STR;
+
           acceleration_type build_rhs(const size_t m, const bool previous = false) const
           {
-//             VLOG_FUNC_START("BorisSweeper") << "m=" << m << ", previous=" << boolalpha << previous;
+            VLOG_FUNC_START("BorisSweeper") << " m=" << m << ", previous=" << boolalpha << previous;
+            VLOG(6) << LOG_INDENT << "building rhs for node " << m
+                                  << ((previous) ? " of previous sweep" : " of current sweep");
             acceleration_type rhs = (previous) ? this->previous_forces[m] : this->forces[m];
-//             VLOG(3) << LOG_INDENT << "rhs:" << rhs;
             if (previous) {
               rhs += cross_prod(this->previous_particles[m]->velocities(), this->previous_b_vecs[m]);
-//               VLOG(3) << LOG_INDENT << "  +=" << this->previous_particles[m]->velocities() << " x " << this->previous_b_vecs[m];
             } else {
               rhs += cross_prod(this->particles[m]->velocities(), this->b_vecs[m]);
-//               VLOG(3) << LOG_INDENT << "  +=" << this->particles[m]->velocities() << " x " << this->b_vecs[m];
             }
-//             VLOG(3) << LOG_INDENT << "  =>" << rhs;
-//             VLOG_FUNC_END("BorisSweeper");
+            VLOG(6) << LOG_INDENT << "  => " << rhs;
+            VLOG_FUNC_END("BorisSweeper");
             return rhs;
           }
 
           scalar compute_residual()
           {
             VLOG_FUNC_START("BorisSweeper");
+            VLOG(6) << LOG_INDENT << "computing residual";
             const auto   nodes  = this->get_nodes();
             const size_t nnodes = nodes.size();
             time dt = this->get_controller()->get_time_step();
@@ -184,8 +190,30 @@ namespace pfasst
               }
             }
 
+            VLOG(6) << LOG_INDENT << "residual: " << max_residual;
             VLOG_FUNC_END("BorisSweeper");
             return max_residual;
+          }
+
+          void write_center_to_file(const size_t iter, const size_t sweep, const ParticleComponent<scalar>& center)
+          {
+            this->data_stream << iter+1 << "," << sweep << ",-1,"
+                              << fixed << setprecision(LOG_PRECISION)
+                              << center[0] << "," << center[1] << "," << center[2] << ",0,0,0" << endl;
+          }
+
+          void write_particle_cloud_to_file(const size_t iter, const size_t sweep, const shared_ptr<encap_type>& cloud,
+                                            const bool with_center = true)
+          {
+            for (size_t p = 0; p < cloud->size(); ++p) {
+              this->data_stream << iter+1 << "," << sweep << "," << p << ","
+                                << fixed << setprecision(LOG_PRECISION)
+                                << cloud->positions()[p][0] << "," << cloud->positions()[p][1] << "," << cloud->positions()[p][2] << ","
+                                << cloud->velocities()[p][0] << "," << cloud->velocities()[p][1] << "," << cloud->velocities()[p][2] << endl;
+            }
+            if (with_center) {
+              this->write_center_to_file(iter, sweep, cloud->center_of_mass());
+            }
           }
 
 
@@ -197,10 +225,11 @@ namespace pfasst
               , errors()
               , exact_updated(false)
               , f_evals(0)
-              , data_stream(data_file, ios::out | ios::trunc)
+              , data_stream(data_file, ios_base::out | ios_base::trunc)
           {
             VLOG_FUNC_START("BorisSweeper");
             assert(data_stream.is_open() && data_stream.good());
+            LOG(INFO) << "writing particle data to: " << data_file;
           }
 
           BorisSweeper(const BorisSweeper<scalar, time>& other) = delete;
@@ -244,19 +273,13 @@ namespace pfasst
           virtual void set_initial_energy()
           {
             VLOG_FUNC_START("BorisSweeper");
+            VLOG(6) << LOG_INDENT << "computing and setting initial energy";
+
             auto p0 = this->particles.front();
             this->initial_energy = this->impl_solver->energy(p0, this->get_controller()->get_time());
-            LOG(INFO) << OUT::green << "Initial Energy:" << this->initial_energy;
-            for (size_t p = 0; p < p0->size(); ++p) {
-              this->data_stream << "0,0," << p << ","
-                                << fixed << setprecision(LOG_PRECISION)
-                                << p0->positions()[p][0] << "," << p0->positions()[p][1] << "," << p0->positions()[p][2] << ","
-                                << p0->velocities()[p][0] << "," << p0->velocities()[p][1] << "," << p0->velocities()[p][2] << endl;
-            }
-            auto center = p0->center_of_mass();
-            this->data_stream << "0,0,-1,"
-                              << fixed << setprecision(LOG_PRECISION)
-                              << center[0] << "," << center[1] << "," << center[2] << ",0,0,0" << endl;
+            LOG(INFO) << OUT::green << "initial total energy: " << this->initial_energy;
+
+            this->write_particle_cloud_to_file(0, 0, p0);
             VLOG_FUNC_END("BorisSweeper");
           }
           //! @}
@@ -276,7 +299,8 @@ namespace pfasst
 
           virtual void exact(encap_type& q, const time t)
           {
-            VLOG_FUNC_START("BorisSweeper") << "n=" << q.size() << ", t=" << t;
+            VLOG_FUNC_START("BorisSweeper") << " n=" << q.size() << ", t=" << t;
+            VLOG(6) << LOG_INDENT << "computing exact solution at t=" << t;
             UNUSED(t);
             if (!this->exact_updated) {
               typedef complex<scalar> C;
@@ -318,20 +342,19 @@ namespace pfasst
               q.velocities()[0][0] = u_v_move.real();
               q.velocities()[0][1] = u_v_move.imag();
 
-              VLOG(1) << LOG_INDENT << "exact solution at time t=" << t << q;
-
               this->exact_cache = make_shared<encap_type>(q);
               this->exact_updated = true;
             } else {
               LOG(DEBUG) << "exact solution has been computed previously.";
               q = *(this->exact_cache.get());
-              VLOG(1) << LOG_INDENT << "exact solution at time t=" << t << q;
             }
+            VLOG(5) << LOG_INDENT << "exact solution at t=" << t << ": " << q;
             VLOG_FUNC_END("BorisSweeper");
           }
 
           virtual void echo_error(const time t, bool predict = false)
           {
+            VLOG_FUNC_START("BorisSweeper");
             auto end = this->particles.back();
             ErrorTuple<scalar> e_tuple;
             scalar e_end = this->impl_solver->energy(end, t);
@@ -342,14 +365,8 @@ namespace pfasst
             size_t k = this->get_controller()->get_iteration();
             error_index nk(n, k);
 
-            LOG(INFO) << scientific << setprecision(5)
-                      << "step" << n+1
-                      << "\titer" << k
-                      << "\tres" << e_tuple.res
-                      << "\tdrift" << e_tuple.e_drift
-                      << fixed << setprecision(2)
-                      << "\tenergy" << e_end;
-            VLOG(1) << LOG_INDENT << "particle at t_end:" << end;
+            LOG(INFO) << boost::format(FORMAT_STR) % (n+1) % k % e_tuple.res % e_tuple.e_drift % e_end;
+            VLOG(3) << LOG_INDENT << "particle at t_end: " << end;
 
             // exact anlytical solution only valid for 1-particle-system
             if (this->particles[0]->size() == 1) {
@@ -363,20 +380,12 @@ namespace pfasst
               e_tuple.p_err.v = ex->velocities()[0][1] - end->velocities()[0][1];
               e_tuple.p_err.w = ex->velocities()[0][2] - end->velocities()[0][2];
 
-              VLOG(2) << LOG_INDENT << "absolute error:" << e_tuple.p_err;
+              VLOG(2) << LOG_INDENT << "absolute error at end point: " << e_tuple.p_err;
             }
             this->errors.insert(pair<error_index, ErrorTuple<scalar>>(nk, e_tuple));
 
-            for (size_t p = 0; p < end->size(); ++p) {
-              this->data_stream << n+1 << "," << k << "," << p << ","
-                                << fixed << setprecision(LOG_PRECISION)
-                                << end->positions()[p][0] << "," << end->positions()[p][1] << "," << end->positions()[p][2] << ","
-                                << end->velocities()[p][0] << "," << end->velocities()[p][1] << "," << end->velocities()[p][2] << endl;
-            }
-            auto center = end->center_of_mass();
-            this->data_stream << n+1 << "," << k << ",-1,"
-                              << fixed << setprecision(LOG_PRECISION)
-                              << center[0] << "," << center[1] << "," << center[2] << ",0,0,0" << endl;
+            this->write_particle_cloud_to_file(n, k, end);
+            VLOG_FUNC_END("BorisSweeper");
           }
 
           virtual error_map<scalar> get_errors() const
@@ -388,7 +397,7 @@ namespace pfasst
           //! @{
           virtual void setup(bool coarse = false) override
           {
-            VLOG_FUNC_START("BorisSweeper") << "coarse=" << coarse;
+            VLOG_FUNC_START("BorisSweeper") << " coarse=" << boolalpha << coarse;
             auto nodes = this->get_nodes();
             assert(nodes.size() >= 1);
             const size_t nnodes = nodes.size();
@@ -465,6 +474,12 @@ namespace pfasst
               this->st_mat.row(i) = qt_mat.row(i) - qt_mat.row(i - 1);
             }
 
+            size_t nsteps = this->get_controller()->get_end_time() / this->get_controller()->get_time_step();
+            size_t digit_step = to_string(nsteps + 1).length();
+            size_t digit_iter = to_string(this->get_controller()->get_max_iterations() - 1).length();
+            this->FORMAT_STR = "step: %|" + to_string(digit_step) + "|      iter: %|" + to_string(digit_iter) + "|"
+                               + "      residual: %10.4e      energy drift: %10.4e      total energy: %10.2f";
+
             UNUSED(coarse);
             VLOG_FUNC_END("BorisSweeper");
           }
@@ -472,35 +487,38 @@ namespace pfasst
           virtual void advance() override
           {
             VLOG_FUNC_START("BorisSweeper");
+            VLOG(6) << LOG_INDENT << "advancing to next step";
             this->set_state(const_pointer_cast<const encap_type>(this->particles.back()), 0);
-            VLOG(3) << LOG_INDENT << "particles:" << this->particles;
             this->energy_evals.front() = this->energy_evals.back();
-            VLOG(3) << LOG_INDENT << "energies:" << this->energy_evals;
             this->forces.front() = this->forces.back();
-            VLOG(3) << LOG_INDENT << "forces:" << this->forces;
             this->b_vecs.front() = this->b_vecs.back();
-            VLOG(3) << LOG_INDENT << "b_vecs:" << this->b_vecs;
             this->exact_updated = false;
+            VLOG(7) << LOG_INDENT << "particles: " << this->particles;
+            VLOG(7) << LOG_INDENT << "energies:  " << this->energy_evals;
+            VLOG(8) << LOG_INDENT << "forces:    " << this->forces;
+            VLOG(8) << LOG_INDENT << "b_vecs:    " << this->b_vecs;
             VLOG_FUNC_END("BorisSweeper");
           }
 
           virtual void evaluate(size_t m)
           {
-            VLOG_FUNC_START("BorisSweeper") << "node=" << m;
+            VLOG_FUNC_START("BorisSweeper") << " node=" << m;
             time t = this->get_controller()->get_time() + this->get_controller()->get_time_step() * this->delta_nodes[m];
-            VLOG(2) << LOG_INDENT << "particles:" << this->particles[m];
+            VLOG(6) << LOG_INDENT << "computing forces at node " << m << " (t=" << t << ")";
 
             this->forces[m] = this->impl_solver->e_field_evaluate(this->particles[m], t);
-            VLOG(3) << LOG_INDENT << "e_forces:" << this->forces[m];
             this->b_vecs[m] = this->impl_solver->b_field_vecs(this->particles[m], t);
-            VLOG(3) << LOG_INDENT << "b_vecs:" << this->b_vecs[m];
+
+            VLOG(8) << LOG_INDENT << "particles:" << this->particles[m];
+            VLOG(7) << LOG_INDENT << "e_forces:" << this->forces[m];
+            VLOG(7) << LOG_INDENT << "b_vecs:" << this->b_vecs[m];
             this->f_evals++;
             VLOG_FUNC_END("BorisSweeper");
           }
 
           virtual void predict(bool initial) override
           {
-            VLOG_FUNC_START("BorisSweeper") << "initial=" << initial;
+            VLOG_FUNC_START("BorisSweeper") << " initial=" << boolalpha << initial;
             UNUSED(initial);
             this->spread();
             for (size_t m = 0; m < this->particles.size(); ++m) {
@@ -518,84 +536,80 @@ namespace pfasst
             assert(nnodes >= 1);
             time t  = this->get_controller()->get_time();
             time dt = this->get_controller()->get_time_step();
-            VLOG(1) << LOG_INDENT << "t=" << t << ", dt=" << dt;
-            VLOG(2) << LOG_INDENT << "nodes=" << nodes;
+            VLOG(2) << LOG_INDENT << "sweeping for t=" << t << " and dt=" << dt;
+            VLOG(6) << LOG_INDENT << "nodes: " << nodes;
 
             this->impl_solver->energy(this->particles.front(), t);
 
             velocity_type c_k_term = cloud_component_factory<scalar>(this->particles[0]->size(), this->particles[0]->dim());
 
             // compute integrals
+            VLOG(7) << LOG_INDENT << "computing integrals";
             zero(this->s_integrals);
             zero(this->ss_integrals);
-            VLOG(3) << LOG_INDENT << "s_int:" << this->s_integrals;
-            VLOG(3) << LOG_INDENT << "ss_int:" << this->ss_integrals;
             // starting at m=1 as m=0 will only add zeros
             for (size_t m = 1; m < nnodes; m++) {
               for (size_t l = 0; l < nnodes; l++) {
                 auto rhs = this->build_rhs(l);
-                VLOG(3) << LOG_INDENT << "l=" << l << " -> rhs:" << rhs;
                 this->s_integrals[m] += rhs * dt * this->s_mat(m, l);
                 this->ss_integrals[m] += rhs * dt * dt * this->ss_mat(m, l);
               }
             }
-            VLOG(3) << LOG_INDENT << "s_int:" << this->s_integrals;
-            VLOG(3) << LOG_INDENT << "ss_int:" << this->ss_integrals;
+            VLOG(7) << LOG_INDENT << "s_int:  " << this->s_integrals;
+            VLOG(7) << LOG_INDENT << "ss_int: " << this->ss_integrals;
 
             this->evaluate(0);
 
             for (size_t m = 0; m < nnodes - 1; m++) {
               time ds = dt * this->delta_nodes[m+1];
-              VLOG(1) << LOG_INDENT << "node" << m << ", ds=" << ds;
+              VLOG(3) << LOG_INDENT << "node " << m << ", ds=" << ds;
               pfasst::log::stack_position++;
 
               //// Update Position (explicit)
               //
               // x_{m+1}^{k+1} = x_{m}^{k+1}
               this->particles[m+1]->positions() = this->particles[m]->positions();
-              VLOG(3) << LOG_INDENT << "pos =" << this->particles[m+1]->positions();
+              VLOG(4) << LOG_INDENT << "pos = " << this->particles[m+1]->positions();
               //               + delta_nodes_{m+1} * v_{0}
               this->particles[m+1]->positions() += this->particles[0]->velocities() * ds;
-              VLOG(3) << LOG_INDENT << "   +=" << this->particles[0]->velocities() << "*" << ds;
+              VLOG(5) << LOG_INDENT << "   += " << this->particles[0]->velocities() << " * " << ds;
               //               + \sum_{l=1}^{m} sx_{m+1,l}^{x} (f_{l}^{k+1} - f_{l}^{k})
               for (size_t l = 0; l <= m; l++) {
                 auto rhs_this = this->build_rhs(l);
                 auto rhs_prev = this->build_rhs(l, true);
                 this->particles[m+1]->positions() += rhs_this * dt * dt * this->sx_mat(m+1, l);
-                VLOG(3) << LOG_INDENT << "   +=" << rhs_this << "*" << dt * dt << "*" << this->sx_mat(m+1, l);
+                VLOG(5) << LOG_INDENT << "   += " << rhs_this << " * " << dt * dt << " * " << this->sx_mat(m+1, l);
                 this->particles[m+1]->positions() -= rhs_prev * dt * dt * this->sx_mat(m+1, l);
-                VLOG(3) << LOG_INDENT << "   -=" << rhs_prev << "*" << dt * dt << "*" << this->sx_mat(m+1, l);
+                VLOG(5) << LOG_INDENT << "   -= " << rhs_prev << " * " << dt * dt << " * " << this->sx_mat(m+1, l);
               }
 
               this->particles[m+1]->positions() += this->ss_integrals[m+1];
-              VLOG(3) << LOG_INDENT << "   +=" << this->ss_integrals[m+1];
-              VLOG(3) << LOG_INDENT << "new positions:" << this->particles[m+1]->positions();
+              VLOG(5) << LOG_INDENT << "   += " << this->ss_integrals[m+1];
+              VLOG(3) << LOG_INDENT << "new positions: " << this->particles[m+1]->positions();
 
               // evaluate electric field with new position
               this->forces[m+1] = this->impl_solver->e_field_evaluate(this->particles[m+1], t + nodes[m]);
 
               //// Update Velocity (semi-implicit)
               zero(c_k_term);  // reset
-              VLOG(3) << LOG_INDENT << "c_k_term:" << c_k_term;
+              VLOG(4) << LOG_INDENT << "c_k_term: " << c_k_term;
               //                 - delta_nodes_{m} / 2 * f_{m+1}^{k}
               auto t1 = this->build_rhs(m+1, true);
               c_k_term -= (0.5 * t1 * ds);
-              VLOG(3) << LOG_INDENT << "  -= 0.5 *" << t1 << "*" << ds << "  =>" << c_k_term;
+              VLOG(5) << LOG_INDENT << "  -= 0.5 * " << t1 << " * " << ds << "  => " << c_k_term;
               //                 - delta_nodes_{m} / 2 * f_{m}^{k}
               auto t2 = this->build_rhs(m, true);
               c_k_term -= (0.5 * t2 * ds);
-              VLOG(3) << LOG_INDENT << "  -= 0.5 *" << t2 << "*" << ds << "  =>" << c_k_term;
+              VLOG(5) << LOG_INDENT << "  -= 0.5 * " << t2 << " * " << ds << "  => " << c_k_term;
               //                 + s_integral[m]
               c_k_term += this->s_integrals[m+1];
-              VLOG(3) << LOG_INDENT << "  +=" << this->s_integrals[m+1];
-              VLOG(3) << LOG_INDENT << " ==>" << c_k_term;
+              VLOG(5) << LOG_INDENT << "  += " << this->s_integrals[m+1];
+              VLOG(4) << LOG_INDENT << " ==> " << c_k_term;
 
               // doing Boris' magic
               this->boris_solve(nodes[m], nodes[m+1], ds, m, c_k_term);
-              VLOG(3) << LOG_INDENT << "new velocities:" << this->particles[m+1]->velocities();
+              VLOG(3) << LOG_INDENT << "new velocities: " << this->particles[m+1]->velocities();
 
-              // TODO XXX BUG
-//               this->forces[m+1] += this->impl_solver->b_field_evaluate(this->particles[m+1], t);
               pfasst::log::stack_position--;
             }
             this->save();
@@ -605,24 +619,24 @@ namespace pfasst
 
           virtual void save(bool initial_only=false) override
           {
-            VLOG_FUNC_START("BorisSweeper") << "initial_only=" << boolalpha << initial_only;
+            VLOG_FUNC_START("BorisSweeper") << " initial_only=" << boolalpha << initial_only;
             if (initial_only) {
               this->previous_particles[0] = make_shared<encap_type>(*(this->particles[0].get()));
               this->previous_forces[0] = this->forces[0];
               this->previous_b_vecs[0] = this->b_vecs[0];
             } else {
               for (size_t m = 0; m < this->previous_particles.size(); m++) {
-                VLOG(3) << LOG_INDENT << "node" << m;
-                VLOG(3) << LOG_INDENT << "  particle:" << this->particles[m];
+                VLOG(8) << LOG_INDENT << "node" << m;
+                VLOG(8) << LOG_INDENT << "  particle:" << this->particles[m];
                 this->previous_particles[m] = make_shared<encap_type>(*(this->particles[m].get()));
-                VLOG(3) << LOG_INDENT << "  previous_particle:" << this->previous_particles[m];
+                VLOG(8) << LOG_INDENT << "  previous_particle:" << this->previous_particles[m];
               }
-              VLOG(3) << LOG_INDENT << "forces:" << this->forces;
+              VLOG(8) << LOG_INDENT << "forces:" << this->forces;
               this->previous_forces = this->forces;
-              VLOG(3) << LOG_INDENT << "previous_forces:" << this->previous_forces;
-              VLOG(3) << LOG_INDENT << "b_vecs:" << this->b_vecs;
+              VLOG(8) << LOG_INDENT << "previous_forces:" << this->previous_forces;
+              VLOG(8) << LOG_INDENT << "b_vecs:" << this->b_vecs;
               this->previous_b_vecs = this->b_vecs;
-              VLOG(3) << LOG_INDENT << "previous_b_vecs:" << this->previous_b_vecs;
+              VLOG(8) << LOG_INDENT << "previous_b_vecs:" << this->previous_b_vecs;
             }
             VLOG_FUNC_END("BorisSweeper");
           }
@@ -667,21 +681,22 @@ namespace pfasst
           virtual void boris_solve(const time tm, const time t_next, const time ds, const size_t m,
                                    const velocity_type& c_k_term)
           {
-            VLOG_FUNC_START("BorisSweeper") << "tm=" << tm << ", t_next=" << t_next << ", ds=" << ds << ", node=" << m;
+            VLOG_FUNC_START("BorisSweeper") << " tm=" << tm << ", t_next=" << t_next << ", ds=" << ds << ", node=" << m;
+            VLOG(4) << LOG_INDENT << "solving with Boris' method";
             UNUSED(t_next);
             velocity_type c_k_term_half = c_k_term / scalar(2.0);
-            VLOG(3) << LOG_INDENT << "c_k_term/2 =" << c_k_term_half;
+            VLOG(6) << LOG_INDENT << "c_k_term/2: " << c_k_term_half;
             AttributeValues<scalar> beta = cmp_wise_div(this->particles[m]->charges(), this->particles[m]->masses()) / scalar(2.0) * ds;
-            VLOG(3) << LOG_INDENT << "beta =" << beta;
+            VLOG(6) << LOG_INDENT << "beta: " << beta;
             acceleration_type e_forces_mean = (this->forces[m] + this->forces[m+1]) / scalar(2.0);
-            VLOG(3) << LOG_INDENT << "e_mean =" << e_forces_mean << " (<=" << this->forces[m] << " +" << this->forces[m+1] << " / 2)";
+            VLOG(5) << LOG_INDENT << "e_mean: " << e_forces_mean << " (<=" << this->forces[m] << " +" << this->forces[m+1] << " / 2)";
 
             // first Boris' drift
             //   v^{-} = v^{k}
             velocity_type v_minus = this->particles[m]->velocities();
             //           + \beta * E_{mean} + c^{k} / 2
             v_minus += e_forces_mean * beta + c_k_term_half;
-            VLOG(3) << LOG_INDENT << "v- =" << v_minus;
+            VLOG(5) << LOG_INDENT << "v-: " << v_minus;
 
             // Boris' kick
             velocity_type boris_t(beta.size());
@@ -690,7 +705,7 @@ namespace pfasst
               boris_t[p] = b_field_vector * beta[p];
             }
             velocity_type v_prime = v_minus + cross_prod(v_minus, boris_t);
-            VLOG(3) << LOG_INDENT << "v' =" << v_prime;
+            VLOG(5) << LOG_INDENT << "v': " << v_prime;
 
             // final Boris' drift
             vector<scalar> boris_t_sqr(boris_t.size());
@@ -699,7 +714,7 @@ namespace pfasst
             }
             velocity_type boris_s = (scalar(2.0) * boris_t) / (scalar(1.0) + boris_t_sqr);
             velocity_type v_plus = v_minus + cross_prod(v_prime, boris_s);
-            VLOG(3) << LOG_INDENT << "v+ =" << v_plus;
+            VLOG(5) << LOG_INDENT << "v+: " << v_plus;
 
   //           assert(abs(v_minus.norm0() - v_plus.norm0()) <= 10e-8);
 
