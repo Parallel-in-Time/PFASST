@@ -82,13 +82,13 @@ const string OUT::reset = "\033[0m";
 #ifndef VLOG_FUNC_START
   #define VLOG_FUNC_START(scope) \
     pfasst::log::stack_position++; \
-    VLOG(9) << std::string((pfasst::log::stack_position - 1) * 2, ' ') << "START:" << std::string(scope) + "::" + std::string(__func__) + "() "
+    VLOG(9) << std::string((pfasst::log::stack_position - 1) * 2, ' ') << "START: " << std::string(scope) << "::" << std::string(__func__) << "()"
 #endif
 
 #ifndef VLOG_FUNC_END
   #define VLOG_FUNC_END(scope) \
     pfasst::log::stack_position--; \
-    VLOG(9) << std::string(pfasst::log::stack_position * 2, ' ') << "DONE: " << std::string(scope) + "::" + std::string(__func__) + "()";
+    VLOG(9) << std::string(pfasst::log::stack_position * 2, ' ') << "DONE:  " << std::string(scope) << "::" << std::string(__func__) << "()";
 #endif
 
 #ifndef LOG_PRECISION
@@ -100,6 +100,21 @@ const string OUT::reset = "\033[0m";
 
 namespace pfasst
 {
+  /**
+   * Logging Facilities for PFASST++
+   *
+   * As PFASST++ is using easylogging++ as the logging backend, there are six distinced logging levels plus ten
+   * additional verbose logging levels.
+   *
+   * To achieve consistent logging throughout PFASST++ and its examples, we agree on the following conventions for using
+   * the different levels:
+   *
+   *   - `INFO` is used for general important messages to the user
+   *   - `DEBUG` is ment for developping purposes and is only active when compiled without `-DNDEBUG`
+   *   - `VLOG` - the verbose logging levels are used as follows:
+   *     - 0 to 8
+   *     - 9 for function enter and exit messages (\see VLOG_FUNC_START and \see VLOG_FUNC_END )
+   */
   namespace log
   {
     static size_t stack_position;
@@ -149,24 +164,20 @@ namespace pfasst
      *
      * Current defaults are:
      *
-     * - NewLineForContainer
      * - LogDetailedCrashReason
      * - DisableApplicationAbortOnFatalLog
      * - ColoredTerminalOutput
      * - MultiLoggerSupport
-     * - AutoSpacing
      *
      * \see https://github.com/easylogging/easyloggingpp#logging-flags
      */
     inline static void set_logging_flags()
     {
-//       el::Loggers::addFlag(el::LoggingFlag::NewLineForContainer);
       el::Loggers::addFlag(el::LoggingFlag::LogDetailedCrashReason);
       el::Loggers::addFlag(el::LoggingFlag::DisableApplicationAbortOnFatalLog);
       el::Loggers::addFlag(el::LoggingFlag::ColoredTerminalOutput);
       el::Loggers::addFlag(el::LoggingFlag::MultiLoggerSupport);
       el::Loggers::addFlag(el::LoggingFlag::CreateLoggerAutomatically);
-      el::Loggers::addFlag(el::LoggingFlag::AutoSpacing);
     }
 
 #ifdef NDEBUG
@@ -182,7 +193,7 @@ namespace pfasst
       LOG(FATAL) << "fatal error";
       LOG(TRACE) << "trace";
       for (size_t level = 0; level <= 9; ++level) {
-        VLOG(level) << "verbose level" << level;
+        VLOG(level) << "verbosity level " << level;
       }
       cout << "### End Example Logging Levels" << endl << endl;
     }
