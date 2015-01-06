@@ -84,8 +84,8 @@ namespace pfasst
         }
         return out;
       }
-      
-      
+
+
       template<typename precision>
       static precision max(const vector<precision>& data)
       {

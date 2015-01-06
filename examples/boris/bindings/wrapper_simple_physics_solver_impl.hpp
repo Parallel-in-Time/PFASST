@@ -115,11 +115,9 @@ namespace pfasst
         ParticleCloudComponent<scalar>
         WrapperSimplePhysicsSolver<scalar, time>::e_field_evaluate(const particle_cloud_type& particles, const time t)
         {
-          VLOG_FUNC_START("WrapperSimplePhysicsSolver") << "time=" << t;
+          VLOG_FUNC_START("WrapperSimplePhysicsSolver") << " time=" << t;
           size_t num_particles = particles->size();
           assert(DIM == particles->dim());
-
-//           VLOG(3) << LOG_INDENT << "positions:" << particles->positions();
 
           scalar* packed_positions = new scalar[num_particles * DIM];
           scalar* packed_masses = new scalar[num_particles];
@@ -145,7 +143,7 @@ namespace pfasst
         ParticleCloudComponent<scalar>
         WrapperSimplePhysicsSolver<scalar, time>::b_field_evaluate(const particle_cloud_type& particles, const time t)
         {
-          VLOG_FUNC_START("WrapperSimplePhysicsSolver") << "time=" << t;
+          VLOG_FUNC_START("WrapperSimplePhysicsSolver") << " time=" << t;
           size_t num_particles = particles->size();
           assert(DIM == particles->dim());
 
@@ -173,7 +171,7 @@ namespace pfasst
         ParticleCloudComponent<scalar>
         WrapperSimplePhysicsSolver<scalar, time>::b_field_vecs(const particle_cloud_type& particles, const time t)
         {
-          VLOG_FUNC_START("WrapperSimplePhysicsSolver") << "time=" << t;
+          VLOG_FUNC_START("WrapperSimplePhysicsSolver") << " time=" << t;
           auto b_vecs = cloud_component_factory<scalar>(particles->size(), particles->dim());
           for (size_t p = 0; p < particles->size(); ++p) {
             b_vecs[p] = this->get_b_field_vector() / particles->charges()[p] / particles->masses()[p];
@@ -186,7 +184,7 @@ namespace pfasst
         ParticleCloudComponent<scalar>
         WrapperSimplePhysicsSolver<scalar, time>::force_evaluate(const particle_cloud_type& particles, const time t)
         {
-          VLOG_FUNC_START("WrapperSimplePhysicsSolver") << "time=" << t;
+          VLOG_FUNC_START("WrapperSimplePhysicsSolver") << " time=" << t;
           auto e_force = this->e_field_evaluate(particles, t);
           auto b_force = this->b_field_evaluate(particles, t);
           VLOG_FUNC_END("WrapperSimplePhysicsSolver");
@@ -197,7 +195,7 @@ namespace pfasst
         scalar
         WrapperSimplePhysicsSolver<scalar, time>::energy(const particle_cloud_type& particles, const time t)
         {
-          VLOG_FUNC_START("WrapperSimplePhysicsSolver") << "time=" << t;
+          VLOG_FUNC_START("WrapperSimplePhysicsSolver") << " time=" << t;
           size_t num_particles = particles->size();
           assert(DIM == particles->dim());
 
@@ -212,7 +210,6 @@ namespace pfasst
 
           auto energy = solver::compute_energy(packed_positions, packed_velocities, packed_charges, packed_masses,
                                                num_particles, t, this->config.get());
-          VLOG(2) << LOG_INDENT << "energy =" << energy;
           delete[] packed_velocities;
           delete[] packed_positions;
           delete[] packed_masses;
