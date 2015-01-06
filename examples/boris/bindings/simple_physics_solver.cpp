@@ -75,7 +75,8 @@ namespace simple_physics_solver
 //     cout << "SimplePhysicsSolver::evaluate_internal_e_field(t=" << t << ")" << endl;
     double r = double(0.0),
            r3 = double(0.0),
-           dist = double(0.0);
+           dist2 = double(0.0);
+    double* dist = new double[DIM];
 
     // computing forces on particle i
     for (size_t i = 0; i < num_particles; ++i) {
@@ -92,18 +93,19 @@ namespace simple_physics_solver
 //           cout << "      skipping" << endl;
           continue;
         }
-        dist = double(0.0);
+        dist2 = double(0.0);
         for (size_t d = 0; d < DIM; ++d) {
-          dist += (positions[i * DIM + d] - positions[j * DIM + d]) * (positions[i * DIM + d] - positions[j * DIM + d]);
+          dist[d] = positions[i * DIM + d] - positions[j * DIM + d];
+          dist2 += dist[d] * dist[d];
         }
 //         cout << "      dist = " << dist << endl;
-        r = sqrt(dist * dist + config->sigma2);
+        r = sqrt(dist2 + config->sigma2);
 //         cout << "      r = " << r << " (= sqrt(dist^2+" << config->sigma2 << ")" << endl;
-        phis[i] += charges[j] / r;
+//         phis[i] += charges[j] / r;
 
         r3 = r * r * r;
         for (size_t d = 0; d < DIM; ++d) {
-          exyz[i * DIM + d] += positions[j * DIM + d] / r3 * charges[j];
+          exyz[i * DIM + d] += dist[d] / r3 * charges[j];
 //           cout << "      exyz[" << i * DIM + d << "] += " << positions[j * DIM + d] << " / " << r3 << " * " << charges[j] << "(q) => " << exyz[i * DIM + d] << endl;
         }
       }
@@ -113,6 +115,7 @@ namespace simple_physics_solver
 //       cout << endl
 //            << "    phi_i = " << phis[i] << endl;
     }
+    delete[] dist;
 //     cout << "DONE SimplePhysicsSolver::evaluate_internal_e_field(t=" << t << ")" << endl;
   }
 
