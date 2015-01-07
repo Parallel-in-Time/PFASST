@@ -70,7 +70,9 @@ namespace pfasst
 
           perform_sweeps(this->finest().level);
 
-          this->get_finest()->post_step();
+          for (auto l = this->finest(); l >= this->coarsest(); --l) {
+            l.current()->post_step();
+          }
 
           if (this->get_time() + this->get_time_step() < this->get_end_time()) {
             this->get_finest()->advance();
