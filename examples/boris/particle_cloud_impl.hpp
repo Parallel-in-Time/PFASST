@@ -217,7 +217,7 @@ namespace pfasst
         VLOG(3) << LOG_INDENT << "distributing " << this->size() << " particles around center " << center;
         assert(this->size() > 0);
 
-        precision scale = 25.0;
+        precision scale = 1000.0;
 
         #ifdef PFASST_DEFAULT_RANDOM_SEED
           default_random_engine rd_gen(PFASST_RANDOM_SEED);
@@ -236,10 +236,10 @@ namespace pfasst
 
         if (this->size() % 2 == 1) {
           this->set_at(p, center);
-          VLOG(5) << LOG_INDENT << "setting p=0 to center";
+          VLOG(5) << LOG_INDENT << "setting p=1 to center";
           p++;
         }
-        for (;p < this->size(); p += 2) {
+        for (;p < this->size(); ++p) {
           ParticleComponent<precision> pos_rand(this->dim());
           ParticleComponent<precision> vel_rand(this->dim());
           for (size_t d = 0; d < this->dim(); ++d) {
@@ -247,12 +247,10 @@ namespace pfasst
             vel_rand[d] = dist_vel(rd_gen);
           }
           this->_positions[p] = center->pos() + pos_rand;
-          this->_positions[p+1] = center->pos() - pos_rand;
           this->_velocities[p] = center->vel() + vel_rand;
-          this->_velocities[p+1] = center->vel() - vel_rand;
-          VLOG(5) << LOG_INDENT << "p=" << p << ": " << this->at(p);
-          VLOG(5) << LOG_INDENT << "p=" << p+1 << ": " << this->at(p+1);
+          VLOG(5) << LOG_INDENT << "p=" << (p+1) << ": " << this->at(p);
         }
+        assert(p == this->size());
         VLOG(3) << LOG_INDENT << "center after distribute: " << this->center_of_mass();
       }
 
