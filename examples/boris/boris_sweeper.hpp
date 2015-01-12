@@ -100,13 +100,16 @@ namespace pfasst
           shared_ptr<encap_type> exact_cache;
 
         protected:
-          vector<shared_ptr<encap_type>> particles;           // TODO: use EncapSweeper::state
-          vector<shared_ptr<encap_type>> previous_particles;  // TODO: use EncapSweeper::saved_state
+          vector<shared_ptr<encap_type>> particles;
+          vector<shared_ptr<encap_type>> saved_particles;
+          shared_ptr<encap_type> start_particles;
+          shared_ptr<encap_type> end_particles;
+
           vector<shared_ptr<encap_type>> tau_corrections;
           vector<acceleration_type> forces;
-          vector<acceleration_type> previous_forces;
+          vector<acceleration_type> saved_forces;
           vector<acceleration_type> b_vecs;
-          vector<acceleration_type> previous_b_vecs;
+          vector<acceleration_type> saved_b_vecs;
 
           scalar initial_energy;
           vector<scalar> energy_evals;
@@ -140,7 +143,8 @@ namespace pfasst
           void write_particle_cloud_to_file(const size_t iter, const size_t sweep, const shared_ptr<encap_type>& cloud,
                                             const scalar energy, const scalar drift, const scalar residual,
                                             const bool with_center = true);
-
+          void update_position(const size_t m, const time dt, const time ds);
+          void update_velocity(const size_t m, const time ds, const vector<time> nodes);
 
         public:
           //! @{
@@ -157,7 +161,7 @@ namespace pfasst
           virtual void set_state(shared_ptr<const encap_type> u0, size_t m);
           virtual void set_start_state(shared_ptr<const encap_type> u0);
           virtual shared_ptr<Encapsulation<time>> get_state(size_t m) const override;
-          virtual shared_ptr<Encapsulation<time>> get_start_state() const;
+          virtual shared_ptr<encap_type> get_start_state() const;
           virtual shared_ptr<Encapsulation<time>> get_tau(size_t m) const override;
           virtual shared_ptr<Encapsulation<time>> get_saved_state(size_t m) const override;
           virtual void set_initial_energy();
@@ -179,6 +183,12 @@ namespace pfasst
           virtual void sweep() override;
           virtual void save(bool initial_only=false) override;
           virtual void spread() override;
+          //! @}
+
+          //! @{
+          virtual void post_sweep() override;
+          virtual void post_predict() override;
+          virtual void post_step() override;
           //! @}
 
           //! @{

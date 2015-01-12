@@ -67,9 +67,9 @@ namespace pfasst
         VLOG_FUNC_START("BorisSweeper") << " m=" << m << ", previous=" << boolalpha << previous;
         VLOG(6) << LOG_INDENT << "building rhs for node " << m
                               << ((previous) ? " of previous sweep" : " of current sweep");
-        acceleration_type rhs = (previous) ? this->previous_forces[m] : this->forces[m];
+        acceleration_type rhs = (previous) ? this->saved_forces[m] : this->forces[m];
         if (previous) {
-          rhs += cross_prod(this->previous_particles[m]->velocities(), this->previous_b_vecs[m]);
+          rhs += cross_prod(this->saved_particles[m]->velocities(), this->saved_b_vecs[m]);
         } else {
           rhs += cross_prod(this->particles[m]->velocities(), this->b_vecs[m]);
         }
@@ -96,8 +96,8 @@ namespace pfasst
             pos += this->q_mat(m, j) * dt * this->particles[j]->velocities();
             vel += this->q_mat(m, j) * dt * this->build_rhs(j);
           }
-          pos += this->particles[0]->positions() - this->particles[m]->positions();
-          vel += this->particles[0]->velocities() - this->particles[m]->velocities();
+          pos += this->start_particles->positions() - this->particles[m]->positions();
+          vel += this->start_particles->velocities() - this->particles[m]->velocities();
 
           for (size_t j = 0; j < pos.size(); ++j) {
             for (size_t d = 0; d < pos[j].size(); ++d) {
@@ -145,6 +145,52 @@ namespace pfasst
         }
       }
 
+      template<typename scalar, typename time>
+      void BorisSweeper<scalar, time>::update_position(const size_t m, const time dt, const time ds)
+      {
+        this->particles[m+1]->positions() = this->particles[m]->positions();
+        VLOG(4) << LOG_INDENT << "pos = " << this->particles[m+1]->positions();
+        //               + delta_nodes_{m+1} * v_{0}
+        this->particles[m+1]->positions() += this->start_particles->velocities() * ds;
+        VLOG(5) << LOG_INDENT << "   += " << this->start_particles->velocities() << " * " << ds;
+        //               + \sum_{l=1}^{m} sx_{m+1,l}^{x} (f_{l}^{k+1} - f_{l}^{k})
+        for (size_t l = 0; l <= m; l++) {
+          auto rhs_this = this->build_rhs(l);
+          auto rhs_prev = this->build_rhs(l, true);
+          this->particles[m+1]->positions() += rhs_this * dt * dt * this->sx_mat(m+1, l);
+          VLOG(5) << LOG_INDENT << "   += " << rhs_this << " * " << dt * dt << " * " << this->sx_mat(m+1, l);
+          this->particles[m+1]->positions() -= rhs_prev * dt * dt * this->sx_mat(m+1, l);
+          VLOG(5) << LOG_INDENT << "   -= " << rhs_prev << " * " << dt * dt << " * " << this->sx_mat(m+1, l);
+        }
+
+        this->particles[m+1]->positions() += this->ss_integrals[m+1];
+        VLOG(5) << LOG_INDENT << "   += " << this->ss_integrals[m+1];
+      }
+
+      template<typename scalar, typename time>
+      void BorisSweeper<scalar, time>::update_velocity(const size_t m, const time ds, const vector<time> nodes)
+      {
+        velocity_type c_k_term = cloud_component_factory<scalar>(this->particles[0]->size(), this->particles[0]->dim());
+        zero(c_k_term);  // TODO: check if this is required
+
+        VLOG(4) << LOG_INDENT << "c_k_term: " << c_k_term;
+        //                 - delta_nodes_{m} / 2 * f_{m+1}^{k}
+        auto t1 = this->build_rhs(m+1, true);
+        c_k_term -= (0.5 * t1 * ds);
+        VLOG(5) << LOG_INDENT << "  -= 0.5 * " << t1 << " * " << ds << "  => " << c_k_term;
+        //                 - delta_nodes_{m} / 2 * f_{m}^{k}
+        auto t2 = this->build_rhs(m, true);
+        c_k_term -= (0.5 * t2 * ds);
+        VLOG(5) << LOG_INDENT << "  -= 0.5 * " << t2 << " * " << ds << "  => " << c_k_term;
+        //                 + s_integral[m]
+        c_k_term += this->s_integrals[m+1];
+        VLOG(5) << LOG_INDENT << "  += " << this->s_integrals[m+1];
+        VLOG(4) << LOG_INDENT << " ==> " << c_k_term;
+
+        // doing Boris' magic
+        this->boris_solve(nodes[m], nodes[m+1], ds, m, c_k_term);
+      }
+
 
       template<typename scalar, typename time>
       BorisSweeper<scalar, time>::BorisSweeper(shared_ptr<bindings::WrapperInterface<scalar, time>>& impl_solver,
@@ -190,7 +236,7 @@ namespace pfasst
       template<typename scalar, typename time>
       void BorisSweeper<scalar, time>::set_start_state(shared_ptr<const encap_type> u0)
       {
-        this->particles.front()->operator=(*(u0.get()));
+        this->start_particles->operator=(*(u0.get()));
       }
 
       template<typename scalar, typename time>
@@ -200,9 +246,9 @@ namespace pfasst
       }
 
       template<typename scalar, typename time>
-      shared_ptr<Encapsulation<time>> BorisSweeper<scalar, time>::get_start_state() const
+      shared_ptr<typename BorisSweeper<scalar, time>::encap_type> BorisSweeper<scalar, time>::get_start_state() const
       {
-        return this->particles.front();
+        return this->start_particles;
       }
 
       template<typename scalar, typename time>
@@ -214,7 +260,7 @@ namespace pfasst
       template<typename scalar, typename time>
       shared_ptr<Encapsulation<time>> BorisSweeper<scalar, time>::get_saved_state(size_t m) const
       {
-        return this->previous_particles[m];
+        return this->saved_particles[m];
       }
 
       template<typename scalar, typename time>
@@ -223,7 +269,8 @@ namespace pfasst
         VLOG_FUNC_START("BorisSweeper");
         VLOG(6) << LOG_INDENT << "computing and setting initial energy";
 
-        auto p0 = this->particles.front();
+        auto p0 = this->start_particles;
+        VLOG(7) << LOG_INDENT << "initial particles: " << p0;
         this->initial_energy = this->impl_solver->energy(p0, this->get_controller()->get_time());
         LOG(INFO) << OUT::green << "initial total energy: " << this->initial_energy;
 
@@ -305,7 +352,7 @@ namespace pfasst
       void BorisSweeper<scalar, time>::echo_error(const time t, bool predict)
       {
         VLOG_FUNC_START("BorisSweeper");
-        auto end = this->particles.back();
+        auto end = this->end_particles;
         ErrorTuple<scalar> e_tuple;
         scalar e_end = this->impl_solver->energy(end, t);
         e_tuple.e_drift = abs(this->initial_energy - e_end);
@@ -349,9 +396,11 @@ namespace pfasst
       {
         EncapSweeper<time>::setup(coarse);
         VLOG_FUNC_START("BorisSweeper") << " coarse=" << boolalpha << coarse;
-        auto nodes = this->get_nodes();
+        auto const nodes = this->get_nodes();
         assert(nodes.size() >= 1);
         const size_t nnodes = nodes.size();
+        const size_t num_s_integrals = this->quadrature->left_is_node() ? nnodes : nnodes - 1;
+        VLOG(4) << "there will be " << num_s_integrals << " integrals for " << nnodes << " nodes";
 
         // compute delta nodes
         this->delta_nodes = vector<time>(nnodes, time(0.0));
@@ -359,19 +408,25 @@ namespace pfasst
           this->delta_nodes[m] = nodes[m] - nodes[m - 1];
         }
 
+        this->start_particles = dynamic_pointer_cast<encap_type>(this->get_factory()->create(pfasst::encap::solution));
+        this->end_particles = dynamic_pointer_cast<encap_type>(this->get_factory()->create(pfasst::encap::solution));
+
         this->energy_evals.resize(nnodes);
         for (size_t m = 0; m < nnodes; ++m) {
           this->particles.push_back(dynamic_pointer_cast<encap_type>(this->get_factory()->create(pfasst::encap::solution)));
-          this->previous_particles.push_back(dynamic_pointer_cast<encap_type>(this->get_factory()->create(pfasst::encap::solution)));
+          this->saved_particles.push_back(dynamic_pointer_cast<encap_type>(this->get_factory()->create(pfasst::encap::solution)));
           this->forces.push_back(cloud_component_factory<scalar>(this->particles[m]->size(), this->particles[m]->dim()));
-          this->previous_forces.push_back(cloud_component_factory<scalar>(this->particles[m]->size(), this->particles[m]->dim()));
+          this->saved_forces.push_back(cloud_component_factory<scalar>(this->particles[m]->size(), this->particles[m]->dim()));
           this->b_vecs.push_back(cloud_component_factory<scalar>(this->particles[m]->size(), this->particles[m]->dim()));
-          this->previous_b_vecs.push_back(cloud_component_factory<scalar>(this->particles[m]->size(), this->particles[m]->dim()));
-          this->s_integrals.push_back(cloud_component_factory<scalar>(this->particles[m]->size(), this->particles[m]->dim()));
-          this->ss_integrals.push_back(cloud_component_factory<scalar>(this->particles[m]->size(), this->particles[m]->dim()));
+          this->saved_b_vecs.push_back(cloud_component_factory<scalar>(this->particles[m]->size(), this->particles[m]->dim()));
           if (coarse) {
             this->tau_corrections.push_back(dynamic_pointer_cast<encap_type>(this->get_factory()->create(pfasst::encap::solution)));
           }
+        }
+
+        for (size_t m = 0; m < num_s_integrals; ++m) {
+          this->s_integrals.push_back(cloud_component_factory<scalar>(this->particles[m]->size(), this->particles[m]->dim()));
+          this->ss_integrals.push_back(cloud_component_factory<scalar>(this->particles[m]->size(), this->particles[m]->dim()));
         }
 
         this->q_mat = this->get_quadrature()->get_q_mat();
@@ -440,7 +495,7 @@ namespace pfasst
       {
         VLOG_FUNC_START("BorisSweeper");
         VLOG(6) << LOG_INDENT << "advancing to next step";
-        this->set_state(const_pointer_cast<const encap_type>(this->particles.back()), 0);
+        this->start_particles->copy(this->end_particles);
         this->energy_evals.front() = this->energy_evals.back();
         this->forces.front() = this->forces.back();
         this->b_vecs.front() = this->b_vecs.back();
@@ -473,11 +528,18 @@ namespace pfasst
       void BorisSweeper<scalar, time>::predict(bool initial)
       {
         VLOG_FUNC_START("BorisSweeper") << " initial=" << boolalpha << initial;
-        UNUSED(initial);
+
+        // in any case copy as we have a simple spread as predict
+        this->particles[0]->copy(this->start_particles);
+
         this->spread();
         for (size_t m = 0; m < this->particles.size(); ++m) {
           this->evaluate(m);
         }
+
+        // in any case copy as we have a simple spread as predict
+        this->end_particles->copy(this->particles.back());
+
         this->save();
         VLOG_FUNC_END("BorisSweeper");
       }
@@ -496,19 +558,21 @@ namespace pfasst
 
         this->impl_solver->energy(this->particles.front(), t);
 
-        velocity_type c_k_term = cloud_component_factory<scalar>(this->particles[0]->size(), this->particles[0]->dim());
-
         // compute integrals
         VLOG(7) << LOG_INDENT << "computing integrals";
         zero(this->s_integrals);
         zero(this->ss_integrals);
-        // starting at m=1 as m=0 will only add zeros
-        for (size_t m = 1; m < nnodes; m++) {
-          for (size_t l = 0; l < nnodes; l++) {
-            auto rhs = this->build_rhs(l);
-            this->s_integrals[m] += rhs * dt * this->s_mat(m, l);
-            this->ss_integrals[m] += rhs * dt * dt * this->ss_mat(m, l);
+        if (this->get_quadrature()->left_is_node()) {
+          // starting at m=1 as m=0 will only add zeros
+          for (size_t m = 1; m < nnodes; m++) {
+            for (size_t l = 0; l < nnodes; l++) {
+              auto rhs = this->build_rhs(l);
+              this->s_integrals[m] += rhs * dt * this->s_mat(m, l);
+              this->ss_integrals[m] += rhs * dt * dt * this->ss_mat(m, l);
+            }
           }
+        } else {
+          throw NotImplementedYet("left-is-NOT-node");
         }
         VLOG(7) << LOG_INDENT << "s_int:  " << this->s_integrals;
         VLOG(7) << LOG_INDENT << "ss_int: " << this->ss_integrals;
@@ -523,52 +587,26 @@ namespace pfasst
           //// Update Position (explicit)
           //
           // x_{m+1}^{k+1} = x_{m}^{k+1}
-          this->particles[m+1]->positions() = this->particles[m]->positions();
-          VLOG(4) << LOG_INDENT << "pos = " << this->particles[m+1]->positions();
-          //               + delta_nodes_{m+1} * v_{0}
-          this->particles[m+1]->positions() += this->particles[0]->velocities() * ds;
-          VLOG(5) << LOG_INDENT << "   += " << this->particles[0]->velocities() << " * " << ds;
-          //               + \sum_{l=1}^{m} sx_{m+1,l}^{x} (f_{l}^{k+1} - f_{l}^{k})
-          for (size_t l = 0; l <= m; l++) {
-            auto rhs_this = this->build_rhs(l);
-            auto rhs_prev = this->build_rhs(l, true);
-            this->particles[m+1]->positions() += rhs_this * dt * dt * this->sx_mat(m+1, l);
-            VLOG(5) << LOG_INDENT << "   += " << rhs_this << " * " << dt * dt << " * " << this->sx_mat(m+1, l);
-            this->particles[m+1]->positions() -= rhs_prev * dt * dt * this->sx_mat(m+1, l);
-            VLOG(5) << LOG_INDENT << "   -= " << rhs_prev << " * " << dt * dt << " * " << this->sx_mat(m+1, l);
-          }
-
-          this->particles[m+1]->positions() += this->ss_integrals[m+1];
-          VLOG(5) << LOG_INDENT << "   += " << this->ss_integrals[m+1];
+          this->update_position(m, dt, ds);
           VLOG(3) << LOG_INDENT << "new positions: " << this->particles[m+1]->positions();
 
           // evaluate electric field with new position
           this->forces[m+1] = this->impl_solver->e_field_evaluate(this->particles[m+1], t + nodes[m]);
 
           //// Update Velocity (semi-implicit)
-          zero(c_k_term);  // reset
-          VLOG(4) << LOG_INDENT << "c_k_term: " << c_k_term;
-          //                 - delta_nodes_{m} / 2 * f_{m+1}^{k}
-          auto t1 = this->build_rhs(m+1, true);
-          c_k_term -= (0.5 * t1 * ds);
-          VLOG(5) << LOG_INDENT << "  -= 0.5 * " << t1 << " * " << ds << "  => " << c_k_term;
-          //                 - delta_nodes_{m} / 2 * f_{m}^{k}
-          auto t2 = this->build_rhs(m, true);
-          c_k_term -= (0.5 * t2 * ds);
-          VLOG(5) << LOG_INDENT << "  -= 0.5 * " << t2 << " * " << ds << "  => " << c_k_term;
-          //                 + s_integral[m]
-          c_k_term += this->s_integrals[m+1];
-          VLOG(5) << LOG_INDENT << "  += " << this->s_integrals[m+1];
-          VLOG(4) << LOG_INDENT << " ==> " << c_k_term;
-
-          // doing Boris' magic
-          this->boris_solve(nodes[m], nodes[m+1], ds, m, c_k_term);
+          this->update_velocity(m, ds, nodes);
           VLOG(3) << LOG_INDENT << "new velocities: " << this->particles[m+1]->velocities();
 
           pfasst::log::stack_position--;
         }
+
+        if (this->get_quadrature()->right_is_node()) {
+          this->end_particles->copy(this->particles.back());
+        } else {
+          throw NotImplementedYet("right-is-NOT-node");
+        }
+
         this->save();
-        this->echo_error(t + dt);
         VLOG_FUNC_END("BorisSweeper");
       }
 
@@ -577,22 +615,22 @@ namespace pfasst
       {
         VLOG_FUNC_START("BorisSweeper") << " initial_only=" << boolalpha << initial_only;
         if (initial_only) {
-          this->previous_particles[0] = make_shared<encap_type>(*(this->particles[0].get()));
-          this->previous_forces[0] = this->forces[0];
-          this->previous_b_vecs[0] = this->b_vecs[0];
+          this->saved_particles[0] = make_shared<encap_type>(*(this->particles[0].get()));
+          this->saved_forces[0] = this->forces[0];
+          this->saved_b_vecs[0] = this->b_vecs[0];
         } else {
-          for (size_t m = 0; m < this->previous_particles.size(); m++) {
+          for (size_t m = 0; m < this->saved_particles.size(); m++) {
             VLOG(8) << LOG_INDENT << "node" << m;
             VLOG(8) << LOG_INDENT << "  particle:" << this->particles[m];
-            this->previous_particles[m] = make_shared<encap_type>(*(this->particles[m].get()));
-            VLOG(8) << LOG_INDENT << "  previous_particle:" << this->previous_particles[m];
+            this->saved_particles[m] = make_shared<encap_type>(*(this->particles[m].get()));
+            VLOG(8) << LOG_INDENT << "  previous_particle:" << this->saved_particles[m];
           }
           VLOG(8) << LOG_INDENT << "forces:" << this->forces;
-          this->previous_forces = this->forces;
-          VLOG(8) << LOG_INDENT << "previous_forces:" << this->previous_forces;
+          this->saved_forces = this->forces;
+          VLOG(8) << LOG_INDENT << "saved_forces:" << this->saved_forces;
           VLOG(8) << LOG_INDENT << "b_vecs:" << this->b_vecs;
-          this->previous_b_vecs = this->b_vecs;
-          VLOG(8) << LOG_INDENT << "previous_b_vecs:" << this->previous_b_vecs;
+          this->saved_b_vecs = this->b_vecs;
+          VLOG(8) << LOG_INDENT << "saved_b_vecs:" << this->saved_b_vecs;
         }
         VLOG_FUNC_END("BorisSweeper");
       }
@@ -606,6 +644,26 @@ namespace pfasst
         }
         VLOG_FUNC_END("BorisSweeper");
       }
+
+      template<typename scalar, typename time>
+      void BorisSweeper<scalar, time>::post_sweep()
+      {
+        time t  = this->get_controller()->get_time();
+        time dt = this->get_controller()->get_time_step();
+        this->echo_error(t + dt);
+      }
+
+      template<typename scalar, typename time>
+      void BorisSweeper<scalar, time>::post_predict()
+      {
+        time t  = this->get_controller()->get_time();
+        time dt = this->get_controller()->get_time_step();
+        this->echo_error(t + dt);
+      }
+
+      template<typename scalar, typename time>
+      void BorisSweeper<scalar, time>::post_step()
+      {}
 
       template<typename scalar, typename time>
       void BorisSweeper<scalar, time>::post(ICommunicator* comm, int tag)

@@ -49,9 +49,9 @@ namespace pfasst
         center->vel()[0] = 100;
         center->vel()[2] = 100;
 
-        shared_ptr<ParticleCloud<double>> q0 = dynamic_pointer_cast<ParticleCloud<double>>(sweeper->get_state(0));
+        shared_ptr<ParticleCloud<double>> q0 = dynamic_pointer_cast<ParticleCloud<double>>(sweeper->get_start_state());
         q0->distribute_around_center(center);
-        LOG(INFO) << OUT::green << "Initial Particle: " << *(dynamic_pointer_cast<ParticleCloud<double>>(sweeper->get_state(0)));
+        LOG(INFO) << OUT::green << "Initial Particle: " << *(dynamic_pointer_cast<ParticleCloud<double>>(sweeper->get_start_state()));
 
         sweeper->set_initial_energy();
         sdc.run();
