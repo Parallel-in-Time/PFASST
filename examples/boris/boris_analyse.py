@@ -33,6 +33,9 @@ class BorisData(object):
         self._energy = np.ndarray(self._nsteps + 1, dtype=np.double)
         self._drift = np.ndarray(self._nsteps + 1, dtype=np.double)
         self._distances = np.ndarray((self._nparticles, self._nsteps + 1), dtype=np.double)
+        self._dist_min = np.ndarray(self._nsteps + 1, dtype=np.double)
+        self._dist_max = np.ndarray(self._nsteps + 1, dtype=np.double)
+        self._dist_mean = np.ndarray(self._nsteps + 1, dtype=np.double)
 
         self._read_data()
 
@@ -90,7 +93,7 @@ class BorisData(object):
 
     @property
     def energy(self):
-        return self._residual
+        return self._energy
 
     @property
     def drift(self):
@@ -99,6 +102,18 @@ class BorisData(object):
     @property
     def distances(self):
         return self._distances
+
+    @property
+    def dist_min(self):
+        return self._dist_min
+
+    @property
+    def dist_max(self):
+        return self._dist_max
+
+    @property
+    def dist_mean(self):
+        return self._dist_mean
 
     def _get_coords(self, step, p):
         return np.asarray([self.x[p][step], self.y[p][step], self.z[p][step]])
@@ -155,6 +170,14 @@ class BorisData(object):
             center = np.asarray([self.x_c[step], self.y_c[step], self.z_c[step]])
             for p in range(self._nparticles):
                 self._distances[p][step] = distance(self._get_coords(step, p), center)
+        self._dist_min = self._distances.min(axis=0)
+        self._dist_max = self._distances.max(axis=0)
+        self._dist_mean = self._distances.mean(axis=0)
+
+
+def get_meetup_after(data, first=0):
+    _dist = data.dist_max - data.dist_min
+    return np.where(_dist[first:] == _dist[first:].min())[0][0] + first
 
 
 def plot_trajectories(data, until=None):
@@ -186,18 +209,12 @@ def plot_analytics(data, start=0, until=None, wo_drift=False):
         until = data.nsteps
     ndisplay = until + 1
     figid = 1
-    maxfig = 3 if wo_drift else 4
+    maxfig = 4 if wo_drift else 5
     figheight = 10 if wo_drift else 15
     steprange = range(start, ndisplay)
 
     plt.figure(figsize=(15, figheight), dpi=1200)
     plt.subplots_adjust(wspace=0.1)
-    plt.subplot(maxfig, 1, figid)
-    plt.plot(steprange, data.distances.transpose()[start:ndisplay])
-    plt.grid()
-    plt.xlim(start, until)
-    plt.ylabel("Distance of Particles from Center of Mass")
-    figid += 1
 
     plt.subplot(maxfig, 1, figid)
     plt.plot(steprange, data.energy[start:ndisplay])
@@ -221,6 +238,23 @@ def plot_analytics(data, start=0, until=None, wo_drift=False):
     plt.yscale("log")
     plt.ylabel("Residual")
     plt.xlabel("Step")
+    figid += 1
+
+    plt.subplot(maxfig, 1, figid)
+    plt.plot(steprange, data.distances.transpose()[start:ndisplay])
+    plt.grid()
+    plt.xlim(start, until)
+    plt.ylabel("Distance of Particles\nfrom Center of Mass")
+    figid += 1
+
+    plt.subplot(maxfig, 1, figid)
+    plt.plot(steprange, data.dist_min.transpose()[start:ndisplay], '-r')
+    plt.plot(steprange, data.dist_max.transpose()[start:ndisplay], '-b')
+    plt.plot(steprange, data.dist_mean.transpose()[start:ndisplay], '-g')
+    plt.grid()
+    plt.xlim(start, until)
+    plt.ylabel("Stats of Distance of Particles\nfrom Center of Mass")
+    figid += 1
 
 
 def plot_particle_meetup(data, step, width=10):

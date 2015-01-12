@@ -6,6 +6,8 @@
 /include/pfasst/site_config.hpp
 
 .python-version
+__pycache__
+.ipynb_checkpoints
 /run
 
 # Created by http://www.gitignore.io
