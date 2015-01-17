@@ -24,14 +24,13 @@ namespace pfasst
   {
     namespace advection_diffusion
     {
-      error_map run_serial_mlsdc()
+      tuple<error_map, residual_map> run_serial_mlsdc(size_t nlevs)
       {
         MLSDC<> mlsdc;
 
-        const size_t nlevs  = 2;
         const size_t nsteps = 4;
         const double dt     = 0.01;
-        const size_t niters = 4;
+        const size_t niters = 8;
         const int    xrat   = 2;
         const int    trat   = 2;
 
@@ -82,7 +81,12 @@ namespace pfasst
 
         fftw_cleanup();
 
-        return sweeper->get_errors();
+        tuple<error_map, residual_map> rinfo;
+        get<0>(rinfo) = mlsdc.get_finest<AdvectionDiffusionSweeper<>>()->get_errors();
+        for (auto l = mlsdc.coarsest(); l <= mlsdc.finest(); ++l) {
+          get<1>(rinfo).insert(pair<size_t, error_map>(l.level, l.current<AdvectionDiffusionSweeper<>>()->get_residuals()));
+        }
+        return rinfo;
       }
     }  // ::pfasst::examples::advection_diffusion
   }  // ::pfasst::examples
@@ -91,6 +95,6 @@ namespace pfasst
 #ifndef PFASST_UNIT_TESTING
 int main(int /*argc*/, char** /*argv*/)
 {
-  pfasst::examples::advection_diffusion::run_serial_mlsdc();
+  pfasst::examples::advection_diffusion::run_serial_mlsdc(3);
 }
 #endif
