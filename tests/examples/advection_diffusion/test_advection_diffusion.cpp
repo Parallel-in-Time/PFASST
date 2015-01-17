@@ -115,16 +115,16 @@ TEST(FASTest, SerialMLSDC)
   ASSERT_NEAR(residuals[2][ktype(3, 4)], 2.18056e-12, 1.e-15);
   ASSERT_NEAR(residuals[0][ktype(3, 4)], 8.34365e-11, 1.e-15);
   ASSERT_NEAR(residuals[1][ktype(3, 4)], 4.19699e-11, 1.e-15);
-  ASSERT_NEAR(residuals[2][ktype(3, 5)], 7.18701e-13, 1.e-16);
+  ASSERT_NEAR(residuals[2][ktype(3, 5)], 7.18701e-13, 1.e-15);
   ASSERT_NEAR(residuals[0][ktype(3, 5)], 8.34336e-11, 1.e-15);
   ASSERT_NEAR(residuals[1][ktype(3, 5)], 4.19691e-11, 1.e-15);
-  ASSERT_NEAR(residuals[2][ktype(3, 6)], 7.07797e-13, 1.e-16);
+  ASSERT_NEAR(residuals[2][ktype(3, 6)], 7.07797e-13, 1.e-15);
   ASSERT_NEAR(residuals[0][ktype(3, 6)], 8.34340e-11, 1.e-15);
   ASSERT_NEAR(residuals[1][ktype(3, 6)], 4.19693e-11, 1.e-15);
-  ASSERT_NEAR(residuals[2][ktype(3, 7)], 7.07356e-13, 1.e-16);
+  ASSERT_NEAR(residuals[2][ktype(3, 7)], 7.07356e-13, 1.e-15);
   ASSERT_NEAR(residuals[0][ktype(3, 7)], 8.34338e-11, 1.e-15);
   ASSERT_NEAR(residuals[1][ktype(3, 7)], 4.19698e-11, 1.e-15);
-  ASSERT_NEAR(residuals[2][ktype(3, 8)], 7.07458e-13, 1.e-16);
+  ASSERT_NEAR(residuals[2][ktype(3, 8)], 7.07458e-13, 1.e-15);
 }
 
 int main(int argc, char** argv)
