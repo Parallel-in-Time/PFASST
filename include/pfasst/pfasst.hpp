@@ -78,7 +78,9 @@ namespace pfasst
             cycle_v(this->finest());
           }
 
-          this->get_finest()->post_step();
+          for (auto l = this->finest(); l >= this->coarsest(); --l) {
+            l.current()->post_step();
+          }
 
           if (nblock < nblocks - 1) {
             broadcast();

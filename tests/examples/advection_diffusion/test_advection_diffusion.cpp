@@ -74,7 +74,8 @@ TEST(ErrorTest, SerialMLSDC)
 {
   typedef error_map::value_type vtype;
 
-  auto errors = run_serial_mlsdc();
+  auto errors_and_residuals = run_serial_mlsdc(2);
+  auto errors = get<0>(errors_and_residuals);
   auto get_iter  = [](const vtype x) { return get<1>(get<0>(x)); };
   auto get_error = [](const vtype x) { return get<1>(x); };
 
@@ -90,6 +91,40 @@ TEST(ErrorTest, SerialMLSDC)
   }
 
   EXPECT_THAT(err, testing::Pointwise(DoubleLess(), tol));
+}
+
+TEST(FASTest, SerialMLSDC)
+{
+  typedef error_map::key_type ktype;
+
+  auto errors_and_residuals = run_serial_mlsdc(3);
+  auto residuals = get<1>(errors_and_residuals);
+
+  ASSERT_NEAR(residuals[2][ktype(3, 0)], 0.000667207, 1.e-8);
+  ASSERT_NEAR(residuals[0][ktype(3, 0)], 6.23966e-07, 1.e-12);
+  ASSERT_NEAR(residuals[1][ktype(3, 0)], 1.27783e-08, 1.e-12);
+  ASSERT_NEAR(residuals[2][ktype(3, 1)], 6.60607e-07, 1.e-12);
+  ASSERT_NEAR(residuals[0][ktype(3, 1)], 5.19702e-10, 1.e-14);
+  ASSERT_NEAR(residuals[1][ktype(3, 1)], 2.59963e-10, 1.e-12);
+  ASSERT_NEAR(residuals[2][ktype(3, 2)], 8.89424e-09, 1.e-12);
+  ASSERT_NEAR(residuals[0][ktype(3, 2)], 8.28716e-11, 1.e-14);
+  ASSERT_NEAR(residuals[1][ktype(3, 2)], 4.54949e-11, 1.e-14);
+  ASSERT_NEAR(residuals[2][ktype(3, 3)], 1.04101e-10, 1.e-12);
+  ASSERT_NEAR(residuals[0][ktype(3, 3)], 8.35953e-11, 1.e-15);
+  ASSERT_NEAR(residuals[1][ktype(3, 3)], 4.20877e-11, 1.e-15);
+  ASSERT_NEAR(residuals[2][ktype(3, 4)], 2.18056e-12, 1.e-15);
+  ASSERT_NEAR(residuals[0][ktype(3, 4)], 8.34365e-11, 1.e-15);
+  ASSERT_NEAR(residuals[1][ktype(3, 4)], 4.19699e-11, 1.e-15);
+  ASSERT_NEAR(residuals[2][ktype(3, 5)], 7.18701e-13, 1.e-15);
+  ASSERT_NEAR(residuals[0][ktype(3, 5)], 8.34336e-11, 1.e-15);
+  ASSERT_NEAR(residuals[1][ktype(3, 5)], 4.19691e-11, 1.e-15);
+  ASSERT_NEAR(residuals[2][ktype(3, 6)], 7.07797e-13, 1.e-15);
+  ASSERT_NEAR(residuals[0][ktype(3, 6)], 8.34340e-11, 1.e-15);
+  ASSERT_NEAR(residuals[1][ktype(3, 6)], 4.19693e-11, 1.e-15);
+  ASSERT_NEAR(residuals[2][ktype(3, 7)], 7.07356e-13, 1.e-15);
+  ASSERT_NEAR(residuals[0][ktype(3, 7)], 8.34338e-11, 1.e-15);
+  ASSERT_NEAR(residuals[1][ktype(3, 7)], 4.19698e-11, 1.e-15);
+  ASSERT_NEAR(residuals[2][ktype(3, 8)], 7.07458e-13, 1.e-15);
 }
 
 int main(int argc, char** argv)

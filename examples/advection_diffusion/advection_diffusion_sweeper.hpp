@@ -35,11 +35,13 @@ namespace pfasst
     namespace advection_diffusion
     {
       /**
-       * errors at different iterations and time nodes
-       *
-       * Mapping a pair of step/iteration indices onto the error of the solution.
+       * Containers for errors/residuals etc.
        */
-      typedef map<pair<size_t, size_t>, double> error_map;
+      typedef map<tuple<size_t, size_t>, double> error_map; // step, iteration -> error
+      typedef map<size_t, error_map> residual_map; // level, (step, iteration) -> residual
+
+      typedef error_map::value_type vtype;
+      typedef error_map::key_type ktype;
 
       template<typename time = pfasst::time_precision>
       class AdvectionDiffusionSweeper
@@ -70,6 +72,7 @@ namespace pfasst
 
           //! @{
           error_map errors;
+          error_map residuals;
           //! @}
 
           //! @{
@@ -138,17 +141,41 @@ namespace pfasst
 
             auto n = this->get_controller()->get_step();
             auto k = this->get_controller()->get_iteration();
-            LOG(INFO) << "err:" << n << k << max << "(" << qend.size() << "," << predict << ")";
+            LOG(INFO) << "err: " << n << " " << k << " " << max << " (" << qend.size() << "," << predict << ")";
 
-            this->errors.insert(pair<pair<size_t, size_t>, double>(pair<size_t, size_t>(n, k), max));
+            this->errors.insert(vtype(ktype(n, k), max));
           }
 
-          /**
-           * retrieve errors at iterations and time nodes
-           */
+          void echo_residual()
+          {
+            vector<shared_ptr<Encapsulation<time>>> residuals;
+
+            for (size_t m = 0; m < this->get_nodes().size(); m++) {
+                residuals.push_back(this->get_factory()->create(pfasst::encap::solution));
+            }
+            this->residual(this->get_controller()->get_time_step(), residuals);
+
+            vector<time> rnorms;
+            for (auto r: residuals) {
+              rnorms.push_back(r->norm0());
+            }
+            auto rmax = *std::max_element(rnorms.begin(), rnorms.end());
+
+            auto n = this->get_controller()->get_step();
+            auto k = this->get_controller()->get_iteration();
+            LOG(INFO) << "res: " << n << " " << k << " " << rmax << " (" << residuals.size() << ")";
+
+            this->residuals[ktype(n, k)] = rmax;
+          }
+
           error_map get_errors()
           {
             return this->errors;
+          }
+
+          error_map get_residuals()
+          {
+            return this->residuals;
           }
           //! @}
 
@@ -161,6 +188,7 @@ namespace pfasst
             time t  = this->get_controller()->get_time();
             time dt = this->get_controller()->get_time_step();
             this->echo_error(t + dt, true);
+            this->echo_residual();
           }
 
           /**
@@ -171,6 +199,7 @@ namespace pfasst
             time t  = this->get_controller()->get_time();
             time dt = this->get_controller()->get_time_step();
             this->echo_error(t + dt);
+            this->echo_residual();
           }
           //! @}
 
