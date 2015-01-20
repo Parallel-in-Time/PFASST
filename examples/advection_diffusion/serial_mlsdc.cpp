@@ -10,6 +10,8 @@ using namespace std;
 #include <fftw3.h>
 
 #include <pfasst.hpp>
+#include <pfasst/logging.hpp>
+#include <pfasst/config.hpp>
 #include <pfasst/mlsdc.hpp>
 #include <pfasst/encap/vector.hpp>
 using namespace pfasst::encap;
