@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "controller.hpp"
+#include "logging.hpp"
 
 using namespace std;
 
@@ -35,6 +36,7 @@ namespace pfasst
       void perform_sweeps(size_t level)
       {
         auto sweeper = this->get_level(level);
+        CLOG(INFO, "Controller") << "on level " << level + 1 << "/" << this->nlevels();
         for (size_t s = 0; s < this->nsweeps[level]; s++) {
           if (predict) {
             sweeper->predict(initial & predict);
@@ -97,6 +99,7 @@ namespace pfasst
           return l;
         }
 
+        CVLOG(1, "Controller") << "Cycle down onto level " << l.level << "/" << this->nlevels();
         trns->restrict(crse, fine, initial);
         trns->fas(this->get_time_step(), crse, fine);
         crse->save();
@@ -117,6 +120,7 @@ namespace pfasst
         auto crse = l.coarse();
         auto trns = l.transfer();
 
+        CVLOG(1, "Controller") << "Cycle up onto level " << l.level + 1 << "/" << this->nlevels();
         trns->interpolate(fine, crse);
 
         if (l < this->finest()) {

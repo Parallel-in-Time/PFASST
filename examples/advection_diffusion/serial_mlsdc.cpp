@@ -28,14 +28,14 @@ namespace pfasst
       {
         MLSDC<> mlsdc;
 
-        const size_t nsteps = 4;
-        const double dt     = 0.01;
-        const size_t niters = 8;
+        const size_t nsteps = config::get_value<size_t>("num_steps", 4);
+        const double dt     = config::get_value<double>("delta_step", 0.01);
+        const size_t niters = config::get_value<size_t>("num_iter", 8);
         const int    xrat   = 2;
         const int    trat   = 2;
 
-        size_t nnodes = 5;
-        size_t ndofs  = 128;
+        size_t nnodes = config::get_value<size_t>("num_nodes", 5);
+        size_t ndofs  = config::get_value<size_t>("spatial_dofs", 128);
 
         /*
          * build space/time discretisation levels and add them to mlsdc
@@ -93,8 +93,12 @@ namespace pfasst
 }  // ::pfasst
 
 #ifndef PFASST_UNIT_TESTING
-int main(int /*argc*/, char** /*argv*/)
+int main(int argc, char** argv)
 {
+  pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::enable_config_options();
+  pfasst::init(argc, argv);
+  pfasst::log::add_custom_logger("Advec");
+
   pfasst::examples::advection_diffusion::run_serial_mlsdc(3);
 }
 #endif
