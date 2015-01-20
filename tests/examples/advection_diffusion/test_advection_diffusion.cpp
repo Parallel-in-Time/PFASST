@@ -130,5 +130,7 @@ TEST(FASTest, SerialMLSDC)
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
+  pfasst::log::start_log(argc, argv);
+  pfasst::log::add_custom_logger("Advec");
   return RUN_ALL_TESTS();
 }
