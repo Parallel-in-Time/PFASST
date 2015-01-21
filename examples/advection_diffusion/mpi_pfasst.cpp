@@ -31,12 +31,10 @@ namespace pfasst
   {
     namespace advection_diffusion
     {
-      error_map run_mpi_pfasst()
+      error_map run_mpi_pfasst(double abs_residual_tol, size_t niters=4)
       {
-        // const size_t nsteps = 8;
         const size_t nsteps = 4;
         const double dt     = 0.01;
-        const size_t niters = 4;
 
         vector<pair<size_t, quadrature::QuadratureType>> nodes = {
           { 3, quadrature::QuadratureType::GaussLobatto },
@@ -68,7 +66,7 @@ namespace pfasst
         pf.set_comm(&comm);
         pf.set_duration(0.0, nsteps * dt, dt, niters);
         pf.set_nsweeps({2, 1});
-        // pf.get_finest<AdvectionDiffusionSweeper<>>()->set_residual_tolerances(1e-8, 0.0);
+        pf.get_finest<AdvectionDiffusionSweeper<>>()->set_residual_tolerances(abs_residual_tol, 0.0);
         pf.run();
 
         auto fine = pf.get_finest<AdvectionDiffusionSweeper<>>();
@@ -83,7 +81,7 @@ namespace pfasst
 int main(int argc, char** argv)
 {
   MPI_Init(&argc, &argv);
-  pfasst::examples::advection_diffusion::run_mpi_pfasst();
+  pfasst::examples::advection_diffusion::run_mpi_pfasst(0.0);
   fftw_cleanup();
   MPI_Finalize();
 }
