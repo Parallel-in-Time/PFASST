@@ -108,14 +108,14 @@ namespace pfasst
 
         virtual void post()
         {
-          // we'll use blocking send/recv for status info
+          // noop: send/recv for status info is blocking
         }
 
         virtual void send()
         {
+          // don't send forward if: single processor run, or we're the last processor
           if (mpi->size() == 1) { return; }
           if (mpi->rank() == mpi->size() - 1) { return; }
-          // if (get_converged(mpi->rank())) { return; }
 
           int iconverged = converged.at(mpi->rank()) ? 1 : 0;
 
@@ -131,8 +131,10 @@ namespace pfasst
 
         virtual void recv()
         {
+          // don't recv if: single processor run, or we're the first processor
           if (mpi->size() == 1) { return; }
           if (mpi->rank() == 0) { return; }
+
           if (get_converged(mpi->rank()-1)) {
             LOG(DEBUG) << "mpi rank " << this->comm->rank() << " skipping status recv";
             return;
