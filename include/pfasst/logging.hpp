@@ -6,6 +6,8 @@
 #include <string>
 using namespace std;
 
+#include <boost/algorithm/string.hpp>
+
 struct OUT
 {
   public:
@@ -97,6 +99,8 @@ const string OUT::reset = "\033[0m";
 
 #define LOG_INDENT string(pfasst::log::stack_position * 2, ' ')
 
+//! length of logger ID to print
+#define LOGGER_ID_LENGTH 8
 
 namespace pfasst
 {
@@ -120,43 +124,82 @@ namespace pfasst
     static size_t stack_position;
 
     /**
+     * \brief provides convenient way of adding additional named loggers
+     * \details With this function one can easily create additional named loggers distinctable by the `id`.
+     *   The first \ref LOGGER_ID_LENGTH characters of the ID (as uppercase) will be included in every line of the log.
+     *   The ID is used in the actual logging calls.
+     *
+     *   \code{.cpp}
+     *       add_custom_logger("MyCustomLogger")
+     *       // somewhere else in the code
+     *       CLOG(INFO, "MyCustomLogger") << "a logging message";
+     *   \endcode
+     *
+     *   This results in the log line (for the default value of \ref LOGGER_ID_LENGTH):
+     *
+     *       <TIME> [MYCUSTOM, INFO ] a logging message
+     * \note Please make sure to use `CLOG` (and `CVLOG` for verbose logging) to be able to specify a specific logger.
+     *   Otherwise the default logger will be used.
+     * \param[in] id The ID of the logger. This is used in logging calls.
+     */
+    inline static void add_custom_logger(const string& id)
+    {
+      const string TIMESTAMP = OUT::white + "%datetime{%H:%m:%s,%g}" + OUT::reset + " ";
+      const string LEVEL = "%level]";
+      const string VLEVEL = "VERB%vlevel]";
+      const string POSITION = "%fbase:%line";
+      const string MESSAGE = "%msg";
+
+      const string INFO_COLOR = OUT::blue;
+      const string DEBG_COLOR = "";
+      const string WARN_COLOR = OUT::magenta;
+      const string ERRO_COLOR = OUT::red;
+      const string FATA_COLOR = OUT::red + OUT::bold;
+      const string VERB_COLOR = OUT::white;
+
+      const size_t id_length = id.size();
+      string id2print = id.substr(0, LOGGER_ID_LENGTH);
+      boost::to_upper(id2print);
+      if (id_length < LOGGER_ID_LENGTH) {
+        id2print.append(LOGGER_ID_LENGTH - id_length, ' ');
+      }
+
+      el::Logger* logger = el::Loggers::getLogger(id);
+      el::Configurations* conf = logger->configurations();
+      conf->set(el::Level::Info, el::ConfigurationType::Format,
+                TIMESTAMP + INFO_COLOR + "[" + id2print + ", " + LEVEL  + " " + MESSAGE + OUT::reset);
+      conf->set(el::Level::Debug, el::ConfigurationType::Format,
+                TIMESTAMP + DEBG_COLOR + "[" + id2print + ", " + LEVEL  + " " + POSITION + " " + MESSAGE + OUT::reset);
+      conf->set(el::Level::Warning, el::ConfigurationType::Format,
+                TIMESTAMP + WARN_COLOR + "[" + id2print + ", " + LEVEL  + " " + MESSAGE + OUT::reset);
+      conf->set(el::Level::Error, el::ConfigurationType::Format,
+                TIMESTAMP + ERRO_COLOR + "[" + id2print + ", " + LEVEL  + " " + MESSAGE + OUT::reset);
+      conf->set(el::Level::Fatal, el::ConfigurationType::Format,
+                TIMESTAMP + FATA_COLOR + "[" + id2print + ", " + LEVEL  + " " + POSITION + " " + MESSAGE + OUT::reset);
+      conf->set(el::Level::Verbose, el::ConfigurationType::Format,
+                TIMESTAMP + VERB_COLOR + "[" + id2print + ", " + VLEVEL + " " + MESSAGE + OUT::reset);
+      el::Loggers::reconfigureLogger(logger, *conf);
+    }
+
+    /**
      * sets default configuration for default loggers
      */
     inline static void load_default_config()
     {
-      const string TIMESTAMP = OUT::white + "%datetime{%H:%m:%s,%g}" + OUT::reset + " ";
-      const string LEVEL = "[%level]";
-      const string VLEVEL = "[VERB%vlevel]";
-      const string POSITION = "%fbase:%line";
-      const string MESSAGE = "%msg";
-
       el::Configurations defaultConf;
       defaultConf.setToDefault();
 
-      defaultConf.setGlobally(el::ConfigurationType::Format, "%msg");
       defaultConf.setGlobally(el::ConfigurationType::ToFile, "false");
       defaultConf.setGlobally(el::ConfigurationType::ToStandardOutput, "true");
       defaultConf.setGlobally(el::ConfigurationType::MillisecondsWidth, PFASST_LOGGER_DEFAULT_GLOBAL_MILLISECOND_WIDTH);
-
-      defaultConf.set(el::Level::Info, el::ConfigurationType::Format,
-                      TIMESTAMP + OUT::blue + LEVEL + " " + MESSAGE + OUT::reset);
-
-      defaultConf.set(el::Level::Debug, el::ConfigurationType::Format,
-                      TIMESTAMP + LEVEL + " " + POSITION + " " + MESSAGE + OUT::reset);
-
-      defaultConf.set(el::Level::Warning, el::ConfigurationType::Format,
-                      TIMESTAMP + OUT::magenta + LEVEL + " " + MESSAGE + OUT::reset);
-
-      defaultConf.set(el::Level::Error, el::ConfigurationType::Format,
-                      TIMESTAMP + OUT::red + LEVEL + " " + MESSAGE + OUT::reset);
-
-      defaultConf.set(el::Level::Fatal, el::ConfigurationType::Format,
-                      TIMESTAMP + OUT::red + OUT::bold + LEVEL + " " + POSITION + " " + MESSAGE + OUT::reset);
-
-      defaultConf.set(el::Level::Verbose, el::ConfigurationType::Format,
-                      TIMESTAMP + OUT::white + VLEVEL + " " + MESSAGE + OUT::reset);
-
       el::Loggers::reconfigureAllLoggers(defaultConf);
+
+      add_custom_logger("default");
+      add_custom_logger("Controller");
+      add_custom_logger("Sweeper");
+      add_custom_logger("Encap");
+      add_custom_logger("Quadrature");
+      add_custom_logger("User");
     }
 
     /**

@@ -99,7 +99,7 @@ namespace pfasst
 
           virtual ~AdvectionDiffusionSweeper()
           {
-            LOG(INFO) << "number of f1 evals: " << this->nf1evals;
+            CLOG(INFO, "Advec") << "number of f1 evals: " << this->nf1evals;
           }
           //! @}
 
@@ -141,7 +141,7 @@ namespace pfasst
 
             auto n = this->get_controller()->get_step();
             auto k = this->get_controller()->get_iteration();
-            LOG(INFO) << "err: " << n << " " << k << " " << max << " (" << qend.size() << "," << predict << ")";
+            CLOG(INFO, "Advec") << "err: " << n << " " << k << " " << max << " (" << qend.size() << "," << predict << ")";
 
             this->errors.insert(vtype(ktype(n, k), max));
           }
@@ -163,7 +163,7 @@ namespace pfasst
 
             auto n = this->get_controller()->get_step();
             auto k = this->get_controller()->get_iteration();
-            LOG(INFO) << "res: " << n << " " << k << " " << rmax << " (" << residuals.size() << ")";
+            CLOG(INFO, "Advec") << "res: " << n << " " << k << " " << rmax << " (" << residuals.size() << ")";
 
             this->residuals[ktype(n, k)] = rmax;
           }
