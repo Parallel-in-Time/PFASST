@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "controller.hpp"
+#include "logging.hpp"
 
 using namespace std;
 
@@ -34,6 +35,7 @@ namespace pfasst
 
       void perform_sweeps(size_t level)
       {
+        VLOG(1) << "Sweeping on level " << level;
         auto sweeper = this->get_level(level);
         for (size_t s = 0; s < this->nsweeps[level]; s++) {
           if (predict) {

@@ -68,6 +68,7 @@ namespace pfasst
         VLOG(6) << LOG_INDENT << "building rhs for node " << m
                               << ((previous) ? " of previous sweep" : " of current sweep");
         acceleration_type rhs = (previous) ? this->saved_forces[m] : this->forces[m];
+        VLOG(7) << LOG_INDENT << "  e-forces: " << rhs;
         if (previous) {
           rhs += cross_prod(this->saved_particles[m]->velocities(), this->saved_b_vecs[m]);
         } else {
@@ -230,7 +231,7 @@ namespace pfasst
       template<typename scalar, typename time>
       void BorisSweeper<scalar, time>::set_state(shared_ptr<const encap_type> u0, size_t m)
       {
-        this->particles[m]->operator=(*(u0.get()));
+        this->particles[m]->copy(u0);
       }
 
       template<typename scalar, typename time>
@@ -252,9 +253,17 @@ namespace pfasst
       }
 
       template<typename scalar, typename time>
-      shared_ptr<Encapsulation<time>> BorisSweeper<scalar, time>::get_tau(size_t m) const
+      shared_ptr<typename BorisSweeper<scalar, time>::acceleration_type>
+      BorisSweeper<scalar, time>::get_tau_q_as_force(size_t m) const
       {
-        return this->tau_corrections[m];
+        return this->tau_q_corrections[m];
+      }
+
+      template<typename scalar, typename time>
+      shared_ptr<typename BorisSweeper<scalar, time>::acceleration_type>
+      BorisSweeper<scalar, time>::get_tau_qq_as_force(size_t m) const
+      {
+        return this->tau_qq_corrections[m];
       }
 
       template<typename scalar, typename time>
@@ -362,7 +371,7 @@ namespace pfasst
         size_t k = this->get_controller()->get_iteration();
         error_index nk(n, k);
 
-        LOG(INFO) << boost::format(this->FORMAT_STR) % (n+1) % k % e_tuple.res % e_tuple.e_drift % e_end;
+        LOG(INFO) << boost::format(this->FORMAT_STR) % (n+1) % k % (this->coarse ? "coarse" : "fine") % e_tuple.res % e_tuple.e_drift % e_end;
         VLOG(3) << LOG_INDENT << "particle at t_end: " << end;
 
         // exact anlytical solution only valid for 1-particle-system
@@ -396,6 +405,7 @@ namespace pfasst
       {
         EncapSweeper<time>::setup(coarse);
         VLOG_FUNC_START("BorisSweeper") << " coarse=" << boolalpha << coarse;
+        this->coarse = coarse;
         auto const nodes = this->get_nodes();
         assert(nodes.size() >= 1);
         const size_t nnodes = nodes.size();
@@ -420,7 +430,8 @@ namespace pfasst
           this->b_vecs.push_back(cloud_component_factory<scalar>(this->particles[m]->size(), this->particles[m]->dim()));
           this->saved_b_vecs.push_back(cloud_component_factory<scalar>(this->particles[m]->size(), this->particles[m]->dim()));
           if (coarse) {
-            this->tau_corrections.push_back(dynamic_pointer_cast<encap_type>(this->get_factory()->create(pfasst::encap::solution)));
+            this->tau_q_corrections.push_back(make_shared<acceleration_type>(cloud_component_factory<scalar>(this->particles[m]->size(), this->particles[m]->dim())));
+            this->tau_qq_corrections.push_back(make_shared<acceleration_type>(cloud_component_factory<scalar>(this->particles[m]->size(), this->particles[m]->dim())));
           }
         }
 
@@ -430,7 +441,7 @@ namespace pfasst
         }
 
         this->q_mat = this->get_quadrature()->get_q_mat();
-        auto qq_mat = this->q_mat * this->q_mat;
+        this->qq_mat = this->q_mat * this->q_mat;
         this->s_mat = Matrix<time>(nnodes, nnodes);
         this->s_mat.fill(time(0.0));
         this->qt_mat = Matrix<time>(nnodes, nnodes);
@@ -460,7 +471,7 @@ namespace pfasst
         }
 
         // Q_T = 0.5 * (Q_E + Q_I)
-        qt_mat = 0.5 * (qe_mat + qi_mat);
+        this->qt_mat = 0.5 * (qe_mat + qi_mat);
 
         // Q_x = Q_E * Q_T + 0.5 * (Q_E ∘ Q_E)
         //  (only first term, i.e. matrix product)
@@ -475,18 +486,49 @@ namespace pfasst
           }
 
           this->s_mat.row(i) = this->q_mat.row(i) - this->q_mat.row(i - 1);
-          this->ss_mat.row(i) = qq_mat.row(i) - qq_mat.row(i - 1);
+          this->ss_mat.row(i) = this->qq_mat.row(i) - this->qq_mat.row(i - 1);
           this->sx_mat.row(i) = this->qx_mat.row(i) - this->qx_mat.row(i - 1);
-          this->st_mat.row(i) = qt_mat.row(i) - qt_mat.row(i - 1);
+          this->st_mat.row(i) = this->qt_mat.row(i) - this->qt_mat.row(i - 1);
         }
 
         size_t nsteps = this->get_controller()->get_end_time() / this->get_controller()->get_time_step();
         size_t digit_step = to_string(nsteps + 1).length();
         size_t digit_iter = to_string(this->get_controller()->get_max_iterations() - 1).length();
-        this->FORMAT_STR = "step: %|" + to_string(digit_step) + "|      iter: %|" + to_string(digit_iter) + "|"
+        this->FORMAT_STR = "step: %|" + to_string(digit_step) + "|      iter: %|" + to_string(digit_iter) + "| (%-6s)"
                            + "      residual: %10.4e      energy drift: %10.4e      total energy: %10.2f";
 
         UNUSED(coarse);
+        VLOG_FUNC_END("BorisSweeper");
+      }
+
+      template<typename scalar, typename time>
+      void BorisSweeper<scalar, time>::integrate(time dt, vector<shared_ptr<Encapsulation<time>>> dst) const
+      {
+        throw NotImplementedYet("Boris::integrate for basic Encap type");
+      }
+
+      template<typename scalar, typename time>
+      void BorisSweeper<scalar, time>::integrate(time dt, vector<shared_ptr<acceleration_type>> dst_q,
+                                                 vector<shared_ptr<acceleration_type>> dst_qq) const
+      {
+        VLOG_FUNC_START("BorisSweeper");
+        const size_t nnodes = this->get_nodes().size();
+
+        vector<acceleration_type> rhs(nnodes);
+        for (size_t m = 0; m < nnodes; ++m) {
+          rhs[m] = this->build_rhs(m);
+        }
+
+        for (size_t m = 0; m < nnodes; ++m) {
+          zero(dst_q[m]);
+          zero(dst_qq[m]);
+          for (size_t n = 0; n < nnodes; ++n) {
+            *(dst_q[m].get()) += dt * this->q_mat(m, n) * rhs[n];
+            *(dst_qq[m].get()) += dt * dt * this->qq_mat(m, n) * rhs[n];
+          }
+          VLOG(6) << LOG_INDENT << "integral(Q)[" << m << "]: " << *(dst_q[m].get());
+          VLOG(6) << LOG_INDENT << "integral(QQ)[" << m << "]: " << *(dst_qq[m].get());
+        }
         VLOG_FUNC_END("BorisSweeper");
       }
 
@@ -514,7 +556,14 @@ namespace pfasst
         time t = this->get_controller()->get_time() + this->get_controller()->get_time_step() * this->delta_nodes[m];
         VLOG(6) << LOG_INDENT << "computing forces at node " << m << " (t=" << t << ")";
 
-        this->forces[m] = this->impl_solver->e_field_evaluate(this->particles[m], t);
+        if (this->coarse) {
+          VLOG(6) << LOG_INDENT << "only external electric field (because on coarse level)";
+          // don't compute internal electric forces when on coarse level
+          this->forces[m] = this->impl_solver->external_e_field_evaluate(this->particles[m], t);
+        } else {
+          VLOG(6) << LOG_INDENT << "internal and external electric field (because not on coarse level)";
+          this->forces[m] = this->impl_solver->e_field_evaluate(this->particles[m], t);
+        }
         this->b_vecs[m] = this->impl_solver->b_field_vecs(this->particles[m], t);
 
         VLOG(8) << LOG_INDENT << "particles:" << this->particles[m];
@@ -555,6 +604,15 @@ namespace pfasst
         time dt = this->get_controller()->get_time_step();
         VLOG(2) << LOG_INDENT << "sweeping for t=" << t << " and dt=" << dt;
         VLOG(6) << LOG_INDENT << "nodes: " << nodes;
+        VLOG(6) << LOG_INDENT << "initial: " << *(this->start_particles.get());
+        VLOG(6) << LOG_INDENT << "previous: ";
+        for (size_t m = 0; m < nnodes; ++m) {
+          VLOG(6) << LOG_INDENT << "  [" << m << "]: " << *(this->saved_particles[m].get());
+        }
+        VLOG(6) << LOG_INDENT << "current: ";
+        for (size_t m = 0; m < nnodes; ++m) {
+          VLOG(6) << LOG_INDENT << "  [" << m << "]: " << *(this->particles[m].get());
+        }
 
         this->impl_solver->energy(this->particles.front(), t);
 
@@ -567,8 +625,19 @@ namespace pfasst
           for (size_t m = 1; m < nnodes; m++) {
             for (size_t l = 0; l < nnodes; l++) {
               auto rhs = this->build_rhs(l);
-              this->s_integrals[m] += rhs * dt * this->s_mat(m, l);
-              this->ss_integrals[m] += rhs * dt * dt * this->ss_mat(m, l);
+              this->s_integrals[m] += dt * this->s_mat(m, l) * rhs;
+              this->ss_integrals[m] += dt * dt * this->ss_mat(m, l) * rhs;
+            }
+          }
+          VLOG(7) << LOG_INDENT << "s_int:  " << this->s_integrals;
+          VLOG(7) << LOG_INDENT << "ss_int: " << this->ss_integrals;
+          if (this->tau_q_corrections.size() > 0 && this->tau_qq_corrections.size()) {
+            VLOG(7) << LOG_INDENT << "adding FAS correction";
+            for (size_t m = 0; m < nnodes; ++m) {
+              VLOG(7) << LOG_INDENT << "+= tau_q[" << m << "] (" << *(this->tau_q_corrections[m].get()) << ")";
+              VLOG(7) << LOG_INDENT << "+= tau_qq[" << m << "] (" << *(this->tau_qq_corrections[m].get()) << ")";
+              this->s_integrals[m] += *(this->tau_q_corrections[m].get());
+              this->ss_integrals[m] += *(this->tau_qq_corrections[m].get());
             }
           }
         } else {
@@ -582,6 +651,7 @@ namespace pfasst
         for (size_t m = 0; m < nnodes - 1; m++) {
           time ds = dt * this->delta_nodes[m+1];
           VLOG(3) << LOG_INDENT << "node " << m << ", ds=" << ds;
+          VLOG(4) << LOG_INDENT << "old m+1 particle: " << this->particles[m+1];
           pfasst::log::stack_position++;
 
           //// Update Position (explicit)
@@ -736,24 +806,6 @@ namespace pfasst
 
         this->particles[m+1]->velocities() = v_plus + e_forces_mean * beta + c_k_term_half;
         VLOG_FUNC_END("BorisSweeper");
-      }
-
-
-      template<typename scalar, typename time>
-      BorisSweeper<scalar, time>& as_boris_sweeper(shared_ptr<ISweeper<time>> x)
-      {
-        shared_ptr<BorisSweeper<scalar, time>> y = dynamic_pointer_cast<BorisSweeper<scalar, time>>(x);
-        assert(y);
-        return *y.get();
-      }
-
-
-      template<typename scalar, typename time>
-      const BorisSweeper<scalar, time>& as_boris_sweeper(shared_ptr<const ISweeper<time>> x)
-      {
-        shared_ptr<const BorisSweeper<scalar, time>> y = dynamic_pointer_cast<const BorisSweeper<scalar, time>>(x);
-        assert(y);
-        return *y.get();
       }
     }  // ::pfasst::examples::boris
   }  // ::pfasst::examples

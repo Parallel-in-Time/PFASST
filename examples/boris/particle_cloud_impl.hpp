@@ -49,10 +49,16 @@ namespace pfasst
       }
 
       template<typename precision>
-      void ParticleCloud<precision>::copy(shared_ptr<encap::Encapsulation<precision>> other)
+      void ParticleCloud<precision>::copy(shared_ptr<const encap::Encapsulation<precision>> other)
       {
-        shared_ptr<ParticleCloud<precision>> other_c = dynamic_pointer_cast<ParticleCloud<precision>>(other);
+        shared_ptr<const ParticleCloud<precision>> other_c = dynamic_pointer_cast<const ParticleCloud<precision>>(other);
         assert(other_c);
+//         this->copy(other_c);
+//       }
+
+//       template<typename precision>
+//       void ParticleCloud<precision>::copy(shared_ptr<const ParticleCloud<precision>> other)
+//       {
         this->_dim = other_c->dim();
         this->_num_particles = other_c->size();
         this->_positions = other_c->positions();
@@ -144,7 +150,19 @@ namespace pfasst
       }
 
       template<typename precision>
+      const ParticleCloudComponent<precision>& ParticleCloud<precision>::positions() const
+      {
+        return this->_positions;
+      }
+
+      template<typename precision>
       ParticleCloudComponent<precision>& ParticleCloud<precision>::velocities()
+      {
+        return this->_velocities;
+      }
+
+      template<typename precision>
+      const ParticleCloudComponent<precision>& ParticleCloud<precision>::velocities() const
       {
         return this->_velocities;
       }
@@ -156,7 +174,19 @@ namespace pfasst
       }
 
       template<typename precision>
+      const vector<precision>& ParticleCloud<precision>::charges() const 
+      {
+        return this->_charges;
+      }
+
+      template<typename precision>
       vector<precision>& ParticleCloud<precision>::masses()
+      {
+        return this->_masses;
+      }
+
+      template<typename precision>
+      const vector<precision>& ParticleCloud<precision>::masses() const
       {
         return this->_masses;
       }

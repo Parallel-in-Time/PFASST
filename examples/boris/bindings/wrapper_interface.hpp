@@ -44,6 +44,9 @@ namespace pfasst
             virtual ~WrapperInterface() {}
 
             virtual ParticleCloudComponent<scalar>
+            external_e_field_evaluate(const particle_cloud_type& particles, const time t) = 0;
+
+            virtual ParticleCloudComponent<scalar>
             e_field_evaluate(const particle_cloud_type& particles, const time t) = 0;
 
             virtual ParticleCloudComponent<scalar>

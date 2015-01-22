@@ -113,6 +113,34 @@ namespace pfasst
 
         template<typename scalar, typename time>
         ParticleCloudComponent<scalar>
+        WrapperSimplePhysicsSolver<scalar, time>::external_e_field_evaluate(const particle_cloud_type& particles, const time t)
+        {
+          VLOG_FUNC_START("WrapperSimplePhysicsSolver") << " time=" << t;
+          size_t num_particles = particles->size();
+          assert(DIM == particles->dim());
+
+          scalar* packed_positions = new scalar[num_particles * DIM];
+          scalar* packed_masses = new scalar[num_particles];
+          scalar* packed_charges = new scalar[num_particles];
+          this->pack_positions(particles, packed_positions);
+          this->pack_masses(particles, packed_masses);
+          this->pack_charges(particles, packed_charges);
+
+          scalar* packed_forces = new scalar[num_particles * DIM];
+          solver::evaluate_external_e_field(packed_positions, packed_charges, packed_masses, num_particles, t,
+                                            this->config.get(), packed_forces);
+
+          delete[] packed_positions;
+          delete[] packed_masses;
+          delete[] packed_charges;
+          auto forces = this->unpack_2d(packed_forces, num_particles);
+          delete[] packed_forces;
+          VLOG_FUNC_END("WrapperSimplePhysicsSolver");
+          return forces;
+        }
+
+        template<typename scalar, typename time>
+        ParticleCloudComponent<scalar>
         WrapperSimplePhysicsSolver<scalar, time>::e_field_evaluate(const particle_cloud_type& particles, const time t)
         {
           VLOG_FUNC_START("WrapperSimplePhysicsSolver") << " time=" << t;

@@ -105,7 +105,8 @@ namespace pfasst
           shared_ptr<encap_type> start_particles;
           shared_ptr<encap_type> end_particles;
 
-          vector<shared_ptr<encap_type>> tau_corrections;
+          vector<shared_ptr<acceleration_type>> tau_q_corrections;
+          vector<shared_ptr<acceleration_type>> tau_qq_corrections;
           vector<acceleration_type> forces;
           vector<acceleration_type> saved_forces;
           vector<acceleration_type> b_vecs;
@@ -114,6 +115,8 @@ namespace pfasst
           scalar initial_energy;
           vector<scalar> energy_evals;
           size_t f_evals;
+
+          bool coarse;
 
           vector<velocity_type> s_integrals;
           vector<position_type> ss_integrals;
@@ -126,6 +129,7 @@ namespace pfasst
           Matrix<time> sx_mat;
           Matrix<time> st_mat;
           Matrix<time> q_mat;
+          Matrix<time> qq_mat;
           Matrix<time> qx_mat;
           Matrix<time> qt_mat;
 
@@ -162,7 +166,8 @@ namespace pfasst
           virtual void set_start_state(shared_ptr<const encap_type> u0);
           virtual shared_ptr<Encapsulation<time>> get_state(size_t m) const override;
           virtual shared_ptr<encap_type> get_start_state() const;
-          virtual shared_ptr<Encapsulation<time>> get_tau(size_t m) const override;
+          virtual shared_ptr<acceleration_type> get_tau_q_as_force(size_t m) const;
+          virtual shared_ptr<acceleration_type> get_tau_qq_as_force(size_t m) const;
           virtual shared_ptr<Encapsulation<time>> get_saved_state(size_t m) const override;
           virtual void set_initial_energy();
           //! @}
@@ -177,6 +182,8 @@ namespace pfasst
 
           //! @{
           virtual void setup(bool coarse = false) override;
+          virtual void integrate(time dt, vector<shared_ptr<Encapsulation<time>>> dst) const override;
+          virtual void integrate(time dt, vector<shared_ptr<acceleration_type>> dst_q, vector<shared_ptr<acceleration_type>> dst_qq) const;
           virtual void advance() override;
           virtual void evaluate(size_t m);
           virtual void predict(bool initial) override;
@@ -203,19 +210,6 @@ namespace pfasst
                                    const velocity_type& c_k_term);
           //! @}
       };
-
-
-      template<
-        typename scalar,
-        typename time
-      >
-      BorisSweeper<scalar, time>& as_boris_sweeper(shared_ptr<ISweeper<time>> x);
-
-      template<
-        typename scalar,
-        typename time
-      >
-      const BorisSweeper<scalar, time>& as_boris_sweeper(shared_ptr<const ISweeper<time>> x);
     }  // ::pfasst::examples::boris
   }  // ::pfasst::examples
 }  // ::pfasst

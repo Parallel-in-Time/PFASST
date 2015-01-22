@@ -9,6 +9,7 @@ add_subdirectory(bindings)
 
 set(boris_examples
     boris_sdc
+    boris_mlsdc
 )
 
 foreach(example ${boris_examples})

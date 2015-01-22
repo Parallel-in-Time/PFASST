@@ -48,7 +48,8 @@ namespace pfasst
           virtual ~ParticleCloud();
 
           virtual void zero() override;
-          virtual void copy(shared_ptr<encap::Encapsulation<precision>> other);
+          virtual void copy(shared_ptr<const encap::Encapsulation<precision>> other);
+//           virtual void copy(shared_ptr<const ParticleCloud<precision>> other);
 
           void extend(const size_t new_size);
           void erase(const size_t index);
@@ -58,9 +59,13 @@ namespace pfasst
           size_t size() const;
           size_t dim() const;
           ParticleCloudComponent<precision>& positions();
+          const ParticleCloudComponent<precision>& positions() const;
           ParticleCloudComponent<precision>& velocities();
+          const ParticleCloudComponent<precision>& velocities() const;
           vector<precision>& charges();
+          const vector<precision>& charges() const;
           vector<precision>& masses();
+          const vector<precision>& masses() const;
 
           ParticleComponent<precision> center_of_mass() const;
           shared_ptr<Particle<precision>> operator[](const size_t index) const;

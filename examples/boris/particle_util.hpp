@@ -33,8 +33,8 @@ namespace pfasst
       template<typename precision>
       static vector<precision> cmp_wise_div(const vector<precision>& first,
                                                        const vector<precision>& second);
-      
-      
+
+
       template<typename precision>
       static precision max(const vector<precision>& data);
 
