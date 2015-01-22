@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "../globals.hpp"
+#include "../logging.hpp"
 #include "../quadrature.hpp"
 #include "encapsulation.hpp"
 #include "encap_sweeper.hpp"
@@ -206,7 +207,14 @@ namespace pfasst
           for (size_t m = 0; m < this->quadrature->get_num_nodes(); m++) {
             dst[m]->copy(this->start_state);
             dst[m]->saxpy(-1.0, this->state[m]);
-            // XXX: add tau corrections
+          }
+          if (this->fas_corrections.size() > 0) {
+            // XXX: build a matrix and use mat_apply to do this
+            for (size_t m = 0; m < this->quadrature->get_num_nodes(); m++) {
+              for (size_t n = 0; n <= m; n++) {
+                dst[m]->saxpy(1.0, this->fas_corrections[n]);
+              }
+            }
           }
           dst[0]->mat_apply(dst, dt, this->quadrature->get_q_mat(), this->fs_expl, false);
           dst[0]->mat_apply(dst, dt, this->quadrature->get_q_mat(), this->fs_impl, false);
@@ -285,6 +293,8 @@ namespace pfasst
         {
           time dt = this->get_controller()->get_time_step();
           time t  = this->get_controller()->get_time();
+          CLOG(INFO, "Sweeper") << "predicting step " << this->get_controller()->get_step() + 1
+                                << " (t=" << t << ", dt=" << dt << ")";
 
           if (initial) {
             this->state[0]->copy(this->start_state);
@@ -312,6 +322,8 @@ namespace pfasst
           UNUSED(initial);
           time dt = this->get_controller()->get_time_step();
           time t  = this->get_controller()->get_time();
+          CLOG(INFO, "Sweeper") << "predicting step " << this->get_controller()->get_step() + 1
+                                << " (t=" << t << ", dt=" << dt << ")";
           time ds;
 
           shared_ptr<Encapsulation<time>> rhs = this->get_factory()->create(pfasst::encap::solution);
@@ -342,6 +354,8 @@ namespace pfasst
           auto const nodes = this->quadrature->get_nodes();
           auto const dt    = this->get_controller()->get_time_step();
           auto const s_mat = this->quadrature->get_s_mat().block(1, 0, nodes.size()-1, nodes.size());
+          CLOG(INFO, "Sweeper") << "sweeping on step " << this->get_controller()->get_step() + 1
+                                << " in iteration " << this->get_controller()->get_iteration() << " (dt=" << dt << ")";
           time ds;
 
           this->s_integrals[0]->mat_apply(this->s_integrals, dt, s_mat, this->fs_expl, true);
@@ -377,6 +391,8 @@ namespace pfasst
           auto const nodes = this->quadrature->get_nodes();
           auto const dt    = this->get_controller()->get_time_step();
           auto const s_mat = this->quadrature->get_s_mat();
+          CLOG(INFO, "Sweeper") << "sweeping on step " << this->get_controller()->get_step() + 1
+                                << " in iteration " << this->get_controller()->get_iteration() << " (dt=" << dt << ")";
           time ds;
 
           this->s_integrals[0]->mat_apply(this->s_integrals, dt, s_mat, this->fs_expl, true);
