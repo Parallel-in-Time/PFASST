@@ -5,6 +5,7 @@
 #ifndef _PFASST_PFASST_HPP_
 #define _PFASST_PFASST_HPP_
 
+#include "logging.hpp"
 #include "mlsdc.hpp"
 
 using namespace std;
@@ -72,9 +73,12 @@ namespace pfasst
           }
 
           for (this->set_iteration(0);
-               this->get_iteration() < this->get_max_iterations();
+               this->get_iteration() < this->get_max_iterations() && this->comm->status->keep_iterating();
                this->advance_iteration()) {
-            post();
+
+            if (this->comm->status->previous_is_iterating()) {
+              post();
+            }
             cycle_v(this->finest());
           }
 
@@ -85,6 +89,8 @@ namespace pfasst
           if (nblock < nblocks - 1) {
             broadcast();
           }
+
+          this->comm->status->clear();
         }
       }
 
@@ -100,8 +106,8 @@ namespace pfasst
 
         perform_sweeps(l.level);
 
-        if (l == this->finest()) {
-          // note: convergence tests belong here
+        if (l == this->finest() && fine->converged()) {
+          this->comm->status->set_converged(true);
         }
 
         fine->send(comm, tag(l), false);
@@ -130,8 +136,10 @@ namespace pfasst
 
         trns->interpolate(fine, crse, true);
 
-        fine->recv(comm, tag(l), false);
-        trns->interpolate_initial(fine, crse);
+        if (this->comm->status->previous_is_iterating()) {
+          fine->recv(comm, tag(l), false);
+          trns->interpolate_initial(fine, crse);
+        }
 
         if (l < this->finest()) {
           perform_sweeps(l.level);
@@ -147,9 +155,13 @@ namespace pfasst
       {
         auto crse = l.current();
 
-        crse->recv(comm, tag(l), true);
+        if (this->comm->status->previous_is_iterating()) {
+          crse->recv(comm, tag(l), true);
+        }
+        this->comm->status->recv();
         this->perform_sweeps(l.level);
         crse->send(comm, tag(l), true);
+        this->comm->status->send();
         return l + 1;
       }
 
@@ -221,6 +233,7 @@ namespace pfasst
 
       void post()
       {
+        this->comm->status->post();
         for (auto l = this->coarsest() + 1; l <= this->finest(); ++l) {
           l.current()->post(comm, tag(l));
         }

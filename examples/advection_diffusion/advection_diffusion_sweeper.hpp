@@ -141,8 +141,8 @@ namespace pfasst
 
             auto n = this->get_controller()->get_step();
             auto k = this->get_controller()->get_iteration();
-            CLOG(INFO, "Advec") << "err: " << n << " " << k << " " << max << " (" << qend.size() << "," << predict << ")";
 
+            CLOG(INFO, "Advec") << "err: " << n << " " << k << " " << max << " (" << qend.size() << "," << predict << ")";
             this->errors.insert(vtype(ktype(n, k), max));
           }
 
