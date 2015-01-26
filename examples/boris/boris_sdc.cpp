@@ -51,7 +51,7 @@ namespace pfasst
 
         shared_ptr<ParticleCloud<double>> q0 = dynamic_pointer_cast<ParticleCloud<double>>(sweeper->get_start_state());
         q0->distribute_around_center(center);
-        LOG(INFO) << OUT::green << "Initial Particle: " << *(dynamic_pointer_cast<ParticleCloud<double>>(sweeper->get_start_state()));
+        CLOG(INFO, "Boris") << OUT::green << "Initial Particle: " << *(dynamic_pointer_cast<ParticleCloud<double>>(sweeper->get_start_state()));
 
         sweeper->set_initial_energy();
         sdc.run();
@@ -67,6 +67,8 @@ int main(int argc, char** argv)
 {
   pfasst::examples::boris::enable_config_options<double>();
   pfasst::init(argc, argv);
+  pfasst::log::add_custom_logger("Boris");
+  pfasst::log::add_custom_logger("Solver");
 
   const size_t nsteps     = pfasst::config::get_value<size_t>("num_steps", 1);
   const double dt         = pfasst::config::get_value<double>("delta_step", 0.015625);

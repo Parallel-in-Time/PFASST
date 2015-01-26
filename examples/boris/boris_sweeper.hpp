@@ -1,6 +1,7 @@
 #ifndef _EXAMPLES__BORIS__BORIS_SWEEPER__HPP_
 #define _EXAMPLES__BORIS__BORIS_SWEEPER__HPP_
 
+#include <array>
 #include <cassert>
 #include <cmath>
 #include <cstdio>
@@ -80,6 +81,21 @@ namespace pfasst
       static void enable_config_options(size_t index = -1);
 
 
+      class LogIndent
+      {
+        private:
+          array<size_t, 9> vlog_levels;
+
+        public:
+          LogIndent();
+          virtual ~LogIndent();
+
+          void increment(const size_t vlevel);
+          void decrement(const size_t vlevel);
+          const string indent(const size_t vlevel) const;
+      };
+
+
       template<
         typename scalar,
         typename time
@@ -98,6 +114,7 @@ namespace pfasst
           error_map<scalar> errors;
           bool exact_updated;
           shared_ptr<encap_type> exact_cache;
+          shared_ptr<LogIndent> log_indent;
 
         protected:
           vector<shared_ptr<encap_type>> particles;
@@ -161,7 +178,6 @@ namespace pfasst
           //! @}
 
           //! @{
-          virtual void set_state(shared_ptr<const Encapsulation<time>> u0, size_t m);
           virtual void set_state(shared_ptr<const encap_type> u0, size_t m);
           virtual void set_start_state(shared_ptr<const encap_type> u0);
           virtual shared_ptr<Encapsulation<time>> get_state(size_t m) const override;

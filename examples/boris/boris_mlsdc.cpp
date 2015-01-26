@@ -62,7 +62,7 @@ namespace pfasst
         auto fine_sweeper = controller.get_finest<BorisSweeper<double, double>>();
         shared_ptr<ParticleCloud<double>> q0 = dynamic_pointer_cast<ParticleCloud<double>>(fine_sweeper->get_start_state());
         q0->distribute_around_center(center);
-        LOG(INFO) << OUT::green << "Initial Particle (fine) : " << *(dynamic_pointer_cast<ParticleCloud<double>>(fine_sweeper->get_start_state()));
+        CLOG(INFO, "Boris") << "Initial Particle (fine) : " << *(dynamic_pointer_cast<ParticleCloud<double>>(fine_sweeper->get_start_state()));
         fine_sweeper->set_initial_energy();
 
 //         auto coarse_sweeper = controller.get_coarsest<BorisSweeper<double, double>>();
@@ -84,6 +84,9 @@ int main(int argc, char** argv)
 {
   pfasst::examples::boris::enable_config_options<double>();
   pfasst::init(argc, argv);
+  pfasst::log::add_custom_logger("Boris");
+  pfasst::log::add_custom_logger("BorisTransfer");
+  pfasst::log::add_custom_logger("Solver");
 
   const size_t nsteps     = pfasst::config::get_value<size_t>("num_steps", 1);
   const double dt         = pfasst::config::get_value<double>("delta_step", 0.015625);

@@ -97,6 +97,8 @@ namespace pfasst
 
       template<typename precision>
       inline MAKE_LOGGABLE(shared_ptr<ParticleCloud<precision>>, sp_cloud, os);
+      template<typename precision>
+      inline MAKE_LOGGABLE(shared_ptr<const ParticleCloud<precision>>, sp_cloud, os);
 
 
       template<typename precision>

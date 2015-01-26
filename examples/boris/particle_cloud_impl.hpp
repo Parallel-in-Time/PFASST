@@ -338,6 +338,14 @@ namespace pfasst
         return os;
       }
 
+      template<typename precision>
+      inline MAKE_LOGGABLE(shared_ptr<const ParticleCloud<precision>>, sp_cloud, os)
+      {
+        os << "<" << addressof(sp_cloud) << ">";
+        sp_cloud->log(os);
+        return os;
+      }
+
 
       template<typename precision>
       ParticleCloudFactory<precision>::ParticleCloudFactory(const size_t num_particles, const size_t dim,
