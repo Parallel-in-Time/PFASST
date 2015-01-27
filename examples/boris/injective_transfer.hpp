@@ -255,14 +255,14 @@ namespace pfasst
 
 //               CVLOG(5, "BorisTransfer") << "  make it node-to-node";
               // make it a (m-1)-to-m FAS correction
-              for (size_t n = 0; n < m; ++n) {
+//               for (size_t n = 0; n < m; ++n) {
 //                 CVLOG(5, "BorisTransfer") << "  tau_q[" << m << "]  += " << *(rstr_int_q[n].get()) << " - " << *(crse_int_q[n].get());
-                *(tau_q[m].get()) += *(rstr_int_q[n].get()) - *(crse_int_q[n].get());
+//                 *(tau_q[m].get()) += *(rstr_int_q[n].get()) - *(crse_int_q[n].get());
 //                 CVLOG(5, "BorisTransfer") << "     --> " << *(tau_q[m].get());
 //                 CVLOG(5, "BorisTransfer") << "  tau_qq[" << m << "] += " << *(rstr_int_qq[n].get()) << " - " << *(crse_int_qq[n].get());
-                *(tau_qq[m].get()) += *(rstr_int_qq[n].get()) - *(crse_int_qq[n].get());
+//                 *(tau_qq[m].get()) += *(rstr_int_qq[n].get()) - *(crse_int_qq[n].get());
 //                 CVLOG(5, "BorisTransfer") << "     --> " << *(tau_qq[m].get());
-              }
+//               }
             }
 
             for (size_t m = 0; m < ncrse; ++m) {

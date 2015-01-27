@@ -687,10 +687,10 @@ namespace pfasst
             BCVLOG(2) << "adding FAS correction to integrals";
             this->log_indent->increment(2);
             for (size_t m = 0; m < nnodes; ++m) {
-              BCVLOG(2) << "+= tau_q[" << m << "]  * dt   (<" << this->tau_q_corrections[m]  << ">" << dt * *(this->tau_q_corrections[m].get()) << ")";
-              BCVLOG(2) << "+= tau_qq[" << m << "] * dt^2 (<" << this->tau_qq_corrections[m] << ">" << dt * dt * *(this->tau_qq_corrections[m].get()) << ")";
-              this->s_integrals[m] += *(this->tau_q_corrections[m].get()) * dt;
-              this->ss_integrals[m] += *(this->tau_qq_corrections[m].get()) * dt * dt;
+              BCVLOG(2) << "+= tau_q[" << m << "]  (<" << this->tau_q_corrections[m]  << ">" << *(this->tau_q_corrections[m].get()) << ")";
+              BCVLOG(2) << "+= tau_qq[" << m << "] (<" << this->tau_qq_corrections[m] << ">" << *(this->tau_qq_corrections[m].get()) << ")";
+              this->s_integrals[m] += *(this->tau_q_corrections[m].get());
+              this->ss_integrals[m] += *(this->tau_qq_corrections[m].get());
             }
             this->log_indent->decrement(2);
           }
