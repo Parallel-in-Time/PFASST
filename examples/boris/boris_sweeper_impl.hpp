@@ -605,14 +605,19 @@ namespace pfasst
         BCVLOG(2) << "computing forces at node " << m << " (t=" << t << ")";
         this->log_indent->increment(2);
 
-//         if (this->coarse) {
-//           BCVLOG(2) << "only external electric field (because on coarse level)";
+#ifndef BORIS_SAME_LEVELS
+        if (this->coarse) {
+          BCVLOG(2) << "only external electric field (because on coarse level)";
           // don't compute internal electric forces when on coarse level
-//           this->forces[m] = this->impl_solver->external_e_field_evaluate(this->particles[m], t);
-//         } else {
-//           BCVLOG(2) << "internal and external electric field (because not on coarse level)";
+          this->forces[m] = this->impl_solver->external_e_field_evaluate(this->particles[m], t);
+        } else {
+          BCVLOG(2) << "internal and external electric field (because not on coarse level)";
           this->forces[m] = this->impl_solver->e_field_evaluate(this->particles[m], t);
-//         }
+        }
+#else
+        BCVLOG(2) << "internal and external electric field";
+        this->forces[m] = this->impl_solver->e_field_evaluate(this->particles[m], t);
+#endif
         this->b_vecs[m] = this->impl_solver->b_field_vecs(this->particles[m], t);
 
         BCVLOG(9) << "for particles:" << this->particles[m];
@@ -682,10 +687,10 @@ namespace pfasst
             BCVLOG(2) << "adding FAS correction to integrals";
             this->log_indent->increment(2);
             for (size_t m = 0; m < nnodes; ++m) {
-              BCVLOG(2) << "+= tau_q[" << m << "]  (<" << this->tau_q_corrections[m]  << ">" << *(this->tau_q_corrections[m].get()) << ")";
-              BCVLOG(2) << "+= tau_qq[" << m << "] (<" << this->tau_qq_corrections[m] << ">" << *(this->tau_qq_corrections[m].get()) << ")";
-              this->s_integrals[m] += *(this->tau_q_corrections[m].get());
-              this->ss_integrals[m] += *(this->tau_qq_corrections[m].get());
+              BCVLOG(2) << "+= tau_q[" << m << "]  * dt   (<" << this->tau_q_corrections[m]  << ">" << dt * *(this->tau_q_corrections[m].get()) << ")";
+              BCVLOG(2) << "+= tau_qq[" << m << "] * dt^2 (<" << this->tau_qq_corrections[m] << ">" << dt * dt * *(this->tau_qq_corrections[m].get()) << ")";
+              this->s_integrals[m] += *(this->tau_q_corrections[m].get()) * dt;
+              this->ss_integrals[m] += *(this->tau_qq_corrections[m].get()) * dt * dt;
             }
             this->log_indent->decrement(2);
           }
@@ -710,14 +715,19 @@ namespace pfasst
           BCVLOG(1) << "new positions: " << this->particles[m+1]->positions();
 
           // evaluate electric field with new position
-//           if (this->coarse) {
-//             BCVLOG(2) << "only external electric field (because on coarse level)";
+#ifndef BORIS_SAME_LEVELS
+          if (this->coarse) {
+            BCVLOG(2) << "only external electric field (because on coarse level)";
             // don't compute internal electric forces when on coarse level
-//             this->forces[m+1] = this->impl_solver->external_e_field_evaluate(this->particles[m+1], t + nodes[m]);
-//           } else {
-//             BCVLOG(2) << "internal and external electric field (because not on coarse level)";
+            this->forces[m+1] = this->impl_solver->external_e_field_evaluate(this->particles[m+1], t + nodes[m]);
+          } else {
+            BCVLOG(2) << "internal and external electric field (because not on coarse level)";
             this->forces[m+1] = this->impl_solver->e_field_evaluate(this->particles[m+1], t + nodes[m]);
-//           }
+          }
+#else
+          BCVLOG(2) << "internal and external electric field";
+          this->forces[m+1] = this->impl_solver->e_field_evaluate(this->particles[m+1], t + nodes[m]);
+#endif
 
           //// Update Velocity (semi-implicit)
           this->update_velocity(m, ds, nodes);

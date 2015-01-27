@@ -1,6 +1,9 @@
 set(examples_to_install ${examples_to_install})
 
 message(STATUS "  boris")
+
+option(pfasst_BORIS_SAME_LEVELS "Use identical levels with MLSDC" ON)
+
 include_directories(
     ${3rdparty_INCLUDES}
     ${pfasst_INCLUDES}
@@ -26,5 +29,16 @@ foreach(example ${boris_examples})
         install(TARGETS ${example} RUNTIME DESTINATION bin)
     endif()
 endforeach(example)
+
+if(pfasst_BORIS_SAME_LEVELS)
+    get_target_property(boris_mlsdc_definitions boris_mlsdc COMPILE_DEFINITIONS)
+    list(APPEND boris_mlsdc_definitions "BORIS_SAME_LEVELS")
+    set_target_properties(boris_mlsdc PROPERTIES COMPILE_DEFINITIONS ${boris_mlsdc_definitions})
+endif()
+
+add_feature_info(Dummy-Boris-MLSDC
+    pfasst_BORIS_SAME_LEVELS
+    "use identical levels for Boris-MLSDC"
+)
 
 set(examples_to_install ${examples_to_install} ${boris_examples} PARENT_SCOPE)
