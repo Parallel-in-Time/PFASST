@@ -175,9 +175,9 @@ class BorisData(object):
         self._dist_mean = self._distances.mean(axis=0)
 
 
-def get_meetup_after(data, first=0):
+def get_meetup_after(data, after=0):
     _dist = data.dist_max - data.dist_min
-    return np.where(_dist[first:] == _dist[first:].min())[0][0] + first
+    return np.where(_dist[after:] == _dist[after:].min())[0][0] + after
 
 
 def plot_trajectories(data, until=None):
@@ -263,7 +263,7 @@ def plot_particle_meetup(data, step, width=10):
 
     plt.figure(figsize=(15, 15), dpi=1200)
     ax = plt.axes(projection='3d')
-    plt.title("Particle Meetup\ndot: start; square: end")
+    plt.title("Particle Meetup at step %d\ndot: start; square: end" % step)
     if data.nparticles <= 5:
         for p in range(data.nparticles):
             ax.plot(data.x[p][start:stop], data.y[p][start:stop], data.z[p][start:stop], '--%s' % colors[p])
