@@ -123,37 +123,20 @@ namespace pfasst
       }
 
       template<typename scalar, typename time>
-      scalar BorisSweeper<scalar, time>::compute_residual()
+      scalar BorisSweeper<scalar, time>::compute_residual_max()
       {
-        BCVLOG(8) << "computing residual";
+        BCVLOG(8) << "computing max residual";
         this->log_indent->increment(8);
-        const auto   nodes  = this->get_nodes();
-        const size_t nnodes = nodes.size();
-        time dt = this->get_controller()->get_time_step();
 
-        scalar max_residual = 0.0;
+        this->residual(this->get_controller()->get_time_step(), this->residuals);
 
-        for (size_t m = 1; m < nnodes; ++m) {
-          BCVLOG(8) << "for node " << m;
-          position_type pos = cloud_component_factory<scalar>(this->particles[0]->size(), this->particles[0]->dim());
-          velocity_type vel = cloud_component_factory<scalar>(this->particles[0]->size(), this->particles[0]->dim());
-          for (size_t j = 0; j < nnodes; ++j) {
-            pos += this->q_mat(m, j) * dt * this->particles[j]->velocities();
-            vel += this->q_mat(m, j) * dt * this->build_rhs(j);
-          }
-          pos += this->start_particles->positions() - this->particles[m]->positions();
-          vel += this->start_particles->velocities() - this->particles[m]->velocities();
+        scalar max_residual = scalar(0.0);
 
-          for (size_t j = 0; j < pos.size(); ++j) {
-            for (size_t d = 0; d < pos[j].size(); ++d) {
-              max_residual = std::max(max_residual, abs(pos[j][d]));
-              max_residual = std::max(max_residual, abs(vel[j][d]));
-            }
-          }
+        for (size_t m = 1; m < this->residuals.size(); ++m) {
+          max_residual = std::max(max_residual, this->residuals[m]->norm0());
         }
 
-        BCVLOG(8) << "=> residual: " << max_residual;
-        this->log_indent->decrement(8);
+        BCVLOG(8) << "=> max residual: " << max_residual;
         return max_residual;
       }
 
@@ -412,7 +395,7 @@ namespace pfasst
         ErrorTuple<scalar> e_tuple;
         scalar e_end = this->impl_solver->energy(end, t);
         e_tuple.e_drift = abs(this->initial_energy - e_end);
-        e_tuple.res = this->compute_residual();
+        e_tuple.res = this->compute_residual_max();
 
         size_t n = this->get_controller()->get_step();
         size_t k = this->get_controller()->get_iteration();
@@ -471,6 +454,7 @@ namespace pfasst
         this->energy_evals.resize(nnodes);
         for (size_t m = 0; m < nnodes; ++m) {
           this->particles.push_back(dynamic_pointer_cast<encap_type>(this->get_factory()->create(pfasst::encap::solution)));
+          this->residuals.push_back(dynamic_pointer_cast<encap_type>(this->get_factory()->create(pfasst::encap::solution)));
           this->saved_particles.push_back(dynamic_pointer_cast<encap_type>(this->get_factory()->create(pfasst::encap::solution)));
           this->forces.push_back(cloud_component_factory<scalar>(this->particles[m]->size(), this->particles[m]->dim()));
           this->saved_forces.push_back(cloud_component_factory<scalar>(this->particles[m]->size(), this->particles[m]->dim()));
@@ -578,6 +562,35 @@ namespace pfasst
           BCVLOG(6) << "integral(QQ)[" << m << "]: " << *(dst_qq[m].get());
         }
         this->log_indent->decrement(6);
+      }
+
+      template<typename scalar, typename time>
+      void BorisSweeper<scalar, time>::residual(time dt, vector<shared_ptr<Encapsulation<time>>> dst) const
+      {
+        BCVLOG(8) << "computing residual";
+        const auto   nodes  = this->get_nodes();
+        const size_t nnodes = nodes.size();
+        assert(dst.size() == nnodes);
+
+        vector<shared_ptr<encap_type>> dst_cast(nnodes);
+        for (size_t m = 0; m < nnodes; ++m) {
+          dst_cast[m] = dynamic_pointer_cast<encap_type>(dst[m]);
+          assert(dst_cast[m]);
+        }
+
+        for (size_t m = 1; m < nnodes; ++m) {
+          BCVLOG(8) << "for node " << m;
+          zero(dst_cast[m]->positions());
+          zero(dst_cast[m]->velocities());
+          for (size_t j = 0; j < nnodes; ++j) {
+            dst_cast[m]->positions() += this->q_mat(m, j) * dt * this->particles[j]->velocities();
+            dst_cast[m]->velocities() += this->q_mat(m, j) * dt * this->build_rhs(j);
+          }
+          dst_cast[m]->positions() += this->start_particles->positions() - this->particles[m]->positions();
+          dst_cast[m]->velocities() += this->start_particles->velocities() - this->particles[m]->velocities();
+        }
+
+        this->log_indent->decrement(8);
       }
 
       template<typename scalar, typename time>
@@ -805,7 +818,7 @@ namespace pfasst
       {
         UNUSED(comm); UNUSED(tag);
         // TODO: implement BorisSweeper::post
-      };
+      }
 
       template<typename scalar, typename time>
       void BorisSweeper<scalar, time>::send(ICommunicator* comm, int tag, bool blocking)

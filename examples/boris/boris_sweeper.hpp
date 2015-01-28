@@ -158,7 +158,7 @@ namespace pfasst
           boost::format data_stream_fmt;
 
           acceleration_type build_rhs(const size_t m, const bool previous = false) const;
-          scalar compute_residual();
+          scalar compute_residual_max();
           void write_center_to_file(const size_t iter, const size_t sweep, const ParticleComponent<scalar>& center,
                                     const scalar energy, const scalar drift, const scalar residual);
           void write_particle_cloud_to_file(const size_t iter, const size_t sweep, const shared_ptr<encap_type>& cloud,
@@ -199,7 +199,9 @@ namespace pfasst
           //! @{
           virtual void setup(bool coarse = false) override;
           virtual void integrate(time dt, vector<shared_ptr<Encapsulation<time>>> dst) const override;
-          virtual void integrate(time dt, vector<shared_ptr<acceleration_type>> dst_q, vector<shared_ptr<acceleration_type>> dst_qq) const;
+          virtual void integrate(time dt, vector<shared_ptr<acceleration_type>> dst_q,
+                                 vector<shared_ptr<acceleration_type>> dst_qq) const;
+          virtual void residual(time dt, vector<shared_ptr<Encapsulation<time>>> dst) const override;
           virtual void advance() override;
           virtual void evaluate(size_t m);
           virtual void predict(bool initial) override;

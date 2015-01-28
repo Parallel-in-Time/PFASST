@@ -76,6 +76,8 @@ namespace pfasst
 
           void distribute_around_center(const shared_ptr<Particle<precision>>& center);
 
+          virtual precision norm0() const;
+
           virtual void log(el::base::type::ostream_t& os) const;
       };
 

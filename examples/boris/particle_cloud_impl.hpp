@@ -285,6 +285,19 @@ namespace pfasst
       }
 
       template<typename precision>
+      precision ParticleCloud<precision>::norm0() const
+      {
+        precision norm = precision(0.0);
+        for (size_t p = 0; p < this->size(); ++p) {
+          for (size_t d = 0; d < this->dim(); ++d) {
+            norm = std::max(norm, abs(this->positions()[p][d]));
+            norm = std::max(norm, abs(this->velocities()[p][d]));
+          }
+        }
+        return norm;
+      }
+
+      template<typename precision>
       void ParticleCloud<precision>::log(el::base::type::ostream_t& os) const
       {
         os << fixed << setprecision(LOG_PRECISION);
