@@ -41,7 +41,7 @@ namespace pfasst
 
         sweeper->set_quadrature(quad);
         sweeper->set_factory(factory);
-        sweeper->set_residual_tolerances(abs_residual_tol, 0.0);
+        sweeper->set_residual_tolerances(abs_residual_tol, pfasst::config::get_value<double>("rel_res_tol", 0.0));
 
         sdc.add_level(sweeper);
         sdc.set_duration(0.0, nsteps*dt, dt, niters);
@@ -68,6 +68,8 @@ int main(int argc, char** argv)
   pfasst::init(argc, argv);
   pfasst::log::add_custom_logger("Advec");
 
-  pfasst::examples::advection_diffusion::run_vanilla_sdc(0.0);
+  const double abs_res_tol = pfasst::config::get_value<double>("abs_res_tol", 0.0);
+
+  pfasst::examples::advection_diffusion::run_vanilla_sdc(abs_res_tol);
 }
 #endif
