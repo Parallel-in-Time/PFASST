@@ -7,10 +7,12 @@
 
 #include <algorithm>
 #include <cstdlib>
-#include <vector>
 #include <memory>
+#include <vector>
+using namespace std;
 
 #include "../globals.hpp"
+#include "../config.hpp"
 #include "../interfaces.hpp"
 #include "../quadrature.hpp"
 #include "encapsulation.hpp"
@@ -25,6 +27,15 @@ namespace pfasst
     class EncapSweeper
       : public ISweeper<time>
     {
+      private:
+        static void init_config_options(po::options_description& opts)
+        {
+          opts.add_options()
+            ("abs_res_tol", po::value<time>(), "absolute residual tolerance")
+            ("rel_res_tol", po::value<time>(), "relative residual tolerance")
+            ;
+        }
+
       protected:
         //! @{
         shared_ptr<IQuadrature<time>> quadrature;
@@ -287,6 +298,16 @@ namespace pfasst
             this->start_state->copy(this->end_state);
           }
           this->start_state->broadcast(comm);
+        }
+        //! @}
+
+        //! @{
+        static void enable_config_options(size_t index = -1)
+        {
+          pfasst::config::Options::get_instance()
+            .register_init_function("Encapsulation Sweeper",
+                                    std::function<void(po::options_description&)>(init_config_options),
+                                    index);
         }
         //! @}
     };
