@@ -67,22 +67,25 @@ namespace pfasst
           return this->unrecognized_args;
         }
 
-        void add_option(string group, string option, string help)
+        static void add_option(string group, string option, string help)
         {
-          this->option_groups.emplace(make_pair<string,
-                                      po::options_description>(string(group),
-                                                               po::options_description(string(group), LINE_WIDTH)));
-          this->option_groups[group].add_options()
+          auto& opts = get_instance();
+          opts.option_groups.emplace(make_pair<string,
+                                     po::options_description>(string(group),
+                                                              po::options_description(string(group), LINE_WIDTH)));
+          opts.option_groups[group].add_options()
             (option.c_str(), help.c_str());
         }
 
         template<typename T>
-        void add_option(string group, string option, string help)
+        static void add_option(string group, string option, string help)
         {
-          this->option_groups.emplace(make_pair<string,
-                                      po::options_description>(string(group),
-                                                               po::options_description(string(group), LINE_WIDTH)));
-          this->option_groups[group].add_options()
+          auto& opts = get_instance();
+
+          opts.option_groups.emplace(make_pair<string,
+                                     po::options_description>(string(group),
+                                                              po::options_description(string(group), LINE_WIDTH)));
+          opts.option_groups[group].add_options()
             (option.c_str(), po::value<T>(), help.c_str());
         }
 
@@ -165,24 +168,13 @@ namespace pfasst
       }
     }
 
-    static void add_option(string group, string name, string help)
-    {
-      options::get_instance().add_option(group, name, help);
-    }
-
-    template<typename T>
-    static void add_option(string group, string name, string help)
-    {
-      options::get_instance().add_option<T>(group, name, help);
-    }
-
     inline static void init()
     {
-      add_option("Global", "help,h", "display this help message");
+      options::add_option("Global", "help,h", "display this help message");
 
-      add_option<double>("Duration", "dt", "time step size");
-      add_option<double>("Duration", "tend", "final time of simulation");
-      add_option<size_t>("Duration", "num_iters", "number of iterations");
+      options::add_option<double>("Duration", "dt", "time step size");
+      options::add_option<double>("Duration", "tend", "final time of simulation");
+      options::add_option<size_t>("Duration", "num_iters", "number of iterations");
 
       options::get_instance().init();
     }

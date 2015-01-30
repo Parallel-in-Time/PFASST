@@ -50,7 +50,7 @@ namespace pfasst
         public:
           static void init_opts()
           {
-            config::add_option<size_t>("Adv/Diff Sweeper", "spatial_dofs", "Number of spatial degrees of freedom");
+            pfasst::config::options::add_option<size_t>("Adv/Diff Sweeper", "spatial_dofs", "Number of spatial degrees of freedom");
           }
 
           static void init_logs()
