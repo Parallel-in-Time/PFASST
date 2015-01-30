@@ -15,32 +15,27 @@ using namespace std;
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
-#include "logging.hpp"
-
 namespace pfasst
 {
 
   namespace config
   {
     /**
-     * @note This is using the Singleton Pattern.
-     *    pfasst::options::get_instance() is thread-safe with C++11.
+     * @note This uses the Singleton Pattern, and hence pfasst::options::get_instance() is
+     *    thread-safe with C++11.
      */
     class options
     {
       public:
-        //! Maximum width of a line in the help output
         static const size_t LINE_WIDTH = 100;
 
       private:
         po::options_description all_options;
         map<string, po::options_description> option_groups;
-
         po::variables_map variables_map;
         vector<string> unrecognized_args;
         bool initialized = false;
 
-      private:
         options() {}
         options(const options&) = delete;
         void operator=(const options&) = delete;

@@ -9,7 +9,7 @@
 
 namespace pfasst
 {
-  inline static void init(int argc, char** argv, std::function<void()> opts, std::function<void()> logs)
+  inline static void init(int argc, char** argv, std::function<void()> opts=nullptr, std::function<void()> logs=nullptr)
   {
     if (opts) {
       opts();
