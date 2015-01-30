@@ -76,25 +76,13 @@ namespace pfasst
 
 
       template<typename scalar>
-      static void init_config_options(po::options_description& opts)
+      static void init_opts()
       {
-        opts.add_options()
-          ("num_particles", po::value<size_t>(), "number of particles in the cloud")
-          ("epsilon", po::value<scalar>(), "Boris' epsilon")
-          ("omega_e", po::value<scalar>(), "E-field constant")
-          ("omega_b", po::value<scalar>(), "B-field constant")
-          ;
+        pfasst::config::options::add_option<size_t>("Boris-SDC", "num_particles", "number of particles in the cloud");
+        pfasst::config::options::add_option<scalar>("Boris-SDC", "epsilon", "Boris' epsilon");
+        pfasst::config::options::add_option<scalar>("Boris-SDC", "omega_e", "E-field constant");
+        pfasst::config::options::add_option<scalar>("Boris-SDC", "omega_b", "B-field constant");
       }
-
-      template<typename scalar>
-      static void enable_config_options(size_t index = -1)
-      {
-        config::Options::get_instance()
-          .register_init_function("Boris-SDC",
-                                  std::function<void(po::options_description&)>(pfasst::examples::boris::init_config_options<scalar>),
-                                  index);
-      }
-
 
       template<
         typename scalar,
@@ -318,7 +306,7 @@ namespace pfasst
               time dt = this->get_controller()->get_time_step();
 
               C omega_tilde = sqrt(-2.0 * epsilon) * omega_e;
-              q.positions()[0][2] = (z0 * cos(omega_tilde * (scalar)(dt)) 
+              q.positions()[0][2] = (z0 * cos(omega_tilde * (scalar)(dt))
                                     + w0 / omega_tilde * sin(omega_tilde * (scalar)(dt))).real();
 
               C sqrt_in_omega = sqrt(pow(omega_b, 2) + 4.0 * epsilon * pow(omega_e, 2));
@@ -440,7 +428,7 @@ namespace pfasst
 
             // building rules for Q_E and Q_I:
             //  Q_E is striclty lower diagonal matrix with delta nodes of column index
-            //  Q_I is lower diagonal matrix with first row and column all zero and delta nodes of 
+            //  Q_I is lower diagonal matrix with first row and column all zero and delta nodes of
             //      column index minus one
             Matrix<time> qe_mat = Matrix<time>(nnodes, nnodes);
             qe_mat.fill(time(0.0));
