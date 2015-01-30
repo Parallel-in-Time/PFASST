@@ -47,21 +47,10 @@ namespace pfasst
       class AdvectionDiffusionSweeper
         : public encap::IMEXSweeper<time>
       {
-        private:
-          static void init_config_options(po::options_description& opts)
-          {
-            opts.add_options()
-              ("spatial_dofs", po::value<size_t>(), "number of spatial degrees of freedom")
-              ;
-          }
-
         public:
-          static void enable_config_options(size_t index = -1)
+          static void init()
           {
-            config::Options::get_instance()
-              .register_init_function("Advection-Diffusion Sweeper",
-                                      std::function<void(po::options_description&)>(init_config_options),
-                                      index);
+            config::add_option<size_t>("Adv/Diff Sweeper", "spatial_dofs", "Number of spatial degrees of freedom");
           }
 
         private:
@@ -99,7 +88,7 @@ namespace pfasst
 
           virtual ~AdvectionDiffusionSweeper()
           {
-            CLOG(INFO, "Advec") << "number of f1 evals: " << this->nf1evals;
+            CLOG(INFO, "User") << "number of f1 evals: " << this->nf1evals;
           }
           //! @}
 
@@ -142,7 +131,7 @@ namespace pfasst
             auto n = this->get_controller()->get_step();
             auto k = this->get_controller()->get_iteration();
 
-            CLOG(INFO, "Advec") << "err: " << n << " " << k << " " << max << " (" << qend.size() << "," << predict << ")";
+            CLOG(INFO, "User") << "err: " << n << " " << k << " " << max << " (" << qend.size() << "," << predict << ")";
             this->errors.insert(vtype(ktype(n, k), max));
           }
 
@@ -163,7 +152,7 @@ namespace pfasst
 
             auto n = this->get_controller()->get_step();
             auto k = this->get_controller()->get_iteration();
-            CLOG(INFO, "Advec") << "res: " << n << " " << k << " " << rmax << " (" << residuals.size() << ")";
+            CLOG(INFO, "User") << "res: " << n << " " << k << " " << rmax << " (" << residuals.size() << ")";
 
             this->residuals[ktype(n, k)] = rmax;
           }

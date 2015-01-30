@@ -27,12 +27,9 @@ namespace pfasst
       {
         SDC<> sdc;
 
-        const size_t nsteps = config::get_value<size_t>("num_steps", 4);
-        const double dt     = config::get_value<double>("delta_step", 0.01);
-        const size_t nnodes = config::get_value<size_t>("num_nodes", 3);
-        const size_t ndofs  = config::get_value<size_t>("spatial_dofs", 64);
-        const size_t niters = config::get_value<size_t>("num_iter", 4);
-        const quadrature::QuadratureType quad_type = \
+        auto const nnodes = config::get_value<size_t>("num_nodes", 3);
+        auto const ndofs  = config::get_value<size_t>("spatial_dofs", 64);
+        auto const quad_type = \
           config::get_value<quadrature::QuadratureType>("nodes_type", quadrature::QuadratureType::GaussLegendre);
 
         auto quad    = quadrature::quadrature_factory(nnodes, quad_type);
@@ -44,7 +41,8 @@ namespace pfasst
         sweeper->set_residual_tolerances(abs_residual_tol, 0.0);
 
         sdc.add_level(sweeper);
-        sdc.set_duration(0.0, nsteps*dt, dt, niters);
+        sdc.set_duration(0.0, 4*0.01, 0.01, 4);
+        sdc.set_options();
         sdc.setup();
 
         auto q0 = sweeper->get_start_state();
@@ -64,10 +62,8 @@ namespace pfasst
 #ifndef PFASST_UNIT_TESTING
 int main(int argc, char** argv)
 {
-  pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::enable_config_options();
+  pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init();
   pfasst::init(argc, argv);
-  pfasst::log::add_custom_logger("Advec");
-
   pfasst::examples::advection_diffusion::run_vanilla_sdc(0.0);
 }
 #endif
