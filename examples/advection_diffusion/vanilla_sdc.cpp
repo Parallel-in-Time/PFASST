@@ -62,8 +62,9 @@ namespace pfasst
 #ifndef PFASST_UNIT_TESTING
 int main(int argc, char** argv)
 {
-  pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init();
-  pfasst::init(argc, argv);
+  pfasst::init(argc, argv,
+               pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_opts,
+               pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_logs);
   pfasst::examples::advection_diffusion::run_vanilla_sdc(0.0);
 }
 #endif
