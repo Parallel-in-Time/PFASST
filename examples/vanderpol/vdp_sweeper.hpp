@@ -14,7 +14,7 @@
 using namespace std;
 
 #include <pfasst/logging.hpp>
-#include <pfasst/encap/imex_sweeper.hpp>
+#include <pfasst/encap/implicit_sweeper.hpp>
 #include <pfasst/encap/vector.hpp>
 
 
@@ -44,18 +44,14 @@ namespace pfasst
        * y' = \\nu*(1 - x^2)*y - x
        * \\]
        *
-       * Although derived from the IMEX sweeper, the explicit part does not do anything
-       * and a fully implicit Euler is used as a base method.
-       *
-       * Note that an analytical solution is available only for \\( \\nu=0 \\), where the vdP 
-       * simplifies to the standard linear oscillator.
-       * Hence, actual errors are computed only for \\( \\nu=0 \\).
+       * Note that an analytical solution is available only for \\( \\nu=0 \\), where the vdP simplifies
+       * to the standard linear oscillator. Hence, actual errors are computed only for \\( \\nu=0 \\).
        *
        * @ingroup VanDerPol
        */
       template<typename time = pfasst::time_precision>
       class VdpSweeper
-        : public encap::IMEXSweeper<time>
+        : public encap::ImplicitSweeper<time>
       {
         private:
           typedef encap::Encapsulation<time> encap_type;
@@ -75,8 +71,8 @@ namespace pfasst
           //! Tolerance for the nonlinear Newton iteration
           double newton_tol;
 
-          //! Counters for how often `f_expl_eval`, `f_impl_eval` and `impl_solve` are called.
-          size_t n_f_expl_eval, n_f_impl_eval, n_impl_solve, n_newton_iter;
+          //! Counters for how often `f_impl_eval` and `impl_solve` are called.
+          size_t n_f_impl_eval, n_impl_solve, n_newton_iter;
 
           //! Output file
           fstream output_file;
@@ -98,7 +94,6 @@ namespace pfasst
               , y0(y0)
               , newton_maxit(50)
               , newton_tol(1e-12)
-              , n_f_expl_eval(0)
               , n_f_impl_eval(0)
               , n_impl_solve(0)
               , n_newton_iter(0)
@@ -114,7 +109,6 @@ namespace pfasst
            */
           virtual ~VdpSweeper()
           {
-            LOG(INFO) << "Number of explicit evaluations:" << this->n_f_expl_eval;
             LOG(INFO) << "Number of implicit evaluations:" << this->n_f_impl_eval;
             LOG(INFO) << "Number of implicit solves:     " << this->n_impl_solve;
             this->output_file.close();
@@ -186,7 +180,7 @@ namespace pfasst
             if (this->nu==0)
             {
               /**
-               * For \\( \\nu=0 \\) and given initial value \\( x0 \\), \\( y0 \\), the analytic 
+               * For \\( \\nu=0 \\) and given initial value \\( x0 \\), \\( y0 \\), the analytic
                * solution reads
                *
                * \\[
@@ -215,29 +209,7 @@ namespace pfasst
           }
 
           /**
-           * evaluate the explicit part of the right hand side.
-           *
-           * Because we use a fully implicit Euler for the vdP oscillator, this returns zeros.
-           */
-          void f_expl_eval(shared_ptr<encap_type> f_encap,
-                           shared_ptr<encap_type> q_encap, time t) override
-          {
-            UNUSED(t);
-            UNUSED(q_encap);
-            auto& f = encap::as_vector<double, time>(f_encap);
-            //auto& q = pfasst::encap::as_vector<double, time>(q_encap);
-
-            // We use a fully implicit sweeper, so f_expl_eval returns zero
-            f[0] = 0.0;
-            f[1] = 0.0;
-            this->n_f_expl_eval++;
-          }
-
-          /**
-           * evaluate the implicit part of the right hand side.
-           *
-           * Because we use a fully implicit Euler for the vdP oscillator, here the full rhs of vdP
-           * is computed.
+           * Evaluate the implicit part of the right hand side.
            */
           void f_impl_eval(shared_ptr<encap_type> f_encap,
                            shared_ptr<encap_type> q_encap, time t) override
