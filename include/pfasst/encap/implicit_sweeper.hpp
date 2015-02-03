@@ -52,15 +52,28 @@ namespace pfasst
         /**
         * Set end state to \\( U_0 + \\int F_{expl} + F_{expl} \\).
         */
-        void set_end_state(time dt)
+        void set_end_state()
         {
           if (this->quadrature->right_is_node()) {
             this->end_state->copy(this->state.back());
           } else {
             vector<shared_ptr<Encapsulation<time>>> dst = { this->end_state };
             dst[0]->copy(this->start_state);
-            dst[0]->mat_apply(dst, dt, this->quadrature->get_b_mat(), this->fs_impl, false);
+            dst[0]->mat_apply(dst, this->get_controller()->get_time_step(), this->quadrature->get_b_mat(), this->fs_impl, false);
           }
+        }
+
+        /**
+        * Augment nodes: nodes <- [t0] + dt * nodes
+        */
+        vector<time> augment(time t0, time dt, vector<time> const & nodes)
+        {
+          vector<time> t(1 + nodes.size());
+          t[0] = t0;
+          for (size_t m = 0; m < nodes.size(); m++) {
+            t[m+1] = t0 + dt * nodes[m];
+          }
+          return t;
         }
 
       public:
@@ -103,26 +116,19 @@ namespace pfasst
         {
           UNUSED(initial);
 
+          auto const dt = this->get_controller()->get_time_step();
+          auto const t  = this->get_controller()->get_time();
+
           CLOG(INFO, "Sweeper") << "predicting step " << this->get_controller()->get_step() + 1
-                                << " (t=" << this->get_controller()->get_time()
-                                << ", dt=" << this->get_controller()->get_time_step() << ")";
+                                << " (t=" << t << ", dt=" << dt << ")";
 
-          time dt = this->get_controller()->get_time_step();
-          time t  = this->get_controller()->get_time();
-          time ds;
-
-          auto const nodes = this->quadrature->get_nodes();
-
-          ds = dt * nodes[0];
-          this->impl_solve(this->fs_impl[0], this->state[0], t, ds, this->get_start_state());
-
-          for (size_t m = 0; m < nodes.size() - 1; ++m) {
-            ds = dt * (nodes[m+1] - nodes[m]);
-            this->impl_solve(this->fs_impl[m+1], this->state[m+1], t, ds, this->state[m]);
-            t += ds;
+          auto const anodes = augment(t, dt, this->quadrature->get_nodes());
+          for (size_t m = 0; m < anodes.size() - 1; ++m) {
+            this->impl_solve(this->fs_impl[m], this->state[m], anodes[m], anodes[m+1] - anodes[m],
+                             m == 0 ? this->get_start_state() : this->state[m-1]);
           }
 
-          this->set_end_state(dt);
+          this->set_end_state();
         }
 
         /**
@@ -133,24 +139,14 @@ namespace pfasst
          */
         virtual void sweep() override
         {
+          auto const dt = this->get_controller()->get_time_step();
+          auto const t  = this->get_controller()->get_time();
+
           CLOG(INFO, "Sweeper") << "sweeping on step " << this->get_controller()->get_step() + 1
                                 << " in iteration " << this->get_controller()->get_iteration()
-                                << " (dt=" << this->get_controller()->get_time_step() << ")";
-
-          time dt = this->get_controller()->get_time_step();
-          time t  = this->get_controller()->get_time();
-          time ds;
-          auto const nodes = this->quadrature->get_nodes();
-
+                                << " (dt=" << dt << ")";
 
           this->s_integrals[0]->mat_apply(this->s_integrals, dt, this->quadrature->get_s_mat(), this->fs_impl, true);
-
-          ds = dt * nodes[0];
-          this->s_integrals[0]->saxpy(-ds, this->fs_impl[0]);
-          for (size_t m = 0; m < nodes.size() - 1; ++m) {
-            ds = dt * (nodes[m+1] - nodes[m]);
-            this->s_integrals[m+1]->saxpy(-ds, this->fs_impl[m+1]);
-          }
           if (this->fas_corrections.size() > 0) {
             for (size_t m = 0; m < this->s_integrals.size(); m++) {
               this->s_integrals[m]->saxpy(1.0, this->fas_corrections[m]);
@@ -159,22 +155,15 @@ namespace pfasst
 
           shared_ptr<Encapsulation<time>> rhs = this->get_factory()->create(pfasst::encap::solution);
 
-          // step to first node
-          ds = dt * nodes[0];
-          rhs->copy(this->start_state);
-          rhs->saxpy(1.0, this->s_integrals[0]);
-          this->impl_solve(this->fs_impl[0], this->state[0], t, ds, rhs);
-
-          // step across all nodes
-          for (size_t m = 0; m < nodes.size() - 1; ++m) {
-            ds = dt * (nodes[m+1] - nodes[m]);
-            rhs->copy(this->state[m]);
-            rhs->saxpy(1.0, this->s_integrals[m+1]);
-            this->impl_solve(this->fs_impl[m+1], this->state[m+1], t, ds, rhs);
-            t += ds;
+          auto const anodes = augment(t, dt, this->quadrature->get_nodes());
+          for (size_t m = 0; m < anodes.size() - 1; ++m) {
+            auto const ds = anodes[m+1] - anodes[m];
+            rhs->copy(m == 0 ? this->get_start_state() : this->state[m-1]);
+            rhs->saxpy(1.0, this->s_integrals[m]);
+            rhs->saxpy(-ds, this->fs_impl[m]);
+            this->impl_solve(this->fs_impl[m], this->state[m], anodes[m], ds, rhs);
           }
-
-          this->set_end_state(dt);
+          this->set_end_state();
         }
 
         /**
@@ -193,12 +182,11 @@ namespace pfasst
           if (initial_only) {
             return;
           }
-
-          time t0 = this->get_controller()->get_time();
-          time dt = this->get_controller()->get_time_step();
-          for (size_t m = 0; m < this->quadrature->get_num_nodes(); m++) {
-            time t =  t0 + dt * this->quadrature->get_nodes()[m];
-            this->f_impl_eval(this->fs_impl[m], this->state[m], t);
+          auto const dt = this->get_controller()->get_time_step();
+          auto const t0 = this->get_controller()->get_time();
+          auto const nodes = this->quadrature->get_nodes();
+          for (size_t m = 0; m < nodes.size(); m++) {
+            this->f_impl_eval(this->fs_impl[m], this->state[m], t0 + dt * nodes[m]);
           }
         }
 
@@ -233,16 +221,15 @@ namespace pfasst
                                  time t)
         {
           UNUSED(f_impl_encap); UNUSED(u_encap); UNUSED(t);
-          throw NotImplementedYet("imex (f_impl_eval)");
+          throw NotImplementedYet("implicit (f_impl_eval)");
         }
 
         /**
          * Solve \\( U - \\Delta t F_{\\rm impl}(U) = RHS \\) for \\( U \\).
          *
-         * During an Implicit SDC sweep, the correction equation is evolved using a forward-Euler
-         * stepper for the explicit piece, and a backward-Euler stepper for the implicit piece.
-         * This routine (implemented by the user) performs the solve required to perform one
-         * backward-Euler sub-step, and also returns \\( F_{\\rm impl}(U) \\).
+         * During an implicit SDC sweep, the correction equation is evolved using a backward-Euler
+         * stepper.  This routine (implemented by the user) performs the solve required to perform
+         * one backward-Euler sub-step, and also returns \\( F_{\\rm impl}(U) \\).
          *
          * @param[in,out] f_encap Encapsulation to store the evaluated implicit piece.
          * @param[in,out] u_encap Encapsulation to store the solution of the backward-Euler sub-step.
@@ -258,7 +245,7 @@ namespace pfasst
                                 shared_ptr<Encapsulation<time>> rhs_encap)
         {
           UNUSED(f_encap); UNUSED(u_encap); UNUSED(t); UNUSED(dt); UNUSED(rhs_encap);
-          throw NotImplementedYet("imex (impl_solve)");
+          throw NotImplementedYet("implicit (impl_solve)");
         }
         //! @}
     };
