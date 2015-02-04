@@ -133,7 +133,9 @@ namespace pfasst
         scalar max_residual = scalar(0.0);
 
         for (size_t m = 1; m < this->residuals.size(); ++m) {
-          max_residual = std::max(max_residual, this->residuals[m]->norm0());
+          auto residual_m = dynamic_pointer_cast<encap_type>(this->residuals[m]);
+          assert(residual_m);
+          max_residual = std::max(max_residual, residual_m->norm0());
         }
 
         BCVLOG(8) << "=> max residual: " << max_residual;
@@ -164,8 +166,8 @@ namespace pfasst
         for (size_t p = 0; p < cloud->size(); ++p) {
           BCVLOG(9) << "writing cloud particle " << p << " to file";
           this->data_stream_fmt % (iter+1) % sweep % p
-                                % cloud->positions()[p][0] % cloud->positions()[p][1] % cloud->positions()[p][2]
-                                % cloud->velocities()[p][0] % cloud->velocities()[p][1] % cloud->velocities()[p][2]
+                                % cloud->positions()[p * cloud->dim()] % cloud->positions()[p * cloud->dim() + 1] % cloud->positions()[p * cloud->dim() + 2]
+                                % cloud->velocities()[p * cloud->dim()] % cloud->velocities()[p * cloud->dim() + 1] % cloud->velocities()[p * cloud->dim() + 2]
                                 % energy % drift % residual;
           this->data_stream << this->data_stream_fmt << endl;
         }
@@ -214,11 +216,11 @@ namespace pfasst
         this->log_indent->increment(5);
         //                 - delta_nodes_{m} / 2 * f_{m+1}^{k}
         auto t1 = this->build_rhs(m+1, true);
-        c_k_term -= (0.5 * t1 * ds);
+        c_k_term -= t1 * 0.5 * ds;
         BCVLOG(5) << "-= 0.5 * " << t1 << " * " << ds << "  => " << c_k_term;
         //                 - delta_nodes_{m} / 2 * f_{m}^{k}
         auto t2 = this->build_rhs(m, true);
-        c_k_term -= (0.5 * t2 * ds);
+        c_k_term -= t2 * 0.5 * ds;
         BCVLOG(5) << "-= 0.5 * " << t2 << " * " << ds << "  => " << c_k_term;
         //                 + s_integral[m]
         c_k_term += this->s_integrals[m+1];
@@ -342,19 +344,19 @@ namespace pfasst
           typedef complex<scalar> C;
           C i(0.0, 1.0);
           auto initial = this->particles[0];
-          scalar x0 = initial->positions()[0][0],
-                 y0 = initial->positions()[0][1],
-                 z0 = initial->positions()[0][2],
-                 u0 = initial->velocities()[0][0],
-                 v0 = initial->velocities()[0][1],
-                 w0 = initial->velocities()[0][2],
+          scalar x0 = initial->positions()[0],
+                 y0 = initial->positions()[1],
+                 z0 = initial->positions()[2],
+                 u0 = initial->velocities()[0],
+                 v0 = initial->velocities()[1],
+                 w0 = initial->velocities()[2],
                  omega_e = this->impl_solver->omega_e(),
                  omega_b = this->impl_solver->omega_b(),
                  epsilon = this->impl_solver->epsilon();
           time dt = this->get_controller()->get_time_step();
 
           C omega_tilde = sqrt(-2.0 * epsilon) * omega_e;
-          q.positions()[0][2] = (z0 * cos(omega_tilde * (scalar)(dt)) 
+          q.positions()[2] = (z0 * cos(omega_tilde * (scalar)(dt)) 
                                 + w0 / omega_tilde * sin(omega_tilde * (scalar)(dt))).real();
 
           C sqrt_in_omega = sqrt(pow(omega_b, 2) + 4.0 * epsilon * pow(omega_e, 2));
@@ -369,14 +371,14 @@ namespace pfasst
 
           C x_y_move = (r_plus + i * i_plus) * exp(- i * omega_plus * (scalar)(dt))
                                                    + (r_minus + i * i_minus) * exp(- i * omega_minus * (scalar)(dt));
-          q.positions()[0][0] = x_y_move.real();
-          q.positions()[0][1] = x_y_move.imag();
+          q.positions()[0] = x_y_move.real();
+          q.positions()[1] = x_y_move.imag();
 
-          q.velocities()[0][2] = (- z0 * omega_tilde * sin(omega_tilde * (scalar)(dt)) + w0 * cos(omega_tilde * (scalar)(dt))).real();
+          q.velocities()[2] = (- z0 * omega_tilde * sin(omega_tilde * (scalar)(dt)) + w0 * cos(omega_tilde * (scalar)(dt))).real();
           C u_v_move = (- i * omega_plus * (r_plus + i * i_plus)) * exp(-i * omega_plus * (scalar)(dt))
                                      - (i * omega_minus * (r_minus + i * i_minus)) * exp(-i * omega_minus * (scalar)(dt));
-          q.velocities()[0][0] = u_v_move.real();
-          q.velocities()[0][1] = u_v_move.imag();
+          q.velocities()[0] = u_v_move.real();
+          q.velocities()[1] = u_v_move.imag();
 
           this->exact_cache = make_shared<encap_type>(q);
           this->exact_updated = true;
@@ -409,12 +411,12 @@ namespace pfasst
           shared_ptr<encap_type> ex = dynamic_pointer_cast<encap_type>(this->get_factory()->create(pfasst::encap::solution));
           this->exact(ex, t);
 
-          e_tuple.p_err.x = ex->positions()[0][0] - end->positions()[0][0];
-          e_tuple.p_err.y = ex->positions()[0][1] - end->positions()[0][1];
-          e_tuple.p_err.z = ex->positions()[0][2] - end->positions()[0][2];
-          e_tuple.p_err.u = ex->velocities()[0][0] - end->velocities()[0][0];
-          e_tuple.p_err.v = ex->velocities()[0][1] - end->velocities()[0][1];
-          e_tuple.p_err.w = ex->velocities()[0][2] - end->velocities()[0][2];
+          e_tuple.p_err.x = ex->positions()[0] - end->positions()[0];
+          e_tuple.p_err.y = ex->positions()[1] - end->positions()[1];
+          e_tuple.p_err.z = ex->positions()[2] - end->positions()[2];
+          e_tuple.p_err.u = ex->velocities()[0] - end->velocities()[0];
+          e_tuple.p_err.v = ex->velocities()[1] - end->velocities()[1];
+          e_tuple.p_err.w = ex->velocities()[2] - end->velocities()[2];
 
           BCVLOG(9) << "absolute error at end point: " << e_tuple.p_err;
         }
@@ -555,8 +557,8 @@ namespace pfasst
           zero(dst_q[m]);
           zero(dst_qq[m]);
           for (size_t n = 0; n < nnodes; ++n) {
-            *(dst_q[m].get()) += dt * this->q_mat(m, n) * rhs[n];
-            *(dst_qq[m].get()) += dt * dt * this->qq_mat(m, n) * rhs[n];
+            *(dst_q[m].get()) += rhs[n] * dt * this->q_mat(m, n);
+            *(dst_qq[m].get()) += rhs[n] * dt * dt * this->qq_mat(m, n);
           }
           BCVLOG(6) << "integral(Q)[" << m << "]:  " << *(dst_q[m].get());
           BCVLOG(6) << "integral(QQ)[" << m << "]: " << *(dst_qq[m].get());
@@ -583,8 +585,8 @@ namespace pfasst
           zero(dst_cast[m]->positions());
           zero(dst_cast[m]->velocities());
           for (size_t j = 0; j < nnodes; ++j) {
-            dst_cast[m]->positions() += this->q_mat(m, j) * dt * this->particles[j]->velocities();
-            dst_cast[m]->velocities() += this->q_mat(m, j) * dt * this->build_rhs(j);
+            dst_cast[m]->positions() += this->particles[j]->velocities() * this->q_mat(m, j) * dt;
+            dst_cast[m]->velocities() += this->build_rhs(j) * this->q_mat(m, j) * dt;
           }
           dst_cast[m]->positions() += this->start_particles->positions() - this->particles[m]->positions();
           dst_cast[m]->velocities() += this->start_particles->velocities() - this->particles[m]->velocities();
@@ -685,15 +687,15 @@ namespace pfasst
 
         // compute integrals
         BCVLOG(1) << "computing integrals";
-        zero(this->s_integrals);
-        zero(this->ss_integrals);
         if (this->get_quadrature()->left_is_node()) {
           // starting at m=1 as m=0 will only add zeros
           for (size_t m = 1; m < nnodes; m++) {
+            zero(this->s_integrals[m]);
+            zero(this->ss_integrals[m]);
             for (size_t l = 0; l < nnodes; l++) {
               auto rhs = this->build_rhs(l);
-              this->s_integrals[m] += dt * this->s_mat(m, l) * rhs;
-              this->ss_integrals[m] += dt * dt * this->ss_mat(m, l) * rhs;
+              this->s_integrals[m] += rhs * dt * this->s_mat(m, l);
+              this->ss_integrals[m] += rhs * dt * dt * this->ss_mat(m, l);
             }
           }
           if (this->tau_q_corrections.size() > 0 && this->tau_qq_corrections.size()) {
@@ -847,10 +849,12 @@ namespace pfasst
       {
         BCVLOG(3) << "solving with Boris' method";
         this->log_indent->increment(3);
+        const size_t npart = this->start_particles->size();
         UNUSED(t_next);
+
         velocity_type c_k_term_half = c_k_term / scalar(2.0);
         BCVLOG(5) << "c_k_term/2: " << c_k_term_half;
-        AttributeValues<scalar> beta = cmp_wise_div(this->particles[m]->charges(), this->particles[m]->masses()) / scalar(2.0) * ds;
+        vector<scalar> beta = cmp_wise_div(this->particles[m]->charges(), this->particles[m]->masses()) / scalar(2.0) * ds;
         BCVLOG(5) << "beta: " << beta;
         acceleration_type e_forces_mean = (this->forces[m] + this->forces[m+1]) / scalar(2.0);
         BCVLOG(5) << "e_mean: " << e_forces_mean << " (<=" << this->forces[m] << " +" << this->forces[m+1] << " / 2)";
@@ -863,20 +867,17 @@ namespace pfasst
         BCVLOG(3) << "v-: " << v_minus;
 
         // Boris' kick
-        velocity_type boris_t(beta.size());
-        auto b_field_vector = this->impl_solver->get_b_field_vector();
-        for (size_t p = 0; p < beta.size(); ++p) {
-          boris_t[p] = b_field_vector * beta[p];
-        }
+        vector<scalar> b_field_vector = this->impl_solver->get_b_field_vector();
+        velocity_type boris_t = kronecker(beta, b_field_vector);
         velocity_type v_prime = v_minus + cross_prod(v_minus, boris_t);
         BCVLOG(3) << "v': " << v_prime;
 
         // final Boris' drift
-        vector<scalar> boris_t_sqr(boris_t.size());
-        for (size_t p = 0; p < boris_t.size(); ++p) {
-          boris_t_sqr[p] = pow(norm0(boris_t[p]), 2);
-        }
-        velocity_type boris_s = (scalar(2.0) * boris_t) / (scalar(1.0) + boris_t_sqr);
+        vector<scalar> boris_t_sqr = norm_sq_npart(boris_t, npart);  // particle-wise scalar product of boris_t
+//         for (size_t p = 0; p < boris_t.size(); ++p) {
+//           boris_t_sqr[p] = pow(norm0(boris_t[p]), 2);
+//         }
+        velocity_type boris_s = (boris_t * scalar(2.0)) / (boris_t_sqr + scalar(1.0));
         velocity_type v_plus = v_minus + cross_prod(v_prime, boris_s);
         BCVLOG(3) << "v+: " << v_plus;
 

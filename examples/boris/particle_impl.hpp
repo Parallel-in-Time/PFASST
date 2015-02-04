@@ -45,7 +45,7 @@ namespace pfasst
       {}
 
       template<typename precision>
-      size_t Particle<precision>::dim() const
+      inline size_t Particle<precision>::dim() const
       {
         return this->_dim;
       }

@@ -36,7 +36,7 @@ namespace pfasst
 
           protected:
             virtual size_t vector_to_array(const vector<scalar>& vec, scalar* arr);
-            virtual size_t vector2d_to_array(const vector<vector<scalar>>& vec, scalar* arr);
+            virtual size_t vector2d_to_array(const vector<scalar>& vec, scalar* arr);
 
             virtual size_t pack_positions(const particle_cloud_type& particles, scalar* packed) override;
 

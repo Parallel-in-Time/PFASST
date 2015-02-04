@@ -27,12 +27,12 @@ namespace pfasst
 
         template<typename scalar, typename time>
         size_t
-        WrapperSimplePhysicsSolver<scalar, time>::vector2d_to_array(const vector<vector<scalar>>& vec,
-                                                                    scalar* arr)
+        WrapperSimplePhysicsSolver<scalar, time>::vector2d_to_array(const vector<scalar>& vec, scalar* arr)
         {
-          for (size_t p = 0; p < vec.size(); ++p) {
+          const size_t npart = vec.size() / DIM;
+          for (size_t p = 0; p < npart; ++p) {
             for (size_t d = 0; d < DIM; ++d) {
-              arr[p * DIM + d] = vec[p][d];
+              arr[p * DIM + d] = vec[p * DIM + d];
             }
           }
           return vec.size() * DIM;
@@ -95,11 +95,7 @@ namespace pfasst
         WrapperSimplePhysicsSolver<scalar, time>::unpack_2d(const scalar* packed,
                                                             const size_t num_particles)
         {
-          ParticleCloudComponent<scalar> out(num_particles);
-          for (size_t p = 0; p < num_particles; ++p) {
-            out[p] = this->unpack_1d(packed + (p * DIM), DIM);
-          }
-          return out;
+          return this->unpack_1d(packed, num_particles * DIM);
         }
 
 
@@ -198,7 +194,8 @@ namespace pfasst
         {
           auto b_vecs = cloud_component_factory<scalar>(particles->size(), particles->dim());
           for (size_t p = 0; p < particles->size(); ++p) {
-            b_vecs[p] = this->get_b_field_vector() / particles->charges()[p] / particles->masses()[p];
+            auto bvec = this->get_b_field_vector() / particles->charges()[p] / particles->masses()[p];
+            std::copy(bvec.cbegin(), bvec.cend(), b_vecs.begin() + (p * DIM));
           }
           return b_vecs;
         }

@@ -2,8 +2,13 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
+#include <functional>
 #include <type_traits>
 using namespace std;
+
+#include <pfasst/globals.hpp>
+#include <pfasst/logging.hpp>
 
 
 namespace pfasst
@@ -13,206 +18,209 @@ namespace pfasst
     namespace boris
     {
       template<typename precision>
-      static vector<vector<precision>> cloud_component_factory(const size_t num_particles, const size_t dim)
+      inline static vector<precision> cloud_component_factory(const size_t num_particles, const size_t dim)
       {
-        vector<vector<precision>> out(num_particles);
-        for (size_t p = 0; p < out.size(); ++p) {
-          out[p].resize(dim);
-        }
+        vector<precision> out(num_particles * dim, precision(0.0));
         return out;
       }
 
 
       template<typename precision>
-      static vector<precision> cross_prod(const vector<precision>& first,
-                                                     const vector<precision>& second)
+      inline static void zero(vector<precision>& data)
       {
-        assert(first.size() == 3 && first.size() == second.size());
-        vector<precision> result(3);
-        result[0] = first[1] * second[2] - first[2] * second[1];
-        result[1] = first[2] * second[0] - first[0] * second[2];
-        result[2] = first[0] * second[1] - first[1] * second[0];
+        std::fill(data.begin(), data.end(), precision(0.0));
+      }
+
+      template<typename precision>
+      inline static void zero(shared_ptr<vector<precision>>& data)
+      {
+        zero(*data.get());
+      }
+
+
+      template<typename precision>
+      inline static vector<precision> cross_prod(const vector<precision>& first, const vector<precision>& second)
+      {
+        if (first.size() == 3 && first.size() == second.size()) {
+          vector<precision> result(3, precision(0.0));
+          cross_prod_1part<precision>(first.cbegin(), second.cbegin(), result.begin());
+          return result;
+        } else {
+          return cross_prod_npart(first, second);
+        }
+      }
+
+      template<typename precision>
+      inline static void cross_prod_1part(typename vector<precision>::const_iterator __first,
+                                          typename vector<precision>::const_iterator __second,
+                                          typename vector<precision>::iterator __result)
+      {
+        __result[0] = __first[1] * __second[2] - __first[2] * __second[1];
+        __result[1] = __first[2] * __second[0] - __first[0] * __second[2];
+        __result[2] = __first[0] * __second[1] - __first[1] * __second[0];
+      }
+
+      template<typename precision>
+      inline static vector<precision> cross_prod_npart(const vector<precision>& first, const vector<precision>& second)
+      {
+        assert(first.size() % 3 == 0 && second.size() % 3 == 0);  // make sure the particles have 3 spacial dimensions
+        assert(first.size() == second.size() || second.size() == 3);
+        const size_t npart = first.size() / 3;
+        vector<precision> dest(first.size(), precision(0.0));
+        if (first.size() == second.size()) {
+          for (size_t p = 0; p < npart; ++p) {
+            cross_prod_1part<precision>(first.cbegin() + (p * 3), second.cbegin() + (p * 3), dest.begin() + (p * 3));
+          }
+        } else if (second.size() == 3) {
+          for (size_t p = 0; p < npart; ++p) {
+            cross_prod_1part<precision>(first.cbegin() + (p * 3), second.cbegin(), dest.begin() + (p * 3));
+          }
+        }
+        return dest;
+      }
+
+
+      template<typename precision>
+      inline static vector<precision> kronecker(const vector<precision>& first,
+                                                const vector<precision>& second)
+      {
+        const size_t npart = first.size();
+        const size_t ndim = second.size();
+        vector<precision> result(npart * ndim, precision(0.0));
+        for (size_t p = 0; p < npart; ++p) {
+          for (size_t d = 0; d < ndim; ++d) {
+            result[p * ndim + d] = first[p] * second[d];
+          }
+        }
         return result;
       }
 
+
       template<typename precision>
-      static vector<vector<precision>> cross_prod(const vector<vector<precision>>& first,
-                                                          const vector<vector<precision>>& second)
+      inline static vector<precision> cmp_wise_mul(const vector<precision>& first, const vector<precision>& second)
       {
         assert(first.size() == second.size());
-        vector<vector<precision>> dest(first);
-        assert(dest.size() == first.size());
-        for (size_t i = 0; i < dest.size(); ++i) {
-          dest[i] = cross_prod(first[i], second[i]);
-        }
-        return dest;
-      }
-
-      template<typename precision>
-      static vector<vector<precision>> cross_prod(const vector<vector<precision>>& first,
-                                                          const vector<precision>& second)
-      {
-        vector<vector<precision>> dest(first);
-        assert(dest.size() == first.size());
-        for (size_t i = 0; i < dest.size(); ++i) {
-          dest[i] = cross_prod(first[i], second);
-        }
-        return dest;
-      }
-
-
-      template<typename precision>
-      static vector<precision> cmp_wise_mul(const vector<precision>& first,
-                                                       const vector<precision>& second)
-      {
-        vector<precision> out(first);
-        assert(out.size() == first.size());
-        for (size_t i = 0; i < out.size(); ++i) {
-          out[i] = first[i] * second[i];
-        }
+        vector<precision> out(first.size(), precision(0.0));
+        transform(first.cbegin(), first.cend(), second.cbegin(), out.begin(), std::multiplies<precision>());
         return out;
       }
 
       template<typename precision>
-      static vector<precision> cmp_wise_div(const vector<precision>& first,
-                                                       const vector<precision>& second)
+      inline static vector<precision> cmp_wise_div(const vector<precision>& first, const vector<precision>& second)
       {
-        vector<precision> out(first);
-        assert(out.size() == first.size());
-        for (size_t i = 0; i < out.size(); ++i) {
-          out[i] = first[i] / second[i];
-        }
+        assert(first.size() == second.size());
+        vector<precision> out(first.size(), precision(0.0));
+        transform(first.cbegin(), first.cend(), second.cbegin(), out.begin(), std::divides<precision>());
         return out;
       }
 
 
       template<typename precision>
-      static precision max(const vector<precision>& data)
+      inline static precision max(const vector<precision>& data)
       {
-        precision _max = precision(0.0);
-        for (auto elem : data)
-        {
-          _max = std::max(_max, elem);
-        }
-        return _max;
+        return *max_element(data.cbegin(), data.cend());
+      }
+
+      template<typename precision>
+      inline static precision max_abs(const vector<precision>& data)
+      {
+        return fabs(*max_element(data.cbegin(), data.cend(), [](const precision& a, const precision& b) { return fabs(a) < fabs(b); }));
       }
 
 
       template<typename precision>
-      static precision norm0(const vector<precision>& data)
+      inline static precision norm_sq(const vector<precision>& data)
       {
-        precision norm = precision(0.0);
-        for (auto elem : data) {
-          norm += elem * elem;
-        }
-        return sqrt(norm);
+        auto norm = norm_sq<precision>(data.cbegin(), data.cend());
+        return norm;
       }
 
       template<typename precision>
-      static vector<precision> norm0(const vector<vector<precision>>& data)
+      inline static precision norm_sq(typename vector<precision>::const_iterator __first,
+                                      typename vector<precision>::const_iterator __second)
       {
-        vector<precision> norm(data.size(), precision(0.0));
-        for (size_t p = 0; p < data.size(); ++p) {
-          norm[p] = norm0(data[p]);
+        return inner_product(__first, __second, __first, precision(0.0));
+      }
+
+      template<typename precision>
+      inline static vector<precision> norm_sq_npart(const vector<precision>& data, const size_t npart)
+      {
+        assert(data.size() % npart == 0);
+        const size_t dim = data.size() / npart;
+        vector<precision> norm(npart, precision(0.0));
+        for (size_t p = 0; p < npart; ++p) {
+          norm[p] = norm_sq<precision>(data.cbegin() + (p * dim), data.cbegin() + ((p+1) * dim));
         }
         return norm;
       }
 
 
       template<typename precision>
-      static void zero(vector<precision>& data)
+      inline static precision norm0(const vector<precision>& data)
       {
-        for (auto iter = data.begin(); iter != data.end(); ++iter) {
-          *iter = precision(0.0);
-        }
+        return norm0(data.cbegin(), data.cend());
       }
 
       template<typename precision>
-      static void zero(vector<vector<precision>>& data)
+      inline static precision norm0(typename vector<precision>::const_iterator __first,
+                                    typename vector<precision>::const_iterator __second)
       {
-        for (auto iter = data.begin(); iter != data.end(); ++iter) {
-          zero(*iter);
-        }
+        return sqrt(inner_product(__first, __second, __first, precision(0.0)));
       }
 
       template<typename precision>
-      static void zero(shared_ptr<vector<vector<precision>>>& data)
+      inline static vector<precision> norm0_npart(const vector<precision>& data, const size_t npart)
       {
-        zero(*data.get());
+        assert(data.size() % npart == 0);
+        const size_t dim = data.size() / npart;
+        vector<precision> norm(npart, precision(0.0));
+        for (size_t p = 0; p < npart; ++p) {
+          norm[p] = norm0<precision>(data.cbegin() + (p * dim), data.cend() + ((p+1) * dim));
+        }
+        return norm;
       }
 
 
       ////
       // OPERATORS: ADD
       template<typename precision>
-      vector<precision> operator+(const vector<precision>& first,
-                                             const vector<precision>& second)
+      inline vector<precision> operator+(const vector<precision>& first, const vector<precision>& second)
       {
-        vector<precision> dest(first);
-        assert(dest.size() == first.size());
-        dest += second;
-        return dest;
-      }
-
-      template<typename precision>
-      vector<vector<precision>> operator+(const vector<vector<precision>>& first,
-                                                  const vector<vector<precision>>& second)
-      {
-        vector<vector<precision>> dest(first);
-        assert(dest.size() == first.size());
-        for (size_t index = 0; index < dest.size(); ++index) {
-          dest[index] += second[index];
-        }
-        return dest;
-      }
-
-      template<typename precision>
-      vector<vector<precision>> operator+(const vector<vector<precision>>& first,
-                                                  const vector<precision>& second)
-      {
-        vector<vector<precision>> dest(first);
-        assert(dest.size() == first.size());
-        for (size_t i = 0; i < dest.size(); ++i) {
-          dest[i] += second;
+        vector<precision> dest;
+        if (first.size() == second.size()) {
+          dest.resize(first.size());
+          std::transform(first.cbegin(), first.cend(), second.cbegin(), dest.begin(), std::plus<precision>());
+        } else if (first.size() % 3 == 0 && second.size() == 3) {
+          dest.resize(first.size());
+          for (size_t p = 0; p < first.size() % 3; ++p) {
+            std::transform(first.cbegin() + (p * 3), first.cbegin() + ((p+1) * 3),
+                           second.cbegin(), dest.begin() + (p * 3), std::plus<precision>());
+          }
+        } else {
+          // try other way round
+          // ATTENTION! recursion
+          LOG(WARNING) << "Commutativity of addition primaly implemented other way round."
+                       << " You should switch to avoid unneccessary function calls.";
+          dest = second + first;
         }
         return dest;
       }
 
       template<typename precision, typename ValueT>
-      vector<precision> operator+(const vector<precision>& vec, const ValueT& value)
+      inline vector<precision> operator+(const vector<precision>& vec, const ValueT& value)
       {
         static_assert(is_arithmetic<ValueT>::value, "");
         vector<precision> dest(vec);
-        assert(dest.size() == vec.size());
-        for (size_t i = 0; i < dest.size(); ++i) {
-          dest[i] += value;
-        }
+        dest += value;
         return dest;
       }
 
       template<typename precision, typename ValueT>
-      vector<vector<precision>> operator+(const vector<vector<precision>>& vec, const ValueT& value)
+      inline vector<precision> operator+(const ValueT& value, const vector<precision>& vec)
       {
         static_assert(is_arithmetic<ValueT>::value, "");
-        vector<vector<precision>> dest(vec);
-        assert(dest->size() == vec->size());
-        for (size_t index = 0; index < dest.size(); ++index) {
-          dest[index] += value;
-        }
-        return dest;
-      }
-
-      template<typename precision, typename ValueT>
-      vector<precision> operator+(const ValueT& value, const vector<precision>& vec)
-      {
-        static_assert(is_arithmetic<ValueT>::value, "");
-        return vec + value;
-      }
-
-      template<typename precision, typename ValueT>
-      vector<vector<precision>> operator+(const ValueT& value, const vector<vector<precision>>& vec)
-      {
-        static_assert(is_arithmetic<ValueT>::value, "");
+        LOG(WARNING) << "Commutativity of addition primaly implemented other way round."
+                     << " You should switch to avoid unneccessary function calls.";
         return vec + value;
       }
       // OPERATORS: ADD
@@ -221,53 +229,30 @@ namespace pfasst
       ////
       // OPERATORS: INPLACE-ADD
       template<typename precision>
-      vector<precision>& operator+=(vector<precision>& first,
-                                               const vector<precision>& second)
+      inline vector<precision>& operator+=(vector<precision>& first, const vector<precision>& second)
       {
-        assert(first.size() == second.size());
-        for (size_t i = 0; i < first.size(); ++i) {
-          first[i] += second[i];
-        }
-        return first;
-      }
-
-      template<typename precision>
-      vector<vector<precision>>& operator+=(vector<vector<precision>>& first,
-                                                    const vector<vector<precision>>& second)
-      {
-        assert(first.size() == second.size());
-        for (size_t i = 0; i < first.size(); ++i) {
-          first[i] += second[i];
-        }
-        return first;
-      }
-
-      template<typename precision>
-      vector<vector<precision>>& operator+=(vector<vector<precision>>& first,
-                                                    const vector<precision>& second)
-      {
-        for (size_t i = 0; i < first.size(); ++i) {
-          first[i] += second;
+        if (first.size() == second.size()) {
+          transform(first.cbegin(), first.cend(), second.cbegin(), first.begin(), std::plus<precision>());
+        } else if (first.size() % 3 == 0 && second.size() == 3) {
+          for (size_t p = 0; p < first.size() % 3; ++p) {
+            std::transform(first.cbegin() + (p * 3), first.cbegin() + ((p+1) * 3),
+                           second.cbegin(), first.begin() + (p * 3), std::plus<precision>());
+          }
+        } else if (first.size() == 3 && second.size() % 3 == 0) {
+          for (size_t p = 0; p < first.size() % 3; ++p) {
+            std::transform(first.cbegin(), first.cend(), second.cbegin() + (p * 3),
+                           first.begin(), std::plus<precision>());
+          }
         }
         return first;
       }
 
       template<typename precision, typename ValueT>
-      vector<precision>& operator+=(vector<precision>& vec, const ValueT& value)
+      inline vector<precision>& operator+=(vector<precision>& vec, const ValueT& value)
       {
         static_assert(is_arithmetic<ValueT>::value, "");
-        for (size_t i = 0; i < vec.size(); ++i) {
-          vec[i] += value;
-        }
-        return vec;
-      }
-
-      template<typename precision, typename ValueT>
-      vector<vector<precision>>& operator+=(vector<vector<precision>>& vec, const ValueT& value)
-      {
-        static_assert(is_arithmetic<ValueT>::value, "");
-        for (size_t i = 0; i < vec.size(); ++i) {
-          vec[i] += value;
+        for (auto&& elem : vec) {
+          elem += value;
         }
         return vec;
       }
@@ -277,74 +262,35 @@ namespace pfasst
       ////
       // OPERATORS: MINUS
       template<typename precision>
-      vector<precision> operator-(const vector<precision>& first,
-                                             const vector<precision>& second)
+      inline vector<precision> operator-(const vector<precision>& first, const vector<precision>& second)
       {
-        vector<precision> dest(first);
-        assert(dest.size() == first.size());
-        dest -= second;
-        return dest;
-      }
-
-      template<typename precision>
-      vector<vector<precision>> operator-(const vector<vector<precision>>& first,
-                                                  const vector<vector<precision>>& second)
-      {
-        vector<vector<precision>> dest(first);
-        assert(dest.size() == first.size());
-        for (size_t i = 0; i < dest.size(); ++i) {
-          dest[i] -= second[i];
-        }
-        return dest;
-      }
-      template<typename precision>
-      vector<vector<precision>> operator-(const vector<vector<precision>>& first,
-                                                  const vector<precision>& second)
-      {
-        vector<vector<precision>> dest(first);
-        assert(dest.size() == first.size());
-        for (size_t i = 0; i < dest.size(); ++i) {
-          dest[i] -= second;
+        vector<precision> dest;
+        if (first.size() == second.size()) {
+          dest.resize(first.size());
+          std::transform(first.cbegin(), first.cend(), second.cbegin(), dest.begin(), std::minus<precision>());
+        } else if (first.size() % 3 == 0 && second.size() == 3) {
+          dest.resize(first.size());
+          for (size_t p = 0; p < first.size() % 3; ++p) {
+            std::transform(first.cbegin() + (p * 3), first.cbegin() + ((p+1) * 3), second.cbegin(),
+                           dest.begin() + (p * 3), std::minus<precision>());
+          }
+        } else if (first.size() == 3 && second.size() % 3 == 0) {
+          dest.resize(first.size());
+          for (size_t p = 0; p < first.size() % 3; ++p) {
+            std::transform(first.cbegin(), first.cend(), second.cbegin() + (p * 3),
+                           dest.begin() + (p * 3), std::minus<precision>());
+          }
         }
         return dest;
       }
 
       template<typename precision, typename ValueT>
-      vector<precision> operator-(const vector<precision>& vec, const ValueT& value)
+      inline vector<precision> operator-(const vector<precision>& vec, const ValueT& value)
       {
         static_assert(is_arithmetic<ValueT>::value, "");
         vector<precision> dest(vec);
-        assert(dest.size() == vec.size());
-        for (size_t i = 0; i < dest.size(); ++i) {
-          dest[i] -= value;
-        }
+        dest -= value;
         return dest;
-      }
-
-      template<typename precision, typename ValueT>
-      vector<vector<precision>> operator-(const vector<vector<precision>>& vec, const ValueT& value)
-      {
-        static_assert(is_arithmetic<ValueT>::value, "");
-        vector<vector<precision>> dest(vec);
-        assert(dest.size() == vec.size());
-        for (size_t i = 0; i < dest.size(); ++i) {
-          dest[i] -= value;
-        }
-        return dest;
-      }
-
-      template<typename precision, typename ValueT>
-      vector<precision> operator-(const ValueT& value, const vector<precision>& vec)
-      {
-        static_assert(is_arithmetic<ValueT>::value, "");
-        return vec - value;
-      }
-
-      template<typename precision, typename ValueT>
-      vector<vector<precision>> operator-(const ValueT& value, const vector<vector<precision>>& vec)
-      {
-        static_assert(is_arithmetic<ValueT>::value, "");
-        return vec - value;
       }
       // OPERATORS: MINUS
       ////
@@ -352,52 +298,30 @@ namespace pfasst
       ////
       // OPERATORS: INPLACE-MINUS
       template<typename precision>
-      vector<precision>& operator-=(vector<precision>& first, const vector<precision>& second)
+      inline vector<precision>& operator-=(vector<precision>& first, const vector<precision>& second)
       {
-        assert(first.size() == second.size());
-        for (size_t i = 0; i < first.size(); ++i) {
-          first[i] -= second[i];
-        }
-        return first;
-      }
-
-      template<typename precision>
-      vector<vector<precision>>& operator-=(vector<vector<precision>>& first,
-                                                    const vector<vector<precision>>& second)
-      {
-        assert(first.size() == second.size());
-        for (size_t i = 0; i < first.size(); ++i) {
-          first[i] -= second[i];
-        }
-        return first;
-      }
-
-      template<typename precision>
-      vector<vector<precision>>& operator-=(vector<vector<precision>>& first,
-                                                    const vector<precision>& second)
-      {
-        for (size_t i = 0; i < first.size(); ++i) {
-          first[i] -= second;
+        if (first.size() == second.size()) {
+          transform(first.cbegin(), first.cend(), second.cbegin(), first.begin(), std::minus<precision>());
+        } else if (first.size() % 3 == 0 && second.size() == 3) {
+          for (size_t p = 0; p < first.size() % 3; ++p) {
+            std::transform(first.cbegin() + (p * 3), first.cbegin() + ((p+1) * 3),
+                           second.cbegin(), first.begin() + (p * 3), std::minus<precision>());
+          }
+        } else if (first.size() == 3 && second.size() % 3 == 0) {
+          for (size_t p = 0; p < first.size() % 3; ++p) {
+            std::transform(first.cbegin(), first.cend(), second.cbegin() + (p * 3),
+                           first.begin(), std::minus<precision>());
+          }
         }
         return first;
       }
 
       template<typename precision, typename ValueT>
-      vector<precision>& operator-=(vector<precision>& vec, const ValueT& value)
+      inline vector<precision>& operator-=(vector<precision>& vec, const ValueT& value)
       {
         static_assert(is_arithmetic<ValueT>::value, "");
-        for (size_t i = 0; i < vec.size(); ++i) {
-          vec[i] -= value;
-        }
-        return vec;
-      }
-
-      template<typename precision, typename ValueT>
-      vector<vector<precision>>& operator-=(vector<vector<precision>>& vec, const ValueT& value)
-      {
-        static_assert(is_arithmetic<ValueT>::value, "");
-        for (size_t i = 0; i < vec.size(); ++i) {
-          vec[i] -= value;
+        for (auto&& elem : vec) {
+          elem -= value;
         }
         return vec;
       }
@@ -407,54 +331,33 @@ namespace pfasst
       ////
       // OPERATORS: MUL
       template<typename precision, typename ValueT>
-      vector<precision> operator*(const vector<precision>& vec, const ValueT& value)
+      inline vector<precision> operator*(const vector<precision>& vec, const ValueT& value)
       {
         static_assert(is_arithmetic<ValueT>::value, "");
         vector<precision> dest(vec);
-        assert(dest.size() == vec.size());
-        for (size_t i = 0; i < dest.size(); ++i) {
-          dest[i] *= value;
-        }
+        dest *= value;
         return dest;
       }
 
       template<typename precision, typename ValueT>
-      vector<vector<precision>> operator*(const vector<vector<precision>>& vec, const ValueT& value)
+      inline vector<precision> operator*(const ValueT& value, const vector<precision>& vec)
       {
         static_assert(is_arithmetic<ValueT>::value, "");
-        vector<vector<precision>> dest(vec);
-        assert(dest.size() == vec.size());
-        for (size_t i = 0; i < dest.size(); ++i) {
-          dest[i] *= value;
-        }
-        return dest;
+        LOG(WARNING) << "Commutativity of multiplication primaly implemented other way round."
+                     << " You should switch to avoid unneccessary function calls.";
+        return vec * value;
       }
 
       template<typename precision>
-      vector<vector<precision>> operator*(const vector<vector<precision>>& vec,
-                                                  const vector<precision>& values)
+      inline vector<precision> operator* (const vector<precision>& vec, const vector<precision>& values)
       {
-        assert(vec.size() == values.size());
-        vector<vector<precision>> dest(vec);
-        assert(dest.size() == vec.size());
-        for (size_t i = 0; i < dest.size(); ++i) {
-          dest[i] *= values[i];
+        assert(vec.size() % 3 == 0 && vec.size() / 3 == values.size());
+        vector<precision> dest(vec.size(), precision(0.0));
+        for (size_t p = 0; p < values.size(); ++p) {
+          std::transform(vec.cbegin() + (p * 3), vec.cbegin() + ((p+1) * 3), dest.begin() + (p * 3),
+                         [&](const precision& v) { return v * values[p]; });
         }
         return dest;
-      }
-
-      template<typename precision, typename ValueT>
-      vector<precision> operator*(const ValueT& value, const vector<precision>& vec)
-      {
-        static_assert(is_arithmetic<ValueT>::value, "");
-        return vec * value;
-      }
-
-      template<typename precision, typename ValueT>
-      vector<vector<precision>> operator*(const ValueT& value, const vector<vector<precision>>& vec)
-      {
-        static_assert(is_arithmetic<ValueT>::value, "");
-        return vec * value;
       }
       // OPERATORS: MUL
       ////
@@ -462,21 +365,11 @@ namespace pfasst
       ////
       // OPERATORS: INPLACE-MUL
       template<typename precision, typename ValueT>
-      vector<precision>& operator*=(vector<precision>& vec, const ValueT& value)
+      inline vector<precision>& operator*=(vector<precision>& vec, const ValueT& value)
       {
         static_assert(is_arithmetic<ValueT>::value, "");
-        for (size_t i = 0; i < vec.size(); ++i) {
-          vec[i] *= value;
-        }
-        return vec;
-      }
-
-      template<typename precision, typename ValueT>
-      vector<vector<precision>>& operator*=(vector<vector<precision>>& vec, const ValueT& value)
-      {
-        static_assert(is_arithmetic<ValueT>::value, "");
-        for (size_t i = 0; i < vec.size(); ++i) {
-          vec[i] *= value;
+        for (auto&& elem : vec) {
+          elem *= value;
         }
         return vec;
       }
@@ -486,38 +379,22 @@ namespace pfasst
       ////
       // OPERATORS: DIV
       template<typename precision, typename ValueT>
-      vector<precision>  operator/(const vector<precision>& vec, const ValueT& value)
+      inline vector<precision> operator/(const vector<precision>& vec, const ValueT& value)
       {
         static_assert(is_arithmetic<ValueT>::value, "");
         vector<precision> dest(vec);
-        assert(dest.size() == vec.size());
-        for (size_t i = 0; i < dest.size(); ++i) {
-          dest[i] /= value;
-        }
-        return dest;
-      }
-
-      template<typename precision, typename ValueT>
-      vector<vector<precision>>  operator/(const vector<vector<precision>>& vec, const ValueT& value)
-      {
-        static_assert(is_arithmetic<ValueT>::value, "");
-        vector<vector<precision>> dest(vec);
-        assert(dest.size() == vec.size());
-        for (size_t i = 0; i < dest.size(); ++i) {
-          dest[i] /= value;
-        }
+        dest /= value;
         return dest;
       }
 
       template<typename precision>
-      vector<vector<precision>> operator/(const vector<vector<precision>>& vec,
-                                                  const vector<precision>& values)
+      inline vector<precision> operator/ (const vector<precision>& vec, const vector<precision>& values)
       {
-        assert(vec.size() == values.size());
-        vector<vector<precision>> dest(vec);
-        assert(dest.size() == vec.size());
-        for (size_t i = 0; i < dest.size(); ++i) {
-          dest[i] /= values[i];
+        assert(vec.size() % 3 == 0 && vec.size() / 3 == values.size());
+        vector<precision> dest(vec.size(), precision(0.0));
+        for (size_t p = 0; p < values.size(); ++p) {
+          std::transform(vec.cbegin() + (p * 3), vec.cbegin() + ((p+1) * 3), dest.begin() + (p * 3),
+                         [&](const precision& v) { return v / values[p]; });
         }
         return dest;
       }
@@ -527,21 +404,11 @@ namespace pfasst
       ////
       // OPERATORS: INPLACE-DIV
       template<typename precision, typename ValueT>
-      vector<precision>& operator/=(vector<precision>& vec, const ValueT& value)
+      inline vector<precision>& operator/=(vector<precision>& vec, const ValueT& value)
       {
         static_assert(is_arithmetic<ValueT>::value, "");
-        for (size_t i = 0; i < vec.size(); ++i) {
-          vec[i] /= value;
-        }
-        return vec;
-      }
-
-      template<typename precision, typename ValueT>
-      vector<vector<precision>>& operator/=(vector<vector<precision>>& vec, const ValueT& value)
-      {
-        static_assert(is_arithmetic<ValueT>::value, "");
-        for (size_t i = 0; i < vec.size(); ++i) {
-          vec[i] /= value;
+        for (auto&& elem : vec) {
+          elem /= value;
         }
         return vec;
       }
