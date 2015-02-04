@@ -156,7 +156,14 @@ namespace pfasst
 
       //! @{
       /**
-       * setup (allocate etc) the sweeper.
+       * Set options from command line etc.
+       */
+      virtual void set_options()
+      {
+      }
+
+      /**
+       * Setup (allocate etc) the sweeper.
        * @param[in] coarse
        *     `true` if this sweeper exists on a coarsened MLSDC or PFASST level.
        *     This implies that space for an FAS correction and "saved" solutions are necessary.

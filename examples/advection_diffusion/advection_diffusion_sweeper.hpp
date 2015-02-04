@@ -47,21 +47,15 @@ namespace pfasst
       class AdvectionDiffusionSweeper
         : public encap::IMEXSweeper<time>
       {
-        private:
-          static void init_config_options(po::options_description& opts)
+        public:
+          static void init_opts()
           {
-            opts.add_options()
-              ("spatial_dofs", po::value<size_t>(), "number of spatial degrees of freedom")
-              ;
+            pfasst::config::options::add_option<size_t>("Adv/Diff Sweeper", "spatial_dofs", "Number of spatial degrees of freedom");
           }
 
-        public:
-          static void enable_config_options(size_t index = -1)
+          static void init_logs()
           {
-            config::Options::get_instance()
-              .register_init_function("Advection-Diffusion Sweeper",
-                                      std::function<void(po::options_description&)>(init_config_options),
-                                      index);
+            pfasst::log::add_custom_logger("Advec");
           }
 
         private:

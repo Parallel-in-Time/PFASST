@@ -9,12 +9,16 @@
 
 namespace pfasst
 {
-  inline static void init(int argc, char** argv)
+  inline static void init(int argc, char** argv, std::function<void()> opts=nullptr, std::function<void()> logs=nullptr)
   {
-    SDC<>::enable_config_options(0);
-    Quadrature::enable_config_options(0);
-    config::init_config();
+    if (opts) {
+      opts();
+    }
+    config::init();
     log::start_log(argc, argv);
+    if (logs) {
+      logs();
+    }
     config::read_commandline(argc, argv);
   }
 } // ::pfasst

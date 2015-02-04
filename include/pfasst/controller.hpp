@@ -35,7 +35,31 @@ namespace pfasst
       //! @}
 
     public:
+      Controller()
+      {
+        this->t = 0.0;
+        this->tend = 0.0;
+        this->dt = 0.0;
+        this->step = 0;
+        this->iteration = 0;
+      }
+
       //! @{
+      virtual void set_options(bool all_sweepers=true)
+      {
+        this->tend = config::get_value<double>("tend", this->tend);
+        this->dt = config::get_value<double>("dt", this->dt);
+        this->max_iterations = config::get_value<size_t>("num_iters", this->max_iterations);
+
+        // XXX: add some nice "nsteps" logic here
+
+        if (all_sweepers) {
+          for (auto l = coarsest(); l <= finest(); ++l) {
+            l.current()->set_options();
+          }
+        }
+      }
+
       virtual void setup()
       {
         for (auto l = coarsest(); l <= finest(); ++l) {

@@ -92,6 +92,13 @@ namespace pfasst
         }
         //! @}
 
+        //! @{
+        virtual void set_options() override
+        {
+          this->abs_residual_tol = time(config::get_value<double>("abs_res_tol", this->abs_residual_tol));
+          this->rel_residual_tol = time(config::get_value<double>("rel_res_tol", this->rel_residual_tol));
+        }
+
         virtual void setup(bool coarse) override
         {
           auto const nodes = this->quadrature->get_nodes();
@@ -113,6 +120,7 @@ namespace pfasst
             }
           }
         }
+        //! @}
 
         //! @{
         virtual void spread() override
@@ -121,7 +129,6 @@ namespace pfasst
             this->state[m]->copy(this->state[0]);
           }
         }
-        //! @}
 
         /**
          * Save current solution states.
@@ -137,6 +144,7 @@ namespace pfasst
             }
           }
         }
+        //! @}
 
         //! @{
         void set_quadrature(shared_ptr<IQuadrature<time>> quadrature)

@@ -64,8 +64,7 @@ namespace pfasst
 #ifndef PFASST_UNIT_TESTING
 int main(int argc, char** argv)
 {
-  pfasst::examples::boris::enable_config_options<double>();
-  pfasst::init(argc, argv);
+  pfasst::init(argc, argv, pfasst::examples::boris::init_opts<double>);
 
   const size_t nsteps     = pfasst::config::get_value<size_t>("num_steps", 1);
   const double dt         = pfasst::config::get_value<double>("delta_step", 0.015625);
