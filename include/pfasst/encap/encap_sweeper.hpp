@@ -250,21 +250,21 @@ namespace pfasst
         {
           if (this->abs_residual_tol > 0.0 || this->rel_residual_tol > 0.0) {
             if (this->residuals.size() == 0) {
-              for (auto x: this->get_nodes()) {
-                UNUSED(x);
+              for (size_t m = 0; m < this->get_nodes().size(); m++) {
                 this->residuals.push_back(this->get_factory()->create(pfasst::encap::solution));
               }
             }
             this->residual(this->get_controller()->get_time_step(), this->residuals);
-            vector<time> rnorms;
-            for (auto r: this->residuals) {
-              rnorms.push_back(r->norm0());
+            vector<time> anorms, rnorms;
+            for (size_t m = 0; m < this->get_nodes().size(); m++) {
+              anorms.push_back(this->residuals[m]->norm0());
+              rnorms.push_back(anorms.back() / this->get_state(m)->norm0());
             }
+            auto amax = *std::max_element(anorms.begin(), anorms.end());
             auto rmax = *std::max_element(rnorms.begin(), rnorms.end());
-            if (rmax < this->abs_residual_tol) {
+            if (amax < this->abs_residual_tol || rmax < this->rel_residual_tol) {
               return true;
             }
-            // XXX: check rel norms too
           }
           return false;
         }

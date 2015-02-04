@@ -23,7 +23,7 @@ namespace pfasst
   {
     namespace advection_diffusion
     {
-      error_map run_vanilla_sdc(double abs_residual_tol)
+      error_map run_vanilla_sdc(double abs_residual_tol, double rel_residual_tol=0.0)
       {
         SDC<> sdc;
 
@@ -38,7 +38,7 @@ namespace pfasst
 
         sweeper->set_quadrature(quad);
         sweeper->set_factory(factory);
-        sweeper->set_residual_tolerances(abs_residual_tol, 0.0);
+        sweeper->set_residual_tolerances(abs_residual_tol, rel_residual_tol);
 
         sdc.add_level(sweeper);
         sdc.set_duration(0.0, 4*0.01, 0.01, 4);
