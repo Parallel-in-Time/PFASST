@@ -158,7 +158,7 @@ namespace pfasst
       template<typename precision>
       inline static precision norm0(const vector<precision>& data)
       {
-        return norm0(data.cbegin(), data.cend());
+        return norm0<precision>(data.cbegin(), data.cend());
       }
 
       template<typename precision>
@@ -192,7 +192,7 @@ namespace pfasst
           std::transform(first.cbegin(), first.cend(), second.cbegin(), dest.begin(), std::plus<precision>());
         } else if (first.size() % 3 == 0 && second.size() == 3) {
           dest.resize(first.size());
-          for (size_t p = 0; p < first.size() % 3; ++p) {
+          for (size_t p = 0; p < first.size() / 3; ++p) {
             std::transform(first.cbegin() + (p * 3), first.cbegin() + ((p+1) * 3),
                            second.cbegin(), dest.begin() + (p * 3), std::plus<precision>());
           }
@@ -234,12 +234,12 @@ namespace pfasst
         if (first.size() == second.size()) {
           transform(first.cbegin(), first.cend(), second.cbegin(), first.begin(), std::plus<precision>());
         } else if (first.size() % 3 == 0 && second.size() == 3) {
-          for (size_t p = 0; p < first.size() % 3; ++p) {
+          for (size_t p = 0; p < first.size() / 3; ++p) {
             std::transform(first.cbegin() + (p * 3), first.cbegin() + ((p+1) * 3),
                            second.cbegin(), first.begin() + (p * 3), std::plus<precision>());
           }
         } else if (first.size() == 3 && second.size() % 3 == 0) {
-          for (size_t p = 0; p < first.size() % 3; ++p) {
+          for (size_t p = 0; p < first.size() / 3; ++p) {
             std::transform(first.cbegin(), first.cend(), second.cbegin() + (p * 3),
                            first.begin(), std::plus<precision>());
           }
@@ -270,13 +270,13 @@ namespace pfasst
           std::transform(first.cbegin(), first.cend(), second.cbegin(), dest.begin(), std::minus<precision>());
         } else if (first.size() % 3 == 0 && second.size() == 3) {
           dest.resize(first.size());
-          for (size_t p = 0; p < first.size() % 3; ++p) {
+          for (size_t p = 0; p < first.size() / 3; ++p) {
             std::transform(first.cbegin() + (p * 3), first.cbegin() + ((p+1) * 3), second.cbegin(),
                            dest.begin() + (p * 3), std::minus<precision>());
           }
         } else if (first.size() == 3 && second.size() % 3 == 0) {
           dest.resize(first.size());
-          for (size_t p = 0; p < first.size() % 3; ++p) {
+          for (size_t p = 0; p < first.size() / 3; ++p) {
             std::transform(first.cbegin(), first.cend(), second.cbegin() + (p * 3),
                            dest.begin() + (p * 3), std::minus<precision>());
           }
@@ -303,12 +303,12 @@ namespace pfasst
         if (first.size() == second.size()) {
           transform(first.cbegin(), first.cend(), second.cbegin(), first.begin(), std::minus<precision>());
         } else if (first.size() % 3 == 0 && second.size() == 3) {
-          for (size_t p = 0; p < first.size() % 3; ++p) {
+          for (size_t p = 0; p < first.size() / 3; ++p) {
             std::transform(first.cbegin() + (p * 3), first.cbegin() + ((p+1) * 3),
                            second.cbegin(), first.begin() + (p * 3), std::minus<precision>());
           }
         } else if (first.size() == 3 && second.size() % 3 == 0) {
-          for (size_t p = 0; p < first.size() % 3; ++p) {
+          for (size_t p = 0; p < first.size() / 3; ++p) {
             std::transform(first.cbegin(), first.cend(), second.cbegin() + (p * 3),
                            first.begin(), std::minus<precision>());
           }
