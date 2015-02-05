@@ -14,8 +14,8 @@ using namespace pfasst::examples::boris;
 TEST(EnergyDriftAndResidual, SingleStep)
 {
   const size_t num_iter = 9;
-  auto errors_map = run_boris_sdc<double>(1, 0.015625, 5, 1, num_iter+1);
-  ASSERT_THAT(errors_map, SizeIs(num_iter));
+  auto errors_map = run_boris_sdc<double>(1, 0.015625, 5, 1, num_iter+1, 0.0, 0.0);
+  ASSERT_THAT(errors_map, SizeIs(num_iter+1));
 
   auto final_error = errors_map.rbegin()->second;
 
@@ -27,8 +27,8 @@ TEST(EnergyDriftAndResidual, MultiStep)
 {
   const size_t num_iter = 9;
   const size_t num_steps = 10;
-  auto errors_map = run_boris_sdc<double>(num_steps, 0.015625, 5, 1, num_iter+1);
-  ASSERT_THAT(errors_map, SizeIs(num_iter * num_steps));
+  auto errors_map = run_boris_sdc<double>(num_steps, 0.015625, 5, 1, num_iter+1, 0.0, 0.0);
+  ASSERT_THAT(errors_map, SizeIs((num_iter+1) * num_steps));
 
   auto final_error = errors_map.rbegin()->second;
 
