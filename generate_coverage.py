@@ -128,29 +128,37 @@ def run_test(path, name, is_example):
     logging.debug("capturing all tracing data ...")
     print('### capturing all tracing data ...', file=output_file, flush=True)
     sp.check_call('lcov --capture --directory . --output-file "%s.info.complete"' % name,
-                          shell=True, stdout=output_file, stderr=output_file)
+                  shell=True, stdout=output_file, stderr=output_file)
     print('### done.', file=output_file, flush=True)
 
     logging.debug("removing unnecessary data ...")
     print('### removing unnecessary data ...', file=output_file, flush=True)
-    sp.check_call('lcov --remove "%s.info.complete" "*%s/include/pfasst/easylogging++.h" '
-                          '--output-file %s.info.prelim'
-                          % (name, options.base_dir, name),
-                          shell=True, stdout=output_file, stderr=output_file)
+    try:
+        sp.check_call('lcov --remove "%s.info.complete" "%s/include/pfasst/easylogging++.h" --output-file %s.info.prelim'
+                      % (name, options.base_dir, name),
+                      shell=True, stdout=output_file, stderr=output_file)
+    except sp.CalledProcessError as e:
+        logging.warning(e)
     print('### done.', file=output_file, flush=True)
 
     logging.debug("extracting interesting tracing data ...")
     print('### extracting interesting tracing data ...', file=output_file, flush=True)
-    sp.check_call('lcov --extract "%s.info.prelim" "*%s/include/**/*" --output-file %s.info'
-                          % (name, options.base_dir, name),
-                          shell=True, stdout=output_file, stderr=output_file)
-    options.tracefiles.append("%s/%s.info" % (os.path.abspath(path), name))
+    try:
+        sp.check_call('lcov --extract "%s.info.prelim" "*%s/include/**/*" --output-file %s.info'
+                      % (name, options.base_dir, name),
+                      shell=True, stdout=output_file, stderr=output_file)
+        options.tracefiles.append("%s/%s.info" % (os.path.abspath(path), name))
+    except sp.CalledProcessError as e:
+        logging.warning(e)
     if is_example:
         logging.debug("this test belongs to an example, thus also covering examples code")
-        sp.check_call('lcov --extract "%s.info.prelim" "*%s/examples/**/*" --output-file %s.info.example'
-                              % (name, options.base_dir, name),
-                              shell=True, stdout=output_file, stderr=output_file)
-        options.tracefiles.append("%s/%s.info.example" % (os.path.abspath(path), name))
+        try:
+            sp.check_call('lcov --extract "%s.info.prelim" "*%s/examples/**/*" --output-file %s.info.example'
+                          % (name, options.base_dir, name),
+                          shell=True, stdout=output_file, stderr=output_file)
+            options.tracefiles.append("%s/%s.info.example" % (os.path.abspath(path), name))
+        except sp.CalledProcessError as e:
+            logging.warning(e)
     print('### done.', file=output_file, flush=True)
 
     os.chdir(options.base_dir)
@@ -166,12 +174,12 @@ def aggregate_tracefiles():
         print("### adding tracefile: %s" % (tracefile,), file=output_file, flush=True)
         if os.access(options.final_tracefile, os.W_OK):
             sp.check_call('lcov --add-tracefile "%s" --add-tracefile "%s" --output-file "%s"'
-                                  % (options.final_tracefile, tracefile, options.final_tracefile),
-                                  shell=True, stdout=output_file, stderr=output_file)
+                          % (options.final_tracefile, tracefile, options.final_tracefile),
+                          shell=True, stdout=output_file, stderr=output_file)
         else:
             sp.check_call('lcov --add-tracefile "%s" --output-file "%s"'
-                                  % (tracefile, options.final_tracefile),
-                                  shell=True, stdout=output_file, stderr=output_file)
+                          % (tracefile, options.final_tracefile),
+                          shell=True, stdout=output_file, stderr=output_file)
         print("### done.", file=output_file, flush=True)
     output_file.close()
 
@@ -180,9 +188,9 @@ def generate_html():
     logging.info("generating HTML report ...")
     output_file = open('%s/generate_html.log' % (options.coverage_dir,), mode='a')
     sp.check_call('genhtml --output-directory %s --demangle-cpp --num-spaces 2 --sort '
-                          '--title "PFASST++ Test Coverage" --prefix "%s" --function-coverage --legend '
-                          '"%s"' % (options.coverage_dir, options.base_dir, options.final_tracefile),
-                          shell=True, stdout=output_file, stderr=output_file)
+                  '--title "PFASST++ Test Coverage" --prefix "%s" --function-coverage --legend "%s"'
+                  % (options.coverage_dir, options.base_dir, options.final_tracefile),
+                  shell=True, stdout=output_file, stderr=output_file)
     output_file.close()
     logging.info("coverage report can be found in: %s" % options.coverage_dir)
 
