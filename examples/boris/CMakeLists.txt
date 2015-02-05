@@ -32,7 +32,11 @@ endforeach(example)
 
 if(pfasst_BORIS_SAME_LEVELS)
     get_target_property(boris_mlsdc_definitions boris_mlsdc COMPILE_DEFINITIONS)
-    list(APPEND boris_mlsdc_definitions "BORIS_SAME_LEVELS")
+    if(${boris_mlsdc_definitions})
+        list(APPEND boris_mlsdc_definitions "BORIS_SAME_LEVELS")
+    else()
+        set(boris_mlsdc_definitions "BORIS_SAME_LEVELS")
+    endif()
     set_target_properties(boris_mlsdc PROPERTIES COMPILE_DEFINITIONS ${boris_mlsdc_definitions})
 endif()
 
