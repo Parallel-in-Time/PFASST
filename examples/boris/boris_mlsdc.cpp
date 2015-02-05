@@ -82,7 +82,7 @@ namespace pfasst
 #ifndef PFASST_UNIT_TESTING
 int main(int argc, char** argv)
 {
-  pfasst::examples::boris::enable_config_options<double>();
+  pfasst::init(argc, argv, pfasst::examples::boris::init_opts<double>);
   pfasst::init(argc, argv);
   pfasst::log::add_custom_logger("Boris");
   pfasst::log::add_custom_logger("BorisTransfer");

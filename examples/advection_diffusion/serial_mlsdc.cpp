@@ -101,10 +101,9 @@ namespace pfasst
 #ifndef PFASST_UNIT_TESTING
 int main(int argc, char** argv)
 {
-  pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::enable_config_options();
-  pfasst::init(argc, argv);
-  pfasst::log::add_custom_logger("Advec");
-
+  pfasst::init(argc, argv,
+               pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_opts,
+               pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_logs);
   pfasst::examples::advection_diffusion::run_serial_mlsdc(3);
 }
 #endif

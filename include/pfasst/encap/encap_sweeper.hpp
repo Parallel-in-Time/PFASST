@@ -27,15 +27,6 @@ namespace pfasst
     class EncapSweeper
       : public ISweeper<time>
     {
-      private:
-        static void init_config_options(po::options_description& opts)
-        {
-          opts.add_options()
-            ("abs_res_tol", po::value<time>(), "absolute residual tolerance")
-            ("rel_res_tol", po::value<time>(), "relative residual tolerance")
-            ;
-        }
-
       protected:
         //! @{
         shared_ptr<IQuadrature<time>> quadrature;
@@ -103,6 +94,13 @@ namespace pfasst
         }
         //! @}
 
+        //! @{
+        virtual void set_options() override
+        {
+          this->abs_residual_tol = time(config::get_value<double>("abs_res_tol", this->abs_residual_tol));
+          this->rel_residual_tol = time(config::get_value<double>("rel_res_tol", this->rel_residual_tol));
+        }
+
         virtual void setup(bool coarse) override
         {
           auto const nodes = this->quadrature->get_nodes();
@@ -124,6 +122,7 @@ namespace pfasst
             }
           }
         }
+        //! @}
 
         //! @{
         virtual void spread() override
@@ -132,7 +131,6 @@ namespace pfasst
             this->state[m]->copy(this->state[0]);
           }
         }
-        //! @}
 
         /**
          * Save current solution states.
@@ -148,6 +146,7 @@ namespace pfasst
             }
           }
         }
+        //! @}
 
         //! @{
         void set_quadrature(shared_ptr<IQuadrature<time>> quadrature)
@@ -253,21 +252,21 @@ namespace pfasst
         {
           if (this->abs_residual_tol > 0.0 || this->rel_residual_tol > 0.0) {
             if (this->residuals.size() == 0) {
-              for (auto x: this->get_nodes()) {
-                UNUSED(x);
+              for (size_t m = 0; m < this->get_nodes().size(); m++) {
                 this->residuals.push_back(this->get_factory()->create(pfasst::encap::solution));
               }
             }
             this->residual(this->get_controller()->get_time_step(), this->residuals);
-            vector<time> rnorms;
-            for (auto r: this->residuals) {
-              rnorms.push_back(r->norm0());
+            vector<time> anorms, rnorms;
+            for (size_t m = 0; m < this->get_nodes().size(); m++) {
+              anorms.push_back(this->residuals[m]->norm0());
+              rnorms.push_back(anorms.back() / this->get_state(m)->norm0());
             }
+            auto amax = *std::max_element(anorms.begin(), anorms.end());
             auto rmax = *std::max_element(rnorms.begin(), rnorms.end());
-            if (rmax < this->abs_residual_tol) {
+            if (amax < this->abs_residual_tol || rmax < this->rel_residual_tol) {
               return true;
             }
-            // XXX: check rel norms too
           }
           return false;
         }
@@ -298,16 +297,6 @@ namespace pfasst
             this->start_state->copy(this->end_state);
           }
           this->start_state->broadcast(comm);
-        }
-        //! @}
-
-        //! @{
-        static void enable_config_options(size_t index = -1)
-        {
-          pfasst::config::Options::get_instance()
-            .register_init_function("Encapsulation Sweeper",
-                                    std::function<void(po::options_description&)>(init_config_options),
-                                    index);
         }
         //! @}
     };

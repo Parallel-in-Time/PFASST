@@ -75,10 +75,7 @@ namespace pfasst
 
 
       template<typename scalar>
-      static void init_config_options(po::options_description& opts);
-
-      template<typename scalar>
-      static void enable_config_options(size_t index = -1);
+      static void init_opts();
 
 
       class LogIndent
