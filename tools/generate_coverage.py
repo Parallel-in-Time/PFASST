@@ -1,13 +1,27 @@
+#!/usr/bin/env python
 # coding=utf-8
 """
+This script will aid in generating a test coverage report for PFASST++ including its examples.
+
+A standard CPython 3.3 compatible Python interpreter with standard library support is required.
+No additional modules.
+
+Run it with argument `-h` for usage instructions.
+
 .. moduleauthor:: Torbjörn Klatt <t.klatt@fz-juelich.de>
 """
-
 from sys import version_info
 # require at least Python 3.3
+#  (because subprocess.DEVNULL)
 assert(version_info[0] >= 3 and version_info[1] >= 3)
 
 
+import argparse
+import os
+import os.path
+import shutil
+import subprocess as sp
+import re
 import logging
 from logging.config import dictConfig
 dictConfig(
@@ -34,27 +48,6 @@ dictConfig(
 )
 
 
-import subprocess as sp
-try:
-    sp.check_call('lcov --version', shell=True, stdout=sp.DEVNULL, stderr=sp.DEVNULL)
-except sp.CalledProcessError as err:
-    logging.critical("lcov command not found. It is required.")
-    raise err
-
-try:
-    sp.check_call('genhtml --version', shell=True, stdout=sp.DEVNULL, stderr=sp.DEVNULL)
-except sp.CalledProcessError as err:
-    logging.critical("genhtml command not found. It is required.")
-    raise err
-
-
-import argparse
-import os
-import os.path
-import shutil
-import re
-
-
 class Options(object):
     coverage_dir = ""
     build_dir = ""
@@ -65,7 +58,38 @@ class Options(object):
 
 
 options = Options()
-options.base_dir = os.path.abspath(os.path.curdir)
+options.base_dir = ""
+
+
+def is_lcov_available():
+    try:
+        sp.check_call('lcov --version', shell=True, stdout=sp.DEVNULL, stderr=sp.DEVNULL)
+    except sp.CalledProcessError:
+        logging.critical("lcov command not available. It is required.")
+        return False
+
+    try:
+        sp.check_call('genhtml --version', shell=True, stdout=sp.DEVNULL, stderr=sp.DEVNULL)
+    except sp.CalledProcessError:
+        logging.critical("genhtml command not available. It is required.")
+        return False
+
+    return True
+
+
+def get_project_root():
+    logging.info("Determine project root directory")
+    curr_dir = os.path.abspath(os.path.curdir)
+    logging.debug("Trying current path: %s" % curr_dir)
+    if os.access(curr_dir + "/include", os.R_OK) and os.access(curr_dir + "/examples", os.R_OK):
+        logging.debug("Project root is: %s" % curr_dir)
+        options.base_dir = curr_dir
+    else:
+        logging.warning("Probably called from within the tools dir. "
+                        "This should work but is not recommended. "
+                        "Trying parent directory as project root.")
+        os.chdir("..")
+        get_project_root()
 
 
 def setup_and_init_options():
@@ -80,6 +104,9 @@ def setup_and_init_options():
                         help="output directory for generated coverage report")
 
     _args = parser.parse_args()
+
+    get_project_root()
+
     if not os.access(_args.build_dir, os.W_OK):
         logging.critical("Given build path could not be found: %s" % _args.build_dir)
         raise ValueError("Given build path could not be found: %s" % _args.build_dir)
@@ -196,6 +223,7 @@ def generate_html():
 
 
 if __name__ == "__main__":
+    assert(is_lcov_available())
     setup_and_init_options()
     get_test_directories()
     for test in options.tests:
