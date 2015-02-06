@@ -36,7 +36,7 @@ namespace simple_physics_solver
                                  const size_t num_particles, const double t,
                                  const SimplePhysicsSolverConfig* config,
                                  double* exyz, double* phis);
-  
+
   void evaluate_e_field(const double* positions, const double* charges, const double* masses,
                         const size_t num_particles, const double t,
                         const SimplePhysicsSolverConfig* config,

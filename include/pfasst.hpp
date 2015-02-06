@@ -6,6 +6,7 @@
 #include "pfasst/interfaces.hpp"
 #include "pfasst/quadrature.hpp"
 #include "pfasst/sdc.hpp"
+#include "pfasst/encap/encap_sweeper.hpp"
 
 namespace pfasst
 {

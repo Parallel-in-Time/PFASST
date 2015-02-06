@@ -18,10 +18,7 @@ namespace pfasst
     namespace boris
     {
       template<typename precision>
-      using ParticleCloudComponent = vector<vector<precision>>;
-
-      template<typename precision>
-      using AttributeValues = ParticleComponent<precision>;
+      using ParticleCloudComponent = vector<precision>;
 
 
       template<typename precision>
@@ -34,8 +31,8 @@ namespace pfasst
           size_t _num_particles;
           ParticleCloudComponent<precision> _positions;
           ParticleCloudComponent<precision> _velocities;
-          AttributeValues<precision> _charges;
-          AttributeValues<precision> _masses;
+          vector<precision> _charges;
+          vector<precision> _masses;
 
           precision _default_charge;
           precision _default_mass;
@@ -48,28 +45,33 @@ namespace pfasst
           virtual ~ParticleCloud();
 
           virtual void zero() override;
-          virtual void copy(shared_ptr<encap::Encapsulation<precision>> other);
+          virtual void copy(shared_ptr<const encap::Encapsulation<precision>> other);
 
-          void extend(const size_t new_size);
-          void erase(const size_t index);
-          void push_back(const shared_ptr<Particle<precision>>& particle);
-          void insert(const size_t pos, const shared_ptr<Particle<precision>>& paticle);
-
-          size_t size() const;
-          size_t dim() const;
-          ParticleCloudComponent<precision>& positions();
-          ParticleCloudComponent<precision>& velocities();
-          vector<precision>& charges();
-          vector<precision>& masses();
+          inline size_t size() const;
+          inline size_t dim() const;
+                ParticleCloudComponent<precision>& positions();
+          const ParticleCloudComponent<precision>& positions() const;
+                ParticleCloudComponent<precision>& velocities();
+          const ParticleCloudComponent<precision>& velocities() const;
+                vector<precision>& charges();
+          const vector<precision>& charges() const;
+                vector<precision>& masses();
+          const vector<precision>& masses() const;
 
           ParticleComponent<precision> center_of_mass() const;
+          // !! EXPENSIVE !!
           shared_ptr<Particle<precision>> operator[](const size_t index) const;
+          // !! EXPENSIVE !!
           shared_ptr<Particle<precision>> at(const size_t index) const;
           void set_at(const size_t index, const shared_ptr<Particle<precision>>& particle);
-          // !! EXPENSIVE !!
+
+          // !! VERY !! EXPENSIVE !! (i.e. never use for production code)
           vector<shared_ptr<Particle<precision>>> particles() const;
 
           void distribute_around_center(const shared_ptr<Particle<precision>>& center);
+
+          // TODO: unify behaviour with particle_util::norm0 (e.g. norm_max vs. norm0 (==sqrt(^2))
+          virtual precision norm0() const;
 
           virtual void log(el::base::type::ostream_t& os) const;
       };
@@ -92,6 +94,8 @@ namespace pfasst
 
       template<typename precision>
       inline MAKE_LOGGABLE(shared_ptr<ParticleCloud<precision>>, sp_cloud, os);
+      template<typename precision>
+      inline MAKE_LOGGABLE(shared_ptr<const ParticleCloud<precision>>, sp_cloud, os);
 
 
       template<typename precision>
@@ -107,8 +111,8 @@ namespace pfasst
         public:
           ParticleCloudFactory(const size_t num_particles, const size_t dim, const precision default_charge,
                                const precision default_mass);
-          size_t num_particles() const;
-          size_t dim() const;
+          inline size_t num_particles() const;
+          inline size_t dim() const;
           virtual shared_ptr<encap::Encapsulation<precision>> create(const encap::EncapType);
       };
     }  // ::pfasst::examples::boris

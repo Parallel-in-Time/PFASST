@@ -39,6 +39,9 @@ namespace pfasst
         size_t nnodes = config::get_value<size_t>("num_nodes", 5);
         size_t ndofs  = config::get_value<size_t>("spatial_dofs", 128);
 
+        const double abs_res_tol = pfasst::config::get_value<double>("abs_res_tol", 0.0);
+        const double rel_res_tol = pfasst::config::get_value<double>("rel_res_tol", 0.0);
+
         /*
          * build space/time discretisation levels and add them to mlsdc
          * controller.  this loop adds the finest level first, and
@@ -53,6 +56,7 @@ namespace pfasst
 
           sweeper->set_quadrature(quad);
           sweeper->set_factory(factory);
+          sweeper->set_residual_tolerances(abs_res_tol, rel_res_tol);
 
           mlsdc.add_level(sweeper, transfer);
 

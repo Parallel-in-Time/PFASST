@@ -2,12 +2,14 @@
 
 #include <algorithm>
 #include <cassert>
+#include <functional>
 #include <random>
 #include <string>
 using namespace std;
 
 #include <boost/format.hpp>
 
+#include <pfasst/globals.hpp>
 #include <pfasst/site_config.hpp>
 #include <pfasst/logging.hpp>
 
@@ -25,8 +27,8 @@ namespace pfasst
                                               const precision default_charge, const precision default_mass)
         :   _dim(dim)
           , _num_particles(num_particles)
-          , _positions(num_particles)
-          , _velocities(num_particles)
+          , _positions(num_particles * dim)
+          , _velocities(num_particles * dim)
           , _charges(num_particles, default_charge)
           , _masses(num_particles, default_mass)
           , _default_charge(default_charge)
@@ -42,17 +44,23 @@ namespace pfasst
       template<typename precision>
       void ParticleCloud<precision>::zero()
       {
-        fill(this->_positions.begin(), this->_positions.end(), vector<precision>(this->dim(), precision(0.0)));
-        fill(this->_velocities.begin(), this->_velocities.end(), vector<precision>(this->dim(), precision(0.0)));
+        fill(this->_positions.begin(), this->_positions.end(), precision(0.0));
+        fill(this->_velocities.begin(), this->_velocities.end(), precision(0.0));
         fill(this->_charges.begin(), this->_charges.end(), this->_default_charge);
         fill(this->_masses.begin(), this->_masses.end(), this->_default_mass);
       }
 
       template<typename precision>
-      void ParticleCloud<precision>::copy(shared_ptr<encap::Encapsulation<precision>> other)
+      void ParticleCloud<precision>::copy(shared_ptr<const encap::Encapsulation<precision>> other)
       {
-        shared_ptr<ParticleCloud<precision>> other_c = dynamic_pointer_cast<ParticleCloud<precision>>(other);
+        shared_ptr<const ParticleCloud<precision>> other_c = dynamic_pointer_cast<const ParticleCloud<precision>>(other);
         assert(other_c);
+//         this->copy(other_c);
+//       }
+
+//       template<typename precision>
+//       void ParticleCloud<precision>::copy(shared_ptr<const ParticleCloud<precision>> other)
+//       {
         this->_dim = other_c->dim();
         this->_num_particles = other_c->size();
         this->_positions = other_c->positions();
@@ -63,6 +71,7 @@ namespace pfasst
         this->_default_mass = other_c->_default_mass;
       }
 
+      /*
       template<typename precision>
       void ParticleCloud<precision>::extend(const size_t new_size)
       {
@@ -71,12 +80,15 @@ namespace pfasst
                                  + to_string(this->_num_particles) + ")");
         }
 
-        for (size_t new_elem = 0; new_elem < (new_size - this->_num_particles); ++new_elem) {
-          this->_positions.push_back(vector<precision>(this->_dim));
-          this->_velocities.push_back(vector<precision>(this->_dim));
-          this->_charges.push_back(this->_default_charge);
-          this->_masses.push_back(this->_default_mass);
-        }
+        this->_positions.resize(new_size * this->dim());
+        fill(this->_positions.begin() + this->_num_particles, this->_positions.end(), precision(0.0));
+        this->_velocities.resize(new_size * this->dim());
+        fill(this->_velocities.begin() + this->_num_particles, this->_velocities.end(), precision(0.0));
+        this->_masses.resize(new_size);
+        fill(this->_masses.begin() + this->_num_particles, this->_masses.end(), this->_default_mass);
+        this->_charges.resize(new_size);
+        fill(this->_charges.begin() + this->_num_particles, this->_charges.end(), this->_default_charge);
+
         this->_num_particles = new_size;
       }
 
@@ -124,15 +136,16 @@ namespace pfasst
         this->_masses.insert(pos, particle->mass());
         this->_num_particles++;
       }
+      */
 
       template<typename precision>
-      size_t ParticleCloud<precision>::size() const
+      inline size_t ParticleCloud<precision>::size() const
       {
         return this->_num_particles;
       }
 
       template<typename precision>
-      size_t ParticleCloud<precision>::dim() const
+      inline size_t ParticleCloud<precision>::dim() const
       {
         return this->_dim;
       }
@@ -144,7 +157,19 @@ namespace pfasst
       }
 
       template<typename precision>
+      const ParticleCloudComponent<precision>& ParticleCloud<precision>::positions() const
+      {
+        return this->_positions;
+      }
+
+      template<typename precision>
       ParticleCloudComponent<precision>& ParticleCloud<precision>::velocities()
+      {
+        return this->_velocities;
+      }
+
+      template<typename precision>
+      const ParticleCloudComponent<precision>& ParticleCloud<precision>::velocities() const
       {
         return this->_velocities;
       }
@@ -156,7 +181,19 @@ namespace pfasst
       }
 
       template<typename precision>
+      const vector<precision>& ParticleCloud<precision>::charges() const 
+      {
+        return this->_charges;
+      }
+
+      template<typename precision>
       vector<precision>& ParticleCloud<precision>::masses()
+      {
+        return this->_masses;
+      }
+
+      template<typename precision>
+      const vector<precision>& ParticleCloud<precision>::masses() const
       {
         return this->_masses;
       }
@@ -164,8 +201,8 @@ namespace pfasst
       template<typename precision>
       vector<shared_ptr<Particle<precision>>> ParticleCloud<precision>::particles() const
       {
-        vector<shared_ptr<Particle<precision>>> particles(this->_num_particles);
-        for (size_t index = 0; index < this->_num_particles; ++index) {
+        vector<shared_ptr<Particle<precision>>> particles(this->size());
+        for (size_t index = 0; index < this->size(); ++index) {
           particles[index] = this->operator[](index);
         }
         return particles;
@@ -174,19 +211,21 @@ namespace pfasst
       template<typename precision>
       ParticleComponent<precision> ParticleCloud<precision>::center_of_mass() const
       {
-        ParticleComponent<precision> center(this->_dim);
-        for (auto elem : this->_positions) {
-          center += elem;
+        ParticleComponent<precision> center(this->dim());
+        for (size_t p = 0; p < this->size(); ++p) {
+          // conter += position[p]
+          std::transform(center.cbegin(), center.cend(), this->positions().cbegin() + (p * this->dim()),
+                         center.begin(), std::plus<precision>());
         }
-        return center / this->_num_particles;
+        return center / this->size();
       }
 
       template<typename precision>
       shared_ptr<Particle<precision>> ParticleCloud<precision>::operator[](const size_t index) const
       {
-        shared_ptr<Particle<precision>> particle = make_shared<Particle<precision>>(this->_dim);
-        particle->pos() = this->_positions[index];
-        particle->vel() = this->_velocities[index];
+        shared_ptr<Particle<precision>> particle = make_shared<Particle<precision>>(this->dim());
+        copy_n(this->positions().cbegin() + (index * this->dim()), this->dim(), particle->pos().begin());
+        copy_n(this->velocities().cbegin() + (index * this->dim()), this->dim(), particle->vel().begin());
         particle->set_charge(this->_charges[index]);
         particle->set_mass(this->_masses[index]);
         return particle;
@@ -204,8 +243,8 @@ namespace pfasst
       {
         assert(this->size() > index);
         assert(particle->dim() == this->dim());
-        this->_positions[index] = particle->pos();
-        this->_velocities[index] = particle->vel();
+        copy_n(particle->pos().cbegin(), this->dim(), this->positions().begin() + (index * this->dim()));
+        copy_n(particle->vel().cbegin(), this->dim(), this->velocities().begin() + (index * this->dim()));
         this->_masses[index] = particle->mass();
         this->_charges[index] = particle->charge();
       }
@@ -217,7 +256,7 @@ namespace pfasst
         VLOG(3) << LOG_INDENT << "distributing " << this->size() << " particles around center " << center;
         assert(this->size() > 0);
 
-        precision scale = 25.0;
+        precision scale = 1000.0;
 
         #ifdef PFASST_DEFAULT_RANDOM_SEED
           default_random_engine rd_gen(PFASST_RANDOM_SEED);
@@ -236,31 +275,35 @@ namespace pfasst
 
         if (this->size() % 2 == 1) {
           this->set_at(p, center);
-          VLOG(5) << LOG_INDENT << "setting p=0 to center";
+          VLOG(5) << LOG_INDENT << "setting p=1 to center";
           p++;
         }
-        for (;p < this->size(); p += 2) {
+        for (;p < this->size(); ++p) {
           ParticleComponent<precision> pos_rand(this->dim());
           ParticleComponent<precision> vel_rand(this->dim());
-          for (size_t d = 0; d < this->dim(); ++d) {
-            pos_rand[d] = dist_pos(rd_gen);
-            vel_rand[d] = dist_vel(rd_gen);
-          }
-          this->_positions[p] = center->pos() + pos_rand;
-          this->_positions[p+1] = center->pos() - pos_rand;
-          this->_velocities[p] = center->vel() + vel_rand;
-          this->_velocities[p+1] = center->vel() - vel_rand;
-          VLOG(5) << LOG_INDENT << "p=" << p << ": " << this->at(p);
-          VLOG(5) << LOG_INDENT << "p=" << p+1 << ": " << this->at(p+1);
+          std::transform(center->pos().cbegin(), center->pos().cend(), pos_rand.begin(),
+                         [&](const precision& c) { return c + dist_pos(rd_gen); });
+          std::transform(center->pos().cbegin(), center->pos().cend(), vel_rand.begin(),
+                         [&](const precision& c) { return c + dist_vel(rd_gen); });
+          std::copy(pos_rand.cbegin(), pos_rand.cend(), this->positions().begin() + (p * this->dim()));
+          std::copy(vel_rand.cbegin(), vel_rand.cend(), this->velocities().begin() + (p * this->dim()));
+          VLOG(5) << LOG_INDENT << "p=" << (p+1) << ": " << this->at(p);
         }
+        assert(p == this->size());
         VLOG(3) << LOG_INDENT << "center after distribute: " << this->center_of_mass();
+      }
+
+      template<typename precision>
+      precision ParticleCloud<precision>::norm0() const
+      {
+        return std::max(max_abs(this->positions()), max_abs(this->velocities()));
       }
 
       template<typename precision>
       void ParticleCloud<precision>::log(el::base::type::ostream_t& os) const
       {
         os << fixed << setprecision(LOG_PRECISION);
-        os << "ParticleCloud(n=" << this->_num_particles << ", particles=" << this->particles() << ")";
+        os << "ParticleCloud(n=" << this->size() << ", d=" << this->dim() << ", particles=" << this->particles() << ")";
         os.unsetf(ios_base::floatfield);
       }
 
@@ -270,11 +313,7 @@ namespace pfasst
       {
         assert(first.dim() == second.dim());
         vector<precision> diff = first.pos() - second.pos();
-        precision dist = precision(0.0);
-        for (size_t i = 0; i < first.dim(); ++i) {
-          dist += diff[i] * diff[i];
-        }
-        return sqrt(dist);
+        return norm0(diff);
       }
 
       template<typename precision>
@@ -310,10 +349,19 @@ namespace pfasst
         return os;
       }
 
+      template<typename precision>
+      inline MAKE_LOGGABLE(shared_ptr<const ParticleCloud<precision>>, sp_cloud, os)
+      {
+        os << "<" << addressof(sp_cloud) << ">";
+        sp_cloud->log(os);
+        return os;
+      }
+
 
       template<typename precision>
       ParticleCloudFactory<precision>::ParticleCloudFactory(const size_t num_particles, const size_t dim,
-                                                 const precision default_charge, const precision default_mass)
+                                                            const precision default_charge,
+                                                            const precision default_mass)
         :   _num_particles(num_particles)
           , _dim(dim)
           , _default_charge(default_charge)
@@ -321,13 +369,13 @@ namespace pfasst
       {}
 
       template<typename precision>
-      size_t ParticleCloudFactory<precision>::num_particles() const
+      inline size_t ParticleCloudFactory<precision>::num_particles() const
       {
         return this->_num_particles;
       }
 
       template<typename precision>
-      size_t ParticleCloudFactory<precision>::dim() const
+      inline size_t ParticleCloudFactory<precision>::dim() const
       {
         return this->_dim;
       }
@@ -336,7 +384,7 @@ namespace pfasst
       shared_ptr<encap::Encapsulation<precision>>
       ParticleCloudFactory<precision>::create(const encap::EncapType)
       {
-        return make_shared<ParticleCloud<precision>>(this->_num_particles, this->_dim,
+        return make_shared<ParticleCloud<precision>>(this->num_particles(), this->dim(),
                                                      this->_default_charge, this->_default_mass);
       }
     }  // ::pfasst::examples::boris

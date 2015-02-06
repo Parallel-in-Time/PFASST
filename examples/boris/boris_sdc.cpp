@@ -11,6 +11,7 @@
 #include "bindings/wrapper_simple_physics_solver.hpp"
 #include "boris_sweeper.hpp"
 
+
 namespace pfasst
 {
   namespace examples
@@ -19,7 +20,8 @@ namespace pfasst
     {
       template<typename scalar>
       error_map<scalar> run_boris_sdc(const size_t nsteps, const scalar dt, const size_t nnodes,
-                                      const size_t nparticles, const size_t niters)
+                                      const size_t nparticles, const size_t niters,
+                                      const double abs_res_tol, const double rel_res_tol)
       {
         SDC<> sdc;
 
@@ -38,6 +40,7 @@ namespace pfasst
 
         sweeper->set_quadrature(quad);
         sweeper->set_factory(factory);
+        sweeper->set_residual_tolerances(abs_res_tol, rel_res_tol);
 
         sdc.add_level(sweeper);
         sdc.set_duration(0.0, nsteps*dt, dt, niters);
@@ -48,9 +51,9 @@ namespace pfasst
         center->vel()[0] = 100;
         center->vel()[2] = 100;
 
-        shared_ptr<ParticleCloud<double>> q0 = dynamic_pointer_cast<ParticleCloud<double>>(sweeper->get_state(0));
+        shared_ptr<ParticleCloud<double>> q0 = dynamic_pointer_cast<ParticleCloud<double>>(sweeper->get_start_state());
         q0->distribute_around_center(center);
-        LOG(INFO) << OUT::green << "Initial Particle: " << *(dynamic_pointer_cast<ParticleCloud<double>>(sweeper->get_state(0)));
+        CLOG(INFO, "Boris") << OUT::green << "Initial Particle: " << *(dynamic_pointer_cast<ParticleCloud<double>>(sweeper->get_start_state()));
 
         sweeper->set_initial_energy();
         sdc.run();
@@ -65,13 +68,17 @@ namespace pfasst
 int main(int argc, char** argv)
 {
   pfasst::init(argc, argv, pfasst::examples::boris::init_opts<double>);
+  pfasst::log::add_custom_logger("Boris");
+  pfasst::log::add_custom_logger("Solver");
 
-  const size_t nsteps     = pfasst::config::get_value<size_t>("num_steps", 1);
-  const double dt         = pfasst::config::get_value<double>("delta_step", 0.015625);
-  const size_t nnodes     = pfasst::config::get_value<size_t>("num_nodes", 5);
-  const size_t nparticles = pfasst::config::get_value<size_t>("num_particles", 1);
-  const size_t niters     = pfasst::config::get_value<size_t>("num_iter", 2);
+  const size_t nsteps      = pfasst::config::get_value<size_t>("num_steps", 1);
+  const double dt          = pfasst::config::get_value<double>("delta_step", 0.015625);
+  const size_t nnodes      = pfasst::config::get_value<size_t>("num_nodes", 5);
+  const size_t nparticles  = pfasst::config::get_value<size_t>("num_particles", 1);
+  const size_t niters      = pfasst::config::get_value<size_t>("num_iter", 2);
+  const double abs_res_tol = pfasst::config::get_value<double>("abs_res_tol", 0.0);
+  const double rel_res_tol = pfasst::config::get_value<double>("rel_res_tol", 0.0);
 
-  pfasst::examples::boris::run_boris_sdc<double>(nsteps, dt, nnodes, nparticles, niters);
+  pfasst::examples::boris::run_boris_sdc<double>(nsteps, dt, nnodes, nparticles, niters, abs_res_tol, rel_res_tol);
 }
 #endif

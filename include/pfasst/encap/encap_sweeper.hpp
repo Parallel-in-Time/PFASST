@@ -7,10 +7,12 @@
 
 #include <algorithm>
 #include <cstdlib>
-#include <vector>
 #include <memory>
+#include <vector>
+using namespace std;
 
 #include "../globals.hpp"
+#include "../config.hpp"
 #include "../interfaces.hpp"
 #include "../quadrature.hpp"
 #include "encapsulation.hpp"

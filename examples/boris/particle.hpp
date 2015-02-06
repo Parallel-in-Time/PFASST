@@ -41,7 +41,7 @@ namespace pfasst
           Particle(const size_t dim, const precision charge, const precision mass);
           virtual ~Particle();
 
-                size_t dim() const;
+          inline size_t dim() const;
                 ParticleComponent<precision>& pos();
           const ParticleComponent<precision>& pos() const;
                 ParticleComponent<precision>& vel();
@@ -50,8 +50,6 @@ namespace pfasst
           const precision mass() const;
           const precision alpha() const;
 
-//           void set_pos(const ParticleComponent<precision>& pos);
-//           void set_vel(const ParticleComponent<precision>& vel);
           void set_charge(const precision& charge);
           void set_mass(const precision& mass);
 
