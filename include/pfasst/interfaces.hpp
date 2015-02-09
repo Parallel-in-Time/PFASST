@@ -33,10 +33,6 @@ namespace pfasst
        * @param[in] msg component or algorithm the throwing function is required for
        */
       explicit NotImplementedYet(const string& msg);
-
-      /**
-       * message string is prepended by the string `Not implemented/supported yet, required for: `
-       */
       virtual const char* what() const throw();
   };
 
@@ -54,10 +50,6 @@ namespace pfasst
 
     public:
       explicit ValueError(const string& msg);
-
-      /**
-       * message string is prepended by the string `ValueError: `
-       */
       virtual const char* what() const throw();
   };
 
@@ -121,9 +113,9 @@ namespace pfasst
       /**
        * set the sweepers controller.
        */
-      void set_controller(Controller<time>* ctrl);
+      virtual void set_controller(Controller<time>* ctrl);
 
-      Controller<time>* get_controller();
+      virtual Controller<time>* get_controller();
       //! @}
 
       //! @{
