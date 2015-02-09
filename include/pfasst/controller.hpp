@@ -1,23 +1,23 @@
-/*
- * Base controller (see also SDC, MLSDC, and PFASST controllers).
- */
-
 #ifndef _PFASST_CONTROLLER_HPP_
 #define _PFASST_CONTROLLER_HPP_
 
-#include <deque>
-#include <memory>
 #include <cassert>
+#include <deque>
 #include <iterator>
-#include <iostream>
+#include <memory>
+using namespace std;
 
 #include "interfaces.hpp"
+
 
 namespace pfasst
 {
   /**
    * base SDC/MLSDC/PFASST controller.
-   * @tparam time time precision
+   *
+   * Base controller (see also SDC, MLSDC, and PFASST controllers).
+   *
+   * @tparam time time precision;
    *     defaults to pfasst::time_precision
    */
   template<typename time = time_precision>
@@ -35,75 +35,33 @@ namespace pfasst
       //! @}
 
     public:
-      Controller()
-      {
-        this->t = 0.0;
-        this->tend = 0.0;
-        this->dt = 0.0;
-        this->step = 0;
-        this->iteration = 0;
-      }
+      Controller();
+      virtual ~Controller();
 
       //! @{
-      virtual void set_options(bool all_sweepers=true)
-      {
-        this->tend = config::get_value<double>("tend", this->tend);
-        this->dt = config::get_value<double>("dt", this->dt);
-        this->max_iterations = config::get_value<size_t>("num_iters", this->max_iterations);
-
-        // XXX: add some nice "nsteps" logic here
-
-        if (all_sweepers) {
-          for (auto l = coarsest(); l <= finest(); ++l) {
-            l.current()->set_options();
-          }
-        }
-      }
-
-      virtual void setup()
-      {
-        for (auto l = coarsest(); l <= finest(); ++l) {
-          l.current()->set_controller(this);
-          l.current()->setup();
-        }
-      }
-
-      void set_duration(time t0, time tend, time dt, size_t niters)
-      {
-        this->t = t0;
-        this->tend = tend;
-        this->dt = dt;
-        this->step = 0;
-        this->iteration = 0;
-        this->max_iterations = niters;
-      }
-
-      void add_level(shared_ptr<ISweeper<time>> swpr,
-                     shared_ptr<ITransfer<time>> trnsfr = shared_ptr<ITransfer<time>>(nullptr),
-                     bool coarse = true)
-      {
-        if (coarse) {
-          levels.push_front(swpr);
-          transfer.push_front(trnsfr);
-        } else {
-          levels.push_back(swpr);
-          transfer.push_back(trnsfr);
-        }
-      }
+      virtual void set_options(bool all_sweepers = true);
+      virtual void setup();
+      virtual void set_duration(time t0, time tend, time dt, size_t niters);
+      virtual void add_level(shared_ptr<ISweeper<time>> swpr,
+                             shared_ptr<ITransfer<time>> trnsfr = shared_ptr<ITransfer<time>>(nullptr),
+                             bool coarse = true);
       //! @}
 
       //! @{
+      virtual size_t nlevels();
+
       template<typename R = ISweeper<time>>
       shared_ptr<R> get_level(size_t level)
       {
-        shared_ptr<R> r = dynamic_pointer_cast<R>(levels[level]); assert(r);
+        shared_ptr<R> r = dynamic_pointer_cast<R>(levels[level]);
+        assert(r);
         return r;
       }
 
       template<typename R = ISweeper<time>>
       shared_ptr<R> get_finest()
       {
-        return get_level<R>(nlevels()-1);
+        return get_level<R>(nlevels() - 1);
       }
 
       template<typename R = ISweeper<time>>
@@ -115,14 +73,26 @@ namespace pfasst
       template<typename R = ITransfer<time>>
       shared_ptr<R> get_transfer(size_t level)
       {
-        shared_ptr<R> r = dynamic_pointer_cast<R>(transfer[level]); assert(r);
+        shared_ptr<R> r = dynamic_pointer_cast<R>(transfer[level]);
+        assert(r);
         return r;
       }
+      //! @}
 
-      size_t nlevels()
-      {
-        return levels.size();
-      }
+      //! @{
+      /**
+       * Get current time step number.
+       */
+      virtual size_t get_step();
+      virtual void   set_step(size_t n);
+      virtual time   get_time_step();
+      virtual time   get_time();
+      virtual void   advance_time(size_t nsteps = 1);
+      virtual time   get_end_time();
+      virtual size_t get_iteration();
+      virtual void   set_iteration(size_t iter);
+      virtual void   advance_iteration();
+      virtual size_t get_max_iterations();
       //! @}
 
       /**
@@ -140,6 +110,7 @@ namespace pfasst
         : iterator<random_access_iterator_tag, shared_ptr<ISweeper<time>>, int,
                    ISweeper<time>*, ISweeper<time>>
       {
+        protected:
           Controller* ts;
 
         public:
@@ -156,9 +127,7 @@ namespace pfasst
           //! @}
 
           //! @{
-          LevelIter(int level, Controller* ts)
-            : ts(ts), level(level)
-          { }
+          LevelIter(int level, Controller* ts);
           //! @}
 
           //! @{
@@ -167,16 +136,19 @@ namespace pfasst
           {
             return ts->template get_level<R>(level);
           }
+
           template<typename R = ISweeper<time>>
           shared_ptr<R> fine()
           {
             return ts->template get_level<R>(level + 1);
           }
+
           template<typename R = ISweeper<time>>
           shared_ptr<R> coarse()
           {
             return ts->template get_level<R>(level - 1);
           }
+
           template<typename R = ITransfer<time>>
           shared_ptr<R> transfer()
           {
@@ -187,88 +159,41 @@ namespace pfasst
           //! @{
           // required by std::iterator
           template<typename R = reference>
-          shared_ptr<R> operator*()                { return current<R>(); }
-          LevelIter  operator++()                  { level++; return *this; }
+          shared_ptr<R> operator*()
+          {
+            return current<R>();
+          }
+
           // required by std::input_iterator_tag
           template<typename R = reference>
-          shared_ptr<R> operator->()               { return current<R>(); }
-          bool       operator==(LevelIter i)       { return level == i.level; }
-          bool       operator!=(LevelIter i)       { return level != i.level; }
+          shared_ptr<R> operator->()
+          {
+            return current<R>();
+          }
+
+          virtual LevelIter     operator++();
+          virtual bool          operator==(LevelIter i);
+          virtual bool          operator!=(LevelIter i);
           // required by std::bidirectional_iterator_tag
-          LevelIter  operator--()                  { level--; return *this; }
+          virtual LevelIter     operator--();
           // required by std::random_access_iterator_tag
-          LevelIter  operator- (difference_type i) { return LevelIter(level - i, ts); }
-          LevelIter  operator+ (difference_type i) { return LevelIter(level + i, ts); }
-          bool       operator<=(LevelIter i)       { return level <= i.level; }
-          bool       operator>=(LevelIter i)       { return level >= i.level; }
-          bool       operator< (LevelIter i)       { return level <  i.level; }
-          bool       operator> (LevelIter i)       { return level >  i.level; }
+          virtual LevelIter     operator- (difference_type i);
+          virtual LevelIter     operator+ (difference_type i);
+          virtual bool          operator<=(LevelIter i);
+          virtual bool          operator>=(LevelIter i);
+          virtual bool          operator< (LevelIter i);
+          virtual bool          operator> (LevelIter i);
           //! @}
       };
 
       //! @{
-      LevelIter finest()   { return LevelIter(nlevels() - 1, this); }
-      LevelIter coarsest() { return LevelIter(0, this); }
-      //! @}
-
-      //! @{
-      /**
-       * Get current time step number.
-       */
-      size_t get_step()
-      {
-        return step;
-      }
-
-      void set_step(size_t n)
-      {
-        t += (n - step)*dt;
-        step = n;
-      }
-
-      time get_time_step()
-      {
-        return dt;
-      }
-
-      time get_time()
-      {
-        return t;
-      }
-
-      void advance_time(size_t nsteps=1)
-      {
-        step += nsteps;
-        t += nsteps*dt;
-      }
-
-      time get_end_time()
-      {
-        return tend;
-      }
-
-      size_t get_iteration()
-      {
-        return iteration;
-      }
-
-      void set_iteration(size_t iter)
-      {
-        this->iteration = iter;
-      }
-
-      void advance_iteration()
-      {
-        iteration++;
-      }
-
-      size_t get_max_iterations()
-      {
-        return max_iterations;
-      }
+      virtual LevelIter finest();
+      virtual LevelIter coarsest();
       //! @}
   };
 
 }  // ::pfasst
+
+#include "controller_impl.hpp"
 
 #endif
