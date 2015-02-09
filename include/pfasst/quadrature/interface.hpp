@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include <vector>
+using namespace std;
 
 #include <Eigen/Dense>
 
@@ -16,7 +17,6 @@ using Matrix = Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowM
 template<typename scalar>
 using Index = typename Matrix<scalar>::Index;
 
-using namespace std;
 
 
 namespace pfasst
@@ -152,68 +152,32 @@ namespace pfasst
 
       public:
         //! @{
-        explicit IQuadrature(const size_t num_nodes)
-          : num_nodes(num_nodes)
-        {
-          if (this->num_nodes == 0) {
-            throw invalid_argument("Any quadrature requires at least one quadrature nodes.");
-          }
-        }
-
-        IQuadrature()
-          : num_nodes(0)
-        {}
-
+        explicit IQuadrature(const size_t num_nodes);
+        IQuadrature();
         virtual ~IQuadrature() = default;
         //! @}
 
         //! @{
-        virtual const Matrix<precision>& get_q_mat() const { return this->q_mat; }
-
-        virtual const Matrix<precision>& get_s_mat() const { return this->s_mat; }
-
-        virtual const Matrix<precision>& get_b_mat() const { return this->b_mat; }
-
-        virtual const vector<precision>& get_q_vec() const { return this->q_vec; }
-
-        virtual const vector<precision>& get_nodes() const { return this->nodes; }
-
-        virtual size_t get_num_nodes() const { return this->num_nodes; }
-
-        virtual bool left_is_node() const
-        {
-          throw NotImplementedYet("Quadrature");
-          return LEFT_IS_NODE;
-        }
-
-        virtual bool right_is_node() const
-        {
-          throw NotImplementedYet("Quadrature");
-          return RIGHT_IS_NODE;
-        }
+        virtual const Matrix<precision>& get_q_mat() const;
+        virtual const Matrix<precision>& get_s_mat() const;
+        virtual const Matrix<precision>& get_b_mat() const;
+        virtual const vector<precision>& get_q_vec() const;
+        virtual const vector<precision>& get_nodes() const;
+        virtual size_t get_num_nodes() const;
+        virtual bool left_is_node() const;
+        virtual bool right_is_node() const;
         //! @}
 
       protected:
         //! @{
-        virtual void compute_nodes()
-        {
-          throw NotImplementedYet("Implemented by derived classes.");
-        }
-
-        virtual void compute_weights()
-        {
-          this->q_mat = compute_q_matrix(this->nodes);
-          this->s_mat = compute_s_matrix(this->q_mat);
-          this->q_vec = compute_q_vec(this->nodes);
-          this->b_mat = Matrix<precision>::Zero(1, this->num_nodes);
-          for (size_t i = 0; i < this->num_nodes; i++){
-            this->b_mat(0,i) = this->q_vec[i];
-          }
-        }
+        virtual void compute_nodes();
+        virtual void compute_weights();
         //! @}
     };
 
   }  // ::pfasst::quadrature
 }  // ::pfasst
+
+#include "interface_imp.hpp"
 
 #endif  // _PFASST__QUADRATURE__INTERFACE_HPP_
