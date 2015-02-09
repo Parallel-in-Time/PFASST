@@ -5,25 +5,16 @@
 #ifndef _PFASST_INTERFACES_HPP_
 #define _PFASST_INTERFACES_HPP_
 
-#include <cassert>
-#include <deque>
 #include <exception>
-#include <iterator>
 #include <memory>
 #include <string>
-
-#include "globals.hpp"
-
 using namespace std;
+
 
 namespace pfasst
 {
-
   using time_precision = double;
 
-  // forward declare for ISweeper
-  template<typename time>
-  class Controller;
 
   /**
    * not implemented yet exception.
@@ -34,16 +25,11 @@ namespace pfasst
   class NotImplementedYet
     : public exception
   {
+    protected:
       string msg;
     public:
-      NotImplementedYet(string msg)
-        : msg(msg)
-      {}
-
-      const char* what() const throw()
-      {
-        return (string("Not implemented/supported yet, required for: ") + this->msg).c_str();
-      }
+      NotImplementedYet(const string& msg);
+      virtual const char* what() const throw();
   };
 
 
@@ -55,29 +41,27 @@ namespace pfasst
   class ValueError
     : public exception
   {
+    protected:
       string msg;
     public:
-      ValueError(string msg)
-        : msg(msg)
-      {}
-
-      const char* what() const throw()
-      {
-        return (string("ValueError: ") + this->msg).c_str();
-      }
+      ValueError(const string& msg);
+      virtual const char* what() const throw();
   };
 
+
+  // forward declare for IStatus
   class IStatus;
 
   class ICommunicator
   {
     public:
-      virtual ~ICommunicator() { }
+      virtual ~ICommunicator();
       virtual int size() = 0;
       virtual int rank() = 0;
 
       shared_ptr<IStatus> status;
   };
+
 
   class IStatus
   {
@@ -85,7 +69,7 @@ namespace pfasst
       ICommunicator* comm;
 
     public:
-      virtual ~IStatus() { }
+      virtual ~IStatus();
       virtual void clear() = 0;
       virtual void set_converged(bool converged) = 0;
       virtual bool get_converged(int rank) = 0;
@@ -93,29 +77,15 @@ namespace pfasst
       virtual void send() = 0;
       virtual void recv() = 0;
 
-      virtual void set_comm(ICommunicator* comm)
-      {
-        this->comm = comm;
-      }
-
-      virtual bool previous_is_iterating()
-      {
-        if (this->comm->rank() == 0) {
-          return false;
-        }
-        return !this->get_converged(this->comm->rank()-1);
-      }
-
-      virtual bool keep_iterating()
-      {
-        if (this->comm->rank() == 0) {
-          return !this->get_converged(0);
-        }
-        return !this->get_converged(this->comm->rank()) || !this->get_converged(this->comm->rank()-1);
-      }
+      virtual void set_comm(ICommunicator* comm);
+      virtual bool previous_is_iterating();
+      virtual bool keep_iterating();
   };
 
 
+  // forward declare for ISweeper
+  template<typename time>
+  class Controller;
 
   /**
    * abstract SDC sweeper.
@@ -130,37 +100,24 @@ namespace pfasst
 
     public:
       //! @{
-      ISweeper()
-        : controller(nullptr)
-      {}
-
-      virtual ~ISweeper()
-      {}
+      ISweeper();
+      virtual ~ISweeper();
       //! @}
 
       //! @{
       /**
        * set the sweepers controller.
        */
-      void set_controller(Controller<time>* ctrl)
-      {
-        this->controller = ctrl;
-      }
+      void set_controller(Controller<time>* ctrl);
 
-      Controller<time>* get_controller()
-      {
-        assert(this->controller);
-        return this->controller;
-      }
+      Controller<time>* get_controller();
       //! @}
 
       //! @{
       /**
        * Set options from command line etc.
        */
-      virtual void set_options()
-      {
-      }
+      virtual void set_options();
 
       /**
        * Setup (allocate etc) the sweeper.
@@ -168,10 +125,7 @@ namespace pfasst
        *     `true` if this sweeper exists on a coarsened MLSDC or PFASST level.
        *     This implies that space for an FAS correction and "saved" solutions are necessary.
        */
-      virtual void setup(bool coarse = false)
-      {
-        UNUSED(coarse);
-      }
+      virtual void setup(bool coarse = false);
 
       /**
        * perform a predictor sweep.
@@ -208,7 +162,7 @@ namespace pfasst
        *
        * This is used by controllers to shortcircuit iterations.
        */
-      virtual bool converged() { return false; }
+      virtual bool converged();
 
       /**
        * Save states (and/or function values) at all nodes.
@@ -218,50 +172,26 @@ namespace pfasst
        *
        * @note This method must be implemented in derived sweepers.
        */
-      virtual void save(bool initial_only=false)
-      {
-        UNUSED(initial_only);
-        throw NotImplementedYet("mlsdc/pfasst");
-      }
+      virtual void save(bool initial_only=false);
 
-      virtual void spread()
-      {
-        throw NotImplementedYet("pfasst");
-      }
+      virtual void spread();
       //! @}
 
       //! @{
-      virtual void post_sweep() { }
-      virtual void post_predict() { }
-      virtual void post_step() { }
+      virtual void post_sweep();
+      virtual void post_predict();
+      virtual void post_step();
       //! @}
 
       //! @{
-      virtual void post(ICommunicator* comm, int tag)
-      {
-        UNUSED(comm); UNUSED(tag);
-      };
-
-      virtual void send(ICommunicator* comm, int tag, bool blocking)
-      {
-        UNUSED(comm); UNUSED(tag); UNUSED(blocking);
-        throw NotImplementedYet("pfasst");
-      }
-
-      virtual void recv(ICommunicator* comm, int tag, bool blocking)
-      {
-        UNUSED(comm); UNUSED(tag); UNUSED(blocking);
-        throw NotImplementedYet("pfasst");
-      }
-
-      virtual void broadcast(ICommunicator* comm)
-      {
-        UNUSED(comm);
-        throw NotImplementedYet("pfasst");
-      }
+      virtual void post(ICommunicator* comm, int tag);
+      virtual void send(ICommunicator* comm, int tag, bool blocking);
+      virtual void recv(ICommunicator* comm, int tag, bool blocking);
+      virtual void broadcast(ICommunicator* comm);
       //! @}
 
   };
+
 
   /**
    * abstract time/space transfer (restrict/interpolate) class.
@@ -273,8 +203,7 @@ namespace pfasst
   {
     public:
       //! @{
-      virtual ~ITransfer()
-      {}
+      virtual ~ITransfer();
       //! @}
 
       //! @{
@@ -282,11 +211,7 @@ namespace pfasst
        * Interpolate initial condition from the coarse sweeper to the fine sweeper.
        */
       virtual void interpolate_initial(shared_ptr<ISweeper<time>> dst,
-                                       shared_ptr<const ISweeper<time>> src)
-      {
-        UNUSED(dst); UNUSED(src);
-        throw NotImplementedYet("pfasst");
-      }
+                                       shared_ptr<const ISweeper<time>> src);
 
       /**
        * Interpolate, in time and space, from the coarse sweeper to the fine sweeper.
@@ -303,11 +228,7 @@ namespace pfasst
        *     `true` if the initial condition should also be restricted.
        */
       virtual void restrict_initial(shared_ptr<ISweeper<time>> dst,
-                                    shared_ptr<const ISweeper<time>> src)
-      {
-        UNUSED(dst); UNUSED(src);
-        throw NotImplementedYet("pfasst");
-      }
+                                    shared_ptr<const ISweeper<time>> src);
 
 
       /**
@@ -327,7 +248,8 @@ namespace pfasst
                        shared_ptr<const ISweeper<time>> src) = 0;
       //! @}
   };
-
 }  // ::pfasst
+
+#include "interfaces_impl.hpp"
 
 #endif
