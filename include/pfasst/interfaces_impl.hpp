@@ -11,7 +11,7 @@ using namespace std;
 namespace pfasst
 {
   NotImplementedYet::NotImplementedYet(const string& msg)
-    : msg(msg)
+    : runtime_error(msg)
   {}
 
   const char* NotImplementedYet::what() const throw()
@@ -21,7 +21,7 @@ namespace pfasst
 
 
   ValueError::ValueError(const string& msg)
-    : msg(msg)
+    : invalid_argument(msg)
   {}
 
   const char* ValueError::what() const throw()

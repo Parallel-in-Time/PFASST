@@ -5,8 +5,8 @@
 #ifndef _PFASST_INTERFACES_HPP_
 #define _PFASST_INTERFACES_HPP_
 
-#include <exception>
 #include <memory>
+#include <stdexcept>
 #include <string>
 using namespace std;
 
@@ -23,12 +23,20 @@ namespace pfasst
    * that may not be necessary for all others.
    */
   class NotImplementedYet
-    : public exception
+    : public runtime_error
   {
     protected:
       string msg;
+
     public:
-      NotImplementedYet(const string& msg);
+      /**
+       * @param[in] msg component or algorithm the throwing function is required for
+       */
+      explicit NotImplementedYet(const string& msg);
+
+      /**
+       * message string is prepended by the string `Not implemented/supported yet, required for: `
+       */
       virtual const char* what() const throw();
   };
 
@@ -39,12 +47,17 @@ namespace pfasst
    * Thrown when a PFASST routine is passed an invalid value.
    */
   class ValueError
-    : public exception
+    : public invalid_argument
   {
     protected:
       string msg;
+
     public:
-      ValueError(const string& msg);
+      explicit ValueError(const string& msg);
+
+      /**
+       * message string is prepended by the string `ValueError: `
+       */
       virtual const char* what() const throw();
   };
 
@@ -89,7 +102,7 @@ namespace pfasst
 
   /**
    * abstract SDC sweeper.
-   * @tparam time time precision
+   * @tparam time time precision;
    *     defaults to pfasst::time_precision
    */
   template<typename time = time_precision>
@@ -195,7 +208,7 @@ namespace pfasst
 
   /**
    * abstract time/space transfer (restrict/interpolate) class.
-   * @tparam time time precision
+   * @tparam time time precision;
    *     defaults to pfasst::time_precision
    */
   template<typename time = time_precision>
