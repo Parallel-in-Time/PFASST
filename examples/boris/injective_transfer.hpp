@@ -132,7 +132,7 @@ namespace pfasst
             auto fine = dynamic_pointer_cast<const BorisSweeper<scalar, time>>(src);
             assert(fine);
             CVLOG(5, "BorisTransfer") << "fine:       " << fine->get_start_state();
-            coarse->set_start_state(fine->get_start_state());
+            coarse->set_start_state(dynamic_pointer_cast<typename BorisSweeper<scalar, time>::encap_type>(fine->get_start_state()));
             CVLOG(5, "BorisTransfer") << "restricted: " << coarse->get_start_state();
           }
 

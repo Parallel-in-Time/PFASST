@@ -269,7 +269,7 @@ namespace pfasst
       }
 
       template<typename scalar, typename time>
-      shared_ptr<typename BorisSweeper<scalar, time>::encap_type> BorisSweeper<scalar, time>::get_start_state() const
+      shared_ptr<Encapsulation<time>> BorisSweeper<scalar, time>::get_start_state() const
       {
         return this->start_particles;
       }

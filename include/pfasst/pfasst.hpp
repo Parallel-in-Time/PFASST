@@ -1,18 +1,11 @@
-/*
- * PFASST controller.
- */
-
 #ifndef _PFASST_PFASST_HPP_
 #define _PFASST_PFASST_HPP_
 
-#include "logging.hpp"
 #include "mlsdc.hpp"
 
-using namespace std;
 
 namespace pfasst
 {
-
   /**
    * implementation of the PFASST algorithm as described in \cite emmett_pfasst_2012
    */
@@ -26,20 +19,7 @@ namespace pfasst
 
       bool predict; //<! whether to use a 'predict' sweep
 
-      void perform_sweeps(size_t level)
-      {
-        auto sweeper = this->get_level(level);
-        for (size_t s = 0; s < this->nsweeps[level]; s++) {
-          if (predict) {
-            sweeper->predict(predict);
-            sweeper->post_predict();
-            predict = false;
-          } else {
-            sweeper->sweep();
-            sweeper->post_sweep();
-          }
-        }
-      }
+      virtual void perform_sweeps(size_t level);
 
     public:
       /**
@@ -50,75 +30,15 @@ namespace pfasst
        *
        * Currently uses "block mode" PFASST with the standard predictor.
        */
-      void run()
-      {
-        if (this->comm->size() == 1) {
-          pfasst::MLSDC<time>::run();
-          return;
-        }
+      virtual void run();
 
-        int nblocks = int(this->get_end_time() / this->get_time_step()) / comm->size();
-
-        if (nblocks == 0) {
-          throw ValueError("invalid duration: there are more time processors than time steps");
-        }
-
-        for (int nblock = 0; nblock < nblocks; nblock++) {
-          this->set_step(nblock * comm->size() + comm->rank());
-
-          if (this->comm->size() == 1) {
-            predict = true;
-          } else {
-            predictor();
-          }
-
-          for (this->set_iteration(0);
-               this->get_iteration() < this->get_max_iterations() && this->comm->status->keep_iterating();
-               this->advance_iteration()) {
-
-            if (this->comm->status->previous_is_iterating()) {
-              post();
-            }
-            cycle_v(this->finest());
-          }
-
-          for (auto l = this->finest(); l >= this->coarsest(); --l) {
-            l.current()->post_step();
-          }
-
-          if (nblock < nblocks - 1) {
-            broadcast();
-          }
-
-          this->comm->status->clear();
-        }
-      }
+      virtual void set_comm(ICommunicator* comm);
 
     private:
       /**
        * Cycle down: sweep on current (fine), restrict to coarse.
        */
-      LevelIter cycle_down(LevelIter l)
-      {
-        auto fine = l.current();
-        auto crse = l.coarse();
-        auto trns = l.transfer();
-
-        perform_sweeps(l.level);
-
-        if (l == this->finest() && fine->converged()) {
-          this->comm->status->set_converged(true);
-        }
-
-        fine->send(comm, tag(l), false);
-
-        trns->restrict(crse, fine, true);
-
-        trns->fas(this->get_time_step(), crse, fine);
-        crse->save();
-
-        return l - 1;
-      }
+      virtual LevelIter cycle_down(LevelIter l);
 
       /**
        * Cycle up: interpolate coarse correction to fine, sweep on
@@ -128,125 +48,31 @@ namespace pfasst
        * level, we don't perform a sweep.  In this case the only
        * operation that is performed here is interpolation.
        */
-      LevelIter cycle_up(LevelIter l)
-      {
-        auto fine = l.current();
-        auto crse = l.coarse();
-        auto trns = l.transfer();
-
-        trns->interpolate(fine, crse, true);
-
-        if (this->comm->status->previous_is_iterating()) {
-          fine->recv(comm, tag(l), false);
-          trns->interpolate_initial(fine, crse);
-        }
-
-        if (l < this->finest()) {
-          perform_sweeps(l.level);
-        }
-
-        return l + 1;
-      }
+      virtual LevelIter cycle_up(LevelIter l);
 
       /**
        * Cycle bottom: sweep on the current (coarsest) level.
        */
-      LevelIter cycle_bottom(LevelIter l)
-      {
-        auto crse = l.current();
-
-        if (this->comm->status->previous_is_iterating()) {
-          crse->recv(comm, tag(l), true);
-        }
-        this->comm->status->recv();
-        this->perform_sweeps(l.level);
-        crse->send(comm, tag(l), true);
-        this->comm->status->send();
-        return l + 1;
-      }
+      virtual LevelIter cycle_bottom(LevelIter l);
 
       /**
        * Perform an MLSDC V-cycle.
        */
-      LevelIter cycle_v(LevelIter l)
-      {
-        if (l.level == 0) {
-          l = cycle_bottom(l);
-        } else {
-          l = cycle_down(l);
-          l = cycle_v(l);
-          l = cycle_up(l);
-        }
-        return l;
-      }
+      virtual LevelIter cycle_v(LevelIter l);
 
       /**
        * Predictor: restrict initial down, preform coarse sweeps, return to finest.
        */
-      void predictor()
-      {
-        this->get_finest()->spread();
+      virtual void predictor();
 
-        // restrict fine initial condition
-        for (auto l = this->finest() - 1; l >= this->coarsest(); --l) {
-          auto crse = l.current();
-          auto fine = l.fine();
-          auto trns = l.transfer();
-          trns->restrict_initial(crse, fine);
-          crse->spread();
-          crse->save();
-        }
+      virtual void broadcast();
 
-        // perform sweeps on the coarse level based on rank
-        predict = true;
-        auto crse = this->coarsest().current();
-        for (int nstep = 0; nstep < comm->rank() + 1; nstep++) {
-          // XXX: set iteration and step?
-          perform_sweeps(0);
-          if (nstep < comm->rank()) {
-            crse->advance();
-          }
-        }
+      virtual int tag(LevelIter l);
 
-        // return to finest level, sweeping as we go
-        for (auto l = this->coarsest() + 1; l <= this->finest(); ++l) {
-          auto crse = l.coarse();
-          auto fine = l.current();
-          auto trns = l.transfer();
-
-          trns->interpolate(fine, crse, true);
-          if (l < this->finest()) {
-            perform_sweeps(l.level);
-          }
-        }
-      }
-
-      void broadcast()
-      {
-        this->get_finest()->broadcast(comm);
-      }
-
-      int tag(LevelIter l)
-      {
-        return l.level * 10000 + this->get_iteration() + 10;
-      }
-
-      void post()
-      {
-        this->comm->status->post();
-        for (auto l = this->coarsest() + 1; l <= this->finest(); ++l) {
-          l.current()->post(comm, tag(l));
-        }
-      }
-
-    public:
-      void set_comm(ICommunicator* comm)
-      {
-        this->comm = comm;
-      }
-
+      virtual void post();
   };
-
 }  // ::pfasst
+
+#include "pfasst_impl.hpp"
 
 #endif
