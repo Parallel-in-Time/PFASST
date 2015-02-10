@@ -5,8 +5,8 @@
 #include <vector>
 using namespace std;
 
-#include "../interfaces.hpp"
-#include "encapsulation.hpp"
+#include "pfasst/interfaces.hpp"
+#include "pfasst/encap/encapsulation.hpp"
 
 
 namespace pfasst
@@ -60,6 +60,6 @@ namespace pfasst
   }  // ::pfasst::encap
 }  // ::pfasst
 
-#include "poly_interp_impl.hpp"
+#include "pfasst/encap/poly_interp_impl.hpp"
 
 #endif

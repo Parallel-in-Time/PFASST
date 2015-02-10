@@ -7,9 +7,9 @@ using namespace std;
 
 #include <Eigen/Dense>
 
-#include "../globals.hpp"
-#include "../interfaces.hpp"
-#include "polynomial.hpp"
+#include "pfasst/globals.hpp"
+#include "pfasst/interfaces.hpp"
+#include "pfasst/quadrature/polynomial.hpp"
 
 template<typename scalar>
 using Matrix = Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
@@ -178,6 +178,6 @@ namespace pfasst
   }  // ::pfasst::quadrature
 }  // ::pfasst
 
-#include "interface_imp.hpp"
+#include "pfasst/quadrature/interface_imp.hpp"
 
 #endif  // _PFASST__QUADRATURE__INTERFACE_HPP_

@@ -38,6 +38,6 @@ namespace pfasst
   };
 }  // ::pfasst
 
-#include "polynomial_impl.hpp"
+#include "pfasst/quadrature/polynomial_impl.hpp"
 
 #endif  // _PFASST__POLYNOMIAL_HPP_

@@ -1,4 +1,4 @@
-#include "config.hpp"
+#include "pfasst/config.hpp"
 
 #include <fstream>
 #include <sstream>

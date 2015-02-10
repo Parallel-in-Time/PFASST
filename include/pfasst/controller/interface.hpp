@@ -7,7 +7,7 @@
 #include <memory>
 using namespace std;
 
-#include "../interfaces.hpp"
+#include "pfasst/interfaces.hpp"
 
 
 namespace pfasst
@@ -193,6 +193,6 @@ namespace pfasst
   };
 }  // ::pfasst
 
-#include "interface_impl.hpp"
+#include "pfasst/controller/interface_impl.hpp"
 
 #endif

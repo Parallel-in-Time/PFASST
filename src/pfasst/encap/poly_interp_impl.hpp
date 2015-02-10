@@ -1,11 +1,11 @@
-#include "poly_interp.hpp"
+#include "pfasst/encap/poly_interp.hpp"
 
 #include <cassert>
 using namespace std;
 
-#include "../globals.hpp"
-#include "../quadrature.hpp"
-#include "encap_sweeper.hpp"
+#include "pfasst/globals.hpp"
+#include "pfasst/quadrature.hpp"
+#include "pfasst/encap/encap_sweeper.hpp"
 
 
 namespace pfasst

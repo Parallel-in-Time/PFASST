@@ -155,6 +155,7 @@ configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/include/pfasst/site_config.hpp"
 )
 add_subdirectory(include)
+add_subdirectory(src)
 
 if(pfasst_BUILD_EXAMPLES)
     message(STATUS "********************************************************************************")
@@ -174,6 +175,10 @@ message(STATUS "Creating 'install' target")
 message(STATUS "  prefix:              ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "  header files:        <PREFIX>/include/pfasst")
 install(DIRECTORY include/
+    DESTINATION include
+    FILES_MATCHING PATTERN "*.hpp"
+)
+install(DIRECTORY src/
     DESTINATION include
     FILES_MATCHING PATTERN "*.hpp"
 )

@@ -1,4 +1,4 @@
-#include "polynomial.hpp"
+#include "pfasst/quadrature/polynomial.hpp"
 
 #include <algorithm>
 #include <cassert>

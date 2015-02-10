@@ -1,10 +1,10 @@
-#include "gauss_lobatto.hpp"
+#include "pfasst/quadrature/gauss_lobatto.hpp"
 
 #include <stdexcept>
 #include <vector>
 using namespace std;
 
-#include "polynomial.hpp"
+#include "pfasst/quadrature/polynomial.hpp"
 
 
 namespace pfasst

@@ -1,11 +1,11 @@
-#include "encap_sweeper.hpp"
+#include "pfasst/encap/encap_sweeper.hpp"
 
 #include <algorithm>
 #include <cassert>
 using namespace std;
 
-#include "../globals.hpp"
-#include "../config.hpp"
+#include "pfasst/globals.hpp"
+#include "pfasst/config.hpp"
 
 
 namespace pfasst

@@ -1,9 +1,8 @@
-#include "gauss_legendre.hpp"
+#include "pfasst/quadrature/uniform.hpp"
 
+#include <stdexcept>
 #include <vector>
 using namespace std;
-
-#include "polynomial.hpp"
 
 
 namespace pfasst
@@ -11,33 +10,34 @@ namespace pfasst
   namespace quadrature
   {
     template<typename precision>
-    GaussLegendre<precision>::GaussLegendre(const size_t num_nodes)
+    Uniform<precision>::Uniform(const size_t num_nodes)
       : IQuadrature<precision>(num_nodes)
     {
+      if (this->num_nodes < 2) {
+        throw invalid_argument("Uniform quadrature requires at least two quadrature nodes.");
+      }
       this->compute_nodes();
       this->compute_weights();
     }
 
     template<typename precision>
-    bool GaussLegendre<precision>::left_is_node() const
+    bool Uniform<precision>::left_is_node() const
     {
       return LEFT_IS_NODE;
     }
 
     template<typename precision>
-    bool GaussLegendre<precision>::right_is_node() const
+    bool Uniform<precision>::right_is_node() const
     {
       return RIGHT_IS_NODE;
     }
 
     template<typename precision>
-    void GaussLegendre<precision>::compute_nodes()
+    void Uniform<precision>::compute_nodes()
     {
       this->nodes = vector<precision>(this->num_nodes, precision(0.0));
-      auto roots = Polynomial<precision>::legendre(this->num_nodes).roots();
-
       for (size_t j = 0; j < this->num_nodes; j++) {
-        this->nodes[j] = 0.5 * (1.0 + roots[j]);
+        this->nodes[j] = precision(j) / (this->num_nodes - 1);
       }
     }
   }  // ::pfasst::quadrature

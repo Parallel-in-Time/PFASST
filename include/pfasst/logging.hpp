@@ -1,7 +1,7 @@
 #ifndef _PFASST__LOGGING_HPP_
 #define _PFASST__LOGGING_HPP_
 
-#include "site_config.hpp"
+#include "pfasst/site_config.hpp"
 
 #include <string>
 using namespace std;

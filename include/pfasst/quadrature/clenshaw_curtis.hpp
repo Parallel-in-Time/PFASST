@@ -6,9 +6,9 @@
 
 #include <boost/math/constants/constants.hpp>
 
-#include "../interfaces.hpp"
-#include "polynomial.hpp"
-#include "interface.hpp"
+#include "pfasst/interfaces.hpp"
+#include "pfasst/quadrature/polynomial.hpp"
+#include "pfasst/quadrature/interface.hpp"
 
 using namespace std;
 using namespace boost::math::constants;
@@ -48,6 +48,6 @@ namespace pfasst
   }  // ::pfasst::quadrature
 }  // ::pfasst
 
-#include "clenshaw_curtis_impl.hpp"
+#include "pfasst/quadrature/clenshaw_curtis_impl.hpp"
 
 #endif  // _PFASST__QUADRATURE__CLENSHAW_CURTIS_HPP_

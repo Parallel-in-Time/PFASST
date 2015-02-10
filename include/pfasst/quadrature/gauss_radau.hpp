@@ -1,7 +1,7 @@
 #ifndef _PFASST__QUADRATURE__GAUSS_RADAU_HPP_
 #define _PFASST__QUADRATURE__GAUSS_RADAU_HPP_
 
-#include "interface.hpp"
+#include "pfasst/quadrature/interface.hpp"
 
 
 namespace pfasst
@@ -38,6 +38,6 @@ namespace pfasst
   }  // ::pfasst::quadrature
 }  // ::pfasst
 
-#include "gauss_radau_impl.hpp"
+#include "pfasst/quadrature/gauss_radau_impl.hpp"
 
 #endif  // _PFASST__QUADRATURE__GAUSS_RADAU_HPP_

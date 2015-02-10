@@ -1,4 +1,4 @@
-#include "vector.hpp"
+#include "pfasst/encap/vector.hpp"
 
 #include <algorithm>
 #include <cassert>

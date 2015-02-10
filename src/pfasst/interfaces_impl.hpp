@@ -1,11 +1,11 @@
-#include "interfaces.hpp"
+#include "pfasst/interfaces.hpp"
 
 #include <cassert>
 #include <memory>
 #include <string>
 using namespace std;
 
-#include "globals.hpp"
+#include "pfasst/globals.hpp"
 
 
 namespace pfasst

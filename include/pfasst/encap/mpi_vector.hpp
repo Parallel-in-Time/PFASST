@@ -3,8 +3,8 @@
 
 #include <mpi.h>
 
-#include "vector.hpp"
-#include "../mpi_communicator.hpp"
+#include "pfasst/encap/vector.hpp"
+#include "pfasst/mpi_communicator.hpp"
 
 
 namespace pfasst
@@ -61,6 +61,6 @@ namespace pfasst
   }  // ::pfasst::encap
 }  // ::pfasst
 
-#include "mpi_vector_impl.hpp"
+#include "pfasst/encap/mpi_vector_impl.hpp"
 
 #endif

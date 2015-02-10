@@ -1,10 +1,10 @@
-#include "imex_sweeper.hpp"
+#include "pfasst/encap/imex_sweeper.hpp"
 
 #include <cassert>
 using namespace std;
 
-#include "../globals.hpp"
-#include "../logging.hpp"
+#include "pfasst/globals.hpp"
+#include "pfasst/logging.hpp"
 
 
 namespace pfasst

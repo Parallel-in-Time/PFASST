@@ -1,7 +1,7 @@
 #ifndef _PFASST__QUADRATURE__UNIFORM_HPP_
 #define _PFASST__QUADRATURE__UNIFORM_HPP_
 
-#include "interface.hpp"
+#include "pfasst/quadrature/interface.hpp"
 
 
 namespace pfasst
@@ -38,6 +38,6 @@ namespace pfasst
   }  // ::pfasst::quadrature
 }  // ::pfasst
 
-#include "uniform_impl.hpp"
+#include "pfasst/quadrature/uniform_impl.hpp"
 
 #endif  // _PFASST__QUADRATURE__UNIFORM_HPP_

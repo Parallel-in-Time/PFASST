@@ -9,15 +9,15 @@
 #include <Eigen/Dense>
 #include <boost/math/constants/constants.hpp>
 
-#include "config.hpp"
-#include "interfaces.hpp"
-#include "quadrature/polynomial.hpp"
-#include "quadrature/interface.hpp"
-#include "quadrature/gauss_lobatto.hpp"
-#include "quadrature/gauss_legendre.hpp"
-#include "quadrature/gauss_radau.hpp"
-#include "quadrature/clenshaw_curtis.hpp"
-#include "quadrature/uniform.hpp"
+#include "pfasst/config.hpp"
+#include "pfasst/interfaces.hpp"
+#include "pfasst/quadrature/polynomial.hpp"
+#include "pfasst/quadrature/interface.hpp"
+#include "pfasst/quadrature/gauss_lobatto.hpp"
+#include "pfasst/quadrature/gauss_legendre.hpp"
+#include "pfasst/quadrature/gauss_radau.hpp"
+#include "pfasst/quadrature/clenshaw_curtis.hpp"
+#include "pfasst/quadrature/uniform.hpp"
 
 template<typename scalar>
 using Matrix = Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;

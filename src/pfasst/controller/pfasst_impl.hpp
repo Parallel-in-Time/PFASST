@@ -1,6 +1,6 @@
-#include "pfasst.hpp"
+#include "pfasst/controller/pfasst.hpp"
 
-#include "../logging.hpp"
+#include "pfasst/logging.hpp"
 
 
 namespace pfasst
