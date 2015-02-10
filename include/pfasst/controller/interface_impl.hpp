@@ -1,6 +1,6 @@
-#include "controller.hpp"
+#include "interface.hpp"
 
-#include "config.hpp"
+#include "../config.hpp"
 
 
 namespace pfasst

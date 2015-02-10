@@ -1,7 +1,7 @@
 #ifndef _PFASST_SDC_HPP_
 #define _PFASST_SDC_HPP_
 
-#include "controller.hpp"
+#include "interface.hpp"
 
 
 namespace pfasst

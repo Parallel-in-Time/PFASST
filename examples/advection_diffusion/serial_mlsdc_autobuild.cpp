@@ -19,7 +19,7 @@ using namespace std;
 #include <pfasst.hpp>
 #include <pfasst/logging.hpp>
 #include <pfasst/config.hpp>
-#include <pfasst/mlsdc.hpp>
+#include <pfasst/controller/mlsdc.hpp>
 #include <pfasst/encap/automagic.hpp>
 #include <pfasst/encap/vector.hpp>
 using namespace pfasst;

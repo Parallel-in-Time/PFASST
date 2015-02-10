@@ -3,7 +3,7 @@
 #include <algorithm>
 using namespace std;
 
-#include "logging.hpp"
+#include "../logging.hpp"
 
 
 namespace pfasst

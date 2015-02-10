@@ -4,7 +4,7 @@
 #include <vector>
 using namespace std;
 
-#include "controller.hpp"
+#include "interface.hpp"
 
 
 namespace pfasst

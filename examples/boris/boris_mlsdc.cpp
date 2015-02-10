@@ -3,8 +3,8 @@
 #include <pfasst.hpp>
 #include <pfasst/config.hpp>
 #include <pfasst/logging.hpp>
-#include <pfasst/sdc.hpp>
-#include <pfasst/mlsdc.hpp>
+#include <pfasst/controller/sdc.hpp>
+#include <pfasst/controller/mlsdc.hpp>
 
 #include "particle.hpp"
 #include "particle_cloud.hpp"
