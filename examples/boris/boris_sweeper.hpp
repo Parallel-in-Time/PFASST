@@ -178,7 +178,7 @@ namespace pfasst
           virtual void set_state(shared_ptr<const encap_type> u0, size_t m);
           virtual void set_start_state(shared_ptr<const encap_type> u0);
           virtual shared_ptr<Encapsulation<time>> get_state(size_t m) const override;
-          virtual shared_ptr<encap_type> get_start_state() const;
+          virtual shared_ptr<Encapsulation<time>> get_start_state() const;
           virtual shared_ptr<acceleration_type> get_tau_q_as_force(size_t m) const;
           virtual shared_ptr<acceleration_type> get_tau_qq_as_force(size_t m) const;
           virtual shared_ptr<Encapsulation<time>> get_saved_state(size_t m) const override;
