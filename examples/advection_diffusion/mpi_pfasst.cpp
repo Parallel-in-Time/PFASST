@@ -14,7 +14,7 @@ using namespace std;
 #include <fftw3.h>
 
 #include <pfasst.hpp>
-#include <pfasst/pfasst.hpp>
+#include <pfasst/controller/pfasst.hpp>
 #include <pfasst/mpi_communicator.hpp>
 #include <pfasst/encap/automagic.hpp>
 #include <pfasst/encap/mpi_vector.hpp>

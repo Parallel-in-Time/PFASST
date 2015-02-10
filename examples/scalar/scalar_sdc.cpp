@@ -16,7 +16,7 @@ using namespace std;
 #include <pfasst.hpp>
 #include <pfasst/config.hpp>
 #include <pfasst/logging.hpp>
-#include <pfasst/sdc.hpp>
+#include <pfasst/controller/sdc.hpp>
 #include <pfasst/encap/vector.hpp>
 
 #include "scalar_sweeper.hpp"

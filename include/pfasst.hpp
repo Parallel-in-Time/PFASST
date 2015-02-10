@@ -3,14 +3,13 @@
 
 #include "pfasst/config.hpp"
 #include "pfasst/logging.hpp"
-#include "pfasst/interfaces.hpp"
-#include "pfasst/quadrature.hpp"
-#include "pfasst/sdc.hpp"
-#include "pfasst/encap/encap_sweeper.hpp"
+
 
 namespace pfasst
 {
-  inline static void init(int argc, char** argv, std::function<void()> opts=nullptr, std::function<void()> logs=nullptr)
+  inline static void init(int argc, char** argv,
+                          std::function<void()> opts = nullptr,
+                          std::function<void()> logs = nullptr)
   {
     if (opts) {
       opts();

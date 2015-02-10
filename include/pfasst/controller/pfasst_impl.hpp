@@ -1,6 +1,6 @@
 #include "pfasst.hpp"
 
-#include "logging.hpp"
+#include "../logging.hpp"
 
 
 namespace pfasst
