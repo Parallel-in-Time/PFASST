@@ -105,6 +105,6 @@ namespace pfasst
   }  // ::pfasst::config
 }  // ::pfasst
 
-#include "config_impl.hpp"
+#include "pfasst/config_impl.hpp"
 
 #endif  // _PFASST__CONFIG_HPP_

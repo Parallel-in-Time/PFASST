@@ -4,7 +4,7 @@
 #include <vector>
 using namespace std;
 
-#include "interface.hpp"
+#include "pfasst/controller/interface.hpp"
 
 
 namespace pfasst
@@ -65,6 +65,6 @@ namespace pfasst
   };
 }  // ::pfasst
 
-#include "mlsdc_impl.hpp"
+#include "pfasst/controller/mlsdc_impl.hpp"
 
 #endif

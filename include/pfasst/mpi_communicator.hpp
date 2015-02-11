@@ -7,7 +7,7 @@ using namespace std;
 
 #include <mpi.h>
 
-#include "interfaces.hpp"
+#include "pfasst/interfaces.hpp"
 
 
 namespace pfasst
@@ -72,6 +72,6 @@ namespace pfasst
   }  // ::pfasst::mpi
 }  // ::pfasst
 
-#include "mpi_communicator_impl.hpp"
+#include "pfasst/mpi_communicator_impl.hpp"
 
 #endif

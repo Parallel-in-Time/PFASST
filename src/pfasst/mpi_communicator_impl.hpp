@@ -1,6 +1,6 @@
-#include "mpi_communicator.hpp"
+#include "pfasst/mpi_communicator.hpp"
 
-#include "logging.hpp"
+#include "pfasst/logging.hpp"
 
 
 namespace pfasst

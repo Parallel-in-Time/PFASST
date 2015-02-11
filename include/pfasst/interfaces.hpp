@@ -255,6 +255,6 @@ namespace pfasst
   };
 }  // ::pfasst
 
-#include "interfaces_impl.hpp"
+#include "pfasst/interfaces_impl.hpp"
 
 #endif

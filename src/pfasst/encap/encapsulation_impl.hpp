@@ -1,7 +1,7 @@
-#include "encapsulation.hpp"
+#include "pfasst/encap/encapsulation.hpp"
 
 
-#include "../globals.hpp"
+#include "pfasst/globals.hpp"
 
 
 namespace pfasst

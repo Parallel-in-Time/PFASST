@@ -5,7 +5,7 @@
 #include <vector>
 using namespace std;
 
-#include "encapsulation.hpp"
+#include "pfasst/encap/encapsulation.hpp"
 
 
 namespace pfasst
@@ -116,6 +116,6 @@ namespace pfasst
   }  // ::pfasst::encap
 }  // ::pfasst
 
-#include "vector_impl.hpp"
+#include "pfasst/encap/vector_impl.hpp"
 
 #endif

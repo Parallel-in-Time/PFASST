@@ -1,4 +1,4 @@
-#include "mpi_vector.hpp"
+#include "pfasst/encap/mpi_vector.hpp"
 
 #include <cassert>
 using namespace std;

@@ -10,7 +10,7 @@ using namespace std;
 template<typename scalar>
 using Matrix = Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
-#include "../interfaces.hpp"
+#include "pfasst/interfaces.hpp"
 
 
 namespace pfasst
@@ -81,6 +81,6 @@ namespace pfasst
   }  // ::pfasst::encap
 } // ::pfasst
 
-#include "encapsulation_impl.hpp"
+#include "pfasst/encap/encapsulation_impl.hpp"
 
 #endif

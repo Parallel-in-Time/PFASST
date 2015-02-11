@@ -5,9 +5,9 @@
 #include <memory>
 using namespace std;
 
-#include "encapsulation.hpp"
-#include "encap_sweeper.hpp"
-#include "vector.hpp"
+#include "pfasst/encap/encapsulation.hpp"
+#include "pfasst/encap/encap_sweeper.hpp"
+#include "pfasst/encap/vector.hpp"
 
 
 namespace pfasst
@@ -182,6 +182,6 @@ namespace pfasst
   }  // ::pfasst::encap
 }  // ::pfasst
 
-#include "imex_sweeper_impl.hpp"
+#include "pfasst/encap/imex_sweeper_impl.hpp"
 
 #endif

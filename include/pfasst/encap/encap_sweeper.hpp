@@ -9,9 +9,9 @@
 #include <vector>
 using namespace std;
 
-#include "../interfaces.hpp"
-#include "../quadrature.hpp"
-#include "encapsulation.hpp"
+#include "pfasst/interfaces.hpp"
+#include "pfasst/quadrature.hpp"
+#include "pfasst/encap/encapsulation.hpp"
 
 
 namespace pfasst
@@ -166,6 +166,6 @@ namespace pfasst
   }  // ::pfasst::encap
 }  // ::pfasst
 
-#include "encap_sweeper_impl.hpp"
+#include "pfasst/encap/encap_sweeper_impl.hpp"
 
 #endif

@@ -1,7 +1,7 @@
 #ifndef _PFASST_PFASST_HPP_
 #define _PFASST_PFASST_HPP_
 
-#include "mlsdc.hpp"
+#include "pfasst/controller/mlsdc.hpp"
 
 
 namespace pfasst
@@ -73,6 +73,6 @@ namespace pfasst
   };
 }  // ::pfasst
 
-#include "pfasst_impl.hpp"
+#include "pfasst/controller/pfasst_impl.hpp"
 
 #endif

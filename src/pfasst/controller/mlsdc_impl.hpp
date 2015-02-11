@@ -1,9 +1,9 @@
-#include "mlsdc.hpp"
+#include "pfasst/controller/mlsdc.hpp"
 
 #include <algorithm>
 using namespace std;
 
-#include "../logging.hpp"
+#include "pfasst/logging.hpp"
 
 
 namespace pfasst
