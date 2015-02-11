@@ -2,6 +2,7 @@
 #define _PFASST__CONFIG_HPP_
 
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <map>
 using namespace std;
