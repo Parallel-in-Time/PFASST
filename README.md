@@ -68,8 +68,8 @@ Releases
 
 Release tags will be signed by one of the following PGP keys:
 
-    0x9CF9601F 2011-07-28 Torbjörn Klatt <t.klatt@fz-juelich.de>
-    Fingerprint DB8D EA65 F6A7 3DE0 E7EA F607 6CE8 B4B1 9CF9 601F
+    0xAD9F8DC6 2014-12-12 Torbjörn Klatt <t.klatt@fz-juelich.de>
+    Fingerprint 6277 E9D9 7AA2 DBBE 5DE7 7498 756B F4D7 AD9F 8DC6
 
 
 Build status
