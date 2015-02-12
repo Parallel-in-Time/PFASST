@@ -1,0 +1,67 @@
+#nav-tree img {
+  box-sizing: content-box;
+}
+
+ul.meta-info-block {
+  font-size: 0.8em;
+  color: gray;
+  padding: 0;
+}
+
+ul.meta-info-block > li {
+  display: block;
+  margin: -3px;
+}
+
+p.lead {
+  font-size: 1.15em;
+  font-style: italic;
+}
+
+code {
+  border: 1px solid #C4CFE5;
+  background-color: #FBFCFD;
+  padding: 1px;
+}
+
+.memdoc .panel {
+  margin-bottom: 5px !important;
+}
+
+.memdoc .panel .panel-heading,
+.memdoc .panel .panel-body,
+.memdoc .panel .list-group-item,
+.reflist .panel .panel-heading,
+.reflist .panel .panel-body,
+.textblock .panel .panel-heading,
+.textblock .panel .panel-body {
+  padding: 5px;
+  padding-left: 10px;
+}
+.memdoc .section.see {
+  font-size: 90%;
+}
+
+.panel-footer ul {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* width of all text blocks */
+.textblock,
+.memdoc.panel-body > *,
+.memdoc > .panel,
+.memdoc > .panel > .panel-body > *,
+.memitem > .panel,
+.memitem > .panel > .panel-body > * {
+  width: 750px;
+}
+
+
+table.directory .badge {
+  margin-right: 3px;
+}
+
+dl.citelist > dd > p {
+  padding-left: 50px;
+}
