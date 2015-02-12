@@ -38,7 +38,7 @@ Currently, it features the following content:
 * \subpage #page_style_guide
 * \subpage #page_troubleshooting
 
-[documentation]:      https://pint.fz-juelich.de/ci/view/PFASST/job/PFASST_LATEST_STABLE_DOCU/doxygen
+[documentation]: https://pint.fz-juelich.de/ci/view/PFASST/job/PFASST_LATEST_STABLE_DOCU/doxygen
 
 
 Releases
@@ -47,20 +47,20 @@ Releases
 * **v0.3.0** The Big Cleanup Release (2014/12/12)
 
   A lot of internal cleanup and usability enhancements.  
-  DOI: [10.5281/zenodo.13221][DOI_v030]  
-  See \subpage #page_changelog "the Changelog" for details.
+  DOI: [10.5281/zenodo.13221][DOI_v030].  
+  See [the Changelog](#page_changelog) for details.
 
 * **v0.2.0** MPI-PFASST Release (2014/08/29)
 
   Implementation of PFASST with MPI.  
-  DOI: [10.5281/zenodo.11517][DOI_v020]  
-  See \subpage #page_changelog "the Changelog" for details.
+  DOI: [10.5281/zenodo.11517][DOI_v020].  
+  See [the Changelog](#page_changelog) for details.
 
 * **v0.1.0** First Release (2014/07/25)
 
   Initial release with basic implementations of SDC and MLSDC.  
-  DOI: [10.5281/zenodo.11047][DOI_v010]  
-  See \subpage #page_changelog "the Changelog" for details.
+  DOI: [10.5281/zenodo.11047][DOI_v010].  
+  See [the Changelog](#page_changelog) for details.
 
 [DOI_v010]: http://dx.doi.org/10.5281/zenodo.11047
 [DOI_v020]: http://dx.doi.org/10.5281/zenodo.11517
