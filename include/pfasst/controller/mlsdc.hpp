@@ -1,5 +1,5 @@
 /**
- * @file controller.mlsdc.hpp
+ * @file controller/mlsdc.hpp
  * @since v0.1.0
  */
 #ifndef _PFASST__CONTROLLER__MLSDC_HPP_

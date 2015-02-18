@@ -1,3 +1,9 @@
+/**
+ * @defgroup BorisBindings Bindings
+ * @ingroup Boris
+ *
+ * @file examples/boris/particle_util.hpp
+ */
 #ifndef _EXAMPLES__BORIS__BINDINGS__WRAPPER_INTERFACE_HPP_
 #define _EXAMPLES__BORIS__BINDINGS__WRAPPER_INTERFACE_HPP_
 
@@ -19,8 +25,14 @@ namespace pfasst
   {
     namespace boris
     {
+      /**
+       * @ingroup BorisBindings
+       */
       namespace bindings
       {
+        /**
+         * @ingroup BorisBindings
+         */
         template<
           typename scalar,
           typename time
@@ -67,18 +79,21 @@ namespace pfasst
             virtual void log(el::base::type::ostream_t& os) const = 0;
         };
 
+        //! @ingroup BorisBindings
         template<typename scalar, typename time>
         void setup(shared_ptr<WrapperInterface<scalar, time>> wrapper)
         {
           UNUSED(wrapper);
         }
 
+        //! @ingroup BorisBindings
         template<typename scalar, typename time, typename ArgT>
         void setup(shared_ptr<WrapperInterface<scalar, time>> wrapper, ArgT arg)
         {
           UNUSED(wrapper); UNUSED(arg);
         }
 
+        //! @ingroup BorisBindings
         template<typename scalar, typename time, typename ArgT, typename... ArgsT>
         void setup(shared_ptr<WrapperInterface<scalar, time>> wrapper, ArgT arg, ArgsT... args)
         {

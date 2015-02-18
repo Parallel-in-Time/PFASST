@@ -1,9 +1,10 @@
-/*
- * Spectral (FFT) transfer routines.
+/**
+ * @ingroup AdvectionDiffusionFiles
+ * @file examples/advection_diffusion/spectral_transfer_1d.hpp
+ * @since v0.1.0
  */
-
-#ifndef _SPECTRAL_TRANSFER_1D_HPP_
-#define _SPECTRAL_TRANSFER_1D_HPP_
+#ifndef _EXAMPLES__ADVEC_DIFF__SPECTRAL_TRANSFER_1D_HPP_
+#define _EXAMPLES__ADVEC_DIFF__SPECTRAL_TRANSFER_1D_HPP_
 
 #include <cassert>
 #include <cstdlib>
@@ -16,13 +17,17 @@ using namespace std;
 #include "fft.hpp"
 
 
-
 namespace pfasst
 {
   namespace examples
   {
     namespace advection_diffusion
     {
+      /**
+       * Spectral (FFT) transfer routines.
+       *
+       * @ingroup AdvectionDiffusion
+       */
       template<typename time = pfasst::time_precision>
       class SpectralTransfer1D
         : public encap::PolyInterpMixin<time>
@@ -73,4 +78,4 @@ namespace pfasst
   }  // ::pfasst::examples
 }  // ::pfasst
 
-#endif
+#endif  // _EXAMPLES__ADVEC_DIFF__SPECTRAL_TRANSFER_1D_HPP_

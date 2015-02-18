@@ -25,18 +25,18 @@ namespace pfasst
 
 
 /**
- * @defgroup Controllers
+ * @defgroup Controllers Controllers
  *   Controllers represent the main entry point of PFASST++ as they ensemble the central algorithmic
  *   logic of PFASST and related algorithms.
  *
- * @defgroup Internals
+ * @defgroup Internals Internals
  *   Entities listed in this module are ment to be for internal use only and should not be used
  *   outside of PFASST++ itself.
  *
- * @defgroup Utilities
+ * @defgroup Utilities Utilities
  *   General utility functions not directly related to PFASST++ but also handy in user code.
  *
- * @defgroup Examples
+ * @defgroup Examples Examples
  *   A few different examples demonstrating the use and functionality of PFASST++.
  */
 

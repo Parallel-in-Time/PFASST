@@ -1,9 +1,10 @@
-/*
- * Advection/diffusion example using an encapsulated IMEX sweeper.
+/**
+ * Advection-Diffusion with serial MLSDC.
  *
- * This example uses a (serial) multi-level SDC sweeper.
+ * @ingroup AdvectionDiffusionFiles
+ * @file examples/advection_diffusion/serial_mlsdc.cpp
+ * @since v0.1.0
  */
-
 #include <memory>
 using namespace std;
 
@@ -26,6 +27,13 @@ namespace pfasst
   {
     namespace advection_diffusion
     {
+      /**
+       * Advection/diffusion example using an encapsulated IMEX sweeper.
+       *
+       * This example uses a (serial) multi-level SDC sweeper.
+       *
+       * @ingroup AdvectionDiffusion
+       */
       tuple<error_map, residual_map> run_serial_mlsdc(size_t nlevs)
       {
         MLSDC<> mlsdc;

@@ -88,7 +88,6 @@ namespace pfasst
     return levels.size();
   }
 
-  //! @{
   template<typename time>
   size_t Controller<time>::get_step()
   {

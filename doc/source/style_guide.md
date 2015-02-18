@@ -61,7 +61,7 @@ using double quotes.
 
 ### Define Guards
 
-Use `#define` guards in header files to prevent multiple inclusion.
+Use `#%define` guards in header files to prevent multiple inclusion.
 The variable defined should be derived from the header file name
 itself.  For example, a header file `my_header.hpp` in the folder
 `PFASST/include/subfolder` should have the following define guard:
