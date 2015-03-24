@@ -79,6 +79,12 @@ int main(int argc, char** argv)
   const double abs_res_tol = pfasst::config::get_value<double>("abs_res_tol", 0.0);
   const double rel_res_tol = pfasst::config::get_value<double>("rel_res_tol", 0.0);
 
+  LOG(INFO) << "nsteps=" << nsteps << ", "
+            << "dt=" << dt << ", "
+            << "nnodes=" << nnodes << ", "
+            << "nparticles=" << nparticles << ", "
+            << "niter=" << niters;
+
   pfasst::examples::boris::run_boris_sdc<double>(nsteps, dt, nnodes, nparticles, niters, abs_res_tol, rel_res_tol);
 }
 #endif
