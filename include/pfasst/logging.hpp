@@ -166,6 +166,8 @@ namespace pfasst
 
       el::Logger* logger = el::Loggers::getLogger(id);
       el::Configurations* conf = logger->configurations();
+      conf->setGlobally(el::ConfigurationType::MillisecondsWidth,
+                        PFASST_LOGGER_DEFAULT_GLOBAL_MILLISECOND_WIDTH);
       conf->set(el::Level::Info, el::ConfigurationType::Format,
                 TIMESTAMP + INFO_COLOR + "[" + id2print + ", " + LEVEL  + " " + MESSAGE + OUT::reset);
       conf->set(el::Level::Debug, el::ConfigurationType::Format,
