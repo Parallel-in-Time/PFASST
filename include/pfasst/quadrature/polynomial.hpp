@@ -33,7 +33,7 @@ namespace pfasst
       }
 
       Polynomial<CoeffT> normalize() const;
-      vector<CoeffT> roots() const;
+      vector<CoeffT> roots(size_t num_iterations=20, CoeffT ztol=1.0e-20) const;
       static Polynomial<CoeffT> legendre(const size_t order);
   };
 }  // ::pfasst
