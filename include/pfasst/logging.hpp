@@ -42,19 +42,19 @@ const string OUT::reset = "\033[0m";
 #include "config.hpp"
 
 // enable easy logging of STL containers
-#define _ELPP_STL_LOGGING
+#define ELPP_STL_LOGGING
 // disable creation of default log file
-#define _ELPP_NO_DEFAULT_LOG_FILE
+#define ELPP_NO_DEFAULT_LOG_FILE
 // enable passing `--logging-flags` via command line
-#define _ELPP_LOGGING_FLAGS_FROM_ARG
+#define ELPP_LOGGING_FLAGS_FROM_ARG
 
 #ifndef NDEBUG
-  #define _ELPP_DEBUG_ASSERT_FAILURE
-  #define _ELPP_STACKTRACE_ON_CRASH
+  #define ELPP_DEBUG_ASSERT_FAILURE
+  #define ELPP_STACKTRACE_ON_CRASH
 #endif
 
 #ifdef PFASST_NO_LOGGING
-  #define _ELPP_DISABLE_LOGS
+  #define ELPP_DISABLE_LOGS
 #endif
 
 #include <pfasst/easylogging++.h>
@@ -63,7 +63,7 @@ const string OUT::reset = "\033[0m";
 #ifndef PFASST_LOGGER_INITIALIZED
   // initialize easyloggingpp
   // FIXME: this might already be called by code using PFASST++
-  _INITIALIZE_EASYLOGGINGPP
+  INITIALIZE_EASYLOGGINGPP
   /**
    * guard symbol to ensure easylogging++ is only initialized once
    *
@@ -255,7 +255,7 @@ namespace pfasst
      */
     inline static void start_log(int argc, char** argv)
     {
-      _START_EASYLOGGINGPP(argc, argv);
+      START_EASYLOGGINGPP(argc, argv);
       set_logging_flags();
       load_default_config();
       pfasst::log::stack_position = 0;
