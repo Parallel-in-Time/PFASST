@@ -1,5 +1,9 @@
-#ifndef _PFASST_PFASST_HPP_
-#define _PFASST_PFASST_HPP_
+/**
+ * @file controller/pfasst.hpp
+ * @since v0.1.0
+ */
+#ifndef _PFASST__CONTROLLER__PFASST_HPP_
+#define _PFASST__CONTROLLER__PFASST_HPP_
 
 #include "pfasst/controller/mlsdc.hpp"
 
@@ -8,71 +12,94 @@ namespace pfasst
 {
   /**
    * implementation of the PFASST algorithm as described in \cite emmett_pfasst_2012
+   *
+   * @ingroup Controllers
    */
   template<typename time = pfasst::time_precision>
   class PFASST
     : public MLSDC<time>
   {
-      ICommunicator* comm;
-
       typedef typename pfasst::Controller<time>::LevelIter LevelIter;
 
-      bool predict; //<! whether to use a 'predict' sweep
+      ICommunicator* comm;  //!< communicator to use
+      bool predict;         //!< whether to use a _predict_ sweep
 
-      virtual void perform_sweeps(size_t level);
+      /**
+       * @copydoc MLSDC::perform_sweeps()
+       */
+      virtual void perform_sweeps(size_t level) override;
 
     public:
       /**
-       * Evolve ODE using PFASST.
+       * solve ODE using PFASST.
        *
-       * This assumes that the user has set initial conditions on the
-       * finest level.
-       *
-       * Currently uses "block mode" PFASST with the standard predictor.
+       * @pre It is assumed that the user has set initial conditions on the finest level.
        */
-      virtual void run();
-
-      virtual void set_comm(ICommunicator* comm);
+      virtual void run() override;
 
     private:
+      //! @{
       /**
-       * Cycle down: sweep on current (fine), restrict to coarse.
+       * @copydoc MLSDC::cycle_down()
        */
-      virtual LevelIter cycle_down(LevelIter l);
+      virtual LevelIter cycle_down(LevelIter level_iter) override;
 
       /**
-       * Cycle up: interpolate coarse correction to fine, sweep on
-       * current (fine).
-       *
-       * Note that if the fine level corresponds to the finest MLSDC
-       * level, we don't perform a sweep.  In this case the only
-       * operation that is performed here is interpolation.
+       * @copydoc MLSDC::cycle_up()
        */
-      virtual LevelIter cycle_up(LevelIter l);
+      virtual LevelIter cycle_up(LevelIter level_iter) override;
 
       /**
-       * Cycle bottom: sweep on the current (coarsest) level.
+       * @copydoc MLSDC::cycle_bottom()
        */
-      virtual LevelIter cycle_bottom(LevelIter l);
+      virtual LevelIter cycle_bottom(LevelIter level_iter) override;
 
       /**
-       * Perform an MLSDC V-cycle.
+       * @copydoc MLSDC::cycle_v()
        */
-      virtual LevelIter cycle_v(LevelIter l);
+      virtual LevelIter cycle_v(LevelIter level_iter) override;
 
       /**
        * Predictor: restrict initial down, preform coarse sweeps, return to finest.
        */
       virtual void predictor();
+      //! @}
 
+      /**
+       * @name Communication
+       * @{
+       */
+      /**
+       * broadcast finest level to all processes of PFASST::comm.
+       *
+       * @see ISweeper::broadcast() and its implementations for details on how broadcasting levels is
+       *   done.
+       */
       virtual void broadcast();
 
-      virtual int tag(LevelIter l);
+      /**
+       * generate a unique tag for level iterator.
+       *
+       * @param[in] level_iter level iterator providing information to compute the communication tag
+       */
+      virtual int tag(LevelIter level_iter);
 
+      /**
+       * post current status and values to next processor.
+       */
       virtual void post();
+
+    public:
+      /**
+       * set communicator.
+       *
+       * @param[in] comm ICommunicator to use
+       */
+      virtual void set_comm(ICommunicator* comm);
+      //! @}
   };
 }  // ::pfasst
 
 #include "pfasst/controller/pfasst_impl.hpp"
 
-#endif
+#endif  // _PFASST__CONTROLLER__PFASST_HPP_

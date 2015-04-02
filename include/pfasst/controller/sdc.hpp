@@ -1,5 +1,9 @@
-#ifndef _PFASST_SDC_HPP_
-#define _PFASST_SDC_HPP_
+/**
+ * @file controller/sdc.hpp
+ * @since v0.1.0
+ */
+#ifndef _PFASST__CONTROLLER__SDC_HPP_
+#define _PFASST__CONTROLLER__SDC_HPP_
 
 #include "pfasst/controller/interface.hpp"
 
@@ -7,17 +11,27 @@
 namespace pfasst
 {
   /**
-   * Vanilla SDC controller.
+   * vanilla SDC controller.
+   *
+   * @tparam time time precision
+   *
+   * @see Controller on how to set up the controller and feed it with sweepers to do the actual
+   *   integration.
+   *
+   * @ingroup Controllers
    */
   template<typename time = time_precision>
   class SDC
     : public Controller<time>
   {
     public:
+      /**
+       * run vanilla SDC.
+       */
       virtual void run();
   };
 }  // ::pfasst
 
 #include "pfasst/controller/sdc_impl.hpp"
 
-#endif
+#endif  // _PFASST__CONTROLLER__SDC_HPP_
