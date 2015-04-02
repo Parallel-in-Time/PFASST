@@ -34,6 +34,10 @@ namespace pfasst
       return this->unrecognized_args;
     }
 
+    /**
+     * @todo Make config::options::add_option() fail when called called after
+     *   config::options::init().
+     */
     void options::add_option(const string& group, const string& option, const string& help)
     {
       auto& opts = get_instance();
@@ -45,6 +49,10 @@ namespace pfasst
                                   (option.c_str(), help.c_str());
     }
 
+    /**
+     * @todo Make config::options::add_option() fail when called called after
+     *   config::options::init().
+     */
     template<typename T>
     void options::add_option(const string& group, const string& option, const string& help)
     {
@@ -58,48 +66,17 @@ namespace pfasst
                                   (option.c_str(), po::value<T>(), help.c_str());
     }
 
+    /**
+     * @todo Make config::options::init() fail when called twice.
+     */
     void options::init()
     {
       if (!this->initialized) {
-        for (auto const & kv : this->option_groups) {
+        for (auto const& kv : this->option_groups) {
           this->all_options.add(kv.second);
         }
       }
       this->initialized = true;
-    }
-
-
-    template<typename T>
-    static T get_value(const string& name, const T& default_val)
-    {
-      return options::get_instance().get_variables_map().count(name)
-              ? options::get_instance().get_variables_map()[name].as<T>() : default_val;
-    }
-
-    template<typename T>
-    static T get_value(const string& name)
-    {
-      return options::get_instance().get_variables_map()[name].as<T>();
-    }
-
-    static string print_help(bool if_no_params)
-    {
-      bool no_params_given = options::get_instance().get_variables_map().empty();
-
-      if (!if_no_params || (if_no_params && no_params_given)) {
-        stringstream s;
-        s << options::get_instance().get_all_options() << endl;
-        s << "Logging options:" << endl
-          << "  -v [ --verbose ]       activates maximum verbosity" << endl
-          << "  --v=arg                activates verbosity upto verbose level `arg`" << endl
-          << "                         (valid range: 0-9)" << endl
-          << "  -vmodule=arg           actives verbose logging for specific module" << endl
-          << "                         (see [1] for details)" << endl << endl
-          << "[1]: https://github.com/easylogging/easyloggingpp#vmodule" << endl;
-        return s.str();
-      } else {
-        return string();
-      }
     }
   }  // ::pfasst::config
 }  // ::pfasst
