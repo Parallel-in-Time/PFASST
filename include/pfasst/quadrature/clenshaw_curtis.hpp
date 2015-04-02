@@ -1,23 +1,29 @@
+/**
+ * @file pfasst/quadrature/clenshaw_curtis.hpp
+ * @since v0.3.0
+ */
 #ifndef _PFASST__QUADRATURE__CLENSHAW_CURTIS_HPP_
 #define _PFASST__QUADRATURE__CLENSHAW_CURTIS_HPP_
 
 #include <cassert>
 #include <vector>
-
-#include <boost/math/constants/constants.hpp>
+using namespace std;
 
 #include "pfasst/interfaces.hpp"
-#include "pfasst/quadrature/polynomial.hpp"
 #include "pfasst/quadrature/interface.hpp"
-
-using namespace std;
-using namespace boost::math::constants;
 
 
 namespace pfasst
 {
   namespace quadrature
   {
+    /**
+     * quadrature handler for Clenshaw-Curtis quadrature
+     *
+     * @tparam scalar precision of quadrature (i.e. `double`)
+     *
+     * @since v0.3.0
+     */
     template<typename precision = pfasst::time_precision>
     class ClenshawCurtis
       : public IQuadrature<precision>
@@ -30,6 +36,9 @@ namespace pfasst
 
       public:
         //! @{
+        /**
+         * @throws invalid_argument if less than two nodes are requested
+         */
         explicit ClenshawCurtis(const size_t num_nodes);
         ClenshawCurtis() = default;
         virtual ~ClenshawCurtis() = default;

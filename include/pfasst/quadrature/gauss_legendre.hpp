@@ -1,3 +1,7 @@
+/**
+ * @file pfasst/quadrature/gauss_legendre.hpp
+ * @since v0.3.0
+ */
 #ifndef _PFASST__QUADRATURE__GAUSS_LEGENDRE_HPP_
 #define _PFASST__QUADRATURE__GAUSS_LEGENDRE_HPP_
 
@@ -8,6 +12,13 @@ namespace pfasst
 {
   namespace quadrature
   {
+    /**
+     * quadrature handler for Gauss-Legendre quadrature
+     *
+     * @tparam scalar precision of quadrature (i.e. `double`)
+     *
+     * @since v0.3.0
+     */
     template<typename precision = pfasst::time_precision>
     class GaussLegendre
       : public IQuadrature<precision>

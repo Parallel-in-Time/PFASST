@@ -1,3 +1,7 @@
+/**
+ * @file pfasst/quadrature/gauss_lobatto.hpp
+ * @since v0.3.0
+ */
 #ifndef _PFASST__QUADRATURE__GAUSS_LOBATTO_HPP_
 #define _PFASST__QUADRATURE__GAUSS_LOBATTO_HPP_
 
@@ -8,6 +12,13 @@ namespace pfasst
 {
   namespace quadrature
   {
+    /**
+     * quadrature handler for Gauss-Lobatto quadrature
+     *
+     * @tparam scalar precision of quadrature (i.e. `double`)
+     *
+     * @since v0.3.0
+     */
     template<typename precision = pfasst::time_precision>
     class GaussLobatto
       : public IQuadrature<precision>
@@ -20,6 +31,9 @@ namespace pfasst
 
       public:
         //! @{
+        /**
+         * @throws invalid_argument if less than two nodes are requested
+         */
         explicit GaussLobatto(const size_t num_nodes);
         GaussLobatto() = default;
         virtual ~GaussLobatto() = default;
