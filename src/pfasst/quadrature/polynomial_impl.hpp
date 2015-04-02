@@ -4,7 +4,6 @@
 #include <cassert>
 #include <cmath>
 #include <complex>
-#include <limits>
 using namespace std;
 
 
@@ -68,21 +67,21 @@ namespace pfasst
      * @endinternals
      */
     template<typename CoeffT>
-    vector<CoeffT> Polynomial<CoeffT>::roots() const
+    vector<CoeffT> Polynomial<CoeffT>::roots(size_t num_iterations, CoeffT ztol) const
     {
       assert(c.size() >= 1);
-      size_t n = this->order();
+      size_t n = c.size() - 1;
 
       // initial guess
-      Polynomial<complex<CoeffT>> z0(n), z1(n);
+      vector<complex<CoeffT>> z0(n), z1(n);
       for (size_t j = 0; j < n; j++) {
         z0[j] = pow(complex<double>(0.4, 0.9), j);
         z1[j] = z0[j];
       }
 
       // durand-kerner-weierstrass iterations
-      Polynomial<CoeffT> p = normalize();
-      for (size_t k = 0; k < 100; k++) {
+      Polynomial<CoeffT> p = this->normalize();
+      for (size_t k = 0; k < num_iterations; k++) {
         complex<CoeffT> num, den;
         for (size_t i = 0; i < n; i++) {
           num = p.evaluate(z0[i]);
@@ -93,18 +92,12 @@ namespace pfasst
           }
           z0[i] = z0[i] - num / den;
         }
-
-        // converged?
-        CoeffT acc = 0.0;
-        for (size_t j = 0; j < n; j++) { acc += abs(z0[j] - z1[j]); }
-        if (acc < 2 * numeric_limits<CoeffT>::epsilon()) { break; }
-
         z1 = z0;
       }
 
       vector<CoeffT> roots(n);
       for (size_t j = 0; j < n; j++) {
-        roots[j] = (abs(z0[j]) < 4 * numeric_limits<CoeffT>::epsilon()) ? 0.0 : real(z0[j]);
+        roots[j] = abs(z0[j]) < ztol ? 0.0 : real(z0[j]);
       }
 
       sort(roots.begin(), roots.end());
