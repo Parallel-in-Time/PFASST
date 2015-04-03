@@ -1,9 +1,8 @@
-cmake_minimum_required(VERSION 2.8.6)
+cmake_minimum_required(VERSION 3.1)
 project(pfasst)
 
 list(APPEND CMAKE_MODULE_PATH ${pfasst_SOURCE_DIR}/cmake)
 include(cmake/utility_functions.cmake)
-include(CheckCXXCompilerFlag)
 include(ExternalProject)
 include(CMakeDependentOption)
 include(FeatureSummary)
@@ -13,7 +12,6 @@ list(APPEND CMAKE_FIND_ROOT_PATH ${pfasst_SOURCE_DIR}/stack)
 # Set default ExternalProject root directory
 set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/3rdparty)
 
-option(pfasst_DISABLE_LIBCXX    "Disable use of LLVM's libc++ when compiling with Clang." ON )
 option(pfasst_BUILD_SHARED_LIBS "Build shared libraries."                                 OFF)
 option(pfasst_BUILD_EXAMPLES    "Build example programs."                                 ON )
 CMAKE_DEPENDENT_OPTION(pfasst_INSTALL_EXAMPLES "Install example programs." ON
@@ -32,47 +30,55 @@ if(pfasst_DEFAULT_RAND_SEED)
     set(pfasst_RANDOM_SEED "42")
 endif()
 
-# Check for C++11 support
+# This is the list of C++ features used somewhere in the code base.
+#  All of these must be supported by the compiler.
+#
+#  Use this when defining targets as
+#    target_compile_features(<my_target> PRIVATE ${pfasst_GLOBAL_COMPILER_FEATURES})
+#
+#  Elsewise one can also use CXX_STANDARD and CXX_REQUIRE_STANDARD target properties
+#    set_property(TARGET <my_target> PROPERTY CXX_STANDARD 11)
+#    set_property(TARGET <my_target> PROPERTY CXX_STANDARD_REQUIRED ON)
+set(pfasst_GLOBAL_COMPILER_FEATURES
+    cxx_alias_templates
+    cxx_auto_type
+    cxx_constexpr
+    cxx_decltype
+    cxx_defaulted_functions
+    cxx_delegating_constructors
+    cxx_deleted_functions
+    cxx_inheriting_constructors
+    cxx_lambdas
+    cxx_noexcept
+    cxx_nullptr
+    cxx_override
+    cxx_range_for
+    cxx_right_angle_brackets
+    cxx_rvalue_references
+    cxx_static_assert
+    cxx_template_template_parameters
+    cxx_uniform_initialization
+    cxx_variadic_templates
+)
+
+# Some further Compiler-dependent options
 if(${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
-    check_cxx_compiler_flag(-std=c++11 HAVE_STD11)
-    if(HAVE_STD11)
-        add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-std=c++11")
-    else()
-        message(FATAL_ERROR "No advanced standard C++ support of your GCC (-std=c++11 not defined).")
-    endif()
     if(pfasst_WITH_GCC_PROF)
         add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-ggdb3 -pg")
     endif(pfasst_WITH_GCC_PROF)
 elseif(${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
-    check_cxx_compiler_flag(-std=c++11 HAVE_STD11)
-    if(HAVE_STD11)
-        if(pfasst_DISABLE_LIBCXX AND NOT APPLE)
-            add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-std=c++11")
-            add_to_string_list("${CMAKE_CXX_LINK_FLAGS}" CMAKE_CXX_LINK_FLAGS "-std=c++11")
-        else()
-            if(APPLE)
-                message(WARNING "You are on an Apple system. libc++ is forcly enabled.")
-            endif(APPLE)
-            add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-std=c++11" "-stdlib=libc++")
-            add_to_string_list("${CMAKE_CXX_LINK_FLAGS}" CMAKE_CXX_LINK_FLAGS "-std=c++11" "-stdlib=libc++")
-        endif()
-    else()
-        message(FATAL_ERROR "No C++11 support for Clang version. Please upgrade Clang to a version supporting C++11.")
-    endif()
+    if(APPLE)
+        message(WARNING "You are on an Apple system. libc++ is forcly enabled.")
+        add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-std=c++11" "-stdlib=libc++")
+        add_to_string_list("${CMAKE_CXX_LINK_FLAGS}" CMAKE_CXX_LINK_FLAGS "-std=c++11" "-stdlib=libc++")
+    endif(APPLE)
     add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-fdiagnostics-show-category=name -fdiagnostics-show-template-tree")
 elseif(${CMAKE_CXX_COMPILER_ID} MATCHES XL)
     # NOTE: This branch is not tested yet (in theory it should work)
     message(WARNING "IMB XL C/C++ support is experimental and not yet tested.")
-    check_cxx_compiler_flag(-qlanglvl=extended0x HAVE_STD11)
-    if(HAVE_STD11)
-        add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-qlanglvl=extended0x -qwarn0x")
-    else()
-        message(FATAL_ERROR "No advanced standard C++ support of your IBM XL C/C++ compiler (-qlanglvl=extended0x not defined).")
-    endif()
 else()
-    message(FATAL_ERROR "Don't know how to check C++11 compatibility with compiler '${CMAKE_CXX_COMPILER_ID}'")
+    message(WARNING "Your compiler type '${CMAKE_CXX_COMPILER_ID}' is new to us. Use on your own risk.")
 endif()
-message(STATUS "Your compiler has C++11 support. Hurray!")
 
 if(CMAKE_CXX_COMPILER_VERSION)
     string(REGEX MATCH "^[0-9]+" CMAKE_CXX_COMPILER_VERSION_MAJOR ${CMAKE_CXX_COMPILER_VERSION})
@@ -102,12 +108,14 @@ add_feature_info(MPI
     pfasst_WITH_MPI
     "build with MPI"
 )
+
 if(${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
     add_feature_info(Profiling
         pfasst_WITH_GCC_PROF
         "build-in profiling support"
     )
 endif()
+
 if(pfasst_RANDOM_SEED)
     add_feature_info(DefaultRandomSeed
         pfasst_RANDOM_SEED
@@ -135,7 +143,7 @@ message(STATUS "Configuring 3rd party libraries")
 #  - Boost headers in 3rdparty_INCLUDES
 #  - Boost libraries in Boost_LIBRARY_DIRS
 #  - Eigen headers in 3rdparty_INCLUDES
-#  - Google test and mock headers in 3rdparty_INCLUDES (if pfasst_BUILD_TESTS)
+#  - Google test and mock headers in TESTS_3rdparty_INCLUDES (if pfasst_BUILD_TESTS)
 #  - FFTW_INCLUDE_PATH (if pfasst_BUILD_EXAMPLES)
 #  - FFTW_LIBRARIES (if pfasst_BUILD_EXAMPLES)
 add_subdirectory(3rdparty)
