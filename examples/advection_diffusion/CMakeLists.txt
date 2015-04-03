@@ -28,6 +28,7 @@ set(all_advec_examples
 
 foreach(example ${all_advec_examples})
     add_executable(${example} ${CMAKE_CURRENT_SOURCE_DIR}/${example}.cpp)
+    target_compile_features(${example} PRIVATE ${pfasst_GLOBAL_COMPILER_FEATURES})
     if(NOT FFTW_FOUND)
         add_dependencies(${example} fftw3)
     endif()

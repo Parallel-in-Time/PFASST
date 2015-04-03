@@ -13,6 +13,7 @@ set(TESTS
 foreach(test ${TESTS})
     message(STATUS "  ${test}")
     add_executable(${test} ${test}.cpp)
+    target_compile_features(${test} PRIVATE ${pfasst_GLOBAL_COMPILER_FEATURES})
     if(${pfasst_NUM_DEPENDEND_TARGETS} GREATER 0)
         add_dependencies(${test} ${pfasst_DEPENDEND_TARGETS})
     endif()

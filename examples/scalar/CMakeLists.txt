@@ -12,6 +12,7 @@ set(scalar_examples
 
 foreach(example ${scalar_examples})
     add_executable(${example} ${CMAKE_CURRENT_SOURCE_DIR}/${example}.cpp)
+    target_compile_features(${example} PRIVATE ${pfasst_GLOBAL_COMPILER_FEATURES})
     if(${pfasst_NUM_DEPENDEND_TARGETS} GREATER 0)
         add_dependencies(${example} ${pfasst_DEPENDEND_TARGETS})
     endif()
