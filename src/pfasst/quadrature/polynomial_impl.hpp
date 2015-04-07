@@ -73,10 +73,9 @@ namespace pfasst
       size_t n = c.size() - 1;
 
       // initial guess
-      vector<complex<CoeffT>> z0(n), z1(n);
+      vector<complex<CoeffT>> z0(n);
       for (size_t j = 0; j < n; j++) {
         z0[j] = pow(complex<double>(0.4, 0.9), j);
-        z1[j] = z0[j];
       }
 
       // durand-kerner-weierstrass iterations
@@ -92,7 +91,6 @@ namespace pfasst
           }
           z0[i] = z0[i] - num / den;
         }
-        z1 = z0;
       }
 
       vector<CoeffT> roots(n);
