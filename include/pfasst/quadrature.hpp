@@ -1,14 +1,19 @@
+/**
+ * @file pfasst/quadrature.hpp
+ * @since v0.1.0
+ */
 #ifndef _PFASST__QUADRATURE_HPP_
 #define _PFASST__QUADRATURE_HPP_
 
 #include <cmath>
 #include <exception>
-#include <string>
-#include <type_traits>
 #include <vector>
 using namespace std;
 
 #include <Eigen/Dense>
+template<typename scalar>
+using Matrix = Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+
 #include <boost/math/constants/constants.hpp>
 
 #include "pfasst/config.hpp"
@@ -27,12 +32,26 @@ using Matrix = Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowM
 
 namespace pfasst
 {
-
+  /**
+   * Functionality related to computing quadrature nodes and weights.
+   *
+   * @note Please note, that all quadrature nodes are in the range \\( [0, 1] \\).
+   */
   namespace quadrature
   {
-
+    /**
+     * Instantiates quadrature handler for given number of nodes and type descriptor.
+     *
+     * @tparam precision numerical type of the nodes (e.g. `double`)
+     * @param[in] nnodes number of quadrature nodes
+     * @param[in] qtype type descriptor of the quadrature
+     * @returns instance of pfasst::quadrature::IQuadrature of specified type with desired number
+     *   of nodes
+     * @throws pfasst::ValueError if @p qtype is not a valid quadrature type descriptor
+     */
     template<typename precision = pfasst::time_precision>
-    shared_ptr<IQuadrature<precision>> quadrature_factory(const size_t nnodes, const QuadratureType qtype)
+    shared_ptr<IQuadrature<precision>> quadrature_factory(const size_t nnodes,
+                                                          const QuadratureType qtype)
     {
       if (qtype == QuadratureType::GaussLegendre) {
         return make_shared<GaussLegendre<precision>>(nnodes);
@@ -50,12 +69,28 @@ namespace pfasst
       }
     }
 
+    /**
+     * Compute quadrature nodes for given quadrature type descriptor.
+     *
+     * @tparam precision numerical type of the nodes (e.g. `double`)
+     * @param[in] nnodes number of quadrature nodes to compute
+     * @param[in] qtype type descriptor of the quadrature nodes
+     * @returns std::vector of quadrature nodes of given type
+     *
+     * @see pfasst::quadrature::QuadratureType for valid types
+     * @see pfasst::quadrature::quadrature_factory for further details
+     */
     template<typename precision = pfasst::time_precision>
     vector<precision> compute_nodes(size_t nnodes, QuadratureType qtype)
     {
       return quadrature_factory<precision>(nnodes, qtype)->get_nodes();
     }
 
+    /**
+     * @todo write documentation
+     *
+     * @tparam precision numerical type of the interpolation (e.g. `double`)
+     */
     template<typename precision = time_precision>
     Matrix<precision> compute_interp(vector<precision> dst, vector<precision> src)
     {
@@ -85,7 +120,6 @@ namespace pfasst
 
       return mat;
     }
-
   }  // ::pfasst::quadrature
 }  // ::pfasst
 

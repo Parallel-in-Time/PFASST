@@ -1,12 +1,10 @@
-/*
- * Advection/diffusion example using an encapsulated IMEX sweeper.
+/**
+ * Advection-Diffusion MLSDC with _auto builder_.
  *
- * This example uses a (serial) multi-level SDC sweeper.  It is
- * functionally exactly the same as ex2.cpp, but uses the 'auto
- * builder' to shorten the build and setup stages of the MLSDC
- * controller.
+ * @ingroup AdvectionDiffusionFiles
+ * @file examples/advection_diffusion/serial_mlsdc_autobuild.cpp
+ * @since v0.1.0
  */
-
 #include <cassert>
 #include <cstdlib>
 #include <memory>
@@ -37,6 +35,15 @@ namespace pfasst
   {
     namespace advection_diffusion
     {
+      /**
+       * Advection/diffusion example using an encapsulated IMEX sweeper.
+       *
+       * This example uses a (serial) multi-level SDC sweeper.
+       * It is functionally exactly the same as serial_mlsdc.cpp, but uses the _auto builder_ to
+       * shorten the build and setup stages of the MLSDC controller.
+       *
+       * @ingroup AdvectionDiffusion
+       */
       tuple<error_map, residual_map> run_serial_mlsdc_autobuild()
       {
         MLSDC<> mlsdc;

@@ -15,8 +15,9 @@ namespace pfasst
   {}
 
   /**
-   * @internal message string is prepended by the string
-   *   `Not implemented/supported yet, required for: `
+   * @internals
+   * The message string is prepended by the string `Not implemented/supported yet, required for: `
+   * @endinternals
    */
   const char* NotImplementedYet::what() const throw()
   {
@@ -29,7 +30,9 @@ namespace pfasst
   {}
 
   /**
-   * @internal message string is prepended by the string `ValueError: `
+   * @internals
+   * The message string is prepended by the string `ValueError: `
+   * @endinternals
    */
   const char* ValueError::what() const throw()
   {
@@ -44,31 +47,38 @@ namespace pfasst
   IStatus::~IStatus()
   {}
 
+  //! @todo Consider asserting validity of the given pointer to the communicator.
   void IStatus::set_comm(ICommunicator* comm)
   {
     this->comm = comm;
   }
 
+  //! @todo Consider asserting presence of valid communicator.
   bool IStatus::previous_is_iterating()
   {
     if (this->comm->rank() == 0) {
       return false;
     }
-    return !this->get_converged(this->comm->rank()-1);
+    return !this->get_converged(this->comm->rank() - 1);
   }
 
   /**
-   * @internal Returning logic depends on current process' rank.
-   *   In case it is not the master process, both the converged state of this and the previous rank
-   *   are checked.
+   * @internals
+   * Returning logic depends on current process' rank.
+   * In case it is not the master process, both the converged state of this and the previous rank
+   * are checked.
+   *
    * @see `IStatus::get_converged()`
+   * @endinternals
+   *
+   * @todo Consider asserting presence of valid communicator.
    */
   bool IStatus::keep_iterating()
   {
     if (this->comm->rank() == 0) {
       return !this->get_converged(0);
     }
-    return !this->get_converged(this->comm->rank()) || !this->get_converged(this->comm->rank()-1);
+    return !this->get_converged(this->comm->rank()) || !this->get_converged(this->comm->rank() - 1);
   }
 
 
@@ -81,6 +91,9 @@ namespace pfasst
   ISweeper<time>::~ISweeper()
   {}
 
+  /**
+   * @todo Consider asserting presence of the given pointer to the controller.
+   */
   template<typename time>
   void ISweeper<time>::set_controller(Controller<time>* ctrl)
   {
@@ -88,9 +101,9 @@ namespace pfasst
   }
 
   /**
-   * @internal
+   * @internals
    * @note Asserts presense of a controller if `NDEBUG` is not defined.
-   * @endinternal
+   * @endinternals
    */
   template<typename time>
   Controller<time>* ISweeper<time>::get_controller()
@@ -99,6 +112,11 @@ namespace pfasst
     return this->controller;
   }
 
+  /**
+   * @internals
+   * @note Unless overwritten by implementations, this is a no-op.
+   * @endinternals
+   */
   template<typename time>
   void ISweeper<time>::set_options()
   {}
@@ -109,6 +127,9 @@ namespace pfasst
     UNUSED(coarse);
   }
 
+  /**
+   * @returns Unless overwritten by implementations, this will always return `false`.
+   */
   template<typename time>
   bool ISweeper<time>::converged()
   {

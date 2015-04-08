@@ -1,7 +1,9 @@
-/*
- * Advection/diffusion example using an encapsulated IMEX sweeper.
+/**
+ * Advection-Diffusion with MPI-enabled PFASST.
  *
- * This example uses MPI PFASST.
+ * @ingroup AdvectionDiffusionFiles
+ * @file examples/advection_diffusion/mpi_pfasst.cpp
+ * @since v0.2.0
  */
 
 #include <cassert>
@@ -31,6 +33,13 @@ namespace pfasst
   {
     namespace advection_diffusion
     {
+      /**
+       * Advection/diffusion example using an encapsulated IMEX sweeper.
+       *
+       * This example uses MPI PFASST.
+       *
+       * @ingroup AdvectionDiffusion
+       */
       error_map run_mpi_pfasst(double abs_residual_tol, size_t niters=4)
       {
         const size_t nsteps = 4;

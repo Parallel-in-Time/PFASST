@@ -1,3 +1,8 @@
+/**
+ * @defgroup BorisFiles Files
+ * @ingroup Boris
+ * @file examples/boris/boris_sweeper.hpp
+ */
 #ifndef _EXAMPLES__BORIS__BORIS_SWEEPER__HPP_
 #define _EXAMPLES__BORIS__BORIS_SWEEPER__HPP_
 
@@ -32,6 +37,18 @@ namespace pfasst
 {
   namespace examples
   {
+    /**
+     * @defgroup Boris Boris
+     * @ingroup Examples
+     *
+     * This directory contains an implementations of a modification to the Boris method to solve 
+     * second order ODEs with the Velocity-Verlet scheme using the PFASST framework.
+     *
+     * The sweeper with it's _Boris magic_ is implemented in `boris_sweeper.hpp`.
+     * The physical properties of a testbed example with a panning trap are defined in `physics.hpp`
+     * and `simple_physics.hpp`, while the data structure for the particles are defined in
+     * `particle.hpp` and `particle_3d.hpp`.
+     */
     namespace boris
     {
       using namespace pfasst::encap;
@@ -93,6 +110,9 @@ namespace pfasst
       };
 
 
+      /**
+       * @ingroup Boris
+       */
       template<
         typename scalar,
         typename time

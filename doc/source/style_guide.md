@@ -61,7 +61,7 @@ using double quotes.
 
 ### Define Guards
 
-Use `#define` guards in header files to prevent multiple inclusion.
+Use `#%define` guards in header files to prevent multiple inclusion.
 The variable defined should be derived from the header file name
 itself.  For example, a header file `my_header.hpp` in the folder
 `PFASST/include/subfolder` should have the following define guard:
@@ -105,9 +105,17 @@ We agreed on using the "most common" C++11 features.  These are:
 
 Document your code.
 
-We use [Doxygen] for generating the documentation webpage.  You can
-use pretty much all the features, Doxygen provides, including
-[MathJAX] for formulas and [Markdown] for easy text formatting.
+We use [Doxygen] for generating the documentation webpage. You can use pretty much all the features,
+Doxygen provides, including [MathJAX] for formulas and [Markdown] for easy text formatting.
+
+It is advised to use Doxygen's special commands wherever possible to aid readability of the 
+generated documentation.
+Especially, one should use `@tparam <T> <description>`, `@param[<in>,<out>] <param> <description>`,
+`@returns <description>`, `@throws <exception> <description>`.
+
+There is an additional custom defined block available to mark documentation of internals.
+Therefore, sourround the respective block with `internals` and `endinternals` (as Doxygen commands).
+
 
 ## Formatting
 

@@ -1,9 +1,10 @@
-/*
- * Advection/diffusion example using an encapsulated IMEX sweeper.
+/**
+ * Advection-Diffusion with vanilla SDC.
  *
- * This example uses a vanilla SDC sweeper.
+ * @ingroup AdvectionDiffusionFiles
+ * @file examples/advection_diffusion/vanilla_sdc.cpp
+ * @since v0.1.0
  */
-
 #include <cstdlib>
 #include <memory>
 
@@ -23,6 +24,13 @@ namespace pfasst
   {
     namespace advection_diffusion
     {
+      /**
+       * Advection/diffusion example using an encapsulated IMEX sweeper.
+       *
+       * This example uses a vanilla SDC sweeper.
+       *
+       * @ingroup AdvectionDiffusion
+       */
       error_map run_vanilla_sdc(double abs_residual_tol, double rel_residual_tol=0.0)
       {
         SDC<> sdc;

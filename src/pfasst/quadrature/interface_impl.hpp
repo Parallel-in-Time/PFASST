@@ -71,9 +71,19 @@ namespace pfasst
     template<typename precision>
     void IQuadrature<precision>::compute_nodes()
     {
-      throw NotImplementedYet("Implemented by derived classes.");
+      throw NotImplementedYet("Quadrature");
     }
 
+    /**
+     * @internals
+     * Computing weights means computing \\( Q \\) and \\( S \\) matrices as well as the \\( q \\)
+     * vector.
+     * The \\( B \\) matrix is constructed from \\( q \\) vector.
+     *
+     * @note As long as the weight computation of the implemented quadrature is based on polynomial
+     *   interpolation, this function must not be overwritten.
+     * @endinternals
+     */
     template<typename precision>
     void IQuadrature<precision>::compute_weights()
     {

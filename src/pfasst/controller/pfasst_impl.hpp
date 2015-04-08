@@ -21,6 +21,21 @@ namespace pfasst
     }
   }
 
+  /**
+   * @internals
+   * @note No consistency checks on validity of given communicator are done.
+   * @endinternals
+   */
+  template<typename time>
+  void PFASST<time>::set_comm(ICommunicator* comm)
+  {
+    this->comm = comm;
+  }
+
+  /**
+   * @note Currently uses _block mode_ PFASST with the standard predictor
+   *   (see PFASST::predictor()).
+   */
   template<typename time>
   void PFASST<time>::run()
   {
@@ -67,12 +82,6 @@ namespace pfasst
   }
 
   template<typename time>
-  void PFASST<time>::set_comm(ICommunicator* comm)
-  {
-    this->comm = comm;
-  }
-
-  template<typename time>
   typename PFASST<time>::LevelIter PFASST<time>::cycle_down(typename PFASST<time>::LevelIter l)
   {
     auto fine = l.current();
@@ -96,52 +105,52 @@ namespace pfasst
   }
 
   template<typename time>
-  typename PFASST<time>::LevelIter PFASST<time>::cycle_up(typename PFASST<time>::LevelIter l)
+  typename PFASST<time>::LevelIter PFASST<time>::cycle_up(typename PFASST<time>::LevelIter level_iter)
   {
-    auto fine = l.current();
-    auto crse = l.coarse();
-    auto trns = l.transfer();
+    auto fine = level_iter.current();
+    auto crse = level_iter.coarse();
+    auto trns = level_iter.transfer();
 
     trns->interpolate(fine, crse, true);
 
     if (this->comm->status->previous_is_iterating()) {
-      fine->recv(comm, tag(l), false);
+      fine->recv(comm, tag(level_iter), false);
       trns->interpolate_initial(fine, crse);
     }
 
-    if (l < this->finest()) {
-      perform_sweeps(l.level);
+    if (level_iter < this->finest()) {
+      perform_sweeps(level_iter.level);
     }
 
-    return l + 1;
+    return level_iter + 1;
   }
 
   template<typename time>
-  typename PFASST<time>::LevelIter PFASST<time>::cycle_bottom(typename PFASST<time>::LevelIter l)
+  typename PFASST<time>::LevelIter PFASST<time>::cycle_bottom(typename PFASST<time>::LevelIter level_iter)
   {
-    auto crse = l.current();
+    auto crse = level_iter.current();
 
     if (this->comm->status->previous_is_iterating()) {
-      crse->recv(comm, tag(l), true);
+      crse->recv(comm, tag(level_iter), true);
     }
     this->comm->status->recv();
-    this->perform_sweeps(l.level);
-    crse->send(comm, tag(l), true);
+    this->perform_sweeps(level_iter.level);
+    crse->send(comm, tag(level_iter), true);
     this->comm->status->send();
-    return l + 1;
+    return level_iter + 1;
   }
 
   template<typename time>
-  typename PFASST<time>::LevelIter PFASST<time>::cycle_v(typename PFASST<time>::LevelIter l)
+  typename PFASST<time>::LevelIter PFASST<time>::cycle_v(typename PFASST<time>::LevelIter level_iter)
   {
-    if (l.level == 0) {
-      l = cycle_bottom(l);
+    if (level_iter.level == 0) {
+      level_iter = cycle_bottom(level_iter);
     } else {
-      l = cycle_down(l);
-      l = cycle_v(l);
-      l = cycle_up(l);
+      level_iter = cycle_down(level_iter);
+      level_iter = cycle_v(level_iter);
+      level_iter = cycle_up(level_iter);
     }
-    return l;
+    return level_iter;
   }
 
   template<typename time>
@@ -186,15 +195,26 @@ namespace pfasst
   template<typename time>
   void PFASST<time>::broadcast()
   {
-    this->get_finest()->broadcast(comm);
+    this->get_finest()->broadcast(this->comm);
   }
 
+  /**
+   * @internals
+   * A simple formula is used with current level index \\( L \\) (provided by @p level_iter) and
+   * current iteration number \\( I \\):
+   * \\[ L * 10000 + I + 10 \\]
+   * @endinternals
+   */
   template<typename time>
-  int PFASST<time>::tag(LevelIter l)
+  int PFASST<time>::tag(LevelIter level_iter)
   {
-    return l.level * 10000 + this->get_iteration() + 10;
+    return level_iter.level * 10000 + this->get_iteration() + 10;
   }
 
+  /**
+   * @see IStatus::post() for details and implementations of posting current status
+   * @see ISweeper::post() for details and implementations of posting current level
+   */
   template<typename time>
   void PFASST<time>::post()
   {
