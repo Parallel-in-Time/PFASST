@@ -1,9 +1,12 @@
-/*
- * Advection/diffusion sweeper.
+/**
+ * @defgroup AdvectionDiffusionFiles Files
+ * @ingroup AdvectionDiffusion
+ *
+ * @file examples/advection_diffusion/advection_diffusion_sweeper.hpp
+ * @since v0.1.0
  */
-
-#ifndef _ADVECTION_DIFFUSION_SWEEPER_HPP_
-#define _ADVECTION_DIFFUSION_SWEEPER_HPP_
+#ifndef _EXAMPLES__ADVEC_DIFF__ADVECTION_DIFFUSION_SWEEPER_HPP_
+#define _EXAMPLES__ADVEC_DIFF__ADVECTION_DIFFUSION_SWEEPER_HPP_
 
 #include <cassert>
 #include <complex>
@@ -32,17 +35,45 @@ namespace pfasst
 {
   namespace examples
   {
+    /**
+     * Advection-Diffusion example
+     *
+     * @defgroup AdvectionDiffusion Advection Diffusion
+     * @ingroup Examples
+     *
+     * This directory contains several implementations of an advection/diffusion solver using the
+     * PFASST framework.
+     *
+     * All of the solvers use the SDC sweeper defined in `advection_diffusion_sweeper.hpp`, and the FFT
+     * routines in `fft.hpp`.
+     *
+     * The implementations are, in order of complexity:
+     *
+     *  - `vanilla_sdc.cpp` - basic example that uses an encapsulated IMEX sweeper.
+     *
+     *  - `serial_mlsdc.cpp` - basic multi-level version that uses polynomial interpolation in time and
+     *    spectral interpolation in space, as defined in `specrtal_transfer_1d.hpp`.
+     *
+     *  - `serial_mlsdc_autobuild.cpp` - same as above, but uses the "auto build" feature to shorten
+     *    `main`.
+     */
     namespace advection_diffusion
     {
       /**
-       * Containers for errors/residuals etc.
+       * @name Containers for errors/residuals etc.
+       * @{
        */
       typedef map<tuple<size_t, size_t>, double> error_map; // step, iteration -> error
       typedef map<size_t, error_map> residual_map; // level, (step, iteration) -> residual
+      //! @}
 
       typedef error_map::value_type vtype;
       typedef error_map::key_type ktype;
 
+      /**
+       * advection-diffusion sweeper with semi-implicit time-integration.
+       * @ingroup AdvectionDiffusion
+       */
       template<typename time = pfasst::time_precision>
       class AdvectionDiffusionSweeper
         : public encap::IMEXSweeper<time>
@@ -271,4 +302,4 @@ namespace pfasst
   }  // ::pfasst::examples
 }  // ::pfasst
 
-#endif
+#endif  // _EXAMPLES__ADVEC_DIFF__ADVECTION_DIFFUSION_SWEEPER_HPP_

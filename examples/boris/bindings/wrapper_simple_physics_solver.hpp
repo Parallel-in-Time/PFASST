@@ -1,3 +1,6 @@
+/**
+ * @ingroup Boris_Bindings
+ */
 #ifndef _EXAMPLES__BORIS__BINDINGS__WRAPPER_SIMPLE_PHYSICS_SOLVER_HPP_
 #define _EXAMPLES__BORIS__BINDINGS__WRAPPER_SIMPLE_PHYSICS_SOLVER_HPP_
 
@@ -21,6 +24,9 @@ namespace pfasst
     {
       namespace bindings
       {
+        /**
+         * @ingroup Boris_Bindings
+         */
         template<
           typename scalar,
           typename time
@@ -76,12 +82,15 @@ namespace pfasst
         };
 
 
+        //! @ingroup Boris_Bindings
         template<typename scalar, typename time>
         void setup(shared_ptr<WrapperSimplePhysicsSolver<scalar, time>> wrapper);
 
+        //! @ingroup Boris_Bindings
         template<typename scalar, typename time, typename ArgT>
         void setup(shared_ptr<WrapperSimplePhysicsSolver<scalar, time>> wrapper, ArgT arg);
 
+        //! @ingroup Boris_Bindings
         template<typename scalar, typename time, typename ArgT, typename... ArgsT>
         void setup(shared_ptr<WrapperSimplePhysicsSolver<scalar, time>> wrapper, ArgT arg, ArgsT... args);
       }  // ::pfasst::examples::boris::bindings

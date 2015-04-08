@@ -1,3 +1,7 @@
+/**
+ * @file examples/boris/injective_transfer.hpp
+ * @ingroup BorisFiles
+ */
 #ifndef _EXAMPLES__BORIS__INJECTIVE_TRANSFER__HPP_
 #define _EXAMPLES__BORIS__INJECTIVE_TRANSFER__HPP_
 
@@ -14,6 +18,9 @@ namespace pfasst
   {
     namespace boris
     {
+      /**
+       * @ingroup Boris
+       */
       template<
         typename scalar,
         typename time = pfasst::time_precision

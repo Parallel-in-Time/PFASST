@@ -1,3 +1,7 @@
+/**
+ * @file examples/boris/particle.hpp
+ * @ingroup BorisFiles
+ */
 #ifndef _EXAMPLES__BORIS__PARTICLE_HPP_
 #define _EXAMPLES__BORIS__PARTICLE_HPP_
 
@@ -14,15 +18,24 @@ namespace pfasst
   {
     namespace boris
     {
+      /**
+       * @ingroup Boris
+       */
       template<
         typename precision
       >
       using ParticleComponent = vector<precision>;
 
+      /**
+       * @ingroup Boris
+       */
       template<typename T>
       inline el::base::type::ostream_t& operator<<(el::base::type::ostream_t& os, const vector<T> vec);
 
 
+      /**
+       * @ingroup Boris
+       */
       template<
         typename precision
       >
@@ -57,6 +70,9 @@ namespace pfasst
       };
 
 
+      /**
+       * @ingroup Boris
+       */
       template<typename precision>
       inline el::base::type::ostream_t& operator<<(el::base::type::ostream_t& os,
                                                    const shared_ptr<Particle<precision>>& sp_particle);

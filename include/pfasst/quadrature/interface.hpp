@@ -1,3 +1,7 @@
+/**
+ * @file pfasst/quadrature/interface.hpp
+ * @since v0.3.0
+ */
 #ifndef _PFASST__QUADRATURE__INTERFACE_HPP_
 #define _PFASST__QUADRATURE__INTERFACE_HPP_
 
@@ -6,29 +10,31 @@
 using namespace std;
 
 #include <Eigen/Dense>
-
-#include "pfasst/globals.hpp"
-#include "pfasst/interfaces.hpp"
-#include "pfasst/quadrature/polynomial.hpp"
-
 template<typename scalar>
 using Matrix = Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
 template<typename scalar>
 using Index = typename Matrix<scalar>::Index;
 
+#include "pfasst/globals.hpp"
+#include "pfasst/interfaces.hpp"
+#include "pfasst/quadrature/polynomial.hpp"
 
 
 namespace pfasst
 {
   namespace quadrature
   {
+    /**
+     * Quadrature type descriptors.
+     * @since v0.3.0
+     */
     enum class QuadratureType : int {
-        GaussLegendre   =  0
-      , GaussLobatto    =  1
-      , GaussRadau      =  2
-      , ClenshawCurtis  =  3
-      , Uniform         =  4
+        GaussLegendre   =  0  //!< @ref pfasst::quadrature::GaussLegendre "Gauss-Legendre" quadrature
+      , GaussLobatto    =  1  //!< @ref pfasst::quadrature::GaussLobatto "Gauss-Lobatto" quadrature
+      , GaussRadau      =  2  //!< @ref pfasst::quadrature::GaussRadau "Gauss-Radau" quadrature
+      , ClenshawCurtis  =  3  //!< @ref pfasst::quadrature::ClenshawCurtis "Clenshaw-Curtis" quadrature
+      , Uniform         =  4  //!< Uniform quadrature
       , UNDEFINED       = -1
     };
 
@@ -54,6 +60,22 @@ namespace pfasst
     }
 
 
+    /**
+     * Compute quadrature matrix \\( Q \\) between two sets of nodes.
+     *
+     * Computing the quadrature matrix \\( Q \\) for polynomial-based integration from one set of 
+     * quadrature nodes (@p from) to another set of quadrature nodes (@p to).
+     *
+     * @tparam scalar precision of quadrature (i.e. `double`)
+     * @param[in] from first set of quadrature nodes
+     * @param[in] to second set of quadrature nodes
+     * @returns quadrature matrix \\( Q \\) with `to.size()` rows and `from.size()` colums
+     *
+     * @pre For correctness of the algorithm it is assumed, that both sets of nodes are in the range
+     *   \\( [0, 1] \\).
+     *
+     * @since v0.3.0
+     */
     template<typename scalar>
     static Matrix<scalar> compute_q_matrix(const vector<scalar>& from, const vector<scalar>& to)
     {
@@ -77,6 +99,16 @@ namespace pfasst
     }
 
 
+    /**
+     * Compute quadrature matrix \\( Q \\) for one set of nodes.
+     *
+     * @tparam scalar precision of quadrature (i.e. `double`)
+     * @param[in] nodes quadrature nodes to compute \\( Q \\) matrix for
+     *
+     * @since v0.3.0
+     *
+     * @overload
+     */
     template<typename scalar>
     static Matrix<scalar> compute_q_matrix(const vector<scalar>& nodes)
     {
@@ -84,6 +116,17 @@ namespace pfasst
     }
 
 
+    /**
+     * Compute quadrature matrix \\( Q \\) from a given node-to-node quadrature matrix \\( S \\).
+     *
+     * @tparam scalar precision of quadrature (i.e. `double`)
+     * @param[in] s_mat \\( S \\) matrix to compute \\( Q \\) from
+     * @see pfasst::quadrature::compute_s_matrix
+     *
+     * @since v0.3.0
+     *
+     * @overload
+     */
     template<typename scalar>
     static Matrix<scalar> compute_q_matrix(const Matrix<scalar>& s_mat)
     {
@@ -96,6 +139,21 @@ namespace pfasst
     }
 
 
+    /**
+     * Compute node-to-node quadrature matrix \\( S \\) from a given quadrature matrix \\( Q \\).
+     *
+     * The \\( S \\) matrix provides a node-to-node quadrature where the \\( i \\)-th row of
+     * \\( S \\) represents a quadrature from the \\( i-1 \\)-th node to the \\( i \\)-th node.
+     *
+     * The procedure is simply subtracting the \\( i-1 \\)-th row of \\( Q \\) from the 
+     * \\( i \\)-th row of \\( Q \\).
+     *
+     * @tparam scalar precision of quadrature (i.e. `double`)
+     * @param[in] q_mat \\( Q \\) matrix to compute \\( S \\) of
+     * @returns \\( S \\) matrix
+     *
+     * @since v0.3.0
+     */
     template<typename scalar>
     static Matrix<scalar> compute_s_matrix(const Matrix<scalar>& q_mat)
     {
@@ -108,6 +166,17 @@ namespace pfasst
     }
 
 
+    /**
+     * Compute node-to-node quadrature matrix \\( S \\) from two given sets of nodes
+     *
+     * @tparam scalar precision of quadrature (i.e. `double`)
+     * @param[in] from first set of quadrature nodes
+     * @param[in] to second set of quadrature nodes
+     *
+     * @since v0.3.0
+     *
+     * @overload
+     */
     template<typename scalar>
     static Matrix<scalar> compute_s_matrix(const vector<scalar>& from, const vector<scalar>& to)
     {
@@ -115,6 +184,18 @@ namespace pfasst
     }
 
 
+    /**
+     * Compute vector \\( q \\) for integration from \\( 0 \\) to \\( 1 \\) for given set of nodes.
+     *
+     * This equals to the last row of the quadrature matrix \\( Q \\) for the given set of nodes.
+     *
+     * @tparam scalar precision of quadrature (i.e. `double`)
+     * @param[in] nodes quadrature nodes to compute \\( Q \\) matrix for
+     * @pre For correctness of the algorithm it is assumed, that the nodes are in the range
+     *   \\( [0, 1] \\).
+     *
+     * @since v0.3.0
+     */
     template<typename scalar>
     static vector<scalar> compute_q_vec(const vector<scalar>& nodes)
     {
@@ -134,6 +215,19 @@ namespace pfasst
       return q_vec;
     }
 
+    /**
+     * Interface for quadrature handlers.
+     *
+     * Quadrature handlers provide \\( Q \\), \\( S \\) and \\( B \\) matrices respecting the left
+     * and right nodes, i.e. whether \\( 0 \\) and \\( 1 \\) are part of the nodes or not.
+     *
+     * Computation of the quadrature nodes and matrices (i.e. quadrature weights) is done on
+     * initialization.
+     *
+     * @tparam scalar precision of quadrature (i.e. `double`)
+     *
+     * @since v0.3.0
+     */
     template<typename precision = pfasst::time_precision>
     class IQuadrature
     {
@@ -152,7 +246,13 @@ namespace pfasst
 
       public:
         //! @{
+        /**
+         * @throws invalid_argument if number of nodes is invalid for quadrature type
+         */
         explicit IQuadrature(const size_t num_nodes);
+        /**
+         * @throws invalid_argument if number of nodes is invalid for quadrature type
+         */
         IQuadrature();
         virtual ~IQuadrature() = default;
         //! @}
@@ -164,20 +264,31 @@ namespace pfasst
         virtual const vector<precision>& get_q_vec() const;
         virtual const vector<precision>& get_nodes() const;
         virtual size_t get_num_nodes() const;
+        /**
+         * @throws pfasst::NotImplementedYet if not overwritten by implementation;
+         *   required for quadrature of any kind
+         */
         virtual bool left_is_node() const;
+        /**
+         * @throws pfasst::NotImplementedYet if not overwritten by implementation;
+         *   required for quadrature of any kind
+         */
         virtual bool right_is_node() const;
         //! @}
 
       protected:
         //! @{
+        /**
+         * @throws pfasst::NotImplementedYet if not overwritten by implementation;
+         *   required for quadrature of any kind
+         */
         virtual void compute_nodes();
         virtual void compute_weights();
         //! @}
     };
-
   }  // ::pfasst::quadrature
 }  // ::pfasst
 
-#include "pfasst/quadrature/interface_imp.hpp"
+#include "pfasst/quadrature/interface_impl.hpp"
 
 #endif  // _PFASST__QUADRATURE__INTERFACE_HPP_
