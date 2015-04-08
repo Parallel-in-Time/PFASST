@@ -19,12 +19,10 @@ if(${pfasst_WITH_MPI})
     set(advec_mpi_examples
         mpi_pfasst
     )
+    set(all_advec_examples ${advec_mpi_examples})
+else()
+    set(all_advec_examples ${advec_examples})
 endif()
-
-set(all_advec_examples
-    ${advec_examples}
-    ${advec_mpi_examples}
-)
 
 foreach(example ${all_advec_examples})
     add_executable(${example} ${CMAKE_CURRENT_SOURCE_DIR}/${example}.cpp)
