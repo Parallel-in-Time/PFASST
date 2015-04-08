@@ -45,7 +45,7 @@ if(${pfasst_WITH_MPI})
             ${MPI_CXX_LIBRARIES}
         )
         add_test(NAME ${test}
-            COMMAND ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} 4 ${MPIEXEC_PREFLAGS} ${CMAKE_BINARY_DIR}/tests/examples/advection_diffusion/${test} ${MPIEXEC_POSTFLAGS}
+            COMMAND ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} 4 ${MPIEXEC_PREFLAGS} ${CMAKE_BINARY_DIR}/tests/examples/advection_diffusion/${test} ${MPIEXEC_POSTFLAGS} --gtest_output=xml:${test}_out.xml
         )
     endforeach(test)
 else()
