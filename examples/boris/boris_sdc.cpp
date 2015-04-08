@@ -83,7 +83,9 @@ int main(int argc, char** argv)
             << "dt=" << dt << ", "
             << "nnodes=" << nnodes << ", "
             << "nparticles=" << nparticles << ", "
-            << "niter=" << niters;
+            << "niter=" << niters << ", "
+            << "abs res=" << abs_res_tol << ", "
+            << "rel res=" << rel_res_tol;
 
   pfasst::examples::boris::run_boris_sdc<double>(nsteps, dt, nnodes, nparticles, niters, abs_res_tol, rel_res_tol);
 }

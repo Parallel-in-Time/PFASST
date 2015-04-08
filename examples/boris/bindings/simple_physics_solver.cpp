@@ -101,7 +101,7 @@ namespace simple_physics_solver
 //         cout << "      dist = " << dist << endl;
         r = sqrt(dist2 + config->sigma2);
 //         cout << "      r = " << r << " (= sqrt(dist^2+" << config->sigma2 << ")" << endl;
-//         phis[i] += charges[j] / r;
+        phis[i] += charges[j] / r;
 
         r3 = r * r * r;
         for (size_t d = 0; d < DIM; ++d) {
