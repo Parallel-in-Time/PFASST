@@ -18,7 +18,7 @@ namespace pfasst
   namespace quadrature
   {
     /**
-     * quadrature handler for Clenshaw-Curtis quadrature
+     * Quadrature handler for Clenshaw-Curtis quadrature.
      *
      * @tparam scalar precision of quadrature (i.e. `double`)
      *

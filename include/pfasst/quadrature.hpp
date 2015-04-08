@@ -30,14 +30,14 @@ using Matrix = Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowM
 namespace pfasst
 {
   /**
-   * functionality related to computing quadrature nodes and weights.
+   * Functionality related to computing quadrature nodes and weights.
    *
    * @note Please note, that all quadrature nodes are in the range \\( [0, 1] \\).
    */
   namespace quadrature
   {
     /**
-     * instantiates quadrature handler for given number of nodes and type descriptor.
+     * Instantiates quadrature handler for given number of nodes and type descriptor.
      *
      * @tparam precision numerical type of the nodes (e.g. `double`)
      * @param[in] nnodes number of quadrature nodes
@@ -67,7 +67,7 @@ namespace pfasst
     }
 
     /**
-     * compute quadrature nodes for given quadrature type descriptor.
+     * Compute quadrature nodes for given quadrature type descriptor.
      *
      * @tparam precision numerical type of the nodes (e.g. `double`)
      * @param[in] nnodes number of quadrature nodes to compute

@@ -11,7 +11,7 @@
 namespace pfasst
 {
   /**
-   * vanilla SDC controller.
+   * Vanilla SDC controller.
    *
    * @tparam time time precision
    *
@@ -26,7 +26,7 @@ namespace pfasst
   {
     public:
       /**
-       * run vanilla SDC.
+       * Run vanilla SDC.
        */
       virtual void run();
   };

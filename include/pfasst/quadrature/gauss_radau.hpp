@@ -13,7 +13,7 @@ namespace pfasst
   namespace quadrature
   {
     /**
-     * quadrature handler for Gauss-Radau quadrature
+     * Quadrature handler for Gauss-Radau quadrature.
      *
      * @tparam scalar precision of quadrature (i.e. `double`)
      *

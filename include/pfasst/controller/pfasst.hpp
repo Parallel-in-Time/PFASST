@@ -11,7 +11,7 @@
 namespace pfasst
 {
   /**
-   * implementation of the PFASST algorithm as described in \cite emmett_pfasst_2012
+   * Implementation of the PFASST algorithm as described in \cite emmett_pfasst_2012 .
    *
    * @ingroup Controllers
    */
@@ -31,7 +31,7 @@ namespace pfasst
 
     public:
       /**
-       * solve ODE using PFASST.
+       * Solve ODE using PFASST.
        *
        * @pre It is assumed that the user has set initial conditions on the finest level.
        */
@@ -70,7 +70,7 @@ namespace pfasst
        * @{
        */
       /**
-       * broadcast finest level to all processes of PFASST::comm.
+       * Broadcast finest level to all processes of PFASST::comm.
        *
        * @see ISweeper::broadcast() and its implementations for details on how broadcasting levels is
        *   done.
@@ -78,20 +78,20 @@ namespace pfasst
       virtual void broadcast();
 
       /**
-       * generate a unique tag for level iterator.
+       * Generate a unique tag for level iterator.
        *
        * @param[in] level_iter level iterator providing information to compute the communication tag
        */
       virtual int tag(LevelIter level_iter);
 
       /**
-       * post current status and values to next processor.
+       * Post current status and values to next processor.
        */
       virtual void post();
 
     public:
       /**
-       * set communicator.
+       * Set communicator.
        *
        * @param[in] comm ICommunicator to use
        */

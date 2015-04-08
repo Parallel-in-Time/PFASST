@@ -18,7 +18,7 @@ using namespace std;
 
 
 /**
- * some general variables for coloured terminal output
+ * Some general variables for coloured terminal output.
  *
  * @since v0.3.0
  */
@@ -84,7 +84,7 @@ const string OUT::reset = "\033[0m";
   // FIXME: this might already be called by code using PFASST++
   _INITIALIZE_EASYLOGGINGPP
   /**
-   * guard symbol to ensure easylogging++ is only initialized once
+   * Guard symbol to ensure easylogging++ is only initialized once.
    *
    * When this symbol is defined, it is expected that `_INITIALIZE_EASYLOGGINGPP` has been called
    * once to initialize easylogging++.
@@ -126,7 +126,7 @@ const string OUT::reset = "\033[0m";
 #endif
 
 /**
- * utility macro for creating identation depending on current stack position.
+ * Utility macro for creating identation depending on current stack position.
  *
  * This uses pfasst::log::stack_position to create a spacing string twice as long.
  */
@@ -134,7 +134,7 @@ const string OUT::reset = "\033[0m";
   string(pfasst::log::stack_position * 2, ' ')
 
 /**
- * length of logger ID to print
+ * Length of logger ID to print.
  *
  * Longer logger IDs will usually get cut off.
  *
@@ -146,7 +146,7 @@ const string OUT::reset = "\033[0m";
 namespace pfasst
 {
   /**
-   * logging facilities for PFASST++
+   * Logging facilities for PFASST++.
    *
    * As PFASST++ is using easylogging++ as the logging backend, there are six distinced logging
    * levels plus ten additional verbose logging levels.
@@ -173,7 +173,7 @@ namespace pfasst
     static size_t stack_position;
 
     /**
-     * provides convenient way of adding additional named loggers.
+     * Provides convenient way of adding additional named loggers.
      *
      * With this function one can easily create additional named loggers distinctable by the `id`.
      * The first @ref LOGGER_ID_LENGTH characters of the ID (as uppercase) will be included in
@@ -238,7 +238,7 @@ namespace pfasst
     }
 
     /**
-     * sets default configuration for default loggers
+     * Sets default configuration for default loggers.
      *
      * @since v0.3.0
      *
@@ -264,7 +264,7 @@ namespace pfasst
     }
 
     /**
-     * sets some default flags for easylogging++
+     * Sets some default flags for easylogging++.
      *
      * Current defaults are:
      *
@@ -322,7 +322,7 @@ namespace pfasst
 #endif
 
     /**
-     * starts easylogging++ with given arguments and loads configuration
+     * Starts easylogging++ with given arguments and loads configuration.
      *
      * Usually, you want to pass the command line arguments given to `%main(int, char**)` in here
      * and let easylogging++ figure out what it needs.

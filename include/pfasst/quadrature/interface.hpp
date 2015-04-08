@@ -26,7 +26,7 @@ namespace pfasst
   namespace quadrature
   {
     /**
-     * quadrature type descriptors
+     * Quadrature type descriptors.
      * @since v0.3.0
      */
     enum class QuadratureType : int {
@@ -61,7 +61,7 @@ namespace pfasst
 
 
     /**
-     * compute quadrature matrix \\( Q \\) between two sets of nodes.
+     * Compute quadrature matrix \\( Q \\) between two sets of nodes.
      *
      * Computing the quadrature matrix \\( Q \\) for polynomial-based integration from one set of 
      * quadrature nodes (@p from) to another set of quadrature nodes (@p to).
@@ -100,7 +100,7 @@ namespace pfasst
 
 
     /**
-     * compute quadrature matrix \\( Q \\) for one set of nodes.
+     * Compute quadrature matrix \\( Q \\) for one set of nodes.
      *
      * @tparam scalar precision of quadrature (i.e. `double`)
      * @param[in] nodes quadrature nodes to compute \\( Q \\) matrix for
@@ -117,7 +117,7 @@ namespace pfasst
 
 
     /**
-     * compute quadrature matrix \\( Q \\) from a given node-to-node quadrature matrix \\( S \\).
+     * Compute quadrature matrix \\( Q \\) from a given node-to-node quadrature matrix \\( S \\).
      *
      * @tparam scalar precision of quadrature (i.e. `double`)
      * @param[in] s_mat \\( S \\) matrix to compute \\( Q \\) from
@@ -140,7 +140,7 @@ namespace pfasst
 
 
     /**
-     * compute node-to-node quadrature matrix \\( S \\) from a given quadrature matrix \\( Q \\).
+     * Compute node-to-node quadrature matrix \\( S \\) from a given quadrature matrix \\( Q \\).
      *
      * The \\( S \\) matrix provides a node-to-node quadrature where the \\( i \\)-th row of
      * \\( S \\) represents a quadrature from the \\( i-1 \\)-th node to the \\( i \\)-th node.
@@ -167,7 +167,7 @@ namespace pfasst
 
 
     /**
-     * compute node-to-node quadrature matrix \\( S \\) from two given sets of nodes
+     * Compute node-to-node quadrature matrix \\( S \\) from two given sets of nodes
      *
      * @tparam scalar precision of quadrature (i.e. `double`)
      * @param[in] from first set of quadrature nodes
@@ -185,7 +185,7 @@ namespace pfasst
 
 
     /**
-     * compute vector \\( q \\) for integration from \\( 0 \\) to \\( 1 \\) for given set of nodes.
+     * Compute vector \\( q \\) for integration from \\( 0 \\) to \\( 1 \\) for given set of nodes.
      *
      * This equals to the last row of the quadrature matrix \\( Q \\) for the given set of nodes.
      *
@@ -216,7 +216,7 @@ namespace pfasst
     }
 
     /**
-     * interface for quadrature handlers.
+     * Interface for quadrature handlers.
      *
      * Quadrature handlers provide \\( Q \\), \\( S \\) and \\( B \\) matrices respecting the left
      * and right nodes, i.e. whether \\( 0 \\) and \\( 1 \\) are part of the nodes or not.

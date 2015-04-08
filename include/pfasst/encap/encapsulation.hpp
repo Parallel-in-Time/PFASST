@@ -30,7 +30,7 @@ namespace pfasst
     typedef enum EncapType { solution, function } EncapType;
 
     /**
-     * data/solution encapsulation.
+     * Data/solution encapsulation.
      *
      * An Encapsulation provides basic functionality of the user data used by PFASST such as
      * mathematical operation _axpy_ \\( y=ax+y \\) and packing/unpacking for message passing.
@@ -48,12 +48,12 @@ namespace pfasst
         //! @{
         // required for host based encap helpers
         /**
-         * zeroes out all values of this data structure.
+         * Zeroes out all values of this data structure.
          */
         virtual void zero();
 
         /**
-         * copies values from @p other into this data structure.
+         * Copies values from @p other into this data structure.
          *
          * @param[in] other other data structure to copy data from
          */
@@ -62,7 +62,7 @@ namespace pfasst
 
         //! @{
         /**
-         * computes the \\( 0 \\)-norm of the data structure's values.
+         * Computes the \\( 0 \\)-norm of the data structure's values.
          *
          * @returns \\( 0 \\)-norm of this data structure
          */
@@ -71,7 +71,7 @@ namespace pfasst
 
         //! @{
         /**
-         * provides basic mathematical operation \\( y+=ax \\).
+         * Provides basic mathematical operation \\( y+=ax \\).
          *
          * This is the main mathematical operation applied by PFASST on the data structures.
          * Here, \\( a \\) is a time point and \\( x \\) another data structure (usually of the
@@ -83,7 +83,7 @@ namespace pfasst
         virtual void saxpy(time a, shared_ptr<const Encapsulation<time>> x);
 
         /**
-         * defines matrix-vector multiplication for this data type.
+         * Defines matrix-vector multiplication for this data type.
          *
          * This implements the matrix-vector multiplication of the form
          * \\( \\vec{y}=a M \\vec{x} \\).
@@ -117,7 +117,7 @@ namespace pfasst
         virtual void post(ICommunicator* comm, int tag);
 
         /**
-         * send values stored in this data structure.
+         * Send values stored in this data structure.
          *
          * @param[in] comm     communicator managing the processes to send to
          * @param[in] tag      tag to distinguish overlapping communication
@@ -126,7 +126,7 @@ namespace pfasst
         virtual void send(ICommunicator* comm, int tag, bool blocking);
 
         /**
-         * receive values to store in this data structure.
+         * Receive values to store in this data structure.
          *
          * @param[in] comm     communicator managing the processes to receive from
          * @param[in] tag      tag to distinguish overlapping communication
@@ -135,7 +135,7 @@ namespace pfasst
         virtual void recv(ICommunicator* comm, int tag, bool blocking);
 
         /**
-         * broadcasting this data structure to all processes in @p comm.
+         * Broadcasting this data structure to all processes in @p comm.
          *
          * @param[in] comm communicator managing the processes to send this data structure to
          */
@@ -145,7 +145,7 @@ namespace pfasst
 
 
     /**
-     * abstract interface of factory for creating Encapsulation objects.
+     * Abstract interface of factory for creating Encapsulation objects.
      *
      * This factory is intendet to be instantiated once to create multiple Encapsulation objects
      * of the same type and with the same parameters later on through calls to
@@ -162,7 +162,7 @@ namespace pfasst
     {
       public:
         /**
-         * actual method to create Encapsulation object of specific type
+         * Actual method to create Encapsulation object of specific type.
          *
          * @param[in] type encapsulation type of the requested Encapsulation object
          */

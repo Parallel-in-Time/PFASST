@@ -17,7 +17,7 @@ using namespace std;
 namespace pfasst
 {
   /**
-   * base SDC/MLSDC/PFASST controller.
+   * Base SDC/MLSDC/PFASST controller.
    *
    * Base controller (see also SDC, MLSDC, and PFASST controllers).
    *
@@ -36,7 +36,7 @@ namespace pfasst
     protected:
       //! @{
       /**
-       * ordered list of all levels.
+       * Ordered list of all levels.
        *
        * A level is represented by a sweeper implementing the ISweeper interface.
        *
@@ -45,7 +45,7 @@ namespace pfasst
       deque<shared_ptr<ISweeper<time>>>  levels;
 
       /**
-       * ordered list of transfer operators for levels.
+       * Ordered list of transfer operators for levels.
        *
        * A transfer operator for a level must implement the ITransfer interface.
        */
@@ -54,17 +54,17 @@ namespace pfasst
 
       //! @{
       /**
-       * current time step index.
+       * Current time step index.
        */
       size_t step;
 
       /**
-       * current iteration index on current time step.
+       * Current iteration index on current time step.
        */
       size_t iteration;
 
       /**
-       * maximum iterations per time step.
+       * Maximum iterations per time step.
        */
       size_t max_iterations;
 
@@ -74,7 +74,7 @@ namespace pfasst
       time t;
 
       /**
-       * width of current time step (\\( \\Delta t \\)).
+       * Width of current time step (\\( \\Delta t \\)).
        */
       time dt;
 
@@ -92,7 +92,7 @@ namespace pfasst
 
       //! @{
       /**
-       * set options from command line etc.
+       * Set options from command line etc.
        *
        * @param[in] all_sweepers if given also calls ISweeper::set_options for all already added
        *   levels
@@ -100,7 +100,7 @@ namespace pfasst
       virtual void set_options(bool all_sweepers = true);
 
       /**
-       * basic setup routine for this controller.
+       * Basic setup routine for this controller.
        *
        * @pre It is expected (i.e. the user has to make that sure) that all levels and transfer
        *   operators have been instantiated and added to this controller before calling
@@ -109,7 +109,7 @@ namespace pfasst
       virtual void setup();
 
       /**
-       * set basic time scope of the Controller.
+       * Set basic time scope of the Controller.
        *
        * @param[in] t0     time start point of the first time step
        * @param[in] tend   time end point of the last time step
@@ -120,7 +120,7 @@ namespace pfasst
       virtual void set_duration(time t0, time tend, time dt, size_t niters);
 
       /**
-       * adding a level to the controller.
+       * Adding a level to the controller.
        *
        * @param[in] sweeper  sweeper representing the level
        * @param[in] transfer corresponding transfer operator for the level
@@ -133,12 +133,12 @@ namespace pfasst
 
       //! @{
       /**
-       * total number of levels controlled by this Controller.
+       * Total number of levels controlled by this Controller.
        */
       virtual size_t nlevels();
 
       /**
-       * get sweeper for level with index @p level.
+       * Get sweeper for level with index @p level.
        *
        * @tparam R type of the level sweeper
        * @returns sweeper of type @p R for requested level
@@ -157,7 +157,7 @@ namespace pfasst
       }
 
       /**
-       * get coarsest level.
+       * Get coarsest level.
        *
        * @tparam R type of the level sweeper
        * @see Controller::get_level() with `level=(Controller::nlevels() - 1)`
@@ -169,7 +169,7 @@ namespace pfasst
       }
 
       /**
-       * get coarsest level.
+       * Get coarsest level.
        *
        * @tparam R type of the level sweeper
        * @see Controller::get_level() with `level=0`
@@ -181,7 +181,7 @@ namespace pfasst
       }
 
       /**
-       * retreive transfer operator for level @p level.
+       * Retreive transfer operator for level @p level.
        *
        * @tparam R type of the requested transfer operator
        * @param[in] level level index to retreive transfer operator for
@@ -203,7 +203,7 @@ namespace pfasst
 
       //! @{
       /**
-       * get current time step index.
+       * Get current time step index.
        *
        * The time step number is zero-based, i.e. the first time step has index `0`.
        *
@@ -212,63 +212,63 @@ namespace pfasst
       virtual size_t get_step();
 
       /**
-       * set current time step index.
+       * Set current time step index.
        *
        * @param[in] n index of new time step
        */
       virtual void   set_step(size_t n);
 
       /**
-       * get width of current time step.
+       * Get width of current time step.
        *
        * @returns \\( \\Delta t \\) of current time step
        */
       virtual time   get_time_step();
 
       /**
-       * get start time point of current time step.
+       * Get start time point of current time step.
        *
        * @returns \\( t_0 \\) of current time step
        */
       virtual time   get_time();
 
       /**
-       * advance to a following time step
+       * Advance to a following time step
        *
        * @param[in] nsteps number of time steps to advance; `1` meaning the next step
        */
       virtual void   advance_time(size_t nsteps = 1);
 
       /**
-       * get end time point of last time step.
+       * Get end time point of last time step.
        *
        * @returns \\( T_{end} \\) of last time step.
        */
       virtual time   get_end_time();
 
       /**
-       * get current iteration index of current time step.
+       * Get current iteration index of current time step.
        *
        * @returns current iteration index of current time step.
        */
       virtual size_t get_iteration();
 
       /**
-       * set current iteration of current time step.
+       * Set current iteration of current time step.
        *
        * @param[in] iter iteration index to set
        */
       virtual void   set_iteration(size_t iter);
 
       /**
-       * advance to the next iteration.
+       * Advance to the next iteration.
        *
        * This method may or may not trigger additional post-iteration procedures.
        */
       virtual void   advance_iteration();
 
       /**
-       * get maximum number of allowed iterations per time step.
+       * Get maximum number of allowed iterations per time step.
        *
        * @returns maximum allowed iterations per time step.
        */
@@ -276,7 +276,7 @@ namespace pfasst
       //! @}
 
       /**
-       * level (MLSDC/PFASST) iterator.
+       * Level (MLSDC/PFASST) iterator.
        *
        * This iterator is used to walk through the MLSDC/PFASST hierarchy of sweepers.
        * It keeps track of the _current_ level, and has convenience routines to return the
@@ -321,7 +321,7 @@ namespace pfasst
 
           //! @{
           /**
-           * get level this iterator is currently pointing at.
+           * Get level this iterator is currently pointing at.
            *
            * @tparam R type implementing ISweeper
            * @returns sweeper of type @p R this is currently pointing at
@@ -333,7 +333,7 @@ namespace pfasst
           }
 
           /**
-           * get the next finer level based on LevelIter::current()
+           * Get the next finer level based on LevelIter::current()
            *
            * @tparam R type implementing ISweeper
            * @returns next finer sweeper with respect to current()
@@ -345,7 +345,7 @@ namespace pfasst
           }
 
           /**
-           * get the next coarser level based on LevelIter::current()
+           * Get the next coarser level based on LevelIter::current()
            *
            * @tparam R type implementing ISweeper
            * @returns next coarser sweeper with respect to current()
@@ -357,7 +357,7 @@ namespace pfasst
           }
 
           /**
-           * get transfer operator for current level.
+           * Get transfer operator for current level.
            *
            * @tparam R type implementing ITransfer
            * @returns transfer operator for current level
@@ -404,14 +404,14 @@ namespace pfasst
 
       //! @{
       /**
-       * convenience accessor to the finest level.
+       * Convenience accessor to the finest level.
        *
        * @returns iterator to the finest level.
        */
       virtual LevelIter finest();
 
       /**
-       * convenience accessor to the coarsest level.
+       * Convenience accessor to the coarsest level.
        *
        * @returns iterator to the coarsest level.
        */

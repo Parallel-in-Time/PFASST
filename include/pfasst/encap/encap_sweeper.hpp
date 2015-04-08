@@ -22,7 +22,7 @@ namespace pfasst
 
 
     /**
-     * host based encapsulated base sweeper.
+     * Host based encapsulated base sweeper.
      *
      * @tparam time time precision; defaults to pfasst::time_precision
      */
@@ -32,20 +32,20 @@ namespace pfasst
     {
       protected:
         //! @{
-        //! quadrature rule used by this sweeper
+        //! Quadrature rule used by this sweeper.
         shared_ptr<IQuadrature<time>> quadrature;
 
-        //! encapsulation data structure factory
+        //! Encapsulation data structure factory.
         shared_ptr<EncapFactory<time>> factory;
 
-        //! separate start state, i.e. initial condition for the sweeper's current time step
+        //! Separate start state, i.e. initial condition for the sweeper's current time step.
         shared_ptr<Encapsulation<time>> start_state;
 
-        //! current solution at \\( T_{end} \\)
+        //! Current solution at \\( T_{end} \\).
         shared_ptr<Encapsulation<time>> end_state;
 
         /**
-         * place for the residuals at the different time nodes
+         * Place for the residuals at the different time nodes.
          *
          * The index of the vector corresponds to the index of the quadrature nodes, i.e.
          * `residuals.size() == quadrature->get_num_nodes()`.
@@ -55,7 +55,7 @@ namespace pfasst
 
         //! @{
         /**
-         * solution values \\( U \\) at all time nodes of the current iteration.
+         * Solution values \\( U \\) at all time nodes of the current iteration.
          *
          * The index of the vector corresponds to the index of the quadrature nodes, i.e.
          * `state.size() == quadrature->get_num_nodes()`.
@@ -63,7 +63,7 @@ namespace pfasst
         vector<shared_ptr<Encapsulation<time>>> state;
 
         /**
-         * solution values \\( U \\) at all time nodes of the previous iteration.
+         * Solution values \\( U \\) at all time nodes of the previous iteration.
          *
          * The index of the vector corresponds to the index of the quadrature nodes, i.e.
          * `saved_state.size() == quadrature->get_num_nodes()`.
@@ -84,7 +84,7 @@ namespace pfasst
         int residual_norm_order;
 
         /**
-         * tolerance for absolute residual.
+         * Tolerance for absolute residual.
          *
          * The absolute residual is the residual between the very first iteration and the current
          * state.
@@ -92,7 +92,7 @@ namespace pfasst
         time abs_residual_tol;
 
         /**
-         * tolerance for relative residual.
+         * Tolerance for relative residual.
          *
          * The relative residual is the residual between the previous iteration and current state.
          */
@@ -104,21 +104,21 @@ namespace pfasst
 
         //! @{
         /**
-         * retrieve solution values of current iteration at time node index @p m.
+         * Retrieve solution values of current iteration at time node index @p m.
          *
          * @param[in] m 0-based index of time node
          */
         virtual shared_ptr<Encapsulation<time>> get_state(size_t m) const;
 
         /**
-         * retrieve FAS correction of current iteration at time node index @p m.
+         * Retrieve FAS correction of current iteration at time node index @p m.
          *
          * @param[in] m 0-based index of time node
          */
         virtual shared_ptr<Encapsulation<time>> get_tau(size_t m) const;
 
         /**
-         * retrieve solution values of previous iteration at time node index @p m.
+         * Retrieve solution values of previous iteration at time node index @p m.
          *
          * @param[in] m 0-based index of time node
          */
@@ -169,7 +169,7 @@ namespace pfasst
         virtual void advance() override;
 
         /**
-         * re-evaluate function values.
+         * Re-evaluate function values.
          *
          * @param[in] initial_only whether the right hand side should only be evaluated at the
          *   initial time point
@@ -177,8 +177,8 @@ namespace pfasst
         virtual void reevaluate(bool initial_only = false);
 
         /**
-         * integrates values of right hand side at all time nodes \\( t \\in [0,M-1] \\)
-         * simultaneously
+         * Integrates values of right hand side at all time nodes \\( t \\in [0,M-1] \\)
+         * simultaneously.
          *
          * @param[in]     dt  width of the time interval to integrate
          * @param[in,out] dst integrated values
@@ -188,7 +188,7 @@ namespace pfasst
 
         //! @{
         /**
-         * set residual tolerances for convergence checking.
+         * Set residual tolerances for convergence checking.
          *
          * @param[in] abs_residual_tol tolerance for the absolute residual
          * @param[in] rel_residual_tol tolerance for the relative residual
@@ -197,7 +197,7 @@ namespace pfasst
         void set_residual_tolerances(time abs_residual_tol, time rel_residual_tol, int order = 0);
 
         /**
-         * compute residual at each SDC node (including FAS corrections).
+         * Compute residual at each SDC node (including FAS corrections).
          *
          * @param[in]     dt  width of the time interval to compute the residual for
          * @param[in,out] dst place to store the residuals at time nodes

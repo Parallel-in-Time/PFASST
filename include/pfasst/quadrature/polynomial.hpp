@@ -14,7 +14,7 @@ namespace pfasst
   namespace quadrature
   {
     /**
-     * representation of a polynomial including differentiation, integration and root finding.
+     * Representation of a polynomial including differentiation, integration and root finding.
      *
      * Nothing more than a \\( n \\)-th order polynomial of the form
      * \\( P_n(x) = \\sum_{i=0}^{n} c_i x^i \\) with coefficients \\( c_i \\),
@@ -29,7 +29,7 @@ namespace pfasst
     {
       protected:
         /**
-         * coefficients of the polynomial.
+         * Coefficients of the polynomial.
          *
          * The coefficient for the highest degree of \\( x \\) has index `0`.
          * The last coefficient is for \\( x^0 \\).
@@ -43,7 +43,7 @@ namespace pfasst
 
         //! @{
         /**
-         * order of this polynomial.
+         * Order of this polynomial.
          *
          * The order of this polynomial is one less the number of coefficients defined.
          *
@@ -52,7 +52,7 @@ namespace pfasst
         size_t order() const;
 
         /**
-         * access coefficient @p i
+         * Access coefficient @p i
          *
          * @param[in] i coefficient index (zero-based)
          * @returns \\( i+1 \\)-th coefficient
@@ -65,7 +65,7 @@ namespace pfasst
         CoeffT& operator[](const size_t i);
 
         /**
-         * differentiate this polynomial.
+         * Differentiate this polynomial.
          *
          * Computes standard differential of this polynomial.
          *
@@ -74,7 +74,7 @@ namespace pfasst
         Polynomial<CoeffT> differentiate() const;
 
         /**
-         * integrates this polynomial.
+         * Integrates this polynomial.
          *
          * Computes integral of this polynomial.
          *
@@ -85,7 +85,7 @@ namespace pfasst
 
         //! @{
         /**
-         * evaluate polynomial for given value
+         * Evaluate polynomial for given value.
          *
          * @tparam xtype numerical type of the value
          * @param[in] x value to evaluate polynomial at
@@ -103,14 +103,14 @@ namespace pfasst
         }
 
         /**
-         * normalizes this polynomial with respect to \\( c_0 \\).
+         * Normalizes this polynomial with respect to \\( c_0 \\).
          *
          * @returns normalized polynomial
          */
         Polynomial<CoeffT> normalize() const;
 
         /**
-         * computes the roots of this polynomial.
+         * Computes the roots of this polynomial.
          *
          * @returns roots sorted with respect to their value
          */
@@ -119,7 +119,7 @@ namespace pfasst
 
         //! @{
         /**
-         * computes the Legendre polynomial of given order.
+         * Computes the Legendre polynomial of given order.
          *
          * @param[in] order desired order of the Legendre polynomial
          * @returns Legendre polynomial of order @p order

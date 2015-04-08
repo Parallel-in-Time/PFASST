@@ -23,7 +23,7 @@ namespace pfasst
   namespace config
   {
     /**
-     * runtime config options provider.
+     * Runtime config options provider.
      *
      * This singleton provides easy access to command line parameters at runtime.
      *
@@ -54,7 +54,7 @@ namespace pfasst
       public:
         //! @{
         /**
-         * accessor to the singleton instance.
+         * Accessor to the singleton instance.
          *
          * @returns singleton config::options instance
          */
@@ -66,7 +66,7 @@ namespace pfasst
 
         //! @{
         /**
-         * adds a new boolean flag.
+         * Adds a new boolean flag.
          *
          * @param[in] group string identifying the parameter group
          * @param[in] option Name of the command line parameter.
@@ -79,7 +79,7 @@ namespace pfasst
         static void add_option(const string& group, const string& option, const string& help);
 
         /**
-         * adds a new parameter with an expected value of type @p T.
+         * Adds a new parameter with an expected value of type @p T.
          *
          * @tparam T type of the specified parameter
          * @param[in] group string identifying the parameter group
@@ -97,7 +97,7 @@ namespace pfasst
         //! @}
 
         /**
-         * initialize program options.
+         * Initialize program options.
          *
          * This initializes `boost::program_options` with all previously added options and groups.
          */
@@ -123,7 +123,7 @@ namespace pfasst
     }
 
     /**
-     * get value of specific type @p T with default value.
+     * Get value of specific type @p T with default value.
      *
      * @tparam T type of the retreived value
      *
@@ -137,7 +137,7 @@ namespace pfasst
     }
 
     /**
-     * compile basic help and usage information.
+     * Compile basic help and usage information.
      *
      * Depending on @p if_no_params and presence of given command line parameters the help and
      * usage information is compiled.
@@ -169,7 +169,7 @@ namespace pfasst
     }
 
     /**
-     * read and parse command line parameters.
+     * Read and parse command line parameters.
      *
      * @param[in] argc Number of command line arguments as provided by `%main(int, char**)`.
      * @param[in] argv List of command line arguments as provided by `%main(int, char**)`.
@@ -196,7 +196,7 @@ namespace pfasst
     }
 
     /**
-     * read config parameters from file.
+     * Read config parameters from file.
      *
      * @param[in] file_name name of the INI-like file containing config parameters;
      *   path/name may be relative
@@ -219,7 +219,7 @@ namespace pfasst
     }
 
     /**
-     * initialize options detection and parsing.
+     * Initialize options detection and parsing.
      *
      * Prepopulates following groups and parameters:
      *

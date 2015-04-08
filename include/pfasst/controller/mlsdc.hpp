@@ -14,7 +14,7 @@ using namespace std;
 namespace pfasst
 {
   /**
-   * multilevel SDC controller.
+   * Multilevel SDC controller.
    *
    * @tparam time time precision
    *
@@ -25,16 +25,16 @@ namespace pfasst
     : public Controller<time>
   {
     protected:
-      vector<size_t> nsweeps;  //!< how many sweeps should be done on the different levels
+      vector<size_t> nsweeps;  //!< How many sweeps should be done on the different levels.
 
       typedef typename pfasst::Controller<time>::LevelIter LevelIter;
 
-      bool predict;   //!< whether to use a _predict_ sweep
-      bool initial;   //!< whether we're sweeping from a new initial condition
-      bool converged; //!< whether we've converged
+      bool predict;   //!< Whether to use a _predict_ sweep.
+      bool initial;   //!< Whether we're sweeping from a new initial condition.
+      bool converged; //!< Whether we've converged.
 
       /**
-       * perform pre-configured number of sweeps on level @p level.
+       * Perform pre-configured number of sweeps on level @p level.
        *
        * @param[in] level level index to perform pre-configured number of sweeps
        * @see set_nsweeps() for pre-configuring number of sweeps
@@ -46,7 +46,7 @@ namespace pfasst
       virtual void setup() override;
 
       /**
-       * set desired number of sweeps for each level independently.
+       * Set desired number of sweeps for each level independently.
        *
        * @param[in] nsweeps vector with number of sweeps for each level.
        *
@@ -55,7 +55,7 @@ namespace pfasst
       virtual void set_nsweeps(vector<size_t> nsweeps);
 
       /**
-       * solve ODE using MLSDC.
+       * Solve ODE using MLSDC.
        *
        * @pre It is assumed that the user has set initial conditions on the finest level.
        */
@@ -63,7 +63,7 @@ namespace pfasst
 
     private:
       /**
-       * sweep on current (fine), restrict to coarse.
+       * Sweep on current (fine), restrict to coarse.
        *
        * @param[in] level_iter level iterator pointing to the finer level
        * @returns level iterator to current level if it has converged after the sweep; otherwise a
@@ -72,7 +72,7 @@ namespace pfasst
       virtual LevelIter cycle_down(LevelIter level_iter);
 
       /**
-       * interpolate coarse correction to fine, sweep on current (fine).
+       * Interpolate coarse correction to fine, sweep on current (fine).
        *
        * @param[in] level_iter level iterator pointing to the finer level
        * @returns level iterator pointing to the coarser level
@@ -80,7 +80,7 @@ namespace pfasst
       virtual LevelIter cycle_up(LevelIter level_iter);
 
       /**
-       * sweep on the current (coarsest) level.
+       * Sweep on the current (coarsest) level.
        *
        * @param[in] level_iter level iterator pointing to the coarsest level
        * @returns level iterator pointing to the next finer level
@@ -90,7 +90,7 @@ namespace pfasst
       virtual LevelIter cycle_bottom(LevelIter level_iter);
 
       /**
-       * perform an MLSDC V-cycle.
+       * Perform an MLSDC V-cycle.
        *
        * @param[in] level_iter level iterator pointing to a fine level
        * @returns level iterator pointing to either the coarsest level if @p level_iter is the 

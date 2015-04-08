@@ -6,7 +6,7 @@
 #define _GLOBALS__HPP_
 
 /**
- * denoting unused function parameters for omitting compiler warnings.
+ * Denoting unused function parameters for omitting compiler warnings.
  *
  * To denote an unused function parameter just use this makro on it in the function body:
  * @code{.cpp}

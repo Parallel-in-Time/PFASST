@@ -19,7 +19,7 @@ namespace pfasst
 
 
   /**
-   * not implemented yet exception.
+   * Not implemented yet exception.
    *
    * Used by PFASST to mark methods that are required for a particular algorithm (SDC/MLSDC/PFASST)
    * that may not be necessary for all others.
@@ -42,7 +42,7 @@ namespace pfasst
 
 
   /**
-   * value exception.
+   * Value exception.
    *
    * Thrown when a PFASST routine is passed an invalid value.
    *
@@ -67,7 +67,7 @@ namespace pfasst
 
 
   /**
-   * abstract interface for communicators.
+   * Abstract interface for communicators.
    *
    * The interface ensures a communicator provides the notion of the total number of processors
    * (i.e. `size()`) and and the ID of the _current_ processor (i.e. `rank()`) as well as the
@@ -85,7 +85,7 @@ namespace pfasst
 
 
   /**
-   * abstract interface for the current status of the algorithm.
+   * Abstract interface for the current status of the algorithm.
    *
    * The status requires a @ref ICommunicator "communicator" to enable sending and receiving stati
    * of other processors.
@@ -100,7 +100,7 @@ namespace pfasst
 
       //! @{
       /**
-       * resetting status.
+       * Resetting status.
        *
        * @note Logic is implementation defined.
        */
@@ -112,7 +112,7 @@ namespace pfasst
       virtual void set_converged(bool converged) = 0;
 
       /**
-       * retreive converged state for specific processor.
+       * Retreive converged state for specific processor.
        *
        * @param[in] rank ID of processor to check converged state for
        * @returns `true` if processor with ID @p rank has converged; `false` otherwise
@@ -124,19 +124,19 @@ namespace pfasst
 
       //! @{
       /**
-       * set new communicator to use.
+       * Set new communicator to use.
        */
       virtual void set_comm(ICommunicator* comm);
 
       /**
-       * check whether previous processor is still iterating.
+       * Check whether previous processor is still iterating.
        *
        * @returns `true` if previous processor has converged; `false` if it is still iterating
        */
       virtual bool previous_is_iterating();
 
       /**
-       * check whether this processor should keep iterating.
+       * Check whether this processor should keep iterating.
        *
        * @returns `true` if this processor should keep iterating; `false` if it should switch to
        *   `converged` state
@@ -158,7 +158,7 @@ namespace pfasst
 
 
   /**
-   * abstract SDC sweeper.
+   * Abstract SDC sweeper.
    *
    * @tparam time time precision; defaults to pfasst::time_precision
    */
@@ -167,7 +167,7 @@ namespace pfasst
   {
     protected:
       /**
-       * backreference to the controller managing the sweeper instance.
+       * Backreference to the controller managing the sweeper instance.
        */
       Controller<time>* controller;
 
@@ -179,14 +179,14 @@ namespace pfasst
 
       //! @{
       /**
-       * set the sweepers controller.
-       * 
+       * Set the sweepers controller.
+       *
        * @param[in] ctrl new controller to manage this sweeper
        */
       virtual void set_controller(Controller<time>* ctrl);
 
       /**
-       * accessor to the controller managing this sweeper.
+       * Accessor to the controller managing this sweeper.
        *
        * @returns controller managing this sweeper
        */
@@ -195,7 +195,7 @@ namespace pfasst
 
       //! @{
       /**
-       * set options from command line etc.
+       * Set options from command line etc.
        */
       virtual void set_options();
 
@@ -208,7 +208,7 @@ namespace pfasst
       virtual void setup(bool coarse = false);
 
       /**
-       * perform a predictor sweep.
+       * Perform a predictor sweep.
        *
        * Compute a provisional solution from the initial condition.
        * This is typically very similar to a regular SDC sweep, except that integral terms based on
@@ -221,7 +221,7 @@ namespace pfasst
       virtual void predict(bool initial) = 0;
 
       /**
-       * perform one SDC sweep/iteration.
+       * Perform one SDC sweep/iteration.
        *
        * Compute a correction and update solution values.
        * Note that this function can assume that valid function values exist from a previous 
@@ -230,7 +230,7 @@ namespace pfasst
       virtual void sweep() = 0;
 
       /**
-       * advance from one time step to the next.
+       * Advance from one time step to the next.
        *
        * Essentially this means copying the solution and function values from the last node to the
        * first node.
@@ -238,14 +238,14 @@ namespace pfasst
       virtual void advance() = 0;
 
       /**
-       * return convergence status.
+       * Return convergence status.
        *
        * This is used by controllers to shortcircuit iterations.
        */
       virtual bool converged();
 
       /**
-       * save states (and/or function values) at all nodes.
+       * Save states (and/or function values) at all nodes.
        *
        * This is typically done in MLSDC/PFASST immediately after a call to restrict.
        * The saved states are used to compute deltas during interpolation.
@@ -257,24 +257,24 @@ namespace pfasst
       virtual void save(bool initial_only=false);
 
       /**
-       * initialize solution values at all time nodes with meaningful values.
+       * Initialize solution values at all time nodes with meaningful values.
        */
       virtual void spread();
       //! @}
 
       //! @{
       /**
-       * hook automatically run after each completed sweep.
+       * Hook automatically run after each completed sweep.
        */
       virtual void post_sweep();
 
       /**
-       * hook automatically run after each completed predict.
+       * Hook automatically run after each completed predict.
        */
       virtual void post_predict();
 
       /**
-       * hook automatically run after each completed time step.
+       * Hook automatically run after each completed time step.
        */
       virtual void post_step();
       //! @}
@@ -289,7 +289,7 @@ namespace pfasst
 
 
   /**
-   * abstract time/space transfer (restrict/interpolate) class.
+   * Abstract time/space transfer (restrict/interpolate) class.
    *
    * @tparam time time precision; defaults to pfasst::time_precision
    */
@@ -303,7 +303,7 @@ namespace pfasst
 
       //! @{
       /**
-       * interpolate initial condition from the coarse sweeper to the fine sweeper.
+       * Interpolate initial condition from the coarse sweeper to the fine sweeper.
        *
        * @param[in,out] dst sweeper to interpolate onto (i.e. fine level)
        * @param[in]     src sweeper to interpolate from (i.e. coarse level)
@@ -312,7 +312,7 @@ namespace pfasst
                                        shared_ptr<const ISweeper<time>> src);
 
       /**
-       * interpolate, in time and space, from the coarse sweeper to the fine sweeper.
+       * Interpolate, in time and space, from the coarse sweeper to the fine sweeper.
        *
        * @param[in,out] dst            sweeper to interpolate onto (i.e. fine level)
        * @param[in]     src            sweeper to interpolate from (i.e. coarse level)
@@ -326,7 +326,7 @@ namespace pfasst
 
       //! @{
       /**
-       * restrict initial condition from the fine sweeper to the coarse sweeper.
+       * Restrict initial condition from the fine sweeper to the coarse sweeper.
        *
        * @param[in,out] dst sweeper to restrict onto (i.e. coarse level)
        * @param[in]     src sweeper to restrict from (i.e. fine level)
@@ -336,7 +336,7 @@ namespace pfasst
 
 
       /**
-       * restrict, in time and space, from the fine sweeper to the coarse sweeper.
+       * Restrict, in time and space, from the fine sweeper to the coarse sweeper.
        *
        * @param[in,out] dst              sweeper to restrict onto (i.e. coarse level)
        * @param[in]     src              sweeper to restrict from (i.e. fine level)
@@ -349,7 +349,7 @@ namespace pfasst
 
       //! @{
       /**
-       * compute FAS correction between the coarse and fine sweepers.
+       * Compute FAS correction between the coarse and fine sweepers.
        *
        * @param[in]     dt  width of the time step to compute FAS correction for
        * @param[in,out] dst sweeper to compute FAS correction for (i.e. coarse level)

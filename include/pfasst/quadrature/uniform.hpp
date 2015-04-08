@@ -13,7 +13,7 @@ namespace pfasst
   namespace quadrature
   {
     /**
-     * quadrature handler for uniform distributed nodes
+     * Quadrature handler for uniform distributed nodes.
      *
      * @tparam scalar precision of quadrature (i.e. `double`)
      *
