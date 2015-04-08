@@ -15,7 +15,7 @@ using namespace std;
 #include <pfasst/controller/sdc.hpp>
 #include <pfasst/encap/vector.hpp>
 
-#include "scalar_sweeper.hpp"
+#include <pfasst/contrib/sweeper/scalar_sweeper.hpp>
 
 namespace pfasst
 {

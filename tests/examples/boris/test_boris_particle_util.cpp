@@ -7,9 +7,9 @@ using namespace std;
 #include <gmock/gmock.h>
 using namespace ::testing;
 
-#include "../examples/boris/particle.hpp"
-#include "../examples/boris/particle_cloud.hpp"
-#include "../examples/boris/particle_util.hpp"
+#include "pfasst/contrib/encap/particle.hpp"
+#include "pfasst/contrib/encap/particle_cloud.hpp"
+#include "pfasst/contrib/encap/particle_util.hpp"
 using namespace pfasst::examples::boris;
 
 #define DIMS 3

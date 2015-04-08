@@ -16,7 +16,7 @@
 #include <pfasst/controller/sdc.hpp>
 #include <pfasst/encap/vector.hpp>
 
-#include "advection_diffusion_sweeper.hpp"
+#include <pfasst/contrib/sweeper/advection_diffusion_sweeper.hpp>
 
 namespace pfasst
 {

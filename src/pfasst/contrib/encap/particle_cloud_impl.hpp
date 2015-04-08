@@ -1,4 +1,4 @@
-#include "particle_cloud.hpp"
+#include "pfasst/contrib/encap/particle_cloud.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -13,7 +13,7 @@ using namespace std;
 #include <pfasst/site_config.hpp>
 #include <pfasst/logging.hpp>
 
-#include "particle_util.hpp"
+#include "pfasst/contrib/encap/particle_util.hpp"
 
 
 namespace pfasst

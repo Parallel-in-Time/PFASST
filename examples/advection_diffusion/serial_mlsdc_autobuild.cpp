@@ -23,8 +23,8 @@ using namespace std;
 using namespace pfasst;
 using namespace pfasst::encap;
 
-#include "advection_diffusion_sweeper.hpp"
-#include "spectral_transfer_1d.hpp"
+#include <pfasst/contrib/sweeper/advection_diffusion_sweeper.hpp>
+#include <pfasst/contrib/util/spectral_transfer_1d.hpp>
 using pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper;
 using pfasst::examples::advection_diffusion::SpectralTransfer1D;
 

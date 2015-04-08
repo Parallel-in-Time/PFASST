@@ -12,7 +12,7 @@ using namespace std;
 #include <pfasst/encap/encapsulation.hpp>
 #include <pfasst/logging.hpp>
 
-#include "particle.hpp"
+#include "pfasst/contrib/encap/particle.hpp"
 
 
 namespace pfasst
@@ -152,6 +152,6 @@ namespace pfasst
 
 
 // #include "particle_util.hpp"
-#include "particle_cloud_impl.hpp"
+#include "pfasst/contrib/encap/particle_cloud_impl.hpp"
 
 #endif  // _EXAMPLES__BORIS__PARTICLE_CLOUD_HPP_

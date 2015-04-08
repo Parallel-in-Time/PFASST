@@ -1,5 +1,5 @@
-#include "particle.hpp"
-#include "particle_util.hpp"
+#include "pfasst/contrib/encap/particle.hpp"
+#include "pfasst/contrib/encap/particle_util.hpp"
 
 #include <cassert>
 #include <iomanip>

@@ -6,12 +6,12 @@
 #include <pfasst/controller/sdc.hpp>
 #include <pfasst/controller/mlsdc.hpp>
 
-#include "particle.hpp"
-#include "particle_cloud.hpp"
-#include "bindings/wrapper_interface.hpp"
+#include "pfasst/contrib/encap/particle.hpp"
+#include "pfasst/contrib/encap/particle_cloud.hpp"
+#include "pfasst/contrib/util/bindings/wrapper_interface.hpp"
 #include "bindings/wrapper_simple_physics_solver.hpp"
-#include "boris_sweeper.hpp"
-#include "injective_transfer.hpp"
+#include "pfasst/contrib/sweeper/boris_sweeper.hpp"
+#include "pfasst/contrib/util/injective_transfer.hpp"
 
 
 namespace pfasst

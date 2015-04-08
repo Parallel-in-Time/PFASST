@@ -5,7 +5,7 @@ using namespace ::testing;
 #include "pfasst/logging.hpp"
 
 #define PFASST_UNIT_TESTING
-#include "../examples/boris/boris_sweeper.hpp"
+#include "pfasst/contrib/sweeper/boris_sweeper.hpp"
 #include "../examples/boris/boris_sdc.cpp"
 #undef PFASST_UNIT_TESTING
 using namespace pfasst::examples::boris;

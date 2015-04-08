@@ -14,7 +14,7 @@ using namespace std;
 #include <pfasst/encap/vector.hpp>
 #include <pfasst/encap/poly_interp.hpp>
 
-#include "fft.hpp"
+#include "pfasst/contrib/util/fft.hpp"
 
 
 namespace pfasst

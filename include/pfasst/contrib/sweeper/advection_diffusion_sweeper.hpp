@@ -24,7 +24,7 @@ using namespace std;
 using pfasst::encap::Encapsulation;
 using pfasst::encap::as_vector;
 
-#include "fft.hpp"
+#include "pfasst/contrib/util/fft.hpp"
 
 #ifndef PI
 #define PI 3.1415926535897932385

@@ -27,10 +27,10 @@ using namespace std;
 #include <pfasst/logging.hpp>
 #include <pfasst/encap/encap_sweeper.hpp>
 
-#include "particle.hpp"
-#include "particle_cloud.hpp"
-#include "particle_util.hpp"
-#include "bindings/wrapper_interface.hpp"
+#include "pfasst/contrib/encap/particle.hpp"
+#include "pfasst/contrib/encap/particle_cloud.hpp"
+#include "pfasst/contrib/encap/particle_util.hpp"
+#include "pfasst/contrib/util/bindings/wrapper_interface.hpp"
 
 
 namespace pfasst
@@ -250,6 +250,6 @@ namespace pfasst
 }  // ::pfasst
 
 
-#include "boris_sweeper_impl.hpp"
+#include "pfasst/contrib/sweeper/boris_sweeper_impl.hpp"
 
 #endif  // _EXAMPLES__BORIS__BORIS_SWEEPER__HPP_

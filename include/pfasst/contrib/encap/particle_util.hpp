@@ -177,6 +177,6 @@ namespace pfasst
   }  // ::pfasst::examples
 }  // ::pfasst
 
-#include "particle_util_impl.hpp"
+#include "pfasst/contrib/encap/particle_util_impl.hpp"
 
 #endif  // _EXAMPLES__BORIS__PARTICLE_UTIL_HPP_

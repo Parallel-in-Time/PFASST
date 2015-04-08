@@ -21,8 +21,8 @@ using namespace std;
 #include <pfasst/encap/automagic.hpp>
 #include <pfasst/encap/mpi_vector.hpp>
 
-#include "advection_diffusion_sweeper.hpp"
-#include "spectral_transfer_1d.hpp"
+#include <pfasst/contrib/sweeper/advection_diffusion_sweeper.hpp>
+#include <pfasst/contrib/util/spectral_transfer_1d.hpp>
 
 using namespace pfasst::encap;
 using namespace pfasst::mpi;

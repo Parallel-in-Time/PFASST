@@ -1,4 +1,4 @@
-#include "boris_sweeper.hpp"
+#include "pfasst/contrib/sweeper/boris_sweeper.hpp"
 
 #include <cassert>
 #include <cmath>
@@ -20,10 +20,10 @@ using namespace std;
 #include <pfasst/logging.hpp>
 #include <pfasst/encap/encap_sweeper.hpp>
 
-#include "particle.hpp"
-#include "particle_cloud.hpp"
-#include "particle_util.hpp"
-#include "bindings/wrapper_interface.hpp"
+#include "pfasst/contrib/encap/particle.hpp"
+#include "pfasst/contrib/encap/particle_cloud.hpp"
+#include "pfasst/contrib/encap/particle_util.hpp"
+#include "pfasst/contrib/util/bindings/wrapper_interface.hpp"
 
 
 #define BCVLOG(level) CVLOG(level, "Boris") << this->log_indent->indent(level)

@@ -9,7 +9,7 @@
 #include <pfasst/interfaces.hpp>
 #include <pfasst/encap/encapsulation.hpp>
 
-#include "boris_sweeper.hpp"
+#include "pfasst/contrib/sweeper/boris_sweeper.hpp"
 
 
 namespace pfasst

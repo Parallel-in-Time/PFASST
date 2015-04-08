@@ -17,8 +17,8 @@ using namespace std;
 #include <pfasst/encap/vector.hpp>
 using namespace pfasst::encap;
 
-#include "advection_diffusion_sweeper.hpp"
-#include "spectral_transfer_1d.hpp"
+#include <pfasst/contrib/sweeper/advection_diffusion_sweeper.hpp>
+#include <pfasst/contrib/util/spectral_transfer_1d.hpp>
 
 
 namespace pfasst

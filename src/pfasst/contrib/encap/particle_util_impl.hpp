@@ -1,4 +1,4 @@
-#include "particle_util.hpp"
+#include "pfasst/contrib/encap/particle_util.hpp"
 
 #include <algorithm>
 #include <cassert>

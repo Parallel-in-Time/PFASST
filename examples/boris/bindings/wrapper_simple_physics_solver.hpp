@@ -9,8 +9,8 @@
 #include <utility>
 using namespace std;
 
-#include "../particle_cloud.hpp"
-#include "wrapper_interface.hpp"
+#include "pfasst/contrib/encap/particle_cloud.hpp"
+#include "pfasst/contrib/util/bindings/wrapper_interface.hpp"
 
 #include "simple_physics_solver.hpp"
 namespace solver = simple_physics_solver;

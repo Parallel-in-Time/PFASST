@@ -14,7 +14,7 @@ using namespace std;
 
 #include <pfasst/logging.hpp>
 
-#include "../particle_cloud.hpp"
+#include "pfasst/contrib/encap/particle_cloud.hpp"
 
 #define UNUSED(expr) (void)(expr)
 

@@ -5,11 +5,11 @@
 #include <pfasst/logging.hpp>
 #include <pfasst/controller/sdc.hpp>
 
-#include "particle.hpp"
-#include "particle_cloud.hpp"
-#include "bindings/wrapper_interface.hpp"
+#include "pfasst/contrib/encap/particle.hpp"
+#include "pfasst/contrib/encap/particle_cloud.hpp"
+#include "pfasst/contrib/util/bindings/wrapper_interface.hpp"
 #include "bindings/wrapper_simple_physics_solver.hpp"
-#include "boris_sweeper.hpp"
+#include "pfasst/contrib/sweeper/boris_sweeper.hpp"
 
 
 namespace pfasst

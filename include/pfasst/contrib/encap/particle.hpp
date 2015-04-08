@@ -81,6 +81,6 @@ namespace pfasst
 }  // ::pfasst
 
 // #include "particle_util.hpp"
-#include "particle_impl.hpp"
+#include "pfasst/contrib/encap/particle_impl.hpp"
 
 #endif  // _EXAMPLES__BORIS__PARTICLE_HPP_
