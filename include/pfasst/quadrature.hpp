@@ -26,6 +26,9 @@ using Matrix = Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowM
 #include "pfasst/quadrature/clenshaw_curtis.hpp"
 #include "pfasst/quadrature/uniform.hpp"
 
+template<typename scalar>
+using Matrix = Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+
 
 namespace pfasst
 {
@@ -118,42 +121,6 @@ namespace pfasst
       return mat;
     }
   }  // ::pfasst::quadrature
-
-
-  namespace config
-  {
-    //! @overload
-    template<>
-    inline quadrature::QuadratureType get_value(const string& name)
-    {
-      const string type = options::get_instance().get_variables_map()[name].as<string>();
-      if (type == "gauss-lobatto") {
-        return quadrature::QuadratureType::GaussLobatto;
-      } else if (type == "gauss-legendre") {
-        return quadrature::QuadratureType::GaussLegendre;
-      } else if (type == "gauss-radau") {
-        return quadrature::QuadratureType::GaussRadau;
-      } else if (type == "clenshaw-curtis") {
-        return quadrature::QuadratureType::ClenshawCurtis;
-      } else if (type == "uniform") {
-        return quadrature::QuadratureType::Uniform;
-      } else {
-        throw invalid_argument("Quadrature type '" + type + "' not known.");
-      }
-    }
-
-    //! @overload
-    template<>
-    inline quadrature::QuadratureType get_value(const string& name,
-                                                const quadrature::QuadratureType& default_value)
-    {
-      if (options::get_instance().get_variables_map().count(name) == 1) {
-        return get_value<quadrature::QuadratureType>(name);
-      } else {
-        return default_value;
-      }
-    }
-  } // ::pfasst::config
 }  // ::pfasst
 
 #endif  // _PFASST__QUADRATURE_HPP_
