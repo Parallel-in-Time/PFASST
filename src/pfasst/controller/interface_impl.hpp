@@ -97,7 +97,7 @@ namespace pfasst
   template<typename time>
   void Controller<time>::set_step(size_t n)
   {
-    t += (n - step) * dt;
+    t += ((int)n - (int)step) * dt;
     step = n;
   }
 
