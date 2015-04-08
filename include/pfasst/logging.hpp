@@ -6,6 +6,10 @@
 #include <string>
 using namespace std;
 
+#ifdef WITH_MPI
+  #include <mpi.h>
+#endif
+
 #include <boost/algorithm/string.hpp>
 
 struct OUT
@@ -168,6 +172,20 @@ namespace pfasst
       el::Configurations* conf = logger->configurations();
       conf->setGlobally(el::ConfigurationType::MillisecondsWidth,
                         PFASST_LOGGER_DEFAULT_GLOBAL_MILLISECOND_WIDTH);
+#ifdef WITH_MPI
+      int initialized = 0;
+      MPI_Initialized(&initialized);
+      assert((bool)initialized);
+      int rank = 0;
+      MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+      conf->setGlobally(el::ConfigurationType::ToFile, "true");
+      conf->setGlobally(el::ConfigurationType::ToStandardOutput, "false");
+      conf->setGlobally(el::ConfigurationType::Filename,
+                        string("mpi_run_") + to_string(rank) + string(".log"));
+#else
+      conf->setGlobally(el::ConfigurationType::ToFile, "false");
+      conf->setGlobally(el::ConfigurationType::ToStandardOutput, "true");
+#endif
       conf->set(el::Level::Info, el::ConfigurationType::Format,
                 TIMESTAMP + INFO_COLOR + "[" + id2print + ", " + LEVEL  + " " + MESSAGE + OUT::reset);
       conf->set(el::Level::Debug, el::ConfigurationType::Format,
@@ -191,8 +209,20 @@ namespace pfasst
       el::Configurations defaultConf;
       defaultConf.setToDefault();
 
+#ifdef WITH_MPI
+      int initialized = 0;
+      MPI_Initialized(&initialized);
+      assert((bool)initialized);
+      int rank = 0;
+      MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+      defaultConf.setGlobally(el::ConfigurationType::ToFile, "true");
+      defaultConf.setGlobally(el::ConfigurationType::ToStandardOutput, "false");
+      defaultConf.setGlobally(el::ConfigurationType::Filename,
+                              string("mpi_run_") + to_string(rank) + string(".log"));
+#else
       defaultConf.setGlobally(el::ConfigurationType::ToFile, "false");
       defaultConf.setGlobally(el::ConfigurationType::ToStandardOutput, "true");
+#endif
       defaultConf.setGlobally(el::ConfigurationType::MillisecondsWidth, PFASST_LOGGER_DEFAULT_GLOBAL_MILLISECOND_WIDTH);
       el::Loggers::reconfigureAllLoggers(defaultConf);
 
