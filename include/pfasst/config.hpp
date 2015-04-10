@@ -115,6 +115,7 @@ namespace pfasst
     static inline void init()
     {
       options::add_option("Global", "help,h", "display this help message");
+      options::add_option("Global", "quiet,q", "don't log to stdout");
 
       options::add_option<double>("Duration", "dt", "time step size");
       options::add_option<double>("Duration", "tend", "final time of simulation");

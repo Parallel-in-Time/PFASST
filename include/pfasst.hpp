@@ -30,11 +30,11 @@ namespace pfasst
       cerr << "PFASST::init() : 'with_mpi' flag used without enabling MPI" << endl;
 #endif
     }
+    config::read_commandline(argc, argv);
     log::start_log(argc, argv);
     if (logs) {
       logs();
     }
-    config::read_commandline(argc, argv);
   }
 } // ::pfasst
 
