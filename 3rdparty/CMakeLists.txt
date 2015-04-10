@@ -10,6 +10,9 @@ message(STATUS "----------------------------------------------------------------
 message(STATUS "Boost")
 
 set(Boost_USE_MULTITHREADED ON)
+if(NOT ${pfasst_BUILD_SHARED_LIBS})
+    set(Boost_USE_STATIC_LIBS ON)
+endif()
 set(Boost_ADDITIONAL_VERSIONS "1.57" "1.57.0" ${Boost_ADDITIONAL_VERSIONS})
 
 if(${compiler_version_available} AND ${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
