@@ -16,6 +16,7 @@ using namespace std;
 #include <fftw3.h>
 
 #include <pfasst.hpp>
+#include <pfasst/logging.hpp>
 #include <pfasst/controller/pfasst.hpp>
 #include <pfasst/mpi_communicator.hpp>
 #include <pfasst/encap/automagic.hpp>
@@ -45,6 +46,13 @@ namespace pfasst
                                const size_t ndofs_f, const size_t ndofs_c,
                                const size_t nnodes_f, const size_t nnodes_c)
       {
+        CLOG(INFO, "Advec") << "abs_res_tol: " << abs_res_tol << ", "
+                            << "rel_res_tol: " << rel_res_tol << ", "
+                            << "niter: " << niters << ", "
+                            << "nsteps: " << nsteps << ", "
+                            << "dt: " << dt << ", "
+                            << "ndofs (f-c): " << ndofs_f << "-" << ndofs_c << ", "
+                            << "nnodes (f-c): " << nnodes_f << "-" << nnodes_c;
         vector<pair<size_t, quadrature::QuadratureType>> nodes = {
           { nnodes_c, quadrature::QuadratureType::GaussLobatto },
           { nnodes_f, quadrature::QuadratureType::GaussLobatto }
@@ -107,7 +115,9 @@ int main(int argc, char** argv)
   const size_t nnodes_c = (nnodes_f + 1) / 2;
   const size_t ndofs_c = ndofs_f / 2;
 
-  pfasst::examples::advection_diffusion::run_mpi_pfasst(abs_res_tol, rel_res_tol, niters, nsteps, dt, ndofs_f, ndofs_c, nnodes_f, nnodes_c);
+  pfasst::examples::advection_diffusion::run_mpi_pfasst(abs_res_tol, rel_res_tol,
+                                                        niters, nsteps, dt,
+                                                        ndofs_f, ndofs_c, nnodes_f, nnodes_c);
   fftw_cleanup();
   MPI_Finalize();
 }

@@ -64,6 +64,6 @@ There are a few steps one has to complete before using _PFASST++_ on _JUQUEEN_.
        #@bg_size               = 1
        #@bg_connectivity       = TORUS
        #@queue
-       runjob --np 32 --ranks-per-node 32 \
-         --exe <PATH_TO_BUILD_DIR>/examples/advection_diffusion/mpi_pfasst \
-         --args '-q'
+       runjob --np 32 --ranks-per-node 32 : \
+         <PATH_TO_BUILD_DIR>/examples/advection_diffusion/mpi_pfasst \
+         -q --tend 0.64 --dt 0.01 --num_iter 8
