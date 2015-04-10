@@ -47,7 +47,13 @@ namespace pfasst
     int nblocks = int(this->get_end_time() / this->get_time_step()) / comm->size();
 
     if (nblocks == 0) {
+      LOG(INFO) << "invalid duration: there are more time processors than time steps";
       throw ValueError("invalid duration: there are more time processors than time steps");
+    }
+
+    if (nblocks * comm->size() * this->get_time_step() < this->get_end_time()) {
+      LOG(INFO) << "invalid duration: mismatch between number of time processors and time steps";
+      throw ValueError("invalid duration: mismatch between number of time processors and time steps");
     }
 
     for (int nblock = 0; nblock < nblocks; nblock++) {
