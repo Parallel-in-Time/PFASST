@@ -1,7 +1,7 @@
 #ifndef _PFASST_HPP_
 #define _PFASST_HPP_
 
-#include <iostream>
+#include <functional>
 using namespace std;
 
 #include "pfasst/config.hpp"
