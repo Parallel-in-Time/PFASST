@@ -238,6 +238,7 @@ namespace pfasst
 
       options::add_option<double>("Duration", "dt", "time step size");
       options::add_option<double>("Duration", "tend", "final time of simulation");
+      options::add_option<size_t>("Duration", "num_steps", "number time steps");
       options::add_option<size_t>("Duration", "num_iter", "number of iterations");
       
       options::add_option<size_t>("Quadrature", "num_nodes", "number of quadrature nodes");
