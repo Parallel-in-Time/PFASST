@@ -86,6 +86,7 @@ namespace pfasst
         auto_build(mlsdc, nodes, build_level);
         auto_setup(mlsdc, initial);
         mlsdc.set_duration(0.0, nsteps*dt, dt, niters);
+        mlsdc.set_options();
         mlsdc.run();
 
         fftw_cleanup();
