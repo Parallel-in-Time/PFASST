@@ -1,11 +1,10 @@
-/*
- * FFT helper class.
- *
- * Please note: side affects galore!  This is not my best work...
+/**
+ * @ingroup AdvectionDiffusionFiles
+ * @file examples/advection_diffusion/fft.hpp
+ * @since v0.1.0
  */
-
-#ifndef _FFT_HPP_
-#define _FFT_HPP_
+#ifndef _EXAMPLES__ADVEC_DIFF__FFT_HPP_
+#define _EXAMPLES__ADVEC_DIFF__FFT_HPP_
 
 #include <map>
 #include <memory>
@@ -23,6 +22,13 @@ namespace pfasst
   {
     namespace advection_diffusion
     {
+      /**
+       * FFT helper class.
+       *
+       * @warning Side affects galore! This is not my best work ...
+       *
+       * @ingroup AdvectionDiffusion
+       */
       class FFT
       {
           struct workspace {
@@ -83,4 +89,4 @@ namespace pfasst
   }  // ::pfasst::examples
 }  // ::pfasst
 
-#endif
+#endif  // _EXAMPLES__ADVEC_DIFF__FFT_HPP_

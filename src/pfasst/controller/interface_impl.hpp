@@ -19,6 +19,13 @@ namespace pfasst
   Controller<time>::~Controller()
   {}
 
+  /**
+   * @internals
+   * Sets @ref Controller::tend "tend", @ref Controller::dt "dt" and
+   * @ref Controller::max_iterations "max_iterations" from command line parameters (or config file).
+   * Uses current values of those values as defaults.
+   * @endinternals
+   */
   template<typename time>
   void Controller<time>::set_options(bool all_sweepers)
   {
@@ -35,6 +42,12 @@ namespace pfasst
     }
   }
 
+  /**
+   * @internals
+   * This also sets the backreference in each sweeper to this controller by calling
+   * ISweeper::set_controller() before calling ISweeper::setup().
+   * @endinternals
+   */
   template<typename time>
   void Controller<time>::setup()
   {
@@ -56,16 +69,16 @@ namespace pfasst
   }
 
   template<typename time>
-  void Controller<time>::add_level(shared_ptr<ISweeper<time>> swpr,
-                                   shared_ptr<ITransfer<time>> trnsfr,
+  void Controller<time>::add_level(shared_ptr<ISweeper<time>> sweeper,
+                                   shared_ptr<ITransfer<time>> transfer,
                                    bool coarse)
   {
     if (coarse) {
-      levels.push_front(swpr);
-      transfer.push_front(trnsfr);
+      this->levels.push_front(sweeper);
+      this->transfer.push_front(transfer);
     } else {
-      levels.push_back(swpr);
-      transfer.push_back(trnsfr);
+      this->levels.push_back(sweeper);
+      this->transfer.push_back(transfer);
     }
   }
 
@@ -75,7 +88,6 @@ namespace pfasst
     return levels.size();
   }
 
-  //! @{
   template<typename time>
   size_t Controller<time>::get_step()
   {
@@ -85,7 +97,7 @@ namespace pfasst
   template<typename time>
   void Controller<time>::set_step(size_t n)
   {
-    t += (n - step) * dt;
+    t += ((int)n - (int)step) * dt;
     step = n;
   }
 
@@ -126,6 +138,11 @@ namespace pfasst
     this->iteration = iter;
   }
 
+  /**
+   * @internals
+   * The default implementation just increments the current iteration counter.
+   * @endinternals
+   */
   template<typename time>
   void Controller<time>::advance_iteration()
   {

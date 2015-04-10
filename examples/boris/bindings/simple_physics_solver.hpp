@@ -1,3 +1,7 @@
+/**
+ * @defgroup ExternalSolver External Solver
+ * @ingroup BorisBindings
+ */
 #ifndef _SIMPLE_PHYSICS_SOLVER_HPP_
 #define _SIMPLE_PHYSICS_SOLVER_HPP_
 
@@ -9,8 +13,10 @@ using namespace std;
 #endif
 
 
+//! @ingroup ExternalSolver
 namespace simple_physics_solver
 {
+  //! @ingroup ExternalSolver
   class SimplePhysicsSolverConfig
   {
     public:
@@ -27,34 +33,41 @@ namespace simple_physics_solver
       virtual ~SimplePhysicsSolverConfig();
   };
 
+  //! @ingroup ExternalSolver
   void evaluate_external_e_field(const double* positions, const double* charges, const double* masses,
                                  const size_t num_particles, const double t,
                                  const SimplePhysicsSolverConfig* config,
                                  double* forces);
 
+  //! @ingroup ExternalSolver
   void evaluate_internal_e_field(const double* positions, const double* charges, const double* masses,
                                  const size_t num_particles, const double t,
                                  const SimplePhysicsSolverConfig* config,
                                  double* exyz, double* phis);
 
+  //! @ingroup ExternalSolver
   void evaluate_e_field(const double* positions, const double* charges, const double* masses,
                         const size_t num_particles, const double t,
                         const SimplePhysicsSolverConfig* config,
                         double* forces);
 
+  //! @ingroup ExternalSolver
   void get_b_field_vector(const SimplePhysicsSolverConfig* config,
                                  double* b_field_vector);
 
+  //! @ingroup ExternalSolver
   void evaluate_b_field(const double* velocities, const double* masses, const double* charges,
                         const size_t num_particles, const double t,
                         const SimplePhysicsSolverConfig* config,
                         double* forces);
 
+  //! @ingroup ExternalSolver
   double compute_energy(const double* positions, const double* velocities, const double* masses,
                         const double* charges,
                         const size_t num_particles, const double t,
                         const SimplePhysicsSolverConfig* config);
 
+  //! @ingroup ExternalSolver
   namespace internal
   {
     inline void cross_prod(const double first[DIM], const double second[DIM], double cross_prod[DIM]);

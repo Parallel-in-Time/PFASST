@@ -1,3 +1,16 @@
+/**
+ * @defgroup ScalarFiles Files
+ * @ingroup Scalar
+ *
+ * This directory contains a simple implementations of scalar ODE solver using the PFASST framework.
+ *
+ * The SDC sweeper is defined in `scalar_sweeper.hpp`.
+ * As this simple equation does not require any special handling, all the SDC magic is derived and
+ * taken from pfasst::encap::IMEXSweeper::sweep().
+ *
+ * @file examples/scalar/scalar_sweeper.hpp
+ * @since v0.2.0
+ */
 #ifndef _EXAMPLES__SCALAR__SCALAR_SWEEPER_HPP_
 #define _EXAMPLES__SCALAR__SCALAR_SWEEPER_HPP_
 
@@ -14,15 +27,25 @@ namespace pfasst
 {
   namespace examples
   {
+    /**
+     * @defgroup Scalar Scalar
+     * @ingroup Examples
+     *
+     * This directory contains a simple implementations of scalar ODE solver using the PFASST framework.
+     *
+     * The SDC sweeper is defined in `scalar_sweeper.hpp`.
+     * As this simple equation does not require any special handling, all the SDC magic is derived and
+     * taken from pfasst::encap::IMEXSweeper::sweep().
+     */
     namespace scalar
     {
       /**
-       * Sweeper for scalar test equation
+       * Sweeper for scalar test equation.
        *
-       * \\( u' = \\lambda*u \\quad\\text{ , } u(0) = u_0 \\)
+       * \\[ u' = \\lambda*u \\quad\\text{ , } u(0) = u_0 \\]
+       * with complex lambda using an IMEX scheme.
        *
-       * with complex lambda using an IMEX scheme. Derived from the generic imex_sweeper.
-       *
+       * @ingroup Scalar
        */
       template<typename time = pfasst::time_precision>
       class ScalarSweeper
@@ -31,24 +54,25 @@ namespace pfasst
         private:
           typedef encap::Encapsulation<time> encap_type;
 
-          //! Define a type for a complex PFASST vector encapsulation.
+          //! define a type for a complex PFASST vector encapsulation.
           typedef encap::VectorEncapsulation<complex<double>> complex_vector_type;
 
-           //! Parameter lambda and initial value \\( u_0 \\)
+           //! parameter lambda and initial value \\( u_0 \\)
           complex<double> lambda, u0;
 
-          //! The complex unit \\( i = \\sqrt{-1} \\)
+          //! the complex unit \\( i = \\sqrt{-1} \\)
           const complex<double> i_complex = complex<double>(0, 1);
 
-           //! Error at the final time. For the scalar example, an analytical solution is known.
+           //! error at the final time. For the scalar example, an analytical solution is known.
           double error;
 
-           //! Counters for how often `f_expl_eval`, `f_impl_eval` and `impl_solve` are called.
+           //! counters for how often `f_expl_eval`, `f_impl_eval` and `impl_solve` are called.
           size_t n_f_expl_eval, n_f_impl_eval, n_impl_solve;
 
         public:
           /**
-           * Generic constructor; initialize all function call counters with zero.
+           * generic constructor; initialize all function call counters with zero.
+           *
            * @param[in] lambda coefficient in test equation
            * @param[in] u0 initial value at \\( t=0 \\)
            */
@@ -62,7 +86,7 @@ namespace pfasst
           {}
 
           /**
-           * Upon destruction, report final error and number of function calls
+           * upon destruction, report final error and number of function calls
            */
           virtual ~ScalarSweeper()
           {
@@ -73,7 +97,7 @@ namespace pfasst
           }
 
           /**
-           * Compute error between last state and exact solution at time tand print it to cout
+           * compute error between last state and exact solution at time tand print it to cout
            *
            * @param[in] t Time
            */
@@ -90,7 +114,7 @@ namespace pfasst
           }
 
           /**
-           * Returns error, but does not update it!
+           * returns error, but does not update it!
            */
           double get_errors()
           {
@@ -98,7 +122,7 @@ namespace pfasst
           }
 
           /**
-           * Post prediction step, update of error.
+           * post prediction step, update of error.
            */
           void post_predict() override
           {
@@ -108,7 +132,7 @@ namespace pfasst
           }
 
           /**
-           * Post sweep, update error.
+           * post sweep, update error.
            */
           void post_sweep() override
           {
@@ -118,7 +142,7 @@ namespace pfasst
           }
 
           /**
-           * Computes the exact solution \\( u_0 \\exp \\left( \\lambda*t \\right) \\) at a given time t.
+           * computes the exact solution \\( u_0 \\exp \\left( \\lambda*t \\right) \\) at a given time t.
            *
            * @param[in] t Time
            */
@@ -134,7 +158,7 @@ namespace pfasst
           }
 
           /**
-           * Evaluate the explicit part of the right hand side: Multiply with \\( \\text{imag}(\\lambda) \\)
+           * evaluate the explicit part of the right hand side: Multiply with \\( \\text{imag}(\\lambda) \\)
            */
           void f_expl_eval(shared_ptr<encap_type> f_encap,
                            shared_ptr<encap_type> q_encap, time t) override
@@ -150,7 +174,7 @@ namespace pfasst
           }
 
           /**
-           * Evaluate the implicit part of the right hand side: Multiply with \\( \\text{real}(\\lambda) \\)
+           * evaluate the implicit part of the right hand side: Multiply with \\( \\text{real}(\\lambda) \\)
            */
           void f_impl_eval(shared_ptr<encap_type> f_encap,
                            shared_ptr<encap_type> q_encap, time t) override
@@ -166,7 +190,7 @@ namespace pfasst
           }
 
           /**
-           * For given \\( b \\), solve
+           * for given \\( b \\), solve
            * \\( \\left( \\mathbb{I}_d - \\Delta t \\text{real}(\\lambda) \\right) u = b \\)
            * for \\( u \\) and set f_encap to \\( \\text{real}(\\lambda) u \\)
            */

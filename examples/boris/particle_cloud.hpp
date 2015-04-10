@@ -1,3 +1,7 @@
+/**
+ * @file examples/boris/particle_cloud.hpp
+ * @ingroup BorisFiles
+ */
 #ifndef _EXAMPLES__BORIS__PARTICLE_CLOUD_HPP_
 #define _EXAMPLES__BORIS__PARTICLE_CLOUD_HPP_
 
@@ -17,10 +21,16 @@ namespace pfasst
   {
     namespace boris
     {
+      /**
+       * @ingroup Boris
+       */
       template<typename precision>
       using ParticleCloudComponent = vector<precision>;
 
 
+      /**
+       * @ingroup Boris
+       */
       template<typename precision>
       class ParticleCloud
         :   public encap::Encapsulation<precision>
@@ -77,27 +87,48 @@ namespace pfasst
       };
 
 
+      /**
+       * @ingroup BorisUtilities
+       */
       template<typename precision>
       static precision distance(const Particle<precision>& first,
                                 const Particle<precision>& second);
+      /**
+       * @ingroup BorisUtilities
+       */
       template<typename precision>
       static precision distance(const shared_ptr<Particle<precision>>& first,
                                 const shared_ptr<Particle<precision>>& second);
 
+      /**
+       * @ingroup BorisUtilities
+       */
       template<typename precision>
       static vector<precision> distance_to_reference(const ParticleCloud<precision>& cloud,
                                                      const Particle<precision>&      reference);
+      /**
+       * @ingroup BorisUtilities
+       */
       template<typename precision>
       static vector<precision> distance_to_reference(const shared_ptr<ParticleCloud<precision>>& cloud,
                                                      const shared_ptr<Particle<precision>>&      reference);
 
 
+      /**
+       * @ingroup BorisUtilities
+       */
       template<typename precision>
       inline MAKE_LOGGABLE(shared_ptr<ParticleCloud<precision>>, sp_cloud, os);
+      /**
+       * @ingroup BorisUtilities
+       */
       template<typename precision>
       inline MAKE_LOGGABLE(shared_ptr<const ParticleCloud<precision>>, sp_cloud, os);
 
 
+      /**
+       * @ingroup Boris
+       */
       template<typename precision>
       class ParticleCloudFactory
         : public encap::EncapFactory<precision>

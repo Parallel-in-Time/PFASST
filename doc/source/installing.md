@@ -138,7 +138,7 @@ latest release from [GitHub][github_releases].
 ## Building with vanilla make
 
 A sample `Makefile` is included in the `advection_diffusion` example.  This may be of particular
-interested to advanced users wishing to incorporate \rm PFASST++ into their existing code bases.
+interested to advanced users wishing to incorporate \em PFASST++ into their existing code bases.
 
 
 [Boost]: https://boost.org/

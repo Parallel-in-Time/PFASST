@@ -1,3 +1,7 @@
+/**
+ * @file pfasst/quadrature/gauss_radau.hpp
+ * @since v0.3.0
+ */
 #ifndef _PFASST__QUADRATURE__GAUSS_RADAU_HPP_
 #define _PFASST__QUADRATURE__GAUSS_RADAU_HPP_
 
@@ -8,6 +12,13 @@ namespace pfasst
 {
   namespace quadrature
   {
+    /**
+     * Quadrature handler for Gauss-Radau quadrature.
+     *
+     * @tparam scalar precision of quadrature (i.e. `double`)
+     *
+     * @since v0.3.0
+     */
     template<typename precision = pfasst::time_precision>
     class GaussRadau
       : public IQuadrature<precision>
@@ -20,6 +31,9 @@ namespace pfasst
 
       public:
         //! @{
+        /**
+         * @throws invalid_argument if less than two nodes are requested
+         */
         explicit GaussRadau(const size_t num_nodes);
         GaussRadau() = default;
         virtual ~GaussRadau() = default;

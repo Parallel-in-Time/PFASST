@@ -28,7 +28,8 @@ namespace pfasst
         VectorEncapsulation(const size_t size);
 
         /**
-         * @brief copy constuctor
+         * Copy constuctor.
+         *
          * @note delegated to sdt::vector<scalar>
          */
         VectorEncapsulation(const VectorEncapsulation<scalar, time>& other);
@@ -41,7 +42,8 @@ namespace pfasst
         VectorEncapsulation(const Encapsulation<time>& other);
 
         /**
-         * @brief move constructor
+         * Move constructor.
+         *
          * @note delegated to std::vector<scalar>
          */
         VectorEncapsulation(VectorEncapsulation<scalar, time>&& other);
@@ -80,7 +82,7 @@ namespace pfasst
                                bool zero = true);
 
         /**
-         * maximum norm of contained elements.
+         * Maximum norm of contained elements.
          *
          * This uses std::max with custom comparison function.
          */

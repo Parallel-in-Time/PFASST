@@ -37,6 +37,18 @@ namespace pfasst
       return this->saved_state[m];
     }
 
+    /**
+     * @internals
+     * Sets EncapSweeper::abs_residual_tol and EncapSweeper::rel_residual_tol from command line or 
+     * config file.
+     * In case the parameters are not found, takes EncapSweeper::abs_residual_tol or 
+     * EncapSweeper::rel_residual_tol respectively as default values.
+     *
+     * @todo Consider using EncapSweeper::set_residual_tolerances() instead of direct member access
+     *   to allow for easy integration of future consistency checks on setting the residual
+     *   tolerances.
+     * @endinternals
+     */
     template<typename time>
     void EncapSweeper<time>::set_options()
     {
@@ -44,6 +56,14 @@ namespace pfasst
       this->rel_residual_tol = time(config::get_value<double>("rel_res_tol", this->rel_residual_tol));
     }
 
+    /**
+     * @internals
+     * Initializes members holding state information by repeating calls to EncapFactory::create()
+     * for EncapSweeper::start_state, EncapSweeper::end_state, EncapSweeper::state,
+     * EncapSweeper::saved_state and - if @p coarse is `true` - also for 
+     * EncapSweeper::fas_corrections.
+     * @endinternals
+     */
     template<typename time>
     void EncapSweeper<time>::setup(bool coarse)
     {
@@ -67,6 +87,10 @@ namespace pfasst
       }
     }
 
+    /**
+     * This implementation simply copies the initial value (see EncapSweeper::get_start_state())
+     * to all time nodes.
+     */
     template<typename time>
     void EncapSweeper<time>::spread()
     {
@@ -130,12 +154,18 @@ namespace pfasst
       return this->end_state;
     }
 
+    /**
+     * @throws NotImplementedYet This function is required by EncapSweeper
+     */
     template<typename time>
     void EncapSweeper<time>::advance()
     {
       throw NotImplementedYet("sweeper");
     }
 
+    /**
+     * @throws NotImplementedYet This function is required by EncapSweeper
+     */
     template<typename time>
     void EncapSweeper<time>::reevaluate(bool initial_only)
     {
@@ -143,6 +173,9 @@ namespace pfasst
       throw NotImplementedYet("sweeper");
     }
 
+    /**
+     * @throws NotImplementedYet This function is required by EncapSweeper
+     */
     template<typename time>
     void EncapSweeper<time>::integrate(time dt, vector<shared_ptr<Encapsulation<time>>> dst) const
     {
@@ -151,13 +184,17 @@ namespace pfasst
     }
 
     template<typename time>
-    void EncapSweeper<time>::set_residual_tolerances(time abs_residual_tol, time rel_residual_tol, int order)
+    void EncapSweeper<time>::set_residual_tolerances(time abs_residual_tol, time rel_residual_tol,
+                                                     int order)
     {
       this->abs_residual_tol = abs_residual_tol;
       this->rel_residual_tol = rel_residual_tol;
       this->residual_norm_order = order;
     }
 
+    /**
+     * @throws NotImplementedYet This function is required by EncapSweeper for residual computation
+     */
     template<typename time>
     void EncapSweeper<time>::residual(time dt, vector<shared_ptr<Encapsulation<time>>> dst) const
     {
@@ -165,6 +202,18 @@ namespace pfasst
       throw NotImplementedYet("residual");
     }
 
+    /**
+     * @internals
+     * The maximum of the absolute and relative residuals at all time nodes is checked against the
+     * predefined tolerances.
+     *
+     * In case both, EncapSweeper::abs_residual_tol and EncapSweeper::rel_residual_tol, are `0.0`,
+     * this is a no-op.
+     *
+     * Otherwise, and if residuals were not yet initialized, repeating calls to
+     * EncapFactory::create() are done.
+     * @endinternals
+     */
     template<typename time>
     bool EncapSweeper<time>::converged()
     {

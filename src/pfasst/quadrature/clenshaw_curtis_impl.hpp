@@ -3,6 +3,11 @@
 #include <stdexcept>
 using namespace std;
 
+#include <boost/math/constants/constants.hpp>
+using namespace boost::math::constants;
+
+#include "pfasst/quadrature/polynomial.hpp"
+
 
 namespace pfasst
 {
