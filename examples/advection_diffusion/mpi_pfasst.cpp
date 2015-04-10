@@ -89,10 +89,10 @@ namespace pfasst
 #ifndef PFASST_UNIT_TESTING
 int main(int argc, char** argv)
 {
+  MPI_Init(&argc, &argv);
   pfasst::init(argc, argv,
                pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_opts,
-               pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_logs,
-               true);
+               pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_logs);
   pfasst::examples::advection_diffusion::run_mpi_pfasst(0.0);
   fftw_cleanup();
   MPI_Finalize();
