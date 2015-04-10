@@ -27,25 +27,19 @@ if(${pfasst_WITH_MPI})
         if(MPI_COMPILE_FLAGS)
             if(pfasst_WITH_GCC_PROF AND ${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
                 set_target_properties(${test}
-                    PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS} -ftest-coverage -fprofile-arcs"
+                    PROPERTIES COMPILE_FLAGS "-ftest-coverage -fprofile-arcs"
                                LINK_FLAGS "-fprofile-arcs"
                 )
-            else()
-                set_target_properties(${test} PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
             endif()
-        endif()
-        if(MPI_LINK_FLAGS)
-            set_target_properties(${test} PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
         endif()
         target_link_libraries(${test}
             ${3rdparty_DEPENDEND_LIBS}
             ${TESTS_3rdparty_DEPENDEND_LIBS}
             ${FFTW_LIBRARIES}
             ${pfasst_DEPENDEND_LIBS}
-            ${MPI_CXX_LIBRARIES}
         )
         add_test(NAME ${test}
-            COMMAND ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} 4 ${MPIEXEC_PREFLAGS} ${CMAKE_BINARY_DIR}/tests/examples/advection_diffusion/${test} ${MPIEXEC_POSTFLAGS} --gtest_output=xml:${test}_out.xml
+            COMMAND ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} 4 ${CMAKE_BINARY_DIR}/tests/examples/advection_diffusion/${test} --gtest_output=xml:${test}_out.xml
         )
     endforeach(test)
 else()

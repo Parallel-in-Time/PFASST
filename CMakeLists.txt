@@ -25,7 +25,12 @@ option(pfasst_DEFAULT_RAND_SEED "Using a hardcoded random seed"                 
 
 if(${pfasst_WITH_MPI})
     find_package(MPI REQUIRED)
-    message(STATUS "Using MPI C++ Compiler: ${MPI_CXX_COMPILER}")
+    if(NOT "${CMAKE_CXX_COMPILER}" STREQUAL "${MPI_CXX_COMPILER}")
+        message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
+        message(STATUS "MPI C++ Compiler Wrapper: ${MPI_CXX_COMPILER}")
+        message(FATAL_ERROR "Please make sure to set CXX and CC to the MPI compiler wrappers!")
+    endif()
+    message(STATUS "Using MPI C++ Compiler Wrapper: ${MPI_CXX_COMPILER}")
     add_definitions(-DWITH_MPI)
 endif()
 
