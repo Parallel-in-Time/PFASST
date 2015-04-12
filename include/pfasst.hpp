@@ -1,6 +1,9 @@
 #ifndef _PFASST_HPP_
 #define _PFASST_HPP_
 
+#include <functional>
+using namespace std;
+
 #include "pfasst/config.hpp"
 #include "pfasst/logging.hpp"
 
@@ -15,11 +18,11 @@ namespace pfasst
       opts();
     }
     config::init();
+    config::read_commandline(argc, argv);
     log::start_log(argc, argv);
     if (logs) {
       logs();
     }
-    config::read_commandline(argc, argv);
   }
 } // ::pfasst
 

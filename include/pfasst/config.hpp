@@ -14,6 +14,10 @@ using namespace std;
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
+#ifdef WITH_MPI
+  #include <mpi.h>
+#endif
+
 
 namespace pfasst
 {
@@ -189,9 +193,27 @@ namespace pfasst
       po::store(parsed, options::get_instance().get_variables_map());
       po::notify(options::get_instance().get_variables_map());
 
+#ifdef WITH_MPI
+      int initialized = 0;
+      MPI_Initialized(&initialized);
+      assert((bool)initialized);
+      int rank = 0;
+      MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+#endif
       if (options::get_instance().get_variables_map().count("help")) {
-        cout << print_help() << endl;
-        if (exit_on_help) exit(0);
+#ifdef WITH_MPI
+        if (rank == 0) {
+#endif
+          cout << print_help() << endl;
+#ifdef WITH_MPI
+        }
+#endif
+        if (exit_on_help) {
+#ifdef WITH_MPI
+          MPI_Finalize();
+#endif
+          exit(0);
+        }
       }
     }
 
@@ -235,6 +257,7 @@ namespace pfasst
     static inline void init()
     {
       options::add_option("Global", "help,h", "display this help message");
+      options::add_option("Global", "quiet,q", "don't log to stdout");
 
       options::add_option<double>("Duration", "dt", "time step size");
       options::add_option<double>("Duration", "tend", "final time of simulation");

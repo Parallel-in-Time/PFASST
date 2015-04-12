@@ -11,6 +11,10 @@
 #include <string>
 using namespace std;
 
+#ifdef WITH_MPI
+  #include <mpi.h>
+#endif
+
 #include <boost/algorithm/string.hpp>
 
 #include "pfasst/site_config.hpp"
@@ -220,10 +224,27 @@ namespace pfasst
         id2print.append(LOGGER_ID_LENGTH - id_length, ' ');
       }
 
+      el::Configurations* default_conf = \
+        const_cast<el::Configurations*>(el::Loggers::defaultConfigurations());
+
       el::Logger* logger = el::Loggers::getLogger(id);
       el::Configurations* conf = logger->configurations();
       conf->setGlobally(el::ConfigurationType::MillisecondsWidth,
-                        PFASST_LOGGER_DEFAULT_GLOBAL_MILLISECOND_WIDTH);
+                        default_conf->get(el::Level::Info,
+                                          el::ConfigurationType::MillisecondsWidth)->value());
+      conf->setGlobally(el::ConfigurationType::ToStandardOutput,
+                        default_conf->get(el::Level::Info,
+                                          el::ConfigurationType::ToStandardOutput)->value());
+#ifdef WITH_MPI
+      int initialized = 0;
+      MPI_Initialized(&initialized);
+      assert((bool)initialized);
+      int rank = 0;
+      MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+      conf->setGlobally(el::ConfigurationType::ToFile, "true");
+      conf->setGlobally(el::ConfigurationType::Filename,
+                        string("mpi_run_") + to_string(rank) + string(".log"));
+#endif
       conf->set(el::Level::Info, el::ConfigurationType::Format,
                 TIMESTAMP + INFO_COLOR + "[" + id2print + ", " + LEVEL  + " " + MESSAGE + OUT::reset);
       conf->set(el::Level::Debug, el::ConfigurationType::Format,
@@ -251,11 +272,24 @@ namespace pfasst
       el::Configurations defaultConf;
       defaultConf.setToDefault();
 
-      defaultConf.setGlobally(el::ConfigurationType::ToFile, "false");
-      defaultConf.setGlobally(el::ConfigurationType::ToStandardOutput, "true");
+      if (!pfasst::config::options::get_instance().get_variables_map().count("quiet")) {
+        defaultConf.setGlobally(el::ConfigurationType::ToStandardOutput, "true");
+      } else {
+        defaultConf.setGlobally(el::ConfigurationType::ToStandardOutput, "false");
+      }
+#ifdef WITH_MPI
+      int initialized = 0;
+      MPI_Initialized(&initialized);
+      assert((bool)initialized);
+      int rank = 0;
+      MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+      defaultConf.setGlobally(el::ConfigurationType::ToFile, "true");
+      defaultConf.setGlobally(el::ConfigurationType::Filename,
+                              string("mpi_run_") + to_string(rank) + string(".log"));
+#endif
       defaultConf.setGlobally(el::ConfigurationType::MillisecondsWidth,
                               PFASST_LOGGER_DEFAULT_GLOBAL_MILLISECOND_WIDTH);
-      el::Loggers::reconfigureAllLoggers(defaultConf);
+      el::Loggers::setDefaultConfigurations(defaultConf, true);
 
       add_custom_logger("default");
       add_custom_logger("Controller");

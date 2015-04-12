@@ -26,6 +26,7 @@ option(pfasst_DEFAULT_RAND_SEED "Using a hardcoded random seed"                 
 if(${pfasst_WITH_MPI})
     find_package(MPI REQUIRED)
     message(STATUS "Using MPI C++ Compiler: ${MPI_CXX_COMPILER}")
+    add_definitions(-DWITH_MPI)
 endif()
 
 if(pfasst_DEFAULT_RAND_SEED)

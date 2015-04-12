@@ -121,6 +121,20 @@ def setup_and_init_options():
         logging.critical("Given build path could not be found: %s" % _args.build_dir)
         raise ValueError("Given build path could not be found: %s" % _args.build_dir)
     options.build_dir = os.path.abspath(_args.build_dir)
+    if os.access(options.build_dir + "/CMakeCache.txt", os.W_OK):
+        with_gcc_prof = False
+        with_mpi = False
+        with open(options.build_dir + "/CMakeCache.txt", 'r') as cache:
+          for line in cache:
+            if "pfasst_WITH_GCC_PROF:BOOL=ON" in line:
+              with_gcc_prof = True
+            if "pfasst_WITH_MPI:BOOL=ON" in line:
+              with_mpi = True
+    if not with_gcc_prof:
+      raise RuntimeError("PFASST++ must be built with 'pfasst_WITH_GCC_PROF=ON'")
+    if with_mpi:
+      logging.warning("Coverage analysis only functional for non-MPI builds")
+      exit(0)
 
     if not os.access(_args.output, os.W_OK):
         logging.info("Output directory not found. Creating: %s" % _args.output)
