@@ -12,6 +12,9 @@
 using namespace std;
 
 #ifdef WITH_MPI
+  #include <iomanip>
+  #include <sstream>
+
   #include <mpi.h>
 #endif
 
@@ -205,10 +208,23 @@ namespace pfasst
     inline static void add_custom_logger(const string& id)
     {
       const string TIMESTAMP = OUT::white + "%datetime{%H:%m:%s,%g}" + OUT::reset + " ";
-      const string LEVEL = "%level]";
-      const string VLEVEL = "VERB%vlevel]";
+      const string LEVEL = "%level";
+      const string VLEVEL = "VERB%vlevel";
       const string POSITION = "%fbase:%line";
       const string MESSAGE = "%msg";
+#ifdef WITH_MPI
+      int initialized = 0;
+      MPI_Initialized(&initialized);
+      assert((bool)initialized);
+      int rank = 0;
+      MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+      ostringstream frmter;
+      frmter << std::setw(3) << rank;
+      const string MPI_RANK = ", rank " + frmter.str();
+#else
+      const string MPI_RANK = "";
+#endif
 
       const string INFO_COLOR = OUT::blue;
       const string DEBG_COLOR = "";
@@ -235,28 +251,24 @@ namespace pfasst
       conf->setGlobally(el::ConfigurationType::ToStandardOutput,
                         default_conf->get(el::Level::Info,
                                           el::ConfigurationType::ToStandardOutput)->value());
+
 #ifdef WITH_MPI
-      int initialized = 0;
-      MPI_Initialized(&initialized);
-      assert((bool)initialized);
-      int rank = 0;
-      MPI_Comm_rank(MPI_COMM_WORLD, &rank);
       conf->setGlobally(el::ConfigurationType::ToFile, "true");
       conf->setGlobally(el::ConfigurationType::Filename,
                         string("mpi_run_") + to_string(rank) + string(".log"));
 #endif
       conf->set(el::Level::Info, el::ConfigurationType::Format,
-                TIMESTAMP + INFO_COLOR + "[" + id2print + ", " + LEVEL  + " " + MESSAGE + OUT::reset);
+                TIMESTAMP + INFO_COLOR + "[" + id2print + ", " + LEVEL  + MPI_RANK + "] " + MESSAGE + OUT::reset);
       conf->set(el::Level::Debug, el::ConfigurationType::Format,
-                TIMESTAMP + DEBG_COLOR + "[" + id2print + ", " + LEVEL  + " " + POSITION + " " + MESSAGE + OUT::reset);
+                TIMESTAMP + DEBG_COLOR + "[" + id2print + ", " + LEVEL  + MPI_RANK + "] " + POSITION + " " + MESSAGE + OUT::reset);
       conf->set(el::Level::Warning, el::ConfigurationType::Format,
-                TIMESTAMP + WARN_COLOR + "[" + id2print + ", " + LEVEL  + " " + MESSAGE + OUT::reset);
+                TIMESTAMP + WARN_COLOR + "[" + id2print + ", " + LEVEL  + MPI_RANK + "] " + MESSAGE + OUT::reset);
       conf->set(el::Level::Error, el::ConfigurationType::Format,
-                TIMESTAMP + ERRO_COLOR + "[" + id2print + ", " + LEVEL  + " " + MESSAGE + OUT::reset);
+                TIMESTAMP + ERRO_COLOR + "[" + id2print + ", " + LEVEL  + MPI_RANK + "] " + MESSAGE + OUT::reset);
       conf->set(el::Level::Fatal, el::ConfigurationType::Format,
-                TIMESTAMP + FATA_COLOR + "[" + id2print + ", " + LEVEL  + " " + POSITION + " " + MESSAGE + OUT::reset);
+                TIMESTAMP + FATA_COLOR + "[" + id2print + ", " + LEVEL  + MPI_RANK + "] " + POSITION + " " + MESSAGE + OUT::reset);
       conf->set(el::Level::Verbose, el::ConfigurationType::Format,
-                TIMESTAMP + VERB_COLOR + "[" + id2print + ", " + VLEVEL + " " + MESSAGE + OUT::reset);
+                TIMESTAMP + VERB_COLOR + "[" + id2print + ", " + VLEVEL + MPI_RANK + "] " + MESSAGE + OUT::reset);
       el::Loggers::reconfigureLogger(logger, *conf);
     }
 
