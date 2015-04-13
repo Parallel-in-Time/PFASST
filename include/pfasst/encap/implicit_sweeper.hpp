@@ -93,6 +93,8 @@ namespace pfasst
         vector<shared_ptr<Encapsulation<time>>> fs_impl;
         //! @}
 
+        Matrix<time> q_tilde;
+
         /**
         * Set end state to \\( U_0 + \\int F_{expl} + F_{expl} \\).
         */
@@ -148,13 +150,17 @@ namespace pfasst
             this->fs_impl.push_back(this->get_factory()->create(pfasst::encap::function));
           }
 
-          auto lu = lu_decomposition(this->quadrature->get_q_mat());
+          Matrix<time> QT = this->quadrature->get_q_mat().transpose();
+          auto lu = lu_decomposition(QT);
           auto L = get<0>(lu);
           auto U = get<1>(lu);
-          CLOG(DEBUG, "Sweeper") << "Q:" << endl << this->quadrature->get_q_mat();
+          this->q_tilde = U.transpose();
+
+          CLOG(DEBUG, "Sweeper") << "Q':" << endl << QT;
           CLOG(DEBUG, "Sweeper") << "L:" << endl << L;
           CLOG(DEBUG, "Sweeper") << "U:" << endl << U;
           CLOG(DEBUG, "Sweeper") << "LU:" << endl << L * U;
+          CLOG(DEBUG, "Sweeper") << "q_tilde:" << endl << this->q_tilde;
         }
 
         /**
@@ -206,6 +212,12 @@ namespace pfasst
             }
           }
 
+          for (size_t m = 0; m < this->s_integrals.size(); m++) {
+            for (size_t n = 0; n < m; n++) {
+              this->s_integrals[m]->saxpy(-dt*this->q_tilde(m, n), this->fs_impl[n]);
+            }
+          }
+
           shared_ptr<Encapsulation<time>> rhs = this->get_factory()->create(pfasst::encap::solution);
 
           auto const anodes = augment(t, dt, this->quadrature->get_nodes());
@@ -214,6 +226,9 @@ namespace pfasst
             rhs->copy(m == 0 ? this->get_start_state() : this->state[m-1]);
             rhs->saxpy(1.0, this->s_integrals[m]);
             rhs->saxpy(-ds, this->fs_impl[m]);
+            for (size_t n = 0; n < m; n++) {
+              rhs->saxpy(dt*this->q_tilde(m, n), this->fs_impl[n]);
+            }
             this->impl_solve(this->fs_impl[m], this->state[m], anodes[m], ds, rhs);
           }
           this->set_end_state();
