@@ -135,6 +135,11 @@ latest release from [GitHub][github_releases].
 
        make install
 
+### Supercomputers
+
+There are a few tweaks and special care require to get up and running on supercomputers.
+We have compiled a few working walk-throughs at \subpage page_supercomputers .
+
 ## Building with vanilla make
 
 A sample `Makefile` is included in the `advection_diffusion` example.  This may be of particular
