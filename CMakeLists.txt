@@ -14,7 +14,7 @@ list(APPEND CMAKE_FIND_ROOT_PATH ${pfasst_SOURCE_DIR}/stack)
 set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/3rdparty)
 
 option(pfasst_DISABLE_LIBCXX    "Disable use of LLVM's libc++ when compiling with Clang." ON )
-option(pfasst_BUILD_SHARED_LIBS "Build shared libraries."                                 OFF)
+option(pfasst_BUILD_SHARED_LIBS "Build shared libraries."                                 ON )
 option(pfasst_BUILD_EXAMPLES    "Build example programs."                                 ON )
 CMAKE_DEPENDENT_OPTION(pfasst_INSTALL_EXAMPLES "Install example programs." ON
     "pfasst_BUILD_EXAMPLES" OFF)
@@ -25,12 +25,17 @@ option(pfasst_DEFAULT_RAND_SEED "Using a hardcoded random seed"                 
 
 if(${pfasst_WITH_MPI})
     find_package(MPI REQUIRED)
-    if(NOT "${CMAKE_CXX_COMPILER}" STREQUAL "${MPI_CXX_COMPILER}")
+    if(NOT "${CMAKE_CXX_COMPILER}" STREQUAL "${MPI_CXX_COMPILER}" OR 
+       NOT "${CMAKE_C_COMPILER}" STREQUAL "${MPI_C_COMPILER}")
         message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
         message(STATUS "MPI C++ Compiler Wrapper: ${MPI_CXX_COMPILER}")
-        message(FATAL_ERROR "Please make sure to set CXX and CC to the MPI compiler wrappers!")
+        message(WARNING "Please make sure to set CXX and CC to the MPI compiler wrappers!")
+        set(CMAKE_CXX_COMPILER "${MPI_CXX_COMPILER}")
+        set(CMAKE_C_COMPILER "${MPI_C_COMPILER}")
+        message(STATUS "Set default compilers to MPI compilers.")
     endif()
     message(STATUS "Using MPI C++ Compiler Wrapper: ${MPI_CXX_COMPILER}")
+    message(STATUS "USing MPI C Compiler Wrapper: ${MPI_C_COMPILER}")
     add_definitions(-DWITH_MPI)
 endif()
 
