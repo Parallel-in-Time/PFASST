@@ -17,6 +17,50 @@ using namespace std;
 
 namespace pfasst
 {
+
+  template<typename scalar>
+  using lu_pair = pair< Matrix<scalar>, Matrix<scalar> >;
+
+  template<typename scalar>
+  static lu_pair<scalar> lu_decomposition(const Matrix<scalar>& A)
+  {
+    assert(A.rows() == A.cols());
+
+    auto n = A.rows();
+
+    Matrix<scalar> L = Matrix<scalar>::Zero(n, n);
+    Matrix<scalar> U = Matrix<scalar>::Zero(n, n);
+
+    if (A.rows() == 1) {
+
+      L(0, 0) = 1.0;
+      U(0, 0) = A(0,0);
+
+    } else {
+
+      // first row of U is first row of A
+      auto U12 = A.block(0, 1, 1, n-1);
+
+      // first column of L is first column of A / a11
+      auto L21 = A.block(1, 0, n-1, 1) / A(0, 0);
+
+      // remove first row and column and recurse
+      auto A22  = A.block(1, 1, n-1, n-1);
+      Matrix<scalar> tmp = A22 - L21 * U12;
+      auto LU22 = lu_decomposition(tmp);
+
+      L(0, 0) = 1.0;
+      U(0, 0) = A(0, 0);
+      L.block(1, 0, n-1, 1) = L21;
+      U.block(0, 1, 1, n-1) = U12;
+      L.block(1, 1, n-1, n-1) = get<0>(LU22);
+      U.block(1, 1, n-1, n-1) = get<1>(LU22);
+
+    }
+
+    return lu_pair<scalar>(L, U);
+  }
+
   namespace encap
   {
     using pfasst::encap::Encapsulation;
@@ -95,6 +139,7 @@ namespace pfasst
           auto const num_nodes = this->quadrature->get_num_nodes();
 
           if (this->quadrature->left_is_node()) {
+            CLOG(INFO, "Sweeper") << "implicit sweeper shouldn't include left endpoint";
             throw ValueError("implicit sweeper shouldn't include left endpoint");
           }
 
@@ -102,6 +147,14 @@ namespace pfasst
             this->s_integrals.push_back(this->get_factory()->create(pfasst::encap::solution));
             this->fs_impl.push_back(this->get_factory()->create(pfasst::encap::function));
           }
+
+          auto lu = lu_decomposition(this->quadrature->get_q_mat());
+          auto L = get<0>(lu);
+          auto U = get<1>(lu);
+          CLOG(DEBUG, "Sweeper") << "Q:" << endl << this->quadrature->get_q_mat();
+          CLOG(DEBUG, "Sweeper") << "L:" << endl << L;
+          CLOG(DEBUG, "Sweeper") << "U:" << endl << U;
+          CLOG(DEBUG, "Sweeper") << "LU:" << endl << L * U;
         }
 
         /**
