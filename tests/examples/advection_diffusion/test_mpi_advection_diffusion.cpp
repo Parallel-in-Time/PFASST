@@ -68,6 +68,7 @@ TEST(AdaptiveErrorTest, MPIPFASST)
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
+  MPI_Init(&argc, &argv);
   pfasst::init(argc, argv,
                pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_opts,
                pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_logs);

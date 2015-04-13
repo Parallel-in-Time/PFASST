@@ -43,7 +43,7 @@ There are a few steps one has to complete before using _PFASST++_ on _JUQUEEN_.
        cmake -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain_juqueen.cmake \
          -DCMAKE_CXX_COMPILER=`which mpig++` -DCMAKE_C_COMPILER=`which mpigcc` \
          -DBOOST_ROOT=<INSTALL_PLACE> -Dpfasst_WITH_MPI=ON \
-         -Dpfasst_BUILD_TESTS=OFF ..
+         -Dpfasst_BUILD_TESTS=OFF -Dpfasst_BUILD_SHARED_LIBS=OFF ..
 
 5. run make
 
