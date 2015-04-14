@@ -82,11 +82,6 @@ namespace pfasst
         vector<shared_ptr<Encapsulation<time>>> s_integrals;
 
         /**
-         * FAS corrections \\( \\tau \\) at all time nodes of the current iteration.
-         */
-        vector<shared_ptr<Encapsulation<time>>> fas_corrections;
-
-        /**
          * Values of the implicit part of the right hand side \\( F_{impl}(t,u) \\) at all time nodes of the current
          * iteration.
          */

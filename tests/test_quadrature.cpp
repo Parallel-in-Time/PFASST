@@ -293,9 +293,8 @@ class QmatTest
 
 TEST_P(QmatTest, AllNodes)
 {
-  long double qsum;
   for (int m = 0; m < this->quad->get_q_mat().rows(); ++m) {
-    qsum = 0;
+    long double qsum = 0;
     for (int j = 0; j < this->quad->get_q_mat().cols(); ++j) {
       qsum += this->quad->get_q_mat()(m,j);
     }
