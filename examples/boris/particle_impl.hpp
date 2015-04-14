@@ -12,7 +12,7 @@ namespace pfasst
     namespace boris
     {
       template<typename T>
-      inline el::base::type::ostream_t& operator<<(el::base::type::ostream_t& os, const vector<T> vec) {
+      inline el::base::type::ostream_t& operator<<(el::base::type::ostream_t& os, const vector<T>& vec) {
         os << "[";
         for (auto iter = vec.cbegin(); iter != vec.cend(); ++iter) {
           os << *iter;

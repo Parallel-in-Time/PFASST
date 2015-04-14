@@ -182,7 +182,7 @@ namespace pfasst
                                             const scalar energy, const scalar drift, const scalar residual,
                                             const bool with_center = true);
           void update_position(const size_t m, const time dt, const time ds);
-          void update_velocity(const size_t m, const time ds, const vector<time> nodes);
+          void update_velocity(const size_t m, const time ds, const vector<time>& nodes);
 
         public:
           //! @{

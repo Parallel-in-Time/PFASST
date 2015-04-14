@@ -139,6 +139,7 @@ namespace pfasst
         BCVLOG(9) << "writing center particle to file";
         this->data_stream_fmt % (iter+1) % sweep % -1
                               % center[0] % center[1] % center[2]
+                              // cppcheck-suppress zerodiv
                               % 0 % 0 % 0
                               % energy % drift % residual;
         this->data_stream << this->data_stream_fmt << endl;
@@ -154,6 +155,7 @@ namespace pfasst
         this->log_indent->increment(9);
         for (size_t p = 0; p < cloud->size(); ++p) {
           BCVLOG(9) << "writing cloud particle " << p << " to file";
+          // cppcheck-suppress zerodiv
           this->data_stream_fmt % (iter+1) % sweep % p
                                 % cloud->positions()[p * cloud->dim()] % cloud->positions()[p * cloud->dim() + 1] % cloud->positions()[p * cloud->dim() + 2]
                                 % cloud->velocities()[p * cloud->dim()] % cloud->velocities()[p * cloud->dim() + 1] % cloud->velocities()[p * cloud->dim() + 2]
@@ -194,7 +196,7 @@ namespace pfasst
       }
 
       template<typename scalar, typename time>
-      void BorisSweeper<scalar, time>::update_velocity(const size_t m, const time ds, const vector<time> nodes)
+      void BorisSweeper<scalar, time>::update_velocity(const size_t m, const time ds, const vector<time>& nodes)
       {
         BCVLOG(4) << "updating velocity (" << m << "->" << m+1 << ") with ds=" << ds;
         this->log_indent->increment(4);
