@@ -830,29 +830,31 @@ namespace pfasst
       template<typename scalar, typename time>
       void BorisSweeper<scalar, time>::post(ICommunicator* comm, int tag)
       {
-        UNUSED(comm); UNUSED(tag);
-        // TODO: implement BorisSweeper::post
+        this->start_particles->post(comm, tag);
       }
 
       template<typename scalar, typename time>
       void BorisSweeper<scalar, time>::send(ICommunicator* comm, int tag, bool blocking)
       {
-        UNUSED(comm); UNUSED(tag); UNUSED(blocking);
-        // TODO: implement BorisSweeper::send
+        this->end_particles->send(comm, tag, blocking);
       }
 
       template<typename scalar, typename time>
       void BorisSweeper<scalar, time>::recv(ICommunicator* comm, int tag, bool blocking)
       {
-        UNUSED(comm); UNUSED(tag); UNUSED(blocking);
-        // TODO: implement BorisSweeper::recv
+        this->start_particles->recv(comm, tag, blocking);
+        if (this->quadrature->left_is_node()) {
+          this->particles[0]->copy(this->start_particles);
+        }
       }
 
       template<typename scalar, typename time>
       void BorisSweeper<scalar, time>::broadcast(ICommunicator* comm)
       {
-        UNUSED(comm);
-        // TODO: implement BorisSweeper::broadcast
+        if (comm->rank() == comm->size() - 1) {
+          this->start_particles->copy(this->end_particles);
+        }
+        this->start_particles->broadcast(comm);
       }
 
       template<typename scalar, typename time>
