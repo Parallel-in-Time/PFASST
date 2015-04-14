@@ -2,7 +2,7 @@ set(examples_to_install ${examples_to_install})
 
 message(STATUS "  boris")
 
-option(pfasst_BORIS_SAME_LEVELS "Use identical levels with MLSDC" ON)
+option(pfasst_BORIS_SAME_LEVELS "Use identical levels with MLSDC" OFF)
 
 include_directories(
     ${3rdparty_INCLUDES}
