@@ -390,6 +390,7 @@ namespace pfasst
       set_logging_flags();
       load_default_config();
       pfasst::log::stack_position = 0;
+      CLOG(INFO, "default") << "PFASST++ version " << pfasst::VERSION;
     }
   }  // ::pfasst::log
 }  // ::pfasst
