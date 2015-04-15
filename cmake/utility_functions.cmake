@@ -27,3 +27,14 @@ macro(msg_not_installed dependency_name)
     message("!  ${dependency_name} manually to your project.")
     message("!!!!")
 endmacro(msg_not_installed)
+
+macro(update_site_config)
+    set(WARNING_COMMENT "/*\n * DO NOT ALTER THIS FILE\n *\n * It will get rewritten on CMake's next run\n */")
+    if(pfasst_RANDOM_SEED)
+        add_definitions(-DPFASST_DEFAULT_RANDOM_SEED)
+    endif()
+    configure_file(
+        "${pfasst_SOURCE_DIR}/cmake/site_config.hpp.in"
+        "${CMAKE_CURRENT_SOURCE_DIR}/include/pfasst/site_config.hpp"
+    )
+endmacro(update_site_config)

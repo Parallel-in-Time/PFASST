@@ -151,20 +151,22 @@ message(STATUS "Configuring 3rd party libraries")
 #  - FFTW_LIBRARIES (if pfasst_BUILD_EXAMPLES)
 add_subdirectory(3rdparty)
 
+message(STATUS "********************************************************************************")
+message(STATUS "Configuring sources")
+update_site_config()
+
+add_custom_target(set_version ALL
+    COMMAND ${pfasst_SOURCE_DIR}/tools/get_pfasst_version.sh
+    WORKING_DIRECTORY ${pfasst_SOURCE_DIR}
+    COMMENT "Updating PFASST++ version number"
+    USES_TERMINAL
+)
+set(pfasst_DEPENDEND_TARGETS set_version ${pfasst_DEPENDEND_TARGETS})
+
 list(LENGTH pfasst_DEPENDEND_LIBS pfasst_NUM_DEPENDEND_LIBS)
 list(LENGTH pfasst_DEPENDEND_TARGETS pfasst_NUM_DEPENDEND_TARGETS)
 list(LENGTH pfasst_TESTS_DEPENDEND_TARGETS pfasst_TESTS_NUM_DEPENDEND_TARGETS)
 
-message(STATUS "********************************************************************************")
-message(STATUS "Configuring sources")
-set(WARNING_COMMENT "/*\n * DO NOT ALTER THIS FILE\n *\n * It will get rewritten on CMake's next run\n *\n */")
-if(pfasst_RANDOM_SEED)
-    add_definitions(-DPFASST_DEFAULT_RANDOM_SEED)
-endif()
-configure_file(
-    "${pfasst_SOURCE_DIR}/cmake/site_config.hpp.in"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/pfasst/site_config.hpp"
-)
 add_subdirectory(include)
 add_subdirectory(src)
 
