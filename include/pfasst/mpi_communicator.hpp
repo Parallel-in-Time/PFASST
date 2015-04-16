@@ -8,6 +8,7 @@ using namespace std;
 #include <mpi.h>
 
 #include "pfasst/interfaces.hpp"
+#include "pfasst/logging.hpp"
 
 
 namespace pfasst
@@ -33,6 +34,7 @@ namespace pfasst
         //! @{
         int _rank;
         int _size;
+        string _name;
         //! @}
 
       public:
@@ -49,6 +51,7 @@ namespace pfasst
         virtual void set_comm(MPI_Comm comm);
         virtual int size();
         virtual int rank();
+        virtual string name();
         //! @}
     };
 
@@ -71,6 +74,9 @@ namespace pfasst
     };
   }  // ::pfasst::mpi
 }  // ::pfasst
+
+
+inline MAKE_LOGGABLE(MPI_Status, mpi_status, os);
 
 #include "pfasst/mpi_communicator_impl.hpp"
 
