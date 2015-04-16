@@ -29,9 +29,6 @@ namespace pfasst
   class NotImplementedYet
     : public runtime_error
   {
-    protected:
-      string msg;
-
     public:
       /**
        * @param[in] msg component or algorithm the throwing function is required for
@@ -53,9 +50,6 @@ namespace pfasst
   class ValueError
     : public invalid_argument
   {
-    protected:
-      string msg;
-
     public:
       explicit ValueError(const string& msg);
       virtual const char* what() const throw();
