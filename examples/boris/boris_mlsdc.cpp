@@ -88,11 +88,9 @@ namespace pfasst
 #ifndef PFASST_UNIT_TESTING
 int main(int argc, char** argv)
 {
-  pfasst::init(argc, argv, pfasst::examples::boris::init_opts<double>);
-  pfasst::init(argc, argv);
-  pfasst::log::add_custom_logger("Boris");
-  pfasst::log::add_custom_logger("BorisTransfer");
-  pfasst::log::add_custom_logger("Solver");
+  pfasst::init(argc, argv,
+               pfasst::examples::boris::init_opts<>,
+               pfasst::examples::boris::init_logs<>);
 
   const size_t nsteps     = pfasst::config::get_value<size_t>("num_steps", 1);
   const double dt         = pfasst::config::get_value<double>("delta_step", 0.015625);
@@ -102,13 +100,13 @@ int main(int argc, char** argv)
   const double abs_res_tol = pfasst::config::get_value<double>("abs_res_tol", 0.0);
   const double rel_res_tol = pfasst::config::get_value<double>("rel_res_tol", 0.0);
 
-  LOG(INFO) << "nsteps=" << nsteps << ", "
-            << "dt=" << dt << ", "
-            << "nnodes=" << nnodes << ", "
-            << "nparticles=" << nparticles << ", "
-            << "niter=" << niters << ", "
-            << "abs res=" << abs_res_tol << ", "
-            << "rel res=" << rel_res_tol;
+  CLOG(INFO, "Boris") << "nsteps=" << nsteps << ", "
+                      << "dt=" << dt << ", "
+                      << "nnodes=" << nnodes << ", "
+                      << "nparticles=" << nparticles << ", "
+                      << "niter=" << niters << ", "
+                      << "abs res=" << abs_res_tol << ", "
+                      << "rel res=" << rel_res_tol;
   
   pfasst::examples::boris::run_boris_sdc<double>(nsteps, dt, nnodes, nparticles, niters, abs_res_tol, rel_res_tol);
 }

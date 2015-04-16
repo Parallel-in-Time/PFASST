@@ -91,8 +91,11 @@ namespace pfasst
       using error_map = map<error_index, ErrorTuple<scalar>>;
 
 
-      template<typename scalar>
+      template<typename precision = pfasst::time_precision>
       static void init_opts();
+
+      template<typename precision = pfasst::time_precision>
+      static void init_logs();
 
 
       class LogIndent
