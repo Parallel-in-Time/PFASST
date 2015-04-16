@@ -21,7 +21,7 @@ namespace pfasst
    */
   const char* NotImplementedYet::what() const throw()
   {
-    return (string("Not implemented/supported yet, required for: ") + this->msg).c_str();
+    return (string("Not implemented/supported yet, required for: ") + string(runtime_error::what())).c_str();
   }
 
 
@@ -36,7 +36,7 @@ namespace pfasst
    */
   const char* ValueError::what() const throw()
   {
-    return (string("ValueError: ") + this->msg).c_str();
+    return (string("ValueError: ") + string(invalid_argument::what())).c_str();
   }
 
 
