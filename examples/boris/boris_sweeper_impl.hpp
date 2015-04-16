@@ -48,20 +48,28 @@ namespace pfasst
   {
     namespace boris
     {
-      template<typename scalar>
-      void ParticleError<scalar>::log(el::base::type::ostream_t& os) const
+      template<typename precision>
+      void ParticleError<precision>::log(el::base::type::ostream_t& os) const
       {
         os << "pos: [" << x << " " << y << " " << z << "]\tvel: [" << y << " " << v << " " << w << "]";
       }
 
 
-      template<typename scalar>
+      template<typename precision>
       static void init_opts()
       {
         pfasst::config::options::add_option<size_t>("Boris-SDC", "num_particles", "number of particles in the cloud");
-        pfasst::config::options::add_option<scalar>("Boris-SDC", "epsilon", "Boris' epsilon");
-        pfasst::config::options::add_option<scalar>("Boris-SDC", "omega_e", "E-field constant");
-        pfasst::config::options::add_option<scalar>("Boris-SDC", "omega_b", "B-field constant");
+        pfasst::config::options::add_option<precision>("Boris-SDC", "epsilon", "Boris' epsilon");
+        pfasst::config::options::add_option<precision>("Boris-SDC", "omega_e", "E-field constant");
+        pfasst::config::options::add_option<precision>("Boris-SDC", "omega_b", "B-field constant");
+      }
+
+      template<typename precision>
+      static void init_logs()
+      {
+        pfasst::log::add_custom_logger("Boris");
+        pfasst::log::add_custom_logger("SolverBinding");
+        pfasst::log::add_custom_logger("Solver");
       }
 
 
