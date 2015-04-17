@@ -3,5 +3,16 @@
 #ifndef _PFASST__SITE_CONFIG_HPP
 #define _PFASST__SITE_CONFIG_HPP
 
+#ifdef PFASST_DEFAULT_RANDOM_SEED
+  #define PFASST_RANDOM_SEED @pfasst_RANDOM_SEED@
+#endif
+
+#include <string>
+using namespace std;
+
+namespace pfasst
+{
+  static constexpr const char* VERSION = "pfasst_VERSION";
+}  // ::pfasst
 
 #endif  // _PFASST__SITE_CONFIG_HPP

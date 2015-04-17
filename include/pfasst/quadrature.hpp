@@ -1,35 +1,57 @@
+/**
+ * @file pfasst/quadrature.hpp
+ * @since v0.1.0
+ */
 #ifndef _PFASST__QUADRATURE_HPP_
 #define _PFASST__QUADRATURE_HPP_
 
 #include <cmath>
 #include <exception>
-#include <type_traits>
 #include <vector>
+using namespace std;
 
 #include <Eigen/Dense>
+template<typename scalar>
+using Matrix = Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+
 #include <boost/math/constants/constants.hpp>
 
-#include "config.hpp"
-#include "interfaces.hpp"
-#include "quadrature/polynomial.hpp"
-#include "quadrature/interface.hpp"
-#include "quadrature/gauss_lobatto.hpp"
-#include "quadrature/gauss_legendre.hpp"
-#include "quadrature/gauss_radau.hpp"
-#include "quadrature/clenshaw_curtis.hpp"
-#include "quadrature/uniform.hpp"
+#include "pfasst/config.hpp"
+#include "pfasst/interfaces.hpp"
+#include "pfasst/quadrature/polynomial.hpp"
+#include "pfasst/quadrature/interface.hpp"
+#include "pfasst/quadrature/gauss_lobatto.hpp"
+#include "pfasst/quadrature/gauss_legendre.hpp"
+#include "pfasst/quadrature/gauss_radau.hpp"
+#include "pfasst/quadrature/clenshaw_curtis.hpp"
+#include "pfasst/quadrature/uniform.hpp"
 
 template<typename scalar>
 using Matrix = Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
-using namespace std;
 
 namespace pfasst
 {
+  /**
+   * Functionality related to computing quadrature nodes and weights.
+   *
+   * @note Please note, that all quadrature nodes are in the range \\( [0, 1] \\).
+   */
   namespace quadrature
   {
+    /**
+     * Instantiates quadrature handler for given number of nodes and type descriptor.
+     *
+     * @tparam precision numerical type of the nodes (e.g. `double`)
+     * @param[in] nnodes number of quadrature nodes
+     * @param[in] qtype type descriptor of the quadrature
+     * @returns instance of pfasst::quadrature::IQuadrature of specified type with desired number
+     *   of nodes
+     * @throws pfasst::ValueError if @p qtype is not a valid quadrature type descriptor
+     */
     template<typename precision = pfasst::time_precision>
-    shared_ptr<IQuadrature<precision>> quadrature_factory(const size_t nnodes, const QuadratureType qtype)
+    shared_ptr<IQuadrature<precision>> quadrature_factory(const size_t nnodes,
+                                                          const QuadratureType qtype)
     {
       if (qtype == QuadratureType::GaussLegendre) {
         return make_shared<GaussLegendre<precision>>(nnodes);
@@ -47,14 +69,28 @@ namespace pfasst
       }
     }
 
-
+    /**
+     * Compute quadrature nodes for given quadrature type descriptor.
+     *
+     * @tparam precision numerical type of the nodes (e.g. `double`)
+     * @param[in] nnodes number of quadrature nodes to compute
+     * @param[in] qtype type descriptor of the quadrature nodes
+     * @returns std::vector of quadrature nodes of given type
+     *
+     * @see pfasst::quadrature::QuadratureType for valid types
+     * @see pfasst::quadrature::quadrature_factory for further details
+     */
     template<typename precision = pfasst::time_precision>
     vector<precision> compute_nodes(size_t nnodes, QuadratureType qtype)
     {
       return quadrature_factory<precision>(nnodes, qtype)->get_nodes();
     }
 
-
+    /**
+     * @todo write documentation
+     *
+     * @tparam precision numerical type of the interpolation (e.g. `double`)
+     */
     template<typename precision = time_precision>
     Matrix<precision> compute_interp(vector<precision> dst, vector<precision> src)
     {
@@ -85,63 +121,6 @@ namespace pfasst
       return mat;
     }
   }  // ::pfasst::quadrature
-
-  class Quadrature
-  {
-    private:
-      static void init_config_options(po::options_description& opts)
-      {
-        opts.add_options()
-          ("nodes_type", po::value<string>(), "type of quadrature nodes")
-          ("num_nodes", po::value<size_t>(), "number of quadrature nodes");
-      }
-
-    public:
-      static void enable_config_options(size_t index = -1)
-      {
-        pfasst::config::Options::get_instance()
-          .register_init_function("Quadrature",
-                                  function<void(po::options_description&)>(init_config_options),
-                                  index);
-      }
-  };
-
-  namespace config
-  {
-    // note: GCC fails with "error: explicit template specialization cannot have a storage class"
-    //       if this template specialization is also declared 'static'; Clang does not care.
-    template<>
-    inline pfasst::quadrature::QuadratureType get_value(const string& name)
-    {
-      const string type = Options::get_instance().get_variables_map()[name].as<string>();
-      if (type == "gauss-lobatto") {
-        return pfasst::quadrature::QuadratureType::GaussLobatto;
-      } else if (type == "gauss-legendre") {
-        return pfasst::quadrature::QuadratureType::GaussLegendre;
-      } else if (type == "gauss-radau") {
-        return pfasst::quadrature::QuadratureType::GaussRadau;
-      } else if (type == "clenshaw-curtis") {
-        return pfasst::quadrature::QuadratureType::ClenshawCurtis;
-      } else if (type == "uniform") {
-        return pfasst::quadrature::QuadratureType::Uniform;
-      } else {
-        throw invalid_argument("Quadrature type '" + type + "' not known.");
-      }
-    }
-
-    // note: GCC fails with "error: explicit template specialization cannot have a storage class"
-    //       if this template specialization is also declared 'static'; Clang does not care.
-    template<>
-    inline pfasst::quadrature::QuadratureType get_value(const string& name,
-                                                        const pfasst::quadrature::QuadratureType& default_value)
-    {
-      if (Options::get_instance().get_variables_map().count(name) == 1) {
-        return pfasst::config::get_value<pfasst::quadrature::QuadratureType>(name);
-      } else {
-        return default_value;
-      }
-    }
-  }
 }  // ::pfasst
 
 #endif  // _PFASST__QUADRATURE_HPP_

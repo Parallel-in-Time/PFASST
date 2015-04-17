@@ -1,32 +1,30 @@
-/*
- * Interfaces for SDC/MLSDC/PFASST algorithms.
- */
-
 #ifndef _PFASST_MPI_COMMUNICATOR_HPP_
 #define _PFASST_MPI_COMMUNICATOR_HPP_
 
-#include <exception>
+#include <stdexcept>
+#include <vector>
+using namespace std;
 
 #include <mpi.h>
 
-#include "interfaces.hpp"
+#include "pfasst/interfaces.hpp"
 
-using namespace std;
 
 namespace pfasst
 {
   namespace mpi
   {
-
     class MPIError
-      : public exception
+      : public runtime_error
     {
       public:
-        const char* what() const throw()
-        {
-          return "mpi error";
-        }
+        explicit MPIError(const string& msg="");
+        virtual const char* what() const throw();
     };
+
+
+    // forward declare for MPICommunicator
+    class MPIStatus;
 
 
     class MPICommunicator
@@ -43,32 +41,37 @@ namespace pfasst
         //! @}
 
         //! @{
-        MPICommunicator()
-        {}
-
-        MPICommunicator(MPI_Comm comm)
-        {
-          set_comm(comm);
-        }
-
-        virtual ~MPICommunicator()
-        {}
+        MPICommunicator();
+        MPICommunicator(MPI_Comm comm);
         //! @}
 
         //! @{
-        void set_comm(MPI_Comm comm)
-        {
-          this->comm = comm;
-          MPI_Comm_size(this->comm, &(this->_size));
-          MPI_Comm_rank(this->comm, &(this->_rank));
-        }
-
-        int size() { return this->_size; }
-        int rank() { return this->_rank; }
-        //! @
+        virtual void set_comm(MPI_Comm comm);
+        virtual int size();
+        virtual int rank();
+        //! @}
     };
 
+
+    class MPIStatus
+      : public IStatus
+    {
+      protected:
+        vector<bool> converged;
+        MPICommunicator* mpi;
+
+      public:
+        virtual void set_comm(ICommunicator* comm);
+        virtual void clear() override;
+        virtual void set_converged(bool converged) override;
+        virtual bool get_converged(int rank) override;
+        virtual void post();
+        virtual void send();
+        virtual void recv();
+    };
   }  // ::pfasst::mpi
 }  // ::pfasst
+
+#include "pfasst/mpi_communicator_impl.hpp"
 
 #endif

@@ -1,13 +1,9 @@
 /**
  * Scalar test equation example using an encapsulated IMEX sweeper.
  *
- * Solves Dahlquist's test equation with single level SDC
- *
- * \\( u' = \\lambda*u \\quad\\text{ , } u(0) = u_0 \\)
- *
- * with complex lambda, treating the real part implicitly and the imaginary part
- * explicitly.
- *
+ * @ingroup ScalarFiles
+ * @file examples/scalar/scalar_sdc.cpp
+ * @since v0.1.0
  */
 
 #include <complex>
@@ -16,7 +12,7 @@ using namespace std;
 #include <pfasst.hpp>
 #include <pfasst/config.hpp>
 #include <pfasst/logging.hpp>
-#include <pfasst/sdc.hpp>
+#include <pfasst/controller/sdc.hpp>
 #include <pfasst/encap/vector.hpp>
 
 #include "scalar_sweeper.hpp"
@@ -27,6 +23,18 @@ namespace pfasst
   {
     namespace scalar
     {
+      /**
+       * Scalar test equation example using an encapsulated IMEX sweeper.
+       *
+       * Solves Dahlquist's test equation with single level SDC
+       *
+       * \\( u' = \\lambda*u \\quad\\text{ , } u(0) = u_0 \\)
+       *
+       * with complex lambda, treating the real part implicitly and the imaginary part
+       * explicitly.
+       *
+       * @ingroup Scalar
+       */
       double run_scalar_sdc(const size_t nsteps, const double dt, const size_t nnodes,
                             const size_t niters, const complex<double> lambda,
                             const quadrature::QuadratureType nodetype)
@@ -64,9 +72,6 @@ namespace pfasst
 }  // ::pfasst
 
 #ifndef PFASST_UNIT_TESTING
-/**
- * Main routine running the scalar example with a preset parameters
- */
 int main(int argc, char** argv)
 {
   const size_t nsteps = 2;

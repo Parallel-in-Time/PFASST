@@ -5,8 +5,8 @@
 #include <tuple>
 #include <cassert>
 
-#include "../quadrature.hpp"
-#include "encap_sweeper.hpp"
+#include "pfasst/quadrature.hpp"
+#include "pfasst/encap/encap_sweeper.hpp"
 
 using namespace std;
 

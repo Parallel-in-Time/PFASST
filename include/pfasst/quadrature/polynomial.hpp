@@ -1,155 +1,135 @@
+/**
+ * @file pfasst/quadrature/polynomial.hpp
+ * @since v0.3.0
+ */
 #ifndef _PFASST__POLYNOMIAL_HPP_
 #define _PFASST__POLYNOMIAL_HPP_
 
-#include <algorithm>
-#include <cassert>
-#include <cmath>
-#include <complex>
-#include <limits>
 #include <vector>
-
-
 using namespace std;
 
 
 namespace pfasst
 {
-  template<typename CoeffT>
-  class Polynomial
+  namespace quadrature
   {
-      vector<CoeffT> c;
+    /**
+     * Representation of a polynomial including differentiation, integration and root finding.
+     *
+     * Nothing more than a \\( n \\)-th order polynomial of the form
+     * \\( P_n(x) = \\sum_{i=0}^{n} c_i x^i \\) with coefficients \\( c_i \\),
+     * \\( i=0, \\dots, n \\).
+     *
+     * @tparam CoeffT numerical precision of polynomial coefficients (e.g. `double`)
+     *
+     * @since v0.3.0
+     */
+    template<typename CoeffT>
+    class Polynomial
+    {
+      protected:
+        /**
+         * Coefficients of the polynomial.
+         *
+         * The coefficient for the highest degree of \\( x \\) has index `0`.
+         * The last coefficient is for \\( x^0 \\).
+         */
+        vector<CoeffT> c;
 
-    public:
-      Polynomial(size_t n)
-        : c(n, CoeffT(0.0))
-      {}
+      public:
+        //! @{
+        Polynomial(size_t n);
+        //! @}
 
-      size_t order() const
-      {
-        return c.size() - 1;
-      }
+        //! @{
+        /**
+         * Order of this polynomial.
+         *
+         * The order of this polynomial is one less the number of coefficients defined.
+         *
+         * @returns order of the polynomial
+         */
+        size_t order() const;
 
-      CoeffT& operator[](const size_t i)
-      {
-        return c.at(i);
-      }
+        /**
+         * Access coefficient @p i
+         *
+         * @param[in] i coefficient index (zero-based)
+         * @returns \\( i+1 \\)-th coefficient
+         * @throws std::out_of_range if index is out of bounds, i.e. @p i >= Polynomial::order()
+         *
+         * @note The coefficients are stored in reversed order to the degree of the indeterminate,
+         *   i.e. `i=0` corresponds to \\( c_n \\) while `i=n` corresponds to \\( c_0 \\).
+         *   See also Polynomial::c.
+         */
+        CoeffT& operator[](const size_t i);
 
-      Polynomial<CoeffT> differentiate() const
-      {
-        Polynomial<CoeffT> p(c.size() - 1);
-        for (size_t j = 1; j < c.size(); j++) {
-          p[j - 1] = j * c[j];
-        }
-        return p;
-      }
+        /**
+         * Differentiate this polynomial.
+         *
+         * Computes standard differential of this polynomial.
+         *
+         * @returns differentiated polynomial
+         */
+        Polynomial<CoeffT> differentiate() const;
 
-      Polynomial<CoeffT> integrate() const
-      {
-        Polynomial<CoeffT> p(c.size() + 1);
-        for (size_t j = 0; j < c.size(); j++) {
-          p[j + 1] = c[j] / (j + 1);
-        }
-        return p;
-      }
+        /**
+         * Integrates this polynomial.
+         *
+         * Computes integral of this polynomial.
+         *
+         * @returns integrated polynomial
+         */
+        Polynomial<CoeffT> integrate() const;
+        //! @}
 
-      template<typename xtype>
-      xtype evaluate(const xtype x) const
-      {
-        int n = c.size() - 1;
-        xtype v = c[n];
-        for (int j = n - 1; j >= 0; j--) {
-          v = x * v + c[j];
-        }
-        return v;
-      }
-
-      Polynomial<CoeffT> normalize() const
-      {
-        Polynomial<CoeffT> p(c.size());
-        for (size_t j = 0; j < c.size(); j++) {
-          p[j] = c[j] / c.back();
-        }
-        return p;
-      }
-
-      vector<CoeffT> roots() const
-      {
-        assert(c.size() >= 1);
-        size_t n = c.size() - 1;
-
-        // initial guess
-        Polynomial<complex<CoeffT>> z0(n), z1(n);
-        for (size_t j = 0; j < n; j++) {
-          z0[j] = pow(complex<double>(0.4, 0.9), j);
-          z1[j] = z0[j];
-        }
-
-        // durand-kerner-weierstrass iterations
-        Polynomial<CoeffT> p = normalize();
-        for (size_t k = 0; k < 100; k++) {
-          complex<CoeffT> num, den;
-          for (size_t i = 0; i < n; i++) {
-            num = p.evaluate(z0[i]);
-            den = 1.0;
-            for (size_t j = 0; j < n; j++) {
-              if (j == i) { continue; }
-              den = den * (z0[i] - z0[j]);
-            }
-            z0[i] = z0[i] - num / den;
+        //! @{
+        /**
+         * Evaluate polynomial for given value.
+         *
+         * @tparam xtype numerical type of the value
+         * @param[in] x value to evaluate polynomial at
+         * @returns value of polynomial at @p x
+         */
+        template<typename xtype>
+        xtype evaluate(const xtype x) const
+        {
+          size_t n = this->order();
+          xtype v = c[n];
+          for (int j = n - 1; j >= 0; j--) {
+            v = x * v + c[j];
           }
-
-          // converged?
-          CoeffT acc = 0.0;
-          for (size_t j = 0; j < n; j++) { acc += abs(z0[j] - z1[j]); }
-          if (acc < 2 * numeric_limits<CoeffT>::epsilon()) { break; }
-
-          z1 = z0;
+          return v;
         }
 
-        vector<CoeffT> roots(n);
-        for (size_t j = 0; j < n; j++) {
-          roots[j] = (abs(z0[j]) < 4 * numeric_limits<CoeffT>::epsilon()) ? 0.0 : real(z0[j]);
-        }
+        /**
+         * Normalizes this polynomial with respect to \\( c_0 \\).
+         *
+         * @returns normalized polynomial
+         */
+        Polynomial<CoeffT> normalize() const;
 
-        sort(roots.begin(), roots.end());
-        return roots;
-      }
+        /**
+         * Computes the roots of this polynomial.
+         *
+         * @returns roots sorted with respect to their value
+         */
+        vector<CoeffT> roots(size_t num_iterations=20, CoeffT ztol=1.0e-20) const;
+        //! @}
 
-      static Polynomial<CoeffT> legendre(const size_t order)
-      {
-        if (order == 0) {
-          Polynomial<CoeffT> p(1);
-          p[0] = 1.0;
-          return p;
-        }
-
-        if (order == 1) {
-          Polynomial<CoeffT> p(2);
-          p[0] = 0.0;
-          p[1] = 1.0;
-          return p;
-        }
-
-        Polynomial<CoeffT> p0(order + 1), p1(order + 1), p2(order + 1);
-        p0[0] = 1.0; p1[1] = 1.0;
-
-        // (n + 1) P_{n+1} = (2n + 1) x P_{n} - n P_{n-1}
-        for (size_t m = 1; m < order; m++) {
-          for (size_t j = 1; j < order + 1; j++) {
-            p2[j] = ((2 * m + 1) * p1[j - 1] - m * p0[j]) / (m + 1);
-          }
-          p2[0] = - int(m) * p0[0] / (m + 1);
-
-          for (size_t j = 0; j < order + 1; j++) {
-            p0[j] = p1[j];
-            p1[j] = p2[j];
-          }
-        }
-
-        return p2;
-      }
-  };
-
+        //! @{
+        /**
+         * Computes the Legendre polynomial of given order.
+         *
+         * @param[in] order desired order of the Legendre polynomial
+         * @returns Legendre polynomial of order @p order
+         */
+        static Polynomial<CoeffT> legendre(const size_t order);
+        //! @}
+    };
+  }  // ::pfasst::quadrature
 }  // ::pfasst
+
+#include "pfasst/quadrature/polynomial_impl.hpp"
 
 #endif  // _PFASST__POLYNOMIAL_HPP_

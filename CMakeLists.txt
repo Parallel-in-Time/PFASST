@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.6)
 project(pfasst)
 
 list(APPEND CMAKE_MODULE_PATH ${pfasst_SOURCE_DIR}/cmake)
@@ -14,17 +14,33 @@ list(APPEND CMAKE_FIND_ROOT_PATH ${pfasst_SOURCE_DIR}/stack)
 set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/3rdparty)
 
 option(pfasst_DISABLE_LIBCXX    "Disable use of LLVM's libc++ when compiling with Clang." ON )
-option(pfasst_BUILD_SHARED_LIBS "Build shared libraries."                                 OFF)
+option(pfasst_BUILD_SHARED_LIBS "Build shared libraries."                                 ON )
 option(pfasst_BUILD_EXAMPLES    "Build example programs."                                 ON )
 CMAKE_DEPENDENT_OPTION(pfasst_INSTALL_EXAMPLES "Install example programs." ON
     "pfasst_BUILD_EXAMPLES" OFF)
 option(pfasst_BUILD_TESTS       "Build test suite for PFASST."                            ON )
 option(pfasst_WITH_MPI          "Build with MPI enabled."                                 OFF)
 option(pfasst_WITH_GCC_PROF     "Enable excessive debugging & profiling output with GCC." OFF)
+option(pfasst_DEFAULT_RAND_SEED "Using a hardcoded random seed"                           ON )
 
 if(${pfasst_WITH_MPI})
     find_package(MPI REQUIRED)
-    message(STATUS "Using MPI C++ Compiler: ${MPI_CXX_COMPILER}")
+    if(NOT "${CMAKE_CXX_COMPILER}" STREQUAL "${MPI_CXX_COMPILER}" OR 
+       NOT "${CMAKE_C_COMPILER}" STREQUAL "${MPI_C_COMPILER}")
+        message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
+        message(STATUS "MPI C++ Compiler Wrapper: ${MPI_CXX_COMPILER}")
+        message(WARNING "Please make sure to set CXX and CC to the MPI compiler wrappers!")
+        set(CMAKE_CXX_COMPILER "${MPI_CXX_COMPILER}")
+        set(CMAKE_C_COMPILER "${MPI_C_COMPILER}")
+        message(STATUS "Set default compilers to MPI compilers.")
+    endif()
+    message(STATUS "Using MPI C++ Compiler Wrapper: ${MPI_CXX_COMPILER}")
+    message(STATUS "USing MPI C Compiler Wrapper: ${MPI_C_COMPILER}")
+    add_definitions(-DWITH_MPI)
+endif()
+
+if(pfasst_DEFAULT_RAND_SEED)
+    set(pfasst_RANDOM_SEED "42")
 endif()
 
 # Check for C++11 support
@@ -103,6 +119,12 @@ if(${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
         "build-in profiling support"
     )
 endif()
+if(pfasst_RANDOM_SEED)
+    add_feature_info(DefaultRandomSeed
+        pfasst_RANDOM_SEED
+        "using specific default random seed ${pfasst_RANDOM_SEED}"
+    )
+endif()
 
 set(3rdparty_INCLUDES)
 set(3rdparty_DEPENDEND_LIBS)
@@ -129,18 +151,24 @@ message(STATUS "Configuring 3rd party libraries")
 #  - FFTW_LIBRARIES (if pfasst_BUILD_EXAMPLES)
 add_subdirectory(3rdparty)
 
+message(STATUS "********************************************************************************")
+message(STATUS "Configuring sources")
+update_site_config()
+
+add_custom_target(set_version ALL
+    COMMAND ${pfasst_SOURCE_DIR}/tools/get_pfasst_version.sh
+    WORKING_DIRECTORY ${pfasst_SOURCE_DIR}
+    COMMENT "Updating PFASST++ version number"
+    USES_TERMINAL
+)
+set(pfasst_DEPENDEND_TARGETS set_version ${pfasst_DEPENDEND_TARGETS})
+
 list(LENGTH pfasst_DEPENDEND_LIBS pfasst_NUM_DEPENDEND_LIBS)
 list(LENGTH pfasst_DEPENDEND_TARGETS pfasst_NUM_DEPENDEND_TARGETS)
 list(LENGTH pfasst_TESTS_DEPENDEND_TARGETS pfasst_TESTS_NUM_DEPENDEND_TARGETS)
 
-message(STATUS "********************************************************************************")
-message(STATUS "Configuring sources")
-set(WARNING_COMMENT "/*\n * DO NOT ALTER THIS FILE\n *\n * It will get rewritten on CMake's next run\n *\n */")
-configure_file(
-    "${pfasst_SOURCE_DIR}/cmake/site_config.hpp.in"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/pfasst/site_config.hpp"
-)
 add_subdirectory(include)
+add_subdirectory(src)
 
 if(pfasst_BUILD_EXAMPLES)
     message(STATUS "********************************************************************************")
@@ -160,6 +188,10 @@ message(STATUS "Creating 'install' target")
 message(STATUS "  prefix:              ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "  header files:        <PREFIX>/include/pfasst")
 install(DIRECTORY include/
+    DESTINATION include
+    FILES_MATCHING PATTERN "*.hpp"
+)
+install(DIRECTORY src/
     DESTINATION include
     FILES_MATCHING PATTERN "*.hpp"
 )

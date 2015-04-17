@@ -5,6 +5,11 @@
 *.info
 /include/pfasst/site_config.hpp
 
+.python-version
+__pycache__
+.ipynb_checkpoints
+/run
+
 # Created by http://www.gitignore.io
 
 ### C ###
@@ -37,24 +42,14 @@
 # Compiled Object files
 *.slo
 *.lo
-*.o
-*.obj
 
 # Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
 
 # Compiled Static libraries
 *.lai
 *.la
-*.a
-*.lib
 
 # Executables
-*.exe
-*.out
-*.app
 
 
 ### Eclipse ###
@@ -123,10 +118,13 @@ tramp
 
 
 ### Linux ###
-*~
 
 # KDE directory preferences
 .directory
+
+# KDevelop
+*.kdev4
+.kdev4/
 
 
 ### OSX ###
@@ -199,4 +197,67 @@ atlassian-ide-plugin.xml
 
 # Crashlytics plugin (for Android Studio and IntelliJ)
 com_crashlytics_export_strings.xml
+
+# Created by https://www.gitignore.io
+
+### Python ###
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+cppcheck.xml
+/cppcheck
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# IPython
+*.ipynb_checkpoints/
 
