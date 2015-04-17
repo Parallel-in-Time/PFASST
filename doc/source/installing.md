@@ -64,7 +64,8 @@ latest release from [GitHub][github_releases].
 
    * __General__
 
-     * By default everything gets built, i.e. tests and examples.
+     * By default everything gets built, i.e. tests, examples and all dependencies which are not
+       found on the system.
 
      * Use `-DCMAKE_BUILD_TYPE=<VALUE>` to specify general compiler flags.
 
@@ -75,33 +76,54 @@ latest release from [GitHub][github_releases].
            | `RelWithDebInfo`   | `-O2 -g -DNDEBUG`      |
            | `MinSizeRel`       | `-Os -DNDEBUG`         |
 
-     * To enable profiling support, you need to specify `-Dpfasst_WITH_GCC_PROF=ON` and have the GNU compiler selected.
+     * To enable profiling support, you need to specify `-Dpfasst_WITH_GCC_PROF=ON` and have the GNU
+       compiler selected.
        When compiling with _Clang_ this option is obsolete as profiling with _Clang_ is not supported.
 
-     * Users on Linux systems with the _Clang_ compiler and a working installation of LLVM's \em libc++ library may
-       want to activate the usage of that by specifying `-Dpfasst_DISABLE_LIBCXX=OFF`.
+     * Users on Linux systems with the _Clang_ compiler and a working installation of LLVM's
+       \em libc++ library may want to activate the usage of that by specifying 
+       `-Dpfasst_DISABLE_LIBCXX=OFF`.
+       As libc++ is highly experimental on non-Darwin systems, this is a very exotic option.
+
+     * There are places in the code (mainly examples) that need a random number generator (RNG).
+       By default, `-Dpfasst_DEFAULT_RAND_SEED=ON` is set and the seed for the RNGs is set to `42`.
+       To overwrite this behaviour, set `-Dpfasst_DEFAULT_RAND_SEED=OFF` and 
+       `-Dpfasst_RANDOM_SEED=<YOUR_VALUE>`.
+
+   * __Dependencies__
+
+     * __Boost__
+       To specify the root path to the Boost installation to be used, add `-DBOOST_ROOT=<PATH>`.
+       The root path should contain the directory `lib` or `lib64` with the compiled Boost libraries
+       as well as `include/boost` with the Boost header files.
+
+     * __GMock__
+       In case there is the Google Testing and Mocking framework installed on the system in a
+       non-standard path, add `-DGMOCK_ROOT=<PATH>` to specify the root path to the framework.
 
    * __MPI__
 
      * To enable MPI, please specify `-Dpfasst_WITH_MPI=ON`.
+       To avoid a warning and potential undefined behaviour, also set `-DCMAKE_C_COMPILER` and
+       `-DCMAKE_CXX_COMPILER` to the MPI compiler wrappers.
 
    * __Test Suite__
 
-     * Deactivate building of the test suite by passing `-Dpfasst_BUILD_TESTS=OFF` to the _CMake_ command line (not
-       recommended).
+     * Deactivate building of the test suite by passing `-Dpfasst_BUILD_TESTS=OFF` to the _CMake_
+       command line (not recommended).
 
    * __Examples__
 
-     * Deactivate building of the example programms by passing `-Dpfasst_BUILD_EXAMPLES=OFF` to the _CMake_ command
-       line.
+     * Deactivate building of the example programms by passing `-Dpfasst_BUILD_EXAMPLES=OFF` to the
+       _CMake_ command line.
 
-     * Add compiled example programs to the `install` target by passing `-Dpfasst_INSTALL_EXAMPLES=ON` to the _CMake_
-       command line (by default, they will not get installed).
+     * Add compiled example programs to the `install` target by passing `-Dpfasst_INSTALL_EXAMPLES=ON`
+       to the _CMake_ command line (by default, they will not get installed).
 
    * __Installing (optional)__
 
-     * Use `-DCMAKE_INSTALL_PREFIX=<PREFIX>` to specify the prefix for installing the headers and optional compiled
-       examples.
+     * Use `-DCMAKE_INSTALL_PREFIX=<PREFIX>` to specify the prefix for installing the headers and
+       optional compiled examples.
 
        By default, `<PREFIX>` is `/usr/local` on Linux systems.
 
@@ -110,15 +132,17 @@ latest release from [GitHub][github_releases].
      * In case you also want to install the compiled example programs on your system, specify
        `-Dpfasst_INSTALL_EXAMPLES=ON`.
 
-   * For example, to build a release version with _Clang_ on a Linux system without the examples, the call to
-     _CMake_ looks like:
+   * For example, to build a release version with _Clang_ on a Linux system without the examples
+     (i.e. only the core test suite and dependencies therefor), the call to _CMake_ looks like:
 
-         cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -Dpfasst_BUILD_EXAMPLES=OFF ..
+         cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang \
+           -DCMAKE_CXX_COMPILER=clang++ -Dpfasst_BUILD_EXAMPLES=OFF ..
 
-   * A full debug build on a Linux system with GCC and the desire to install everything to `/home/<USER>`, call _CMake_
-     with:
+   * For a full debug build with enabled profiling on a Linux system with GCC and the desire to
+     install everything to `/home/<USER>`, call _CMake_ with:
 
-         cmake -DCMAKE_BUILD_TYPE=Debug -Dpfasst_WITH_GCC_PROF=ON -Dpfasst_INSTALL_EXAMPLES=ON -DCMAKE_INSTALL_PREFIX=$HOME ..
+         cmake -DCMAKE_BUILD_TYPE=Debug -Dpfasst_WITH_GCC_PROF=ON \
+           -Dpfasst_INSTALL_EXAMPLES=ON -DCMAKE_INSTALL_PREFIX=$HOME ..
 
 3. Compile:
 
@@ -128,8 +152,8 @@ latest release from [GitHub][github_releases].
 
        make test
 
-   In case any of the tests do not pass, please [open an issue on GitHub][github_new_issue] and provide the full log of
-   your _CMake_ and _make_ invocations.
+   In case any of the tests do not pass, please [open an issue on GitHub][github_new_issue] and
+   provide the full log of your _CMake_ and _make_ invocations.
 
 5. (optional) Install \em PFASST++ headers (and compiled examples if specified so):
 

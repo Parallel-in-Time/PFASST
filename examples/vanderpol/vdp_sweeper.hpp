@@ -271,9 +271,6 @@ namespace pfasst
             double residual = this->newton_tol + 1.0;
             size_t iter     = 0.0;
 
-            // initialize temporary variables for use in loop
-            double a, b, c, f0, f1;
-
             // Initial value for q is just rhs: For small dt, P is approximately the identity
             q[0] = rhs[0];
             q[1] = rhs[1];
@@ -281,8 +278,8 @@ namespace pfasst
             // NEWTON ITERATION: q_new = q + inv(J(q))*(-f(q))
             do {
               // Store -P(q) in f0, f1
-              f0 = -( q[0] - dt*q[1] - rhs[0] );
-              f1 = -( q[1] - dt*( this->nu*(1-q[0]*q[0])*q[1]-q[0]) - rhs[1] );
+              double f0 = -( q[0] - dt*q[1] - rhs[0] );
+              double f1 = -( q[1] - dt*( this->nu*(1-q[0]*q[0])*q[1]-q[0]) - rhs[1] );
 
               /**
                * The Jacobian of the right hand side of the van der Pol oscillator for \\( q=[x;y] \\)
@@ -307,9 +304,9 @@ namespace pfasst
                *
                * with \\( c:=2*\\nu*x*y*dt^2 + dt^2 + dt*x^2 - dt + 1 \\)
                */
-              a = dt*q[0]*q[0]-dt+1.0;
-              b = -2.0*dt*this->nu*q[0]*q[1]-dt;
-              c = 2.0*this->nu*q[0]*q[1]*dt*dt + dt*dt + dt*q[0]*q[0] - dt + 1.0;
+              double a = dt * q[0] * q[0] - dt + 1.0;
+              double b = -2.0 * dt * this->nu * q[0] * q[1] - dt;
+              double c = 2.0 * this->nu * q[0] * q[1] * dt * dt + dt * dt + dt * q[0] * q[0] - dt + 1.0;
 
               // Compute inv(J(q))*(-f(q)) and store it in f
               f[0] = (1.0/c)*( a*f0 + dt*f1 );

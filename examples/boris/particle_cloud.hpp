@@ -9,8 +9,11 @@
 #include <vector>
 using namespace std;
 
-#include <pfasst/encap/encapsulation.hpp>
 #include <pfasst/logging.hpp>
+#include <pfasst/encap/encapsulation.hpp>
+#ifdef WITH_MPI
+  #include <pfasst/mpi_communicator.hpp>
+#endif
 
 #include "particle.hpp"
 
@@ -47,6 +50,17 @@ namespace pfasst
           precision _default_charge;
           precision _default_mass;
 
+#ifdef WITH_MPI
+          //! @{
+          vector<MPI_Request> recv_request;
+          vector<MPI_Request> send_request;
+          //! @}
+
+          //! @{
+          inline mpi::MPICommunicator& as_mpi(ICommunicator* comm);
+          //! @}
+#endif
+
         public:
           explicit ParticleCloud(const size_t num_particles = 0,
                                  const size_t dim = 3,
@@ -82,6 +96,15 @@ namespace pfasst
 
           // TODO: unify behaviour with particle_util::norm0 (e.g. norm_max vs. norm0 (==sqrt(^2))
           virtual precision norm0() const;
+
+#ifdef WITH_MPI
+          //! @{
+          virtual void post(ICommunicator* comm, int tag) override;
+          virtual void recv(ICommunicator* comm, int tag, bool blocking) override;
+          virtual void send(ICommunicator* comm, int tag, bool blocking) override;
+          virtual void broadcast(ICommunicator* comm) override;
+          //! @}
+#endif
 
           virtual void log(el::base::type::ostream_t& os) const;
       };

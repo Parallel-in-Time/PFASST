@@ -12,6 +12,9 @@ using namespace std;
 #include <pfasst/globals.hpp>
 #include <pfasst/site_config.hpp>
 #include <pfasst/logging.hpp>
+#ifdef WITH_MPI
+  #include <mpi.h>
+#endif
 
 #include "particle_util.hpp"
 
@@ -22,6 +25,17 @@ namespace pfasst
   {
     namespace boris
     {
+#ifdef WITH_MPI
+      template<typename precision>
+      inline mpi::MPICommunicator& ParticleCloud<precision>::as_mpi(ICommunicator* comm)
+      {
+        auto mpi = dynamic_cast<mpi::MPICommunicator*>(comm);
+        assert(mpi);
+        return *mpi;
+      }
+#endif
+
+
       template<typename precision>
       ParticleCloud<precision>::ParticleCloud(const size_t num_particles, const size_t dim,
                                               const precision default_charge, const precision default_mass)
@@ -33,6 +47,10 @@ namespace pfasst
           , _masses(num_particles, default_mass)
           , _default_charge(default_charge)
           , _default_mass(default_mass)
+#ifdef WITH_MPI
+          , recv_request(2)
+          , send_request(2)
+#endif
       {
         this->zero();
       }
@@ -48,6 +66,10 @@ namespace pfasst
         fill(this->_velocities.begin(), this->_velocities.end(), precision(0.0));
         fill(this->_charges.begin(), this->_charges.end(), this->_default_charge);
         fill(this->_masses.begin(), this->_masses.end(), this->_default_mass);
+#ifdef WITH_MPI
+        fill(this->recv_request.begin(), this->recv_request.end(), MPI_REQUEST_NULL);
+        fill(this->send_request.begin(), this->send_request.end(), MPI_REQUEST_NULL);
+#endif
       }
 
       template<typename precision>
@@ -298,6 +320,101 @@ namespace pfasst
       {
         return std::max(max_abs(this->positions()), max_abs(this->velocities()));
       }
+
+#ifdef WITH_MPI
+      template<typename precision>
+      void ParticleCloud<precision>::post(ICommunicator* comm, int tag)
+      {
+        auto& mpi = as_mpi(comm);
+        if (mpi.size() == 1) { return; }
+        if (mpi.rank() == 0) { return; }
+
+        int err = MPI_Irecv(this->positions().data(),
+                            sizeof(precision) * this->size() * this->dim(), MPI_CHAR,
+                            (mpi.rank() - 1) % mpi.size(), tag, mpi.comm, &(this->recv_request[0]));
+        if (err != MPI_SUCCESS) { throw mpi::MPIError(); }
+        err = MPI_Irecv(this->velocities().data(),
+                        sizeof(precision) * this->size() * this->dim(), MPI_CHAR,
+                        (mpi.rank() - 1) % mpi.size(), tag + 1, mpi.comm, &(this->recv_request[1]));
+        if (err != MPI_SUCCESS) { throw mpi::MPIError(); }
+      }
+
+      template<typename precision>
+      void ParticleCloud<precision>::recv(ICommunicator* comm, int tag, bool blocking)
+      {
+        auto& mpi = as_mpi(comm);
+        if (mpi.size() == 1) { return; }
+        if (mpi.rank() == 0) { return; }
+
+        int err;
+        MPI_Status stat;
+        if (blocking) {
+          err = MPI_Recv(this->positions().data(),
+                         sizeof(precision) * this->size() * this->dim(), MPI_CHAR,
+                         (mpi.rank() - 1) % mpi.size(), tag, mpi.comm, &stat);
+          if (err != MPI_SUCCESS) { throw mpi::MPIError(); }
+
+          err = MPI_Recv(this->velocities().data(),
+                         sizeof(precision) * this->size() * this->dim(), MPI_CHAR,
+                         (mpi.rank() - 1) % mpi.size(), tag + 1, mpi.comm, &stat);
+          if (err != MPI_SUCCESS) { throw mpi::MPIError(); }
+        } else {
+          for (auto req : this->recv_request) {
+            err = MPI_Wait(&req, &stat);
+            if (err != MPI_SUCCESS) { throw mpi::MPIError(); }
+          }
+        }
+      }
+
+      template<typename precision>
+      void ParticleCloud<precision>::send(ICommunicator* comm, int tag, bool blocking)
+      {
+        auto& mpi = as_mpi(comm);
+        if (mpi.size() == 1) { return; }
+        if (mpi.rank() == mpi.size() - 1) { return; }
+
+        int err = MPI_SUCCESS;
+        if (blocking) {
+          err = MPI_Send(this->positions().data(),
+                         sizeof(precision) * this->size() * this->dim(), MPI_CHAR,
+                         (mpi.rank() + 1) % mpi.size(), tag, mpi.comm);
+          if (err != MPI_SUCCESS) { throw mpi::MPIError(); }
+          err = MPI_Send(this->velocities().data(),
+                         sizeof(precision) * this->size() * this->dim(), MPI_CHAR,
+                         (mpi.rank() + 1) % mpi.size(), tag + 1, mpi.comm);
+          if (err != MPI_SUCCESS) { throw mpi::MPIError(); }
+        } else {
+          MPI_Status stat;
+          for (auto req : this->send_request) {
+            err = MPI_Wait(&req, &stat);
+            if (err != MPI_SUCCESS) { throw mpi::MPIError(); }
+          }
+
+          err = MPI_Isend(this->positions().data(),
+                         sizeof(precision) * this->size() * this->dim(), MPI_CHAR,
+                          (mpi.rank() + 1) % mpi.size(), tag, mpi.comm, &send_request[0]);
+          if (err != MPI_SUCCESS) { throw mpi::MPIError(); }
+          err = MPI_Isend(this->velocities().data(),
+                         sizeof(precision) * this->size() * this->dim(), MPI_CHAR,
+                          (mpi.rank() + 1) % mpi.size(), tag + 1, mpi.comm, &send_request[1]);
+          if (err != MPI_SUCCESS) { throw mpi::MPIError(); }
+        }
+      }
+
+      template<typename precision>
+      void ParticleCloud<precision>::broadcast(ICommunicator* comm)
+      {
+        auto& mpi = as_mpi(comm);
+        int err = MPI_Bcast(this->positions().data(),
+                            sizeof(precision) * this->size() * this->dim(), MPI_CHAR,
+                            comm->size() - 1, mpi.comm);
+        if (err != MPI_SUCCESS) { throw mpi::MPIError(); }
+        err = MPI_Bcast(this->velocities().data(),
+                        sizeof(precision) * this->size() * this->dim(), MPI_CHAR,
+                        comm->size() - 1, mpi.comm);
+        if (err != MPI_SUCCESS) { throw mpi::MPIError(); }
+      }
+#endif
 
       template<typename precision>
       void ParticleCloud<precision>::log(el::base::type::ostream_t& os) const

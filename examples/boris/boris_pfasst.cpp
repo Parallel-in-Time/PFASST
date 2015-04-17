@@ -3,8 +3,9 @@
 #include <pfasst.hpp>
 #include <pfasst/config.hpp>
 #include <pfasst/logging.hpp>
-#include <pfasst/controller/sdc.hpp>
-#include <pfasst/controller/mlsdc.hpp>
+#include <pfasst/controller/pfasst.hpp>
+#include <pfasst/mpi_communicator.hpp>
+using namespace pfasst;
 
 #include "particle.hpp"
 #include "particle_cloud.hpp"
@@ -21,11 +22,13 @@ namespace pfasst
     namespace boris
     {
       template<typename scalar>
-      error_map<scalar> run_boris_sdc(const size_t nsteps, const scalar dt, const size_t nnodes,
-                                      const size_t nparticles, const size_t niters,
-                                      const double abs_res_tol, const double rel_res_tol)
+      error_map<scalar> run_boris_pfasst(const size_t nsteps, const scalar dt, const size_t nnodes,
+                                         const size_t nparticles, const size_t niters,
+                                         const double abs_res_tol, const double rel_res_tol)
       {
-        MLSDC<> controller;
+        PFASST<> controller;
+        mpi::MPICommunicator comm(MPI_COMM_WORLD);
+        controller.set_comm(&comm);
 
         const double mass = 1.0;
         const double charge = 1.0;
@@ -62,6 +65,7 @@ namespace pfasst
         controller.add_level(sweeper2, transfer2);
 
         controller.set_duration(0.0, nsteps*dt, dt, niters);
+        controller.set_options();
         controller.setup();
 
         shared_ptr<Particle<double>> center = make_shared<Particle<double>>();
@@ -88,6 +92,7 @@ namespace pfasst
 #ifndef PFASST_UNIT_TESTING
 int main(int argc, char** argv)
 {
+  MPI_Init(&argc, &argv);
   pfasst::init(argc, argv,
                pfasst::examples::boris::init_opts<>,
                pfasst::examples::boris::init_logs<>);
@@ -107,7 +112,8 @@ int main(int argc, char** argv)
                       << "niter=" << niters << ", "
                       << "abs res=" << abs_res_tol << ", "
                       << "rel res=" << rel_res_tol;
-  
-  pfasst::examples::boris::run_boris_sdc<double>(nsteps, dt, nnodes, nparticles, niters, abs_res_tol, rel_res_tol);
+
+  pfasst::examples::boris::run_boris_pfasst<double>(nsteps, dt, nnodes, nparticles, niters, abs_res_tol, rel_res_tol);
+  MPI_Finalize();
 }
 #endif

@@ -48,20 +48,28 @@ namespace pfasst
   {
     namespace boris
     {
-      template<typename scalar>
-      void ParticleError<scalar>::log(el::base::type::ostream_t& os) const
+      template<typename precision>
+      void ParticleError<precision>::log(el::base::type::ostream_t& os) const
       {
         os << "pos: [" << x << " " << y << " " << z << "]\tvel: [" << y << " " << v << " " << w << "]";
       }
 
 
-      template<typename scalar>
+      template<typename precision>
       static void init_opts()
       {
         pfasst::config::options::add_option<size_t>("Boris-SDC", "num_particles", "number of particles in the cloud");
-        pfasst::config::options::add_option<scalar>("Boris-SDC", "epsilon", "Boris' epsilon");
-        pfasst::config::options::add_option<scalar>("Boris-SDC", "omega_e", "E-field constant");
-        pfasst::config::options::add_option<scalar>("Boris-SDC", "omega_b", "B-field constant");
+        pfasst::config::options::add_option<precision>("Boris-SDC", "epsilon", "Boris' epsilon");
+        pfasst::config::options::add_option<precision>("Boris-SDC", "omega_e", "E-field constant");
+        pfasst::config::options::add_option<precision>("Boris-SDC", "omega_b", "B-field constant");
+      }
+
+      template<typename precision>
+      static void init_logs()
+      {
+        pfasst::log::add_custom_logger("Boris");
+        pfasst::log::add_custom_logger("SolverBinding");
+        pfasst::log::add_custom_logger("Solver");
       }
 
 
@@ -139,6 +147,7 @@ namespace pfasst
         BCVLOG(9) << "writing center particle to file";
         this->data_stream_fmt % (iter+1) % sweep % -1
                               % center[0] % center[1] % center[2]
+                              // cppcheck-suppress zerodiv
                               % 0 % 0 % 0
                               % energy % drift % residual;
         this->data_stream << this->data_stream_fmt << endl;
@@ -154,6 +163,7 @@ namespace pfasst
         this->log_indent->increment(9);
         for (size_t p = 0; p < cloud->size(); ++p) {
           BCVLOG(9) << "writing cloud particle " << p << " to file";
+          // cppcheck-suppress zerodiv
           this->data_stream_fmt % (iter+1) % sweep % p
                                 % cloud->positions()[p * cloud->dim()] % cloud->positions()[p * cloud->dim() + 1] % cloud->positions()[p * cloud->dim() + 2]
                                 % cloud->velocities()[p * cloud->dim()] % cloud->velocities()[p * cloud->dim() + 1] % cloud->velocities()[p * cloud->dim() + 2]
@@ -194,7 +204,7 @@ namespace pfasst
       }
 
       template<typename scalar, typename time>
-      void BorisSweeper<scalar, time>::update_velocity(const size_t m, const time ds, const vector<time> nodes)
+      void BorisSweeper<scalar, time>::update_velocity(const size_t m, const time ds, const vector<time>& nodes)
       {
         BCVLOG(4) << "updating velocity (" << m << "->" << m+1 << ") with ds=" << ds;
         this->log_indent->increment(4);
@@ -830,29 +840,31 @@ namespace pfasst
       template<typename scalar, typename time>
       void BorisSweeper<scalar, time>::post(ICommunicator* comm, int tag)
       {
-        UNUSED(comm); UNUSED(tag);
-        // TODO: implement BorisSweeper::post
+        this->start_particles->post(comm, tag);
       }
 
       template<typename scalar, typename time>
       void BorisSweeper<scalar, time>::send(ICommunicator* comm, int tag, bool blocking)
       {
-        UNUSED(comm); UNUSED(tag); UNUSED(blocking);
-        // TODO: implement BorisSweeper::send
+        this->end_particles->send(comm, tag, blocking);
       }
 
       template<typename scalar, typename time>
       void BorisSweeper<scalar, time>::recv(ICommunicator* comm, int tag, bool blocking)
       {
-        UNUSED(comm); UNUSED(tag); UNUSED(blocking);
-        // TODO: implement BorisSweeper::recv
+        this->start_particles->recv(comm, tag, blocking);
+        if (this->quadrature->left_is_node()) {
+          this->particles[0]->copy(this->start_particles);
+        }
       }
 
       template<typename scalar, typename time>
       void BorisSweeper<scalar, time>::broadcast(ICommunicator* comm)
       {
-        UNUSED(comm);
-        // TODO: implement BorisSweeper::broadcast
+        if (comm->rank() == comm->size() - 1) {
+          this->start_particles->copy(this->end_particles);
+        }
+        this->start_particles->broadcast(comm);
       }
 
       template<typename scalar, typename time>

@@ -73,6 +73,7 @@ int main(int argc, char** argv)
                pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_opts,
                pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_logs);
   int result = 1, max_result;  // GTest return value 1 (failure), 0 (success)
+  // cppcheck-suppress redundantAssignment
   result = RUN_ALL_TESTS();
   MPI_Allreduce(&result, &max_result, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
   MPI_Finalize();

@@ -10,13 +10,16 @@ spectral deferred correction* (MLSDC) algorithms.
 News
 ----
 
+* April 17, 2014: PFASST v0.4.0 release. Please see the [release notes](#releases) for more
+  information.
+
 * December 12, 2014: PFASST v0.3.0 release. Please see the [release notes](#releases) for more
   information.
 
 * August 29, 2014: PFASST v0.2.0 release. Please see the [release notes](#releases) for more
   information.
 
-* July 25, 2014: PFASST v0.1.0 released.  Please see the [release notes](#releases) for more
+* July 25, 2014: PFASST v0.1.0 released. Please see the [release notes](#releases) for more
   information.
 
 
@@ -44,6 +47,12 @@ Currently, it features the following content:
 Releases
 --------
 
+* **v0.4.0** The Big Improvement (2015/04/17)
+
+  A bunch of improvements and usability enhancements.  
+  DOI: [10.6084/m9.figshare.1381721][DOI_v040].  
+  See [the Changelog](#page_changelog) for details.
+
 * **v0.3.0** The Big Cleanup Release (2014/12/12)
 
   A lot of internal cleanup and usability enhancements.  
@@ -65,6 +74,7 @@ Releases
 [DOI_v010]: http://dx.doi.org/10.5281/zenodo.11047
 [DOI_v020]: http://dx.doi.org/10.5281/zenodo.11517
 [DOI_v030]: http://dx.doi.org/10.5281/zenodo.13221
+[DOI_v040]: http://dx.doi.org/10.6084/m9.figshare.1381721
 
 Release tags will be signed by one of the following PGP keys:
 
