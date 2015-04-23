@@ -33,6 +33,9 @@ macro(update_site_config)
     if(pfasst_RANDOM_SEED)
         add_definitions(-DPFASST_DEFAULT_RANDOM_SEED)
     endif()
+    execute_process(COMMAND git describe --dirty
+                    OUTPUT_VARIABLE pfasst_VERSION
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
     configure_file(
         "${pfasst_SOURCE_DIR}/cmake/site_config.hpp.in"
         "${CMAKE_CURRENT_SOURCE_DIR}/include/pfasst/site_config.hpp"

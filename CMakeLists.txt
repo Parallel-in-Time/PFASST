@@ -25,7 +25,7 @@ option(pfasst_DEFAULT_RAND_SEED "Using a hardcoded random seed"                 
 
 if(${pfasst_WITH_MPI})
     find_package(MPI REQUIRED)
-    if(NOT "${CMAKE_CXX_COMPILER}" STREQUAL "${MPI_CXX_COMPILER}" OR 
+    if(NOT "${CMAKE_CXX_COMPILER}" STREQUAL "${MPI_CXX_COMPILER}" OR
        NOT "${CMAKE_C_COMPILER}" STREQUAL "${MPI_C_COMPILER}")
         message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
         message(STATUS "MPI C++ Compiler Wrapper: ${MPI_CXX_COMPILER}")
@@ -156,7 +156,7 @@ message(STATUS "Configuring sources")
 update_site_config()
 
 add_custom_target(set_version ALL
-    COMMAND ${pfasst_SOURCE_DIR}/tools/get_pfasst_version.sh
+    COMMAND ${pfasst_SOURCE_DIR}/tools/get_pfasst_version.py
     WORKING_DIRECTORY ${pfasst_SOURCE_DIR}
     COMMENT "Updating PFASST++ version number"
     USES_TERMINAL
