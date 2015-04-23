@@ -39,7 +39,7 @@ namespace pfasst
        * @param[in] level level index to perform pre-configured number of sweeps
        * @see set_nsweeps() for pre-configuring number of sweeps
        */
-      virtual void perform_sweeps(size_t level);
+      void perform_sweeps(size_t level);
 
     public:
       //! @copydoc Controller::setup()
@@ -69,7 +69,7 @@ namespace pfasst
        * @returns level iterator to current level if it has converged after the sweep; otherwise a
        *   level iterator to the next coarser level
        */
-      virtual LevelIter cycle_down(LevelIter level_iter);
+      LevelIter cycle_down(LevelIter level_iter);
 
       /**
        * Interpolate coarse correction to fine, sweep on current (fine).
@@ -77,7 +77,7 @@ namespace pfasst
        * @param[in] level_iter level iterator pointing to the finer level
        * @returns level iterator pointing to the coarser level
        */
-      virtual LevelIter cycle_up(LevelIter level_iter);
+      LevelIter cycle_up(LevelIter level_iter);
 
       /**
        * Sweep on the current (coarsest) level.
@@ -87,17 +87,17 @@ namespace pfasst
        *
        * @pre It is assumed that @p level_iter currently points to the coarsest level.
        */
-      virtual LevelIter cycle_bottom(LevelIter level_iter);
+      LevelIter cycle_bottom(LevelIter level_iter);
 
       /**
        * Perform an MLSDC V-cycle.
        *
        * @param[in] level_iter level iterator pointing to a fine level
-       * @returns level iterator pointing to either the coarsest level if @p level_iter is the 
+       * @returns level iterator pointing to either the coarsest level if @p level_iter is the
        *   coarsest level or the same level as @p level_iter if a sweep on that level results in
        *   convergence or all sweeps on all coarser levels did not let to convergence
        */
-      virtual LevelIter cycle_v(LevelIter level_iter);
+      LevelIter cycle_v(LevelIter level_iter);
   };
 }  // ::pfasst
 
