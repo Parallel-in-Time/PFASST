@@ -9,7 +9,7 @@ import subprocess
 from os.path import dirname, abspath, join
 
 # get git version
-version = str(subprocess.check_output(['git', 'describe', '--dirty'])).strip()
+version = subprocess.check_output(['git', 'describe', '--dirty']).decode().strip()
 
 # read in site_config.hpp
 base = dirname(dirname(abspath(__file__)))
