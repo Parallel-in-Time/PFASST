@@ -32,13 +32,12 @@ namespace pfasst
     {
       auto& mpi = as_mpi(comm);
       if (mpi.size() == 1) { return; }
-      if (mpi.rank() == 0) { return; }
 
       int err;
       if (blocking) {
         MPI_Status stat;
         err = MPI_Recv(this->data(), sizeof(scalar) * this->size(), MPI_CHAR,
-                       (mpi.rank() - 1) % mpi.size(), tag, mpi.comm, &stat);
+                       mpi.rank() == 0 ? mpi.size() - 1 : mpi.rank() - 1, tag, mpi.comm, &stat);
       } else {
         MPI_Status stat;
         err = MPI_Wait(&recv_request, &stat);
@@ -54,7 +53,6 @@ namespace pfasst
     {
       auto& mpi = as_mpi(comm);
       if (mpi.size() == 1) { return; }
-      if (mpi.rank() == mpi.size() - 1) { return; }
 
       int err = MPI_SUCCESS;
       if (blocking) {
