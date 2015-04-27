@@ -27,6 +27,30 @@ namespace pfasst
   namespace config
   {
     /**
+     * Get MPI rank during initialization.
+     *
+     * When running without MPI (ie, without using mpirun/mpiexec), returns 0.  When running with
+     * MPI, returns the MPI rank.
+     *
+     * If the user is running with MPI and MPI_Init hasn't been called yet, this will return 0.  I
+     * hope this is rare.
+     */
+    int get_rank()
+    {
+#ifdef WITH_MPI
+      int initialized = 0, rank = 0;
+      // if we're not running under "mpirun/mpiexec", just assume rank 0.
+      MPI_Initialized(&initialized);
+      if (initialized) {
+        MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+      }
+      return rank;
+#else
+      return 0;
+#endif
+    }
+
+    /**
      * Runtime config options provider.
      *
      * This singleton provides easy access to command line parameters at runtime.
@@ -76,7 +100,7 @@ namespace pfasst
          * @param[in] option Name of the command line parameter.
          *   It is possible to specify a long and optional short option name by comma-separation.
          *   Short option names are identified by being only a single character.
-         *   They are automatically parsed as '`-[SHORT]`' by `boost::program_options` in contrast 
+         *   They are automatically parsed as '`-[SHORT]`' by `boost::program_options` in contrast
          *   to '`--[LONG]`'.
          * @param[in] help help text to be displayed in the help and usage information
          */
@@ -90,7 +114,7 @@ namespace pfasst
          * @param[in] option Name of the command line parameter.
          *   It is possible to specify a long and optional short option name by comma-separation.
          *   Short option names are identified by being only a single character.
-         *   They are automatically parsed as '`-[SHORT]`' by `boost::program_options` in contrast 
+         *   They are automatically parsed as '`-[SHORT]`' by `boost::program_options` in contrast
          *   to '`--[LONG]`'.
          * @param[in] help help text to be displayed in the help and usage information
          *
@@ -193,21 +217,11 @@ namespace pfasst
       po::store(parsed, options::get_instance().get_variables_map());
       po::notify(options::get_instance().get_variables_map());
 
-#ifdef WITH_MPI
-      int initialized = 0;
-      MPI_Initialized(&initialized);
-      assert((bool)initialized);
-      int rank = 0;
-      MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-#endif
       if (options::get_instance().get_variables_map().count("help")) {
-#ifdef WITH_MPI
-        if (rank == 0) {
-#endif
+        if (get_rank() == 0) {
           cout << print_help() << endl;
-#ifdef WITH_MPI
         }
-#endif
+
         if (exit_on_help) {
 #ifdef WITH_MPI
           MPI_Finalize();
@@ -263,7 +277,7 @@ namespace pfasst
       options::add_option<double>("Duration", "tend", "final time of simulation");
       options::add_option<size_t>("Duration", "num_steps", "number time steps");
       options::add_option<size_t>("Duration", "num_iter", "number of iterations");
-      
+
       options::add_option<size_t>("Quadrature", "num_nodes", "number of quadrature nodes");
 
       options::add_option<double>("Tolerances", "abs_res_tol", "absolute residual tolerance");

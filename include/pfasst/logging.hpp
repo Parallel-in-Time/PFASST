@@ -166,7 +166,7 @@ namespace pfasst
    *   - `VLOG` - the verbose logging levels are used as follows:
    *     - 0 to 8
    *     - 9 for function enter and exit messages (cfg. @ref VLOG_FUNC_START and @ref VLOG_FUNC_END)
-   * 
+   *
    * @see [easylogging++](https://github.com/easylogging/easyloggingpp)
    */
   namespace log
@@ -213,12 +213,7 @@ namespace pfasst
       const string POSITION = "%fbase:%line";
       const string MESSAGE = "%msg";
 #ifdef WITH_MPI
-      int initialized = 0;
-      MPI_Initialized(&initialized);
-      assert((bool)initialized);
-      int rank = 0;
-      MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
+      const int rank = pfasst::config::get_rank();
       ostringstream frmter;
       frmter << std::setw(3) << rank;
       const string MPI_RANK = ", rank " + frmter.str();
@@ -290,11 +285,7 @@ namespace pfasst
         defaultConf.setGlobally(el::ConfigurationType::ToStandardOutput, "false");
       }
 #ifdef WITH_MPI
-      int initialized = 0;
-      MPI_Initialized(&initialized);
-      assert((bool)initialized);
-      int rank = 0;
-      MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+      int rank = pfasst::config::get_rank();
       defaultConf.setGlobally(el::ConfigurationType::ToFile, "true");
       defaultConf.setGlobally(el::ConfigurationType::Filename,
                               string("mpi_run_") + to_string(rank) + string(".log"));

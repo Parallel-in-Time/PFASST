@@ -6,11 +6,9 @@ include_directories(
     ${3rdparty_INCLUDES}
 )
 
-if(NOT ${pfasst_WITH_MPI})
-    set(vanderpol_examples
-        vdp_sdc
-    )
-endif()
+set(vanderpol_examples
+    vdp_sdc
+)
 
 foreach(example ${vanderpol_examples})
     add_executable(${example} ${CMAKE_CURRENT_SOURCE_DIR}/${example}.cpp)

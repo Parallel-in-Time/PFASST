@@ -19,13 +19,13 @@ option(pfasst_BUILD_EXAMPLES    "Build example programs."                       
 CMAKE_DEPENDENT_OPTION(pfasst_INSTALL_EXAMPLES "Install example programs." ON
     "pfasst_BUILD_EXAMPLES" OFF)
 option(pfasst_BUILD_TESTS       "Build test suite for PFASST."                            ON )
-option(pfasst_WITH_MPI          "Build with MPI enabled."                                 OFF)
+option(pfasst_WITH_MPI          "Build with MPI enabled."                                 ON )
 option(pfasst_WITH_GCC_PROF     "Enable excessive debugging & profiling output with GCC." OFF)
 option(pfasst_DEFAULT_RAND_SEED "Using a hardcoded random seed"                           ON )
 
 if(${pfasst_WITH_MPI})
     find_package(MPI REQUIRED)
-    if(NOT "${CMAKE_CXX_COMPILER}" STREQUAL "${MPI_CXX_COMPILER}" OR 
+    if(NOT "${CMAKE_CXX_COMPILER}" STREQUAL "${MPI_CXX_COMPILER}" OR
        NOT "${CMAKE_C_COMPILER}" STREQUAL "${MPI_C_COMPILER}")
         message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
         message(STATUS "MPI C++ Compiler Wrapper: ${MPI_CXX_COMPILER}")
