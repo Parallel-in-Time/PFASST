@@ -152,7 +152,7 @@ namespace pfasst
    * @note This method is recursive with two exit points.
    *   The two exit points:
    *     1. if @p level_iter points to the coarsest level
-   *     2. if MLSDC::cycle_bottom() results in a converged state
+   *     2. if MLSDC::cycle_down() results in a converged state
    */
   template<typename time>
   typename MLSDC<time>::LevelIter MLSDC<time>::cycle_v(typename MLSDC<time>::LevelIter level_iter)
