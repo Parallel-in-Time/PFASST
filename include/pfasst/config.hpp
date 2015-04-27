@@ -197,42 +197,25 @@ namespace pfasst
     }
 
     /**
-     * Read and parse command line parameters.
-     *
-     * @param[in] argc Number of command line arguments as provided by `%main(int, char**)`.
-     * @param[in] argv List of command line arguments as provided by `%main(int, char**)`.
-     * @param[in] exit_on_help Whether to exit the program after displaying help and usage
-     *   information.
-     *
-     * @note Will call `std::exit` in case the `help` parameter has been provided and
-     *   @p exit_on_help is `true`.
-     */
-    static inline void read_commandline(int argc, char* argv[], bool exit_on_help = true)
-    {
-      po::parsed_options parsed = po::command_line_parser(argc, argv)
-                                    .options(options::get_instance().get_all_options())
-                                    .allow_unregistered().run();
-      options::get_instance().get_unrecognized_args() = po::collect_unrecognized(parsed.options,
-                                                                                 po::exclude_positional);
-      po::store(parsed, options::get_instance().get_variables_map());
-      po::notify(options::get_instance().get_variables_map());
-
-      if (options::get_instance().get_variables_map().count("help")) {
-        if (get_rank() == 0) {
-          cout << print_help() << endl;
-        }
-
-        if (exit_on_help) {
-#ifdef WITH_MPI
-          MPI_Finalize();
-#endif
-          exit(0);
-        }
-      }
-    }
-
-    /**
      * Read config parameters from file.
+     *
+     * A potential INI file might look like the following:
+     *
+     * @code
+     * # Global
+     * quiet=yes
+     *
+     * # Duration
+     * dt=0.015625
+     * num_steps=2
+     * num_iter=10
+     * 
+     * # Tolerances
+     * rel_res_tol=1e-10
+     *
+     * # PFASST
+     * num_blocks=1
+     * @endcode
      *
      * @param[in] file_name name of the INI-like file containing config parameters;
      *   path/name may be relative
@@ -255,6 +238,46 @@ namespace pfasst
     }
 
     /**
+     * Read and parse command line parameters.
+     *
+     * @param[in] argc Number of command line arguments as provided by `%main(int, char**)`.
+     * @param[in] argv List of command line arguments as provided by `%main(int, char**)`.
+     * @param[in] exit_on_help Whether to exit the program after displaying help and usage
+     *   information.
+     *
+     * @note Will call `std::exit` in case the `help` parameter has been provided and
+     *   @p exit_on_help is `true`.
+     */
+    static inline void read_commandline(int argc, char* argv[], bool exit_on_help = true)
+    {
+      po::parsed_options parsed = po::command_line_parser(argc, argv)
+                                    .options(options::get_instance().get_all_options())
+                                    .allow_unregistered().run();
+      options::get_instance().get_unrecognized_args() = po::collect_unrecognized(parsed.options,
+                                                                                 po::exclude_positional);
+      po::store(parsed, options::get_instance().get_variables_map());
+      po::notify(options::get_instance().get_variables_map());
+
+      if (options::get_instance().get_variables_map().count("input")) {
+        string input_file = config::get_value<string>("input");
+        read_config_file(input_file);
+      }
+
+      if (options::get_instance().get_variables_map().count("help")) {
+        if (get_rank() == 0) {
+          cout << print_help() << endl;
+        }
+
+        if (exit_on_help) {
+#ifdef WITH_MPI
+          MPI_Finalize();
+#endif
+          exit(0);
+        }
+      }
+    }
+
+    /**
      * Initialize options detection and parsing.
      *
      * Prepopulates following groups and parameters:
@@ -262,6 +285,8 @@ namespace pfasst
      * Group      | Parameter     | Type
      * -----------|---------------|---------
      * Global     | `h`, `help`   | `bool`
+     * Global     | `q`, `quiet`  | `bool`
+     * Global     | `input`       | `string`
      * Duration   | `dt`          | `double`
      * Duration   | `tend`        | `double`
      * Duration   | `num_iters`   | `size_t`
@@ -272,6 +297,7 @@ namespace pfasst
     {
       options::add_option("Global", "help,h", "display this help message");
       options::add_option("Global", "quiet,q", "don't log to stdout");
+      options::add_option<string>("Global", "input", "INI file with configuration options");
 
       options::add_option<double>("Duration", "dt", "time step size");
       options::add_option<double>("Duration", "tend", "final time of simulation");
