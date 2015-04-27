@@ -1,10 +1,7 @@
-#include "pfasst/encap/vector.hpp"
-
 #include <algorithm>
 #include <cassert>
-#include <vector>
-using namespace std;
 
+#include "pfasst/encap/vector.hpp"
 
 namespace pfasst
 {
@@ -166,6 +163,83 @@ namespace pfasst
       assert(y);
       return *y.get();
     }
+
+#ifdef WITH_MPI
+        template<typename scalar, typename time>
+    void VectorEncapsulation<scalar, time>::post(ICommunicator* comm, int tag)
+    {
+      auto& mpi = as_mpi(comm);
+      if (mpi.size() == 1) { return; }
+      if (mpi.rank() == 0) { return; }
+
+      int err = MPI_Irecv(this->data(), sizeof(scalar) * this->size(), MPI_CHAR,
+                          (mpi.rank() - 1) % mpi.size(), tag, mpi.comm, &recv_request);
+      if (err != MPI_SUCCESS) {
+        throw MPIError();
+      }
+    }
+
+    template<typename scalar, typename time>
+    void VectorEncapsulation<scalar, time>::recv(ICommunicator* comm, int tag, bool blocking)
+    {
+      auto& mpi = as_mpi(comm);
+      if (mpi.size() == 1) { return; }
+      if (mpi.rank() == 0) { return; }
+
+      int err;
+      if (blocking) {
+        MPI_Status stat;
+        err = MPI_Recv(this->data(), sizeof(scalar) * this->size(), MPI_CHAR,
+                       (mpi.rank() - 1) % mpi.size(), tag, mpi.comm, &stat);
+      } else {
+        MPI_Status stat;
+        err = MPI_Wait(&recv_request, &stat);
+      }
+
+      if (err != MPI_SUCCESS) {
+        throw MPIError();
+      }
+    }
+
+    template<typename scalar, typename time>
+    void VectorEncapsulation<scalar, time>::send(ICommunicator* comm, int tag, bool blocking)
+    {
+      auto& mpi = as_mpi(comm);
+      if (mpi.size() == 1) { return; }
+      if (mpi.rank() == mpi.size() - 1) { return; }
+
+      int err = MPI_SUCCESS;
+      if (blocking) {
+        err = MPI_Send(this->data(), sizeof(scalar) * this->size(), MPI_CHAR,
+                       (mpi.rank() + 1) % mpi.size(), tag, mpi.comm);
+      } else {
+        MPI_Status stat;
+        err = MPI_Wait(&send_request, &stat);
+        if (err != MPI_SUCCESS) {
+          throw MPIError();
+        }
+
+        err = MPI_Isend(this->data(), sizeof(scalar) * this->size(), MPI_CHAR,
+                        (mpi.rank() + 1) % mpi.size(), tag, mpi.comm, &send_request);
+      }
+
+      if (err != MPI_SUCCESS) {
+        throw MPIError();
+      }
+    }
+
+    template<typename scalar, typename time>
+    void VectorEncapsulation<scalar, time>::broadcast(ICommunicator* comm)
+    {
+      auto& mpi = as_mpi(comm);
+      int err = MPI_Bcast(this->data(), sizeof(scalar) * this->size(), MPI_CHAR,
+                          comm->size()-1, mpi.comm);
+
+      if (err != MPI_SUCCESS) {
+        throw MPIError();
+      }
+    }
+#endif
 
   }  // ::pfasst::encap
 }  // ::pfasst
