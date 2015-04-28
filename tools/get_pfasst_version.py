@@ -1,7 +1,11 @@
-#!/usr/bin/env python
-#
-#
-#
+# encoding: utf-8
+
+from __future__ import print_function
+
+from sys import version_info
+
+if version_info[0] == 2 and version_info[1] < 7:
+    raise SystemExit("Insufficient Python Interpreter Version (%s < 2.7)" % (version_info,))
 
 import re
 import subprocess
@@ -25,3 +29,6 @@ new_config = re.sub('VERSION = "[^"]*"', 'VERSION = "{version}"'.format(version=
 if config != new_config:
     with open(site_config, 'w') as f:
         f.write(new_config)
+    print("PFASST++ version set to: %s" % (version,))
+else:
+    print("PFASST++ version did not change (still %s)" % (version,))
