@@ -155,7 +155,14 @@ message(STATUS "****************************************************************
 message(STATUS "Configuring sources")
 update_site_config()
 
-find_package(PythonInterp REQUIRED)
+if(NOT PYTHON_EXECUTABLE)
+    find_package(PythonInterp 2.7)
+    if(NOT PYTHONINTERP_FOUND)
+        find_package(PythonInterp 3 REQUIRED)
+    endif()
+else()
+    message(STATUS "Using specified Python executable: ${PYTHON_EXECUTABLE}")
+endif()
 add_custom_target(set_version ALL
     COMMAND ${PYTHON_EXECUTABLE} ${pfasst_SOURCE_DIR}/tools/get_pfasst_version.py
     WORKING_DIRECTORY ${pfasst_SOURCE_DIR}
