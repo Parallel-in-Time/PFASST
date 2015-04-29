@@ -52,6 +52,21 @@ struct OUT
     static const string reset;
 };
 
+#ifdef NO_COLOR
+const string OUT::black = "";
+const string OUT::red = "";
+const string OUT::green = "";
+const string OUT::yellow = "";
+const string OUT::blue = "";
+const string OUT::magenta = "";
+const string OUT::cyan = "";
+const string OUT::white = "";
+
+const string OUT::bold = "";
+const string OUT::underline = "";
+
+const string OUT::reset = "";
+#else
 const string OUT::black = "\033[30m";
 const string OUT::red = "\033[31m";
 const string OUT::green = "\033[32m";
@@ -65,7 +80,7 @@ const string OUT::bold = "\033[1m";
 const string OUT::underline = "\033[4m";
 
 const string OUT::reset = "\033[0m";
-
+#endif
 
 // enable easy logging of STL containers
 #define ELPP_STL_LOGGING
@@ -325,7 +340,11 @@ namespace pfasst
     {
       el::Loggers::addFlag(el::LoggingFlag::LogDetailedCrashReason);
       el::Loggers::addFlag(el::LoggingFlag::DisableApplicationAbortOnFatalLog);
+#ifdef NO_COLOR
+      el::Loggers::removeFlag(el::LoggingFlag::ColoredTerminalOutput);
+#else
       el::Loggers::addFlag(el::LoggingFlag::ColoredTerminalOutput);
+#endif
       el::Loggers::addFlag(el::LoggingFlag::MultiLoggerSupport);
       el::Loggers::addFlag(el::LoggingFlag::CreateLoggerAutomatically);
     }

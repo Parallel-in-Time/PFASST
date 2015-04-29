@@ -20,6 +20,7 @@ CMAKE_DEPENDENT_OPTION(pfasst_INSTALL_EXAMPLES "Install example programs." ON
     "pfasst_BUILD_EXAMPLES" OFF)
 option(pfasst_BUILD_TESTS       "Build test suite for PFASST."                            ON )
 option(pfasst_WITH_MPI          "Build with MPI enabled."                                 ON )
+option(pfasst_WITH_COLOR        "Enable colorful logging output."                         ON )
 option(pfasst_WITH_GCC_PROF     "Enable excessive debugging & profiling output with GCC." OFF)
 option(pfasst_DEFAULT_RAND_SEED "Using a hardcoded random seed"                           ON )
 
@@ -41,6 +42,10 @@ endif()
 
 if(pfasst_DEFAULT_RAND_SEED)
     set(pfasst_RANDOM_SEED "42")
+endif()
+
+if(NOT ${pfasst_WITH_COLOR})
+    add_definitions(-DNO_COLOR)
 endif()
 
 # Check for C++11 support
@@ -112,6 +117,10 @@ add_feature_info(Tests
 add_feature_info(MPI
     pfasst_WITH_MPI
     "build with MPI"
+)
+add_feature_info(COLOR
+    pfasst_WITH_COLOR
+    "colorful logging"
 )
 if(${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
     add_feature_info(Profiling
