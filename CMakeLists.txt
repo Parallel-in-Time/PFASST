@@ -155,8 +155,9 @@ message(STATUS "****************************************************************
 message(STATUS "Configuring sources")
 update_site_config()
 
+find_package(PythonInterp REQUIRED)
 add_custom_target(set_version ALL
-    COMMAND ${pfasst_SOURCE_DIR}/tools/get_pfasst_version.sh
+    COMMAND ${PYTHON_EXECUTABLE} ${pfasst_SOURCE_DIR}/tools/get_pfasst_version.py
     WORKING_DIRECTORY ${pfasst_SOURCE_DIR}
     COMMENT "Updating PFASST++ version number"
     USES_TERMINAL
