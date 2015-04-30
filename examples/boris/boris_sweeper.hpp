@@ -172,7 +172,6 @@ namespace pfasst
 
           ofstream data_stream;
 
-          string FORMAT_STR;
           boost::format log_fmt;
           string DATA_STREAM_FORMAT_STR;
           boost::format data_stream_fmt;

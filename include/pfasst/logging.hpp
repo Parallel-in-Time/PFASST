@@ -191,10 +191,10 @@ namespace pfasst
      *
      * @ingroup Internals
      */
-    inline string format_mpi_rank(const size_t width = 4, const char fill = ' ')
+    inline string format_mpi_rank(const char fill = ' ')
     {
       ostringstream frmter;
-      frmter << std::setw(width) << std::setfill(fill) << pfasst::config::get_rank();
+      frmter << std::setw(4) << std::setfill(fill) << pfasst::config::get_rank();
       return frmter.str();
     }
 
