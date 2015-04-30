@@ -287,6 +287,8 @@ namespace pfasst
      * Global     | `h`, `help`   | `bool`
      * Global     | `q`, `quiet`  | `bool`
      * Global     | `input`       | `string`
+     * Global     | `log_prefix`  | `string`
+     * Global     | `c`,`nocolor` | `bool`
      * Duration   | `dt`          | `double`
      * Duration   | `tend`        | `double`
      * Duration   | `num_iters`   | `size_t`
@@ -299,6 +301,7 @@ namespace pfasst
       options::add_option        ("Global", "quiet,q", "don't log to stdout");
       options::add_option<string>("Global", "input", "INI file with configuration options");
       options::add_option<string>("Global", "log_prefix", "a prefix for the log files");
+      options::add_option        ("Global", "nocolor,c", "disable colorful logging");
 
       options::add_option<double>("Duration", "dt", "time step size");
       options::add_option<double>("Duration", "tend", "final time of simulation");

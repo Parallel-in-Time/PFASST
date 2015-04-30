@@ -51,21 +51,6 @@ struct OUT
     static const string reset;
 };
 
-#ifdef NO_COLOR
-const string OUT::black = "";
-const string OUT::red = "";
-const string OUT::green = "";
-const string OUT::yellow = "";
-const string OUT::blue = "";
-const string OUT::magenta = "";
-const string OUT::cyan = "";
-const string OUT::white = "";
-
-const string OUT::bold = "";
-const string OUT::underline = "";
-
-const string OUT::reset = "";
-#else
 const string OUT::black = "\033[30m";
 const string OUT::red = "\033[31m";
 const string OUT::green = "\033[32m";
@@ -79,7 +64,6 @@ const string OUT::bold = "\033[1m";
 const string OUT::underline = "\033[4m";
 
 const string OUT::reset = "\033[0m";
-#endif
 
 // enable easy logging of STL containers
 #define ELPP_STL_LOGGING
@@ -301,7 +285,19 @@ namespace pfasst
      */
     inline static void add_custom_logger(const string& id)
     {
-      const string TIMESTAMP = OUT::white + "%datetime{%H:%m:%s,%g}" + OUT::reset + " ";
+      bool colorize = pfasst::config::options::get_instance().get_variables_map()
+                                                             .count("nocolor") ? false : true;
+
+      const string INFO_COLOR = (colorize) ? OUT::blue : "";
+      const string DEBG_COLOR = (colorize) ? "" : "";
+      const string WARN_COLOR = (colorize) ? OUT::magenta : "";
+      const string ERRO_COLOR = (colorize) ? OUT::red : "";
+      const string FATA_COLOR = (colorize) ? OUT::red + OUT::bold : "";
+      const string VERB_COLOR = (colorize) ? OUT::white : "";
+      const string TIMESTAMP_COLOR = (colorize) ? OUT::white : "";
+      const string RESET = (colorize) ? OUT::reset : "";
+
+      const string TIMESTAMP = TIMESTAMP_COLOR + "%datetime{%H:%m:%s,%g}" + RESET + " ";
       const string LEVEL = "%level";
       const string VLEVEL = "VERB%vlevel";
       const string POSITION = "%fbase:%line";
@@ -311,13 +307,6 @@ namespace pfasst
 #else
       const string MPI_RANK = "";
 #endif
-
-      const string INFO_COLOR = OUT::blue;
-      const string DEBG_COLOR = "";
-      const string WARN_COLOR = OUT::magenta;
-      const string ERRO_COLOR = OUT::red;
-      const string FATA_COLOR = OUT::red + OUT::bold;
-      const string VERB_COLOR = OUT::white;
 
       const size_t id_length = id.size();
       string id2print = id.substr(0, LOGGER_ID_LENGTH);
@@ -332,17 +321,17 @@ namespace pfasst
       set_global_logging_options(conf, default_conf);
 
       conf->set(el::Level::Info, el::ConfigurationType::Format,
-                TIMESTAMP + INFO_COLOR + "[" + id2print + ", " + LEVEL  + MPI_RANK + "] " + MESSAGE + OUT::reset);
+                TIMESTAMP + INFO_COLOR + "[" + id2print + ", " + LEVEL  + MPI_RANK + "] " + MESSAGE + RESET);
       conf->set(el::Level::Debug, el::ConfigurationType::Format,
-                TIMESTAMP + DEBG_COLOR + "[" + id2print + ", " + LEVEL  + MPI_RANK + "] " + POSITION + " " + MESSAGE + OUT::reset);
+                TIMESTAMP + DEBG_COLOR + "[" + id2print + ", " + LEVEL  + MPI_RANK + "] " + POSITION + " " + MESSAGE + RESET);
       conf->set(el::Level::Warning, el::ConfigurationType::Format,
-                TIMESTAMP + WARN_COLOR + "[" + id2print + ", " + LEVEL  + MPI_RANK + "] " + MESSAGE + OUT::reset);
+                TIMESTAMP + WARN_COLOR + "[" + id2print + ", " + LEVEL  + MPI_RANK + "] " + MESSAGE + RESET);
       conf->set(el::Level::Error, el::ConfigurationType::Format,
-                TIMESTAMP + ERRO_COLOR + "[" + id2print + ", " + LEVEL  + MPI_RANK + "] " + MESSAGE + OUT::reset);
+                TIMESTAMP + ERRO_COLOR + "[" + id2print + ", " + LEVEL  + MPI_RANK + "] " + MESSAGE + RESET);
       conf->set(el::Level::Fatal, el::ConfigurationType::Format,
-                TIMESTAMP + FATA_COLOR + "[" + id2print + ", " + LEVEL  + MPI_RANK + "] " + POSITION + " " + MESSAGE + OUT::reset);
+                TIMESTAMP + FATA_COLOR + "[" + id2print + ", " + LEVEL  + MPI_RANK + "] " + POSITION + " " + MESSAGE + RESET);
       conf->set(el::Level::Verbose, el::ConfigurationType::Format,
-                TIMESTAMP + VERB_COLOR + "[" + id2print + ", " + VLEVEL + MPI_RANK + "] " + MESSAGE + OUT::reset);
+                TIMESTAMP + VERB_COLOR + "[" + id2print + ", " + VLEVEL + MPI_RANK + "] " + MESSAGE + RESET);
       el::Loggers::reconfigureLogger(logger, *conf);
     }
 
