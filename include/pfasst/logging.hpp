@@ -5,6 +5,7 @@
 #ifndef _PFASST__LOGGING_HPP_
 #define _PFASST__LOGGING_HPP_
 
+#include <iomanip>
 #ifndef NDEBUG
   #include <iostream>  // used by pfasst::log::test_logging_levels()
 #endif
@@ -12,9 +13,7 @@
 using namespace std;
 
 #ifdef WITH_MPI
-  #include <iomanip>
   #include <sstream>
-
   #include <mpi.h>
 #endif
 
@@ -195,6 +194,86 @@ namespace pfasst
     static size_t stack_position;
 
     /**
+     * Formats the local MPI world rank as a string.
+     *
+     * The local rank number as given by pfasst::config::get_rank() is filled from the left with the
+     * @p fill character.
+     *
+     * @param[in] width width of the formatted rank
+     * @param[in] fill  character used for left-filling
+     * @returns formatted rank
+     *
+     * @since v1.0.0
+     *
+     * @ingroup Internals
+     */
+    inline string format_mpi_rank(const size_t width = 4, const char fill = ' ')
+    {
+      ostringstream frmter;
+      frmter << std::setw(width) << std::setfill(fill) << pfasst::config::get_rank();
+      return frmter.str();
+    }
+
+    /**
+     * Composes the log file name for the local rank.
+     *
+     * The rank-local log file name is composed of a potentially given _log_prefix_ as given from
+     * the command line.
+     * In case MPI is enabled this prefix gets extended by `_mpi-rank-<RANK>` where `<RANK>` is
+     * the formatted MPI rank as determined by format_mpi_rank().
+     * The file extension is always `.log`.
+     *
+     * @returns rank-local log file name
+     *
+     * @since v1.0.0
+     *
+     * @ingroup Internals
+     */
+    inline string get_log_file_name()
+    {
+      string log_name = config::get_value<string>("log_prefix", "");
+#ifdef WITH_MPI
+      if (log_name.size() > 0) {
+        log_name += "_";
+      }
+      log_name += "mpi-rank-" + format_mpi_rank('0');
+#endif
+      log_name += ".log";
+      return log_name;
+    }
+
+    /**
+     * Sets global logging options.
+     *
+     * @param[in,out] conf         configuration to extend and set
+     * @param[in]     default_conf optional, default configuration set to be used to retreive
+     *   default options
+     *
+     * @since v1.0.0
+     *
+     * @ingroup Internals
+     */
+    inline void set_global_logging_options(el::Configurations* conf,
+                                           const el::Configurations* default_conf = nullptr)
+    {
+      string milliseconds_width, to_stdout;
+      if (default_conf) {
+        el::Configurations* default_conf_nc = const_cast<el::Configurations*>(default_conf);
+        milliseconds_width = default_conf_nc->get(el::Level::Info,
+                                                  el::ConfigurationType::MillisecondsWidth)->value();
+        to_stdout = default_conf_nc->get(el::Level::Info,
+                                         el::ConfigurationType::ToStandardOutput)->value();
+      } else {
+        milliseconds_width = PFASST_LOGGER_DEFAULT_GLOBAL_MILLISECOND_WIDTH;
+        to_stdout = (pfasst::config::options::get_instance().get_variables_map()
+                                                            .count("quiet")) ? "false" : "true";
+      }
+
+      conf->setGlobally(el::ConfigurationType::ToStandardOutput, to_stdout);
+      conf->setGlobally(el::ConfigurationType::Filename, get_log_file_name());
+    }
+
+    /**
      * Provides convenient way of adding additional named loggers.
      *
      * With this function one can easily create additional named loggers distinctable by the `id`.
@@ -228,10 +307,7 @@ namespace pfasst
       const string POSITION = "%fbase:%line";
       const string MESSAGE = "%msg";
 #ifdef WITH_MPI
-      const int rank = pfasst::config::get_rank();
-      ostringstream frmter;
-      frmter << std::setw(3) << rank;
-      const string MPI_RANK = ", rank " + frmter.str();
+      const string MPI_RANK = ", rank " + format_mpi_rank();
 #else
       const string MPI_RANK = "";
 #endif
@@ -250,23 +326,11 @@ namespace pfasst
         id2print.append(LOGGER_ID_LENGTH - id_length, ' ');
       }
 
-      el::Configurations* default_conf = \
-        const_cast<el::Configurations*>(el::Loggers::defaultConfigurations());
-
       el::Logger* logger = el::Loggers::getLogger(id);
       el::Configurations* conf = logger->configurations();
-      conf->setGlobally(el::ConfigurationType::MillisecondsWidth,
-                        default_conf->get(el::Level::Info,
-                                          el::ConfigurationType::MillisecondsWidth)->value());
-      conf->setGlobally(el::ConfigurationType::ToStandardOutput,
-                        default_conf->get(el::Level::Info,
-                                          el::ConfigurationType::ToStandardOutput)->value());
+      const el::Configurations* default_conf = el::Loggers::defaultConfigurations();
+      set_global_logging_options(conf, default_conf);
 
-#ifdef WITH_MPI
-      conf->setGlobally(el::ConfigurationType::ToFile, "true");
-      conf->setGlobally(el::ConfigurationType::Filename,
-                        string("mpi_run_") + to_string(rank) + string(".log"));
-#endif
       conf->set(el::Level::Info, el::ConfigurationType::Format,
                 TIMESTAMP + INFO_COLOR + "[" + id2print + ", " + LEVEL  + MPI_RANK + "] " + MESSAGE + OUT::reset);
       conf->set(el::Level::Debug, el::ConfigurationType::Format,
@@ -294,19 +358,8 @@ namespace pfasst
       el::Configurations defaultConf;
       defaultConf.setToDefault();
 
-      if (!pfasst::config::options::get_instance().get_variables_map().count("quiet")) {
-        defaultConf.setGlobally(el::ConfigurationType::ToStandardOutput, "true");
-      } else {
-        defaultConf.setGlobally(el::ConfigurationType::ToStandardOutput, "false");
-      }
-#ifdef WITH_MPI
-      int rank = pfasst::config::get_rank();
-      defaultConf.setGlobally(el::ConfigurationType::ToFile, "true");
-      defaultConf.setGlobally(el::ConfigurationType::Filename,
-                              string("mpi_run_") + to_string(rank) + string(".log"));
-#endif
-      defaultConf.setGlobally(el::ConfigurationType::MillisecondsWidth,
-                              PFASST_LOGGER_DEFAULT_GLOBAL_MILLISECOND_WIDTH);
+      set_global_logging_options(&defaultConf);
+
       el::Loggers::setDefaultConfigurations(defaultConf, true);
 
       add_custom_logger("default");
