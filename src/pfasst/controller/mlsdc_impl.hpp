@@ -20,7 +20,7 @@ namespace pfasst
   void MLSDC<time>::perform_sweeps(size_t level)
   {
     auto sweeper = this->get_level(level);
-    CLOG(INFO, "Controller") << "on level " << level + 1 << "/" << this->nlevels();
+    CVLOG(1, "Controller") << "on level " << level + 1 << "/" << this->nlevels();
     for (size_t s = 0; s < this->nsweeps[level]; s++) {
       if (predict) {
         sweeper->predict(initial & predict);
