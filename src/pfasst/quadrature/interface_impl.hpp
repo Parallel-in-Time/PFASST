@@ -74,6 +74,15 @@ namespace pfasst
       throw NotImplementedYet("Quadrature");
     }
 
+    template<typename precision>
+    precision IQuadrature<precision>::expected_error() const
+    {
+      using vec = Eigen::Array<precision, 1, Eigen::Dynamic>;
+      const vec row_sums = this->get_q_mat().rowwise().sum();
+      Eigen::Map<const vec> nodes(this->get_nodes().data(), this->get_nodes().size());
+      return (row_sums - nodes).maxCoeff();
+    }
+
     /**
      * @internals
      * Computing weights means computing \\( Q \\) and \\( S \\) matrices as well as the \\( q \\)
