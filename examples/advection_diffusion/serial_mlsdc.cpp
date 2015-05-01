@@ -62,6 +62,8 @@ namespace pfasst
           auto sweeper  = make_shared<AdvectionDiffusionSweeper<>>(ndofs);
           auto transfer = make_shared<SpectralTransfer1D<>>();
 
+          LOG(INFO) << "expected quadrature error: " << quad->expected_error() << " (" << nnodes << ")";
+
           sweeper->set_quadrature(quad);
           sweeper->set_factory(factory);
           sweeper->set_residual_tolerances(abs_res_tol, rel_res_tol);
