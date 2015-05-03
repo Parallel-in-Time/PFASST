@@ -43,4 +43,11 @@ namespace pfasst
  *   A few different examples demonstrating the use and functionality of PFASST++.
  */
 
+/**
+ * PFASST++ version: closest release tag and a brief git hash.
+ *
+ * @var pfasst::VERSION
+ * @ingroup Utilities
+ */
+
 #endif
