@@ -103,7 +103,7 @@ const string OUT::reset = "\033[0m";
 
 #ifndef PFASST_LOGGER_DEFAULT_GLOBAL_MILLISECOND_WIDTH
   //! precision of milliseconds to be printed
-  #define PFASST_LOGGER_DEFAULT_GLOBAL_MILLISECOND_WIDTH "4"
+  #define PFASST_LOGGER_DEFAULT_GLOBAL_MILLISECOND_WIDTH "2"
 #endif
 
 #ifndef VLOG_FUNC_START
@@ -145,7 +145,7 @@ const string OUT::reset = "\033[0m";
  *
  * @see pfasst::log::add_custom_logger()
  */
-#define LOGGER_ID_LENGTH 8
+#define LOGGER_ID_LENGTH 10
 
 
 namespace pfasst
@@ -176,6 +176,13 @@ namespace pfasst
      * @since v0.3.0
      */
     static size_t stack_position;
+
+    /**
+     * internal flag identifying whether the default logger has been initialized.
+     *
+     * @since v1.0.0
+     */
+    static bool initialized = false;
 
     /**
      * Formats the local MPI world rank as a string.
@@ -275,6 +282,11 @@ namespace pfasst
      *
      *     <TIME> [MYCUSTOM, INFO ] a logging message
      *
+     * In case MPI is enabled, the line will also contain the MPI rank as given by
+     * pfasst::config::get_rank():
+     *
+     *     <TIME> [MYCUSTOM, INFO , MPI  <rank> ] a logging message
+     *
      * @param[in] id the ID of the logger; this is used in logging calls
      *
      * @note Please make sure to use `CLOG` (and `CVLOG` for verbose logging) to be able to specify
@@ -303,7 +315,7 @@ namespace pfasst
       const string POSITION = "%fbase:%line";
       const string MESSAGE = "%msg";
 #ifdef WITH_MPI
-      const string MPI_RANK = ", rank " + format_mpi_rank();
+      const string MPI_RANK = ", MPI " + format_mpi_rank();
 #else
       const string MPI_RANK = "";
 #endif
@@ -311,6 +323,9 @@ namespace pfasst
       const size_t id_length = id.size();
       string id2print = id.substr(0, LOGGER_ID_LENGTH);
       boost::to_upper(id2print);
+      if (initialized) {
+        CLOG(DEBUG, "default") << "initializing custom logger '" << id << "' as '" << id2print << "'";
+      }
       if (id_length < LOGGER_ID_LENGTH) {
         id2print.append(LOGGER_ID_LENGTH - id_length, ' ');
       }
@@ -352,7 +367,9 @@ namespace pfasst
       el::Loggers::setDefaultConfigurations(defaultConf, true);
 
       add_custom_logger("default");
+      pfasst::log::initialized = true;
       add_custom_logger("Controller");
+      add_custom_logger("Communicator");
       add_custom_logger("Sweeper");
       add_custom_logger("Encap");
       add_custom_logger("Quadrature");
