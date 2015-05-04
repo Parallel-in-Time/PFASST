@@ -30,6 +30,14 @@ namespace pfasst
       this->comm = comm;
       MPI_Comm_size(this->comm, &(this->_size));
       MPI_Comm_rank(this->comm, &(this->_rank));
+      int len = 0;
+      char buff[MPI_MAX_OBJECT_NAME];
+      MPI_Comm_get_name(this->comm, buff, &len);
+      if (len == 0) {
+        this->_name = string("world");
+      } else {
+        this->_name = string(buff, len);
+      }
 
       shared_ptr<MPIStatus> status = make_shared<MPIStatus>();
       this->status = status;
@@ -44,6 +52,11 @@ namespace pfasst
     int MPICommunicator::rank()
     {
       return this->_rank;
+    }
+
+    string MPICommunicator::name()
+    {
+      return this->_name;
     }
 
 
@@ -62,7 +75,7 @@ namespace pfasst
 
     void MPIStatus::set_converged(bool converged)
     {
-      LOG(DEBUG) << "mpi rank " << this->comm->rank() << " set converged to " << converged;
+      CLOG(DEBUG, "Controller") << "set converged to " << boolalpha << converged;
       this->converged.at(this->comm->rank()) = converged;
     }
 
@@ -84,10 +97,12 @@ namespace pfasst
 
       int iconverged = converged.at(mpi->rank()) ? 1 : 0;
 
-      LOG(DEBUG) << "mpi rank " << this->comm->rank() << " status send " << iconverged;
+      int dest_rank = (mpi->rank() + 1) % mpi->size();
+      CLOG(DEBUG, "Controller") << "sending status " << iconverged
+                                << " to " << dest_rank << " of communicator " << mpi->name();
 
       int err = MPI_Send(&iconverged, sizeof(int), MPI_INT,
-                         (mpi->rank() + 1) % mpi->size(), 1, mpi->comm);
+                         dest_rank, 1, mpi->comm);
 
       if (err != MPI_SUCCESS) {
         throw MPIError();
@@ -101,14 +116,15 @@ namespace pfasst
       if (mpi->rank() == 0) { return; }
 
       if (get_converged(mpi->rank()-1)) {
-        LOG(DEBUG) << "mpi rank " << this->comm->rank() << " skipping status recv";
+        CLOG(DEBUG, "Controller") << "skipping status recv";
         return;
       }
 
       MPI_Status stat;
       int iconverged;
+      int src_rank = (mpi->rank() - 1) % mpi->size();
       int err = MPI_Recv(&iconverged, sizeof(iconverged), MPI_INT,
-                         (mpi->rank() - 1) % mpi->size(), 1, mpi->comm, &stat);
+                         src_rank, 1, mpi->comm, &stat);
 
       if (err != MPI_SUCCESS) {
         throw MPIError();
@@ -116,7 +132,17 @@ namespace pfasst
 
       converged.at(mpi->rank()-1) = iconverged == 1 ? true : false;
 
-      LOG(DEBUG) << "mpi rank " << this->comm->rank() << " status recv " << iconverged;
+      CLOG(DEBUG, "Controller") << "recieved status " << iconverged
+                                << " from rank " << src_rank << " of communicator " << mpi->name();
     }
   }  // ::pfasst::mpi
 }  // ::pfasst
+
+
+MAKE_LOGGABLE(MPI_Status, mpi_status, os)
+{
+  os << "MPI_Status(source=" << mpi_status.MPI_SOURCE << ", "
+                << "tag=" << mpi_status.MPI_TAG << ", "
+                << "error=" << mpi_status.MPI_ERROR << ")";
+  return os;
+}
