@@ -16,12 +16,16 @@ set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/3rdparty)
 option(pfasst_DISABLE_LIBCXX    "Disable use of LLVM's libc++ when compiling with Clang." ON )
 option(pfasst_BUILD_SHARED_LIBS "Build shared libraries."                                 ON )
 option(pfasst_BUILD_EXAMPLES    "Build example programs."                                 ON )
-CMAKE_DEPENDENT_OPTION(pfasst_INSTALL_EXAMPLES "Install example programs." ON
-    "pfasst_BUILD_EXAMPLES" OFF)
+cmake_dependent_option(
+       pfasst_INSTALL_EXAMPLES  "Install example programs."                               ON
+           "pfasst_BUILD_EXAMPLES" OFF)
 option(pfasst_BUILD_TESTS       "Build test suite for PFASST."                            ON )
 option(pfasst_WITH_MPI          "Build with MPI enabled."                                 ON )
 option(pfasst_WITH_GCC_PROF     "Enable excessive debugging & profiling output with GCC." OFF)
 option(pfasst_DEFAULT_RAND_SEED "Using a hardcoded random seed"                           ON )
+cmake_dependent_option(
+       enable_LTO               "enable LinkTimeOptimization"                             OFF
+           "CMAKE_BUILD_TYPE" Release)
 
 if(${pfasst_WITH_MPI})
     find_package(MPI REQUIRED)
@@ -54,6 +58,12 @@ if(${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
     if(pfasst_WITH_GCC_PROF)
         add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-ggdb3 -pg")
     endif(pfasst_WITH_GCC_PROF)
+    if(${CMAKE_BUILD_TYPE} MATCHES "Release" AND ${enable_LTO})
+        message(STATUS "enabling Link Time Optimization (LTO)")
+        set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -flto -fwhole-program")
+        set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} -flto")
+        set(CMAKE_MODULE_LINKER_FLAGS_RELEASE "${CMAKE_MODULE_LINKER_FLAGS_RELEASE} -flto")
+    endif()
 elseif(${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
     check_cxx_compiler_flag(-std=c++11 HAVE_STD11)
     if(HAVE_STD11)
