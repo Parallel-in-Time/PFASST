@@ -22,7 +22,6 @@ cmake_dependent_option(
 option(pfasst_BUILD_TESTS       "Build test suite for PFASST."                            ON )
 option(pfasst_WITH_MPI          "Build with MPI enabled."                                 ON )
 option(pfasst_WITH_GCC_PROF     "Enable excessive debugging & profiling output with GCC." OFF)
-option(pfasst_DEFAULT_RAND_SEED "Using a hardcoded random seed"                           ON )
 cmake_dependent_option(
        enable_LTO               "enable LinkTimeOptimization"                             OFF
            "CMAKE_BUILD_TYPE" Release)
@@ -41,10 +40,6 @@ if(${pfasst_WITH_MPI})
     message(STATUS "Using MPI C++ Compiler Wrapper: ${MPI_CXX_COMPILER}")
     message(STATUS "USing MPI C Compiler Wrapper: ${MPI_C_COMPILER}")
     add_definitions(-DWITH_MPI)
-endif()
-
-if(pfasst_DEFAULT_RAND_SEED)
-    set(pfasst_RANDOM_SEED "42")
 endif()
 
 # Check for C++11 support
@@ -127,12 +122,6 @@ if(${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
     add_feature_info(Profiling
         pfasst_WITH_GCC_PROF
         "build-in profiling support"
-    )
-endif()
-if(pfasst_RANDOM_SEED)
-    add_feature_info(DefaultRandomSeed
-        pfasst_RANDOM_SEED
-        "using specific default random seed ${pfasst_RANDOM_SEED}"
     )
 endif()
 
