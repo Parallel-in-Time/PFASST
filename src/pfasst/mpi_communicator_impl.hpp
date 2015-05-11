@@ -132,7 +132,7 @@ namespace pfasst
 
       converged.at(mpi->rank()-1) = iconverged == 1 ? true : false;
 
-      CLOG(DEBUG, "Controller") << "recieved status " << iconverged
+      CLOG(DEBUG, "Controller") << "received status " << iconverged
                                 << " from rank " << src_rank << " of communicator " << mpi->name();
     }
   }  // ::pfasst::mpi
