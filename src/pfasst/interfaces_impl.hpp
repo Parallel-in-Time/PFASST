@@ -6,6 +6,7 @@
 using namespace std;
 
 #include "pfasst/globals.hpp"
+#include "pfasst/logging.hpp"
 
 
 namespace pfasst
@@ -78,7 +79,11 @@ namespace pfasst
     if (this->comm->rank() == 0) {
       return !this->get_converged(0);
     }
-    return !this->get_converged(this->comm->rank()) || !this->get_converged(this->comm->rank() - 1);
+    bool keep_iterating = !this->get_converged(this->comm->rank() - 1) || !this->get_converged(this->comm->rank());
+    CLOG(DEBUG, "Controller") << "previous converged: " << boolalpha << this->get_converged(this->comm->rank() - 1)
+                              << "; this converged: " << boolalpha << this->get_converged(this->comm->rank())
+                              << " --> keep iterating: " << boolalpha << keep_iterating;
+    return keep_iterating;
   }
 
 

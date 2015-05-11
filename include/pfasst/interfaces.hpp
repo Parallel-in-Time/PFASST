@@ -86,6 +86,10 @@ namespace pfasst
    */
   class IStatus
   {
+    public:
+      static const int NOT_CONVERGED = 0;
+      static const int CONVERGED = 1;
+
     protected:
       ICommunicator* comm;
 
