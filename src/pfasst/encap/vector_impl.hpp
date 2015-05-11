@@ -35,6 +35,48 @@ namespace pfasst
     {}
 
     template<typename scalar, typename time>
+    VectorEncapsulation<scalar, time>::~VectorEncapsulation()
+    {
+#ifdef WITH_MPI
+      // TODO: refactor that request handler cleanup
+
+      int err = MPI_SUCCESS;
+
+      // check and finalize old request
+      if (this->recv_request != MPI_REQUEST_NULL) {
+        int old_complete = -1;
+        MPI_Status test_old_stat;
+        err = MPI_Request_get_status(this->recv_request, &old_complete, &test_old_stat);
+        if (err != MPI_SUCCESS) { throw MPIError::from_code(err); }
+        if (!(bool)old_complete) {
+          err = MPI_Cancel(&(this->recv_request));
+          if (err != MPI_SUCCESS) { throw MPIError::from_code(err); }
+        }
+        // cleanup resources
+        err = MPI_Request_free(&(this->recv_request));
+        if (err != MPI_SUCCESS) { throw MPIError::from_code(err); }
+        assert(this->recv_request == MPI_REQUEST_NULL);  // just to make sure
+      }
+
+      // check and finalize old request
+      if (this->send_request != MPI_REQUEST_NULL) {
+        int old_complete = -1;
+        MPI_Status test_old_stat;
+        err = MPI_Request_get_status(this->send_request, &old_complete, &test_old_stat);
+        if (err != MPI_SUCCESS) { throw MPIError::from_code(err); }
+        if (!(bool)old_complete) {
+          err = MPI_Cancel(&(this->send_request));
+          if (err != MPI_SUCCESS) { throw MPIError::from_code(err); }
+        }
+        // cleanup resources
+        err = MPI_Request_free(&(this->send_request));
+        if (err != MPI_SUCCESS) { throw MPIError::from_code(err); }
+        assert(this->send_request == MPI_REQUEST_NULL);  // just to make sure
+      }
+#endif
+    }
+
+    template<typename scalar, typename time>
     void VectorEncapsulation<scalar, time>::zero()
     {
       this->assign(this->size(), scalar(0.0));
@@ -165,18 +207,40 @@ namespace pfasst
     }
 
 #ifdef WITH_MPI
-        template<typename scalar, typename time>
+    template<typename scalar, typename time>
     void VectorEncapsulation<scalar, time>::post(ICommunicator* comm, int tag)
     {
       auto& mpi = as_mpi(comm);
       if (mpi.size() == 1) { return; }
       if (mpi.rank() == 0) { return; }
 
-      int err = MPI_Irecv(this->data(), sizeof(scalar) * this->size(), MPI_CHAR,
-                          (mpi.rank() - 1) % mpi.size(), tag, mpi.comm, &recv_request);
-      if (err != MPI_SUCCESS) {
-        throw MPIError();
+      int err = MPI_SUCCESS;
+
+      MPI_Request new_recv_request = MPI_REQUEST_NULL;
+      int src = (mpi.rank() - 1) % mpi.size();
+      err = MPI_Irecv(this->data(), sizeof(scalar) * this->size(), MPI_CHAR,
+                      src, tag, mpi.comm, &new_recv_request);
+      if (err != MPI_SUCCESS) { throw MPIError::from_code(err); }
+
+      // check and finalize old request
+      if (this->recv_request != MPI_REQUEST_NULL) {
+        int old_complete = -1;
+        MPI_Status test_old_stat;
+        err = MPI_Request_get_status(this->recv_request, &old_complete, &test_old_stat);
+        if (err != MPI_SUCCESS) { throw MPIError::from_code(err); }
+        if (!(bool)old_complete) {
+          err = MPI_Cancel(&(this->recv_request));
+          if (err != MPI_SUCCESS) { throw MPIError::from_code(err); }
+        }
+        // cleanup resources
+        err = MPI_Request_free(&(this->recv_request));
+        if (err != MPI_SUCCESS) { throw MPIError::from_code(err); }
+        assert(this->recv_request == MPI_REQUEST_NULL);  // just to make sure
       }
+
+      // keep the new request handler
+      std::swap(this->recv_request, new_recv_request);
+      assert(new_recv_request == MPI_REQUEST_NULL);
     }
 
     template<typename scalar, typename time>
@@ -186,19 +250,23 @@ namespace pfasst
       if (mpi.size() == 1) { return; }
       if (mpi.rank() == 0) { return; }
 
-      int err;
+      int err = MPI_SUCCESS;
+
       if (blocking) {
         MPI_Status stat;
+        int src = (mpi.rank() - 1) % mpi.size();
         err = MPI_Recv(this->data(), sizeof(scalar) * this->size(), MPI_CHAR,
-                       (mpi.rank() - 1) % mpi.size(), tag, mpi.comm, &stat);
+                       src, tag, mpi.comm, &stat);
       } else {
         MPI_Status stat;
-        err = MPI_Wait(&recv_request, &stat);
+        if (this->recv_request != MPI_REQUEST_NULL) {
+          CLOG(DEBUG, "Encap") << "waiting on last recv request";
+          err = MPI_Wait(&(this->recv_request), &stat);
+          CLOG(DEBUG, "Encap") << "waiting done: " << stat;
+        }
       }
 
-      if (err != MPI_SUCCESS) {
-        throw MPIError();
-      }
+      if (err != MPI_SUCCESS) { throw MPIError::from_code(err); }
     }
 
     template<typename scalar, typename time>
@@ -209,23 +277,38 @@ namespace pfasst
       if (mpi.rank() == mpi.size() - 1) { return; }
 
       int err = MPI_SUCCESS;
+      int dest = (mpi.rank() + 1) % mpi.size();
+
       if (blocking) {
-        err = MPI_Send(this->data(), sizeof(scalar) * this->size(), MPI_CHAR,
-                       (mpi.rank() + 1) % mpi.size(), tag, mpi.comm);
+        err = MPI_Send(this->data(), sizeof(scalar) * this->size(), MPI_CHAR, dest, tag, mpi.comm);
       } else {
-        MPI_Status stat;
-        err = MPI_Wait(&send_request, &stat);
-        if (err != MPI_SUCCESS) {
-          throw MPIError();
+        MPI_Request new_send_request = MPI_REQUEST_NULL;
+        err = MPI_Isend(this->data(), sizeof(scalar) * this->size(), MPI_CHAR,
+                        dest, tag, mpi.comm, &new_send_request);
+
+        // check and finalize old request
+        if (this->send_request != MPI_REQUEST_NULL) {
+          int old_complete = -1;
+          MPI_Status test_old_stat;
+          err = MPI_Request_get_status(this->send_request, &old_complete, &test_old_stat);
+          if (err != MPI_SUCCESS) { throw MPIError::from_code(err); }
+
+          if (!(bool)old_complete) {
+            err = MPI_Cancel(&(this->send_request));
+            if (err != MPI_SUCCESS) { throw MPIError::from_code(err); }
+          }
+
+          // cleanup resources
+          err = MPI_Request_free(&(this->send_request));
+          if (err != MPI_SUCCESS) { throw MPIError::from_code(err); }
+          assert(this->send_request == MPI_REQUEST_NULL);  // just to make sure
         }
 
-        err = MPI_Isend(this->data(), sizeof(scalar) * this->size(), MPI_CHAR,
-                        (mpi.rank() + 1) % mpi.size(), tag, mpi.comm, &send_request);
+        // keep the new request handler
+        std::swap(this->send_request, new_send_request);
       }
 
-      if (err != MPI_SUCCESS) {
-        throw MPIError();
-      }
+      if (err != MPI_SUCCESS) { throw MPIError::from_code(err); }
     }
 
     template<typename scalar, typename time>
@@ -235,9 +318,7 @@ namespace pfasst
       int err = MPI_Bcast(this->data(), sizeof(scalar) * this->size(), MPI_CHAR,
                           comm->size()-1, mpi.comm);
 
-      if (err != MPI_SUCCESS) {
-        throw MPIError();
-      }
+      if (err != MPI_SUCCESS) { throw MPIError::from_code(err); }
     }
 #endif
 
