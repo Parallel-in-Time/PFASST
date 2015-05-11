@@ -19,8 +19,9 @@ namespace pfasst
       : public runtime_error
     {
       public:
-        explicit MPIError(const string& msg="");
+        MPIError(const string& msg="");
         virtual const char* what() const throw();
+        static MPIError from_code(const int err_code);
     };
 
 
