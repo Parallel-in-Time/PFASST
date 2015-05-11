@@ -118,11 +118,8 @@ namespace pfasst
     auto trns = level_iter.transfer();
 
     trns->interpolate(fine, crse, true);
-
-    if (this->comm->status->previous_is_iterating()) {
-      fine->recv(comm, tag(level_iter), false);
-      trns->interpolate_initial(fine, crse);
-    }
+    fine->recv(comm, tag(level_iter), false);
+    trns->interpolate_initial(fine, crse);
 
     if (level_iter < this->finest()) {
       perform_sweeps(level_iter.level);
@@ -224,9 +221,11 @@ namespace pfasst
   template<typename time>
   void PFASST<time>::post()
   {
-    this->comm->status->post();
-    for (auto l = this->coarsest() + 1; l <= this->finest(); ++l) {
-      l.current()->post(comm, tag(l));
+    if (this->comm->status->previous_is_iterating()) {
+      this->comm->status->post();
+      for (auto l = this->coarsest() + 1; l <= this->finest(); ++l) {
+        l.current()->post(comm, tag(l));
+      }
     }
   }
 }  // ::pfasst
