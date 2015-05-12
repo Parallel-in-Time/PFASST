@@ -39,9 +39,11 @@ namespace pfasst
     {
 #ifdef WITH_MPI
       if (this->send_request != MPI_REQUEST_NULL) {
-        MPI_Status stat;
+        MPI_Status stat = MPI_Status_factory();
+        CLOG(DEBUG, "Encap") << "waiting for open send request";
         int err = MPI_Wait(&(this->send_request), &stat);
         check_mpi_error(err);
+        CLOG(DEBUG, "Encap") << "waited for open send request";
       }
       assert(this->recv_request == MPI_REQUEST_NULL);
       assert(this->send_request == MPI_REQUEST_NULL);
@@ -191,9 +193,11 @@ namespace pfasst
       }
 
       int src = (mpi.rank() - 1) % mpi.size();
+      CLOG(DEBUG, "Encap") << "non-blocking recieving from rank " << src << " with tag=" << tag;
       int err = MPI_Irecv(this->data(), sizeof(scalar) * this->size(), MPI_CHAR,
-                      src, tag, mpi.comm, &this->recv_request);
+                          src, tag, mpi.comm, &this->recv_request);
       check_mpi_error(err);
+      CLOG(DEBUG, "Encap") << "non-blocking recieved from rank " << src << " with tag=" << tag;
     }
 
     template<typename scalar, typename time>
@@ -208,15 +212,17 @@ namespace pfasst
 
       if (blocking) {
         int src = (mpi.rank() - 1) % mpi.size();
+        CLOG(DEBUG, "Encap") << "blocking recieve from rank " << src << " with tag=" << tag;
         err = MPI_Recv(this->data(), sizeof(scalar) * this->size(), MPI_CHAR,
                        src, tag, mpi.comm, &stat);
         check_mpi_error(err);
+        CLOG(DEBUG, "Encap") << "recieved blocking from rank " << src << " with tag=" << tag << ": " << stat;
       } else {
         if (this->recv_request != MPI_REQUEST_NULL) {
-          CLOG(DEBUG, "Encap") << "waiting on last recv request";
+          CLOG(DEBUG, "Encap") << "waiting on last recieve request";
           err = MPI_Wait(&(this->recv_request), &stat);
           check_mpi_error(err);
-          CLOG(DEBUG, "Encap") << "waiting done: " << stat;
+          CLOG(DEBUG, "Encap") << "waited on last recieve request: " << stat;
         }
       }
     }
@@ -233,14 +239,21 @@ namespace pfasst
       int dest = (mpi.rank() + 1) % mpi.size();
 
       if (blocking) {
+        CLOG(DEBUG, "Encap") << "blocking send to rank " << dest << " with tag=" << tag;
         err = MPI_Send(this->data(), sizeof(scalar) * this->size(), MPI_CHAR, dest, tag, mpi.comm);
         check_mpi_error(err);
+        CLOG(DEBUG, "Encap") << "sent blocking to rank " << dest << " with tag=" << tag;
       } else {
+        // got never in here
+        CLOG(DEBUG, "Encap") << "waiting on last send request to finish";
         err = MPI_Wait(&(this->send_request), &stat);
         check_mpi_error(err);
+        CLOG(DEBUG, "Encap") << "waited on last send request: " << stat;
+        CLOG(DEBUG, "Encap") << "non-blocking sending to rank " << dest << " with tag=" << tag;
         err = MPI_Isend(this->data(), sizeof(scalar) * this->size(), MPI_CHAR,
                         dest, tag, mpi.comm, &(this->send_request));
         check_mpi_error(err);
+        CLOG(DEBUG, "Encap") << "sent non-blocking to rank " << dest << " with tag=" << tag;
       }
     }
 
@@ -248,9 +261,11 @@ namespace pfasst
     void VectorEncapsulation<scalar, time>::broadcast(ICommunicator* comm)
     {
       auto& mpi = as_mpi(comm);
+      CLOG(DEBUG, "Encap") << "broadcasting";
       int err = MPI_Bcast(this->data(), sizeof(scalar) * this->size(), MPI_CHAR,
                           comm->size()-1, mpi.comm);
       check_mpi_error(err);
+      CLOG(DEBUG, "Encap") << "broadcasted";
     }
 #endif
 
