@@ -97,13 +97,12 @@ namespace pfasst
     perform_sweeps(l.level);
 
     if (l == this->finest() && fine->converged()) {
-      this->comm->status->set_converged(true);
+      bool previous_converged = this->comm->status->previous_is_iterating();
+      this->comm->status->set_converged(!previous_converged);
     }
 
     fine->send(comm, tag(l), false);
-
     trns->restrict(crse, fine, true);
-
     trns->fas(this->get_time_step(), crse, fine);
     crse->save();
 
@@ -136,10 +135,10 @@ namespace pfasst
     if (this->comm->status->previous_is_iterating()) {
       crse->recv(comm, tag(level_iter), true);
     }
-    this->comm->status->recv();
+    this->comm->status->recv(stag(level_iter));
     this->perform_sweeps(level_iter.level);
+    this->comm->status->send(stag(level_iter));
     crse->send(comm, tag(level_iter), true);
-    this->comm->status->send();
     return level_iter + 1;
   }
 
@@ -205,13 +204,19 @@ namespace pfasst
    * @internals
    * A simple formula is used with current level index \\( L \\) (provided by @p level_iter) and
    * current iteration number \\( I \\):
-   * \\[ L * 10000 + I + 10 \\]
+   * \\[ (L+1) * 10000 + I \\]
    * @endinternals
    */
   template<typename time>
   int PFASST<time>::tag(LevelIter level_iter)
   {
-    return level_iter.level * 10000 + this->get_iteration() + 10;
+    return (level_iter.level+1) * 10000 + this->get_iteration();
+  }
+
+  template<typename time>
+  int PFASST<time>::stag(LevelIter level_iter)
+  {
+    return level_iter.level * 1000 + this->get_iteration();
   }
 
   /**
@@ -222,7 +227,7 @@ namespace pfasst
   void PFASST<time>::post()
   {
     if (this->comm->status->previous_is_iterating()) {
-      this->comm->status->post();
+      this->comm->status->post(0);
       for (auto l = this->coarsest() + 1; l <= this->finest(); ++l) {
         l.current()->post(comm, tag(l));
       }

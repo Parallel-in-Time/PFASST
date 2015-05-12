@@ -105,9 +105,9 @@ namespace pfasst
         virtual void clear() override;
         virtual void set_converged(bool converged) override;
         virtual bool get_converged(int rank) override;
-        virtual void post();
-        virtual void send();
-        virtual void recv();
+        virtual void post(int tag) override;
+        virtual void send(int tag) override;
+        virtual void recv(int tag) override;
     };
   }  // ::pfasst::mpi
 }  // ::pfasst
