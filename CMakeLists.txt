@@ -8,8 +8,6 @@ include(ExternalProject)
 include(CMakeDependentOption)
 include(FeatureSummary)
 
-list(APPEND CMAKE_FIND_ROOT_PATH ${pfasst_SOURCE_DIR}/stack)
-
 # Set default ExternalProject root directory
 set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/3rdparty)
 
@@ -25,6 +23,12 @@ option(pfasst_WITH_GCC_PROF     "Enable excessive debugging & profiling output w
 cmake_dependent_option(
        enable_LTO               "enable LinkTimeOptimization"                             OFF
            "CMAKE_BUILD_TYPE" Release)
+
+if(NOT ${pfasst_BUILD_SHARED_LIBS})
+    set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+    set(BUILD_SHARED_LIBRARIES OFF)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+endif()
 
 if(${pfasst_WITH_MPI})
     find_package(MPI REQUIRED)
