@@ -11,8 +11,10 @@ if(FFTW_INCLUDE_PATH)
 endif(FFTW_INCLUDE_PATH)
 
 find_path(FFTW_INCLUDE_PATH fftw3.h
-    HINTS ${FFTW3_INC}
+    HINTS ${FFTW3_INCLUDE}
+        ${FFTW3_INC}
         ${FFTW3_ROOT}/include
+        $ENV{FFTW3_INCLUDE}
         $ENV{FFTW3_INC}
         $ENV{FFTW3_ROOT}/include
 )

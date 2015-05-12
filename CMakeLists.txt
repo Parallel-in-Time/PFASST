@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.6)
-project(pfasst LANGUAGES CXX)
+project(pfasst)
 
 list(APPEND CMAKE_MODULE_PATH ${pfasst_SOURCE_DIR}/cmake)
 include(cmake/utility_functions.cmake)
