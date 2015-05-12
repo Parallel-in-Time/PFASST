@@ -11,11 +11,19 @@ if(FFTW_INCLUDE_PATH)
 endif(FFTW_INCLUDE_PATH)
 
 find_path(FFTW_INCLUDE_PATH fftw3.h
-    HINTS $ENV{FFTW3_INCLUDE}
+    HINTS ${FFTW3_INC}
+        ${FFTW3_ROOT}/include
+        $ENV{FFTW3_INC}
+        $ENV{FFTW3_ROOT}/include
 )
 
-find_library(FFTW_LIBRARIES NAMES fftw3
-    HINTS $ENV{FFTW3_LIB}
+find_library(FFTW_LIBRARIES NAMES fftw3 fftw3l fftw3_mpi fftw3l_mpi fftw3_omp fftw3l_omp
+    HINTS ${FFTW3_LIB}
+        ${FFTW3_ROOT}/lib64
+        ${FFTW3_ROOT}/lib
+        $ENV{FFTW3_LIB}
+        $ENV{FFTW3_ROOT}/lib64
+        $ENV{FFTW3_ROOT}/lib
 )
 
 # handle the QUIETLY and REQUIRED arguments and set FFTW_FOUND to TRUE if
