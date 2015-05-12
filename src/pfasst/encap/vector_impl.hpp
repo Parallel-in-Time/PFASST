@@ -207,7 +207,7 @@ namespace pfasst
       if (mpi.size() == 1) { return; }
       if (mpi.rank() == 0) { return; }
 
-      MPI_Status stat;
+      MPI_Status stat = MPI_Status_factory();
       int err = MPI_SUCCESS;
 
       if (blocking) {
@@ -231,7 +231,7 @@ namespace pfasst
       if (mpi.size() == 1) { return; }
       if (mpi.rank() == mpi.size() - 1) { return; }
 
-      MPI_Status stat;
+      MPI_Status stat = MPI_Status_factory();
       int err = MPI_SUCCESS;
       int dest = (mpi.rank() + 1) % mpi.size();
 
