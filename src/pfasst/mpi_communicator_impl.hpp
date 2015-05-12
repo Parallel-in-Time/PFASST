@@ -20,7 +20,8 @@ namespace pfasst
     {
       char err_str[MPI_MAX_ERROR_STRING];
       int err_len = 0;
-      MPI_Error_string(err_code, err_str, &err_len);
+      int err = MPI_Error_string(err_code, err_str, &err_len);
+      check_mpi_error(err);
       return MPIError("MPI Error: " + string(err_str, err_len) + " (code=" + to_string(err_code) + ")");
     }
 
@@ -40,7 +41,8 @@ namespace pfasst
       MPI_Comm_rank(this->comm, &(this->_rank));
       int len = 0;
       char buff[MPI_MAX_OBJECT_NAME];
-      MPI_Comm_get_name(this->comm, buff, &len);
+      int err = MPI_Comm_get_name(this->comm, buff, &len);
+      check_mpi_error(err);
       if (len == 0) {
         this->_name = string("world");
       } else {
@@ -109,7 +111,7 @@ namespace pfasst
       int dest_rank = (mpi->rank() + 1) % mpi->size();
 
       int err = MPI_Send(&iconverged, sizeof(int), MPI_INT, dest_rank, 1, mpi->comm);
-      if (err != MPI_SUCCESS) { throw MPIError::from_code(err); }
+      check_mpi_error(err);
     }
 
     void MPIStatus::recv()
@@ -127,7 +129,7 @@ namespace pfasst
       int iconverged;
       int src_rank = (mpi->rank() - 1) % mpi->size();
       int err = MPI_Recv(&iconverged, sizeof(iconverged), MPI_INT, src_rank, 1, mpi->comm, &stat);
-      if (err != MPI_SUCCESS) { throw MPIError::from_code(err); }
+      check_mpi_error(err);
 
       converged.at(mpi->rank() - 1) = (iconverged == IStatus::CONVERGED) ? true : false;
     }
@@ -142,9 +144,13 @@ MAKE_LOGGABLE(MPI_Status, mpi_status, os)
       && mpi_status.MPI_ERROR == MPI_SUCCESS) {
     os << "MPI_Status(empty)";
   } else {
+    char err_str[MPI_MAX_ERROR_STRING];
+    int err_len = 0;
+    int err = MPI_Error_string(mpi_status.MPI_ERROR, err_str, &err_len);
+    pfasst::mpi::check_mpi_error(err);
     os << "MPI_Status(source=" << to_string(mpi_status.MPI_SOURCE) << ", "
                   << "tag=" << to_string(mpi_status.MPI_TAG) << ", "
-                  << "error=" << to_string(mpi_status.MPI_ERROR) << ")";
+                  << "error=" << string(err_str, err_len) << ")";
   }
   return os;
 }

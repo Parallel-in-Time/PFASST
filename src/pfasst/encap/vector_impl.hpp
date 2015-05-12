@@ -3,10 +3,6 @@
 
 #include "pfasst/encap/vector.hpp"
 
-#ifdef WITH_MPI
-#define CHKMPIERR(err) if (err != MPI_SUCCESS) { throw MPIError::from_code(err); }
-#endif
-
 namespace pfasst
 {
   namespace encap
@@ -45,7 +41,7 @@ namespace pfasst
       if (this->send_request != MPI_REQUEST_NULL) {
         MPI_Status stat;
         int err = MPI_Wait(&(this->send_request), &stat);
-        CHKMPIERR(err);
+        check_mpi_error(err);
       }
       assert(this->recv_request == MPI_REQUEST_NULL);
       assert(this->send_request == MPI_REQUEST_NULL);
@@ -191,13 +187,13 @@ namespace pfasst
       if (mpi.rank() == 0) { return; }
 
       if (this->recv_request != MPI_REQUEST_NULL) {
-        throw MPIError();
+        throw MPIError("a previous recieve request is still open");
       }
 
       int src = (mpi.rank() - 1) % mpi.size();
       int err = MPI_Irecv(this->data(), sizeof(scalar) * this->size(), MPI_CHAR,
                       src, tag, mpi.comm, &this->recv_request);
-      CHKMPIERR(err);
+      check_mpi_error(err);
     }
 
     template<typename scalar, typename time>
@@ -214,11 +210,12 @@ namespace pfasst
         int src = (mpi.rank() - 1) % mpi.size();
         err = MPI_Recv(this->data(), sizeof(scalar) * this->size(), MPI_CHAR,
                        src, tag, mpi.comm, &stat);
-        CHKMPIERR(err);
+        check_mpi_error(err);
       } else {
         if (this->recv_request != MPI_REQUEST_NULL) {
           CLOG(DEBUG, "Encap") << "waiting on last recv request";
-          err = MPI_Wait(&(this->recv_request), &stat); CHKMPIERR(err);
+          err = MPI_Wait(&(this->recv_request), &stat);
+          check_mpi_error(err);
           CLOG(DEBUG, "Encap") << "waiting done: " << stat;
         }
       }
@@ -237,15 +234,14 @@ namespace pfasst
 
       if (blocking) {
         err = MPI_Send(this->data(), sizeof(scalar) * this->size(), MPI_CHAR, dest, tag, mpi.comm);
-        CHKMPIERR(err);
+        check_mpi_error(err);
       } else {
         err = MPI_Wait(&(this->send_request), &stat);
-        CHKMPIERR(err);
+        check_mpi_error(err);
         err = MPI_Isend(this->data(), sizeof(scalar) * this->size(), MPI_CHAR,
                         dest, tag, mpi.comm, &(this->send_request));
-        CHKMPIERR(err);
+        check_mpi_error(err);
       }
-
     }
 
     template<typename scalar, typename time>
@@ -253,8 +249,8 @@ namespace pfasst
     {
       auto& mpi = as_mpi(comm);
       int err = MPI_Bcast(this->data(), sizeof(scalar) * this->size(), MPI_CHAR,
-                          comm->size()-1, mpi.comm); CHKMPIERR(err);
-      CHKMPIERR(err);
+                          comm->size()-1, mpi.comm);
+      check_mpi_error(err);
     }
 #endif
 

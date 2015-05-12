@@ -47,6 +47,19 @@ namespace pfasst
         static MPIError from_code(const int err_code);
     };
 
+    /**
+     * checks MPI error code
+     *
+     * In case @p err_code is not `MPI_SUCCESS` this throws MPIError with the error code looked up
+     * to a descriptive string as defined by the MPI implementation.
+     */
+    inline static void check_mpi_error(const int err_code)
+    {
+      if (err_code != MPI_SUCCESS) {
+        throw MPIError::from_code(err_code);
+      }
+    }
+
 
     // forward declare for MPICommunicator
     class MPIStatus;
