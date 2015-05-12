@@ -19,6 +19,9 @@ cmake_dependent_option(
            "pfasst_BUILD_EXAMPLES" OFF)
 option(pfasst_BUILD_TESTS       "Build test suite for PFASST."                            ON )
 option(pfasst_WITH_MPI          "Build with MPI enabled."                                 ON )
+cmake_dependent_option(
+       pfasst_WITH_MPIP         "enable to link against MPIP"                             OFF
+           "pfasst_WITH_MPI" ON)
 option(pfasst_WITH_GCC_PROF     "Enable excessive debugging & profiling output with GCC." OFF)
 cmake_dependent_option(
        enable_LTO               "enable LinkTimeOptimization"                             OFF
@@ -30,6 +33,13 @@ if(NOT ${pfasst_BUILD_SHARED_LIBS})
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
 endif()
 
+set(3rdparty_INCLUDES)
+set(3rdparty_DEPENDEND_LIBS)
+set(pfasst_INCLUDES)
+set(pfasst_DEPENDEND_LIBS)
+set(pfasst_DEPENDEND_TARGETS)
+set(pfasst_TESTS_DEPENDEND_TARGETS)
+
 if(${pfasst_WITH_MPI})
     find_package(MPI REQUIRED)
     if(NOT "${CMAKE_CXX_COMPILER}" STREQUAL "${MPI_CXX_COMPILER}" OR
@@ -40,6 +50,11 @@ if(${pfasst_WITH_MPI})
         set(CMAKE_CXX_COMPILER "${MPI_CXX_COMPILER}")
         set(CMAKE_C_COMPILER "${MPI_C_COMPILER}")
         message(STATUS "Set default compilers to MPI compilers.")
+    endif()
+    if(${pfasst_WITH_MPIP})
+        find_package(MPIP REQUIRED)
+        list(APPEND pfasst_DEPENDEND_LIBS ${MPIP_LIBRARIES})
+        message(STATUS "linking against MPIP library at: ${MPIP_LIBRARIES}")
     endif()
     message(STATUS "Using MPI C++ Compiler Wrapper: ${MPI_CXX_COMPILER}")
     message(STATUS "USing MPI C Compiler Wrapper: ${MPI_C_COMPILER}")
@@ -132,13 +147,6 @@ if(${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
     )
 endif()
 
-set(3rdparty_INCLUDES)
-set(3rdparty_DEPENDEND_LIBS)
-set(pfasst_INCLUDES)
-set(pfasst_DEPENDEND_LIBS)
-set(pfasst_DEPENDEND_TARGETS)
-set(pfasst_TESTS_DEPENDEND_TARGETS)
-
 if(pfasst_BUILD_TESTS)
     enable_testing()
     set(TESTS_3rdparty_INCLUDES)
@@ -227,6 +235,7 @@ if(${CMAKE_VERBOSE_MAKEFILE})
   message(STATUS "C++ Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}")
   message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS}")
   message(STATUS "C++ link flags: ${CMAKE_CXX_LINK_FLAGS}")
+  message(STATUS "Dependend Libs: ${pfasst_DEPENDEND_LIBS}")
   message(STATUS "********************************************************************************")
 endif()
 
