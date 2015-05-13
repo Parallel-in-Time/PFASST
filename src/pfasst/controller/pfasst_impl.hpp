@@ -97,8 +97,7 @@ namespace pfasst
     perform_sweeps(l.level);
 
     if (l == this->finest() && fine->converged()) {
-      bool previous_converged = this->comm->status->previous_is_iterating();
-      this->comm->status->set_converged(!previous_converged);
+      this->comm->status->set_converged(true);
     }
 
     fine->send(comm, tag(l), false);
@@ -137,8 +136,9 @@ namespace pfasst
     }
     this->comm->status->recv(stag(level_iter));
     this->perform_sweeps(level_iter.level);
-    this->comm->status->send(stag(level_iter));
     crse->send(comm, tag(level_iter), true);
+    this->comm->status->set_converged(!this->comm->status->keep_iterating());
+    this->comm->status->send(stag(level_iter));
     return level_iter + 1;
   }
 
