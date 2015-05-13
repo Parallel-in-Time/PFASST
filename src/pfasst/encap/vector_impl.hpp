@@ -189,15 +189,15 @@ namespace pfasst
       if (mpi.rank() == 0) { return; }
 
       if (this->recv_request != MPI_REQUEST_NULL) {
-        throw MPIError("a previous recieve request is still open");
+        throw MPIError("a previous receive request is still open");
       }
 
       int src = (mpi.rank() - 1) % mpi.size();
-      CLOG(DEBUG, "Encap") << "non-blocking recieving from rank " << src << " with tag=" << tag;
+      CLOG(DEBUG, "Encap") << "non-blocking receiving from rank " << src << " with tag=" << tag;
       int err = MPI_Irecv(this->data(), sizeof(scalar) * this->size(), MPI_CHAR,
                           src, tag, mpi.comm, &this->recv_request);
       check_mpi_error(err);
-      CLOG(DEBUG, "Encap") << "non-blocking recieved from rank " << src << " with tag=" << tag;
+      CLOG(DEBUG, "Encap") << "non-blocking received from rank " << src << " with tag=" << tag;
     }
 
     template<typename scalar, typename time>
@@ -212,17 +212,17 @@ namespace pfasst
 
       if (blocking) {
         int src = (mpi.rank() - 1) % mpi.size();
-        CLOG(DEBUG, "Encap") << "blocking recieve from rank " << src << " with tag=" << tag;
+        CLOG(DEBUG, "Encap") << "blocking receive from rank " << src << " with tag=" << tag;
         err = MPI_Recv(this->data(), sizeof(scalar) * this->size(), MPI_CHAR,
                        src, tag, mpi.comm, &stat);
         check_mpi_error(err);
-        CLOG(DEBUG, "Encap") << "recieved blocking from rank " << src << " with tag=" << tag << ": " << stat;
+        CLOG(DEBUG, "Encap") << "received blocking from rank " << src << " with tag=" << tag << ": " << stat;
       } else {
         if (this->recv_request != MPI_REQUEST_NULL) {
-          CLOG(DEBUG, "Encap") << "waiting on last recieve request";
+          CLOG(DEBUG, "Encap") << "waiting on last receive request";
           err = MPI_Wait(&(this->recv_request), &stat);
           check_mpi_error(err);
-          CLOG(DEBUG, "Encap") << "waited on last recieve request: " << stat;
+          CLOG(DEBUG, "Encap") << "waited on last receive request: " << stat;
         }
       }
     }
