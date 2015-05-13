@@ -11,6 +11,8 @@ include(FeatureSummary)
 # Set default ExternalProject root directory
 set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/3rdparty)
 
+list(APPEND CMAKE_FIND_ROOT_PATH ${pfasst_SOURCE_DIR}/stack)
+
 option(pfasst_DISABLE_LIBCXX    "Disable use of LLVM's libc++ when compiling with Clang." ON )
 option(pfasst_BUILD_SHARED_LIBS "Build shared libraries."                                 ON )
 option(pfasst_BUILD_EXAMPLES    "Build example programs."                                 ON )
