@@ -80,6 +80,7 @@ namespace pfasst
        * @param[in] level_iter level iterator providing information to compute the communication tag
        */
       virtual int tag(LevelIter level_iter);
+      virtual int stag(LevelIter level_iter);
 
       /**
        * Post current status and values to next processor.
