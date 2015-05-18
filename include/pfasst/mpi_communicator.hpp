@@ -22,6 +22,8 @@ using namespace std;
  *
  * @returns _empty_ `MPI_Status` object
  *
+ * @since v0.5.0
+ *
  * @ingroup Utilities
  */
 inline static MPI_Status MPI_Status_factory()
@@ -52,6 +54,12 @@ namespace pfasst
      *
      * In case @p err_code is not `MPI_SUCCESS` this throws MPIError with the error code looked up
      * to a descriptive string as defined by the MPI implementation.
+     *
+     * @param[in] err_code MPI error code as returned from an MPI call
+     *
+     * @since v0.5.0
+     *
+     * @ingroup Utilities
      */
     inline static void check_mpi_error(const int err_code)
     {
