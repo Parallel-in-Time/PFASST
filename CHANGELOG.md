@@ -1,11 +1,11 @@
 # Changelog                                                                        {#page_changelog}
 
-## v0.5.0 -- The MPI Bugfix Release (2015/05/XX)
+## v0.5.0 -- The MPI Bugfix Release (2015/06/01)
 
-DOI: []()
+DOI: [10.6084/m9.figshare.1431794](http://dx.doi.org/10.6084/m9.figshare.1431794)
 
-    $ 
-    > 
+    $ git diff --stat v0.4.0..v0.5.0
+    > 45 files changed, 1109 insertions(+), 758 deletions(-)
 
 ### Notable Features
 
