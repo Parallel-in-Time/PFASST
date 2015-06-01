@@ -1,5 +1,89 @@
 # Changelog                                                                        {#page_changelog}
 
+## v0.5.0 -- The MPI Bugfix Release (2015/06/31)
+
+DOI: [10.6084/m9.figshare.1431794](http://dx.doi.org/10.6084/m9.figshare.1431794)
+
+    $ git diff --stat v0.4.0..v0.5.0
+    > 45 files changed, 1109 insertions(+), 758 deletions(-)
+
+### Notable Features
+
+* random deadlocks with various setups due to open and unused MPI request handlers
+  ([#210][], [#212][], [#216][])
+
+* PFASST with one processor was not MLSDC
+  ([#193][], [#196][])
+
+* MPI is now the default when compiling
+  ([#197][])
+
+* expected quadrature error now calculated and logged
+  ([#206][])
+
+* runtime parameters can now also be read from config file instead of command line
+  ([#199][])
+
+* colourful logging can now be disabled via runtime flag
+  ([#202][])
+
+* file name for logs can be specified via runtime parameters
+  ([#203][])
+
+### Details
+
+* `VectorEncapsulation` and `MPIVectorEncapsulation` merged into one
+  ([#176][], [#200][])
+
+* version now set by Python script not requireing recompilation of everything when not changed
+  ([#195][])
+
+* various enhancements and fixes of build system
+  ([#201][], [#211][])
+
+* little code cleanup
+  ([#194][], [#204][], [#205][], [#208][])
+
+* some documentation
+  ([#191][], [#207][])
+
+[#176]: https://github.com/Parallel-in-Time/PFASST/pull/176
+[#191]: https://github.com/Parallel-in-Time/PFASST/pull/191
+[#193]: https://github.com/Parallel-in-Time/PFASST/pull/193
+[#194]: https://github.com/Parallel-in-Time/PFASST/pull/194
+[#195]: https://github.com/Parallel-in-Time/PFASST/pull/195
+[#196]: https://github.com/Parallel-in-Time/PFASST/pull/196
+[#197]: https://github.com/Parallel-in-Time/PFASST/pull/197
+[#199]: https://github.com/Parallel-in-Time/PFASST/pull/199
+[#200]: https://github.com/Parallel-in-Time/PFASST/pull/200
+[#201]: https://github.com/Parallel-in-Time/PFASST/pull/201
+[#202]: https://github.com/Parallel-in-Time/PFASST/pull/202
+[#203]: https://github.com/Parallel-in-Time/PFASST/pull/203
+[#204]: https://github.com/Parallel-in-Time/PFASST/pull/204
+[#205]: https://github.com/Parallel-in-Time/PFASST/pull/205
+[#206]: https://github.com/Parallel-in-Time/PFASST/pull/206
+[#207]: https://github.com/Parallel-in-Time/PFASST/pull/207
+[#208]: https://github.com/Parallel-in-Time/PFASST/pull/208
+[#210]: https://github.com/Parallel-in-Time/PFASST/pull/210
+[#211]: https://github.com/Parallel-in-Time/PFASST/pull/211
+[#212]: https://github.com/Parallel-in-Time/PFASST/pull/212
+[#216]: https://github.com/Parallel-in-Time/PFASST/pull/216
+
+### Contributors
+
+* Matthew Emmett, Lawrence Berkeley National Laboratory ([memmett][])
+* Torbjörn Klatt, Jülich Supercomputing Centre ([torbjoernk][])
+* Daniel Ruprecht, Institute of Computational Science, University of Lugano ([danielru][])
+* Robert Speck, Jülich Supercomputing Centre ([pancetta][])
+* Selman Terzi, Jülich Supercomputing Centre ([selmanTerzi][])
+
+[memmett]: https://github.com/memmett
+[torbjoernk]: https://github.com/torbjoernk
+[danielru]: https://github.com/danielru
+[pancetta]: https://github.com/pancetta
+[selmanTerzi]: https://github.com/selmanTerzi
+
+
 ## v0.4.0 -- The Big Improvement (2015/04/17)
 
 DOI: [10.6084/m9.figshare.1381721](http://dx.doi.org/10.6084/m9.figshare.1381721)

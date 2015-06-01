@@ -5,6 +5,11 @@
 #include <vector>
 using namespace std;
 
+#ifdef WITH_MPI
+#include "pfasst/mpi_communicator.hpp"
+using namespace pfasst::mpi;
+#endif
+
 #include "pfasst/encap/encapsulation.hpp"
 
 
@@ -24,6 +29,7 @@ namespace pfasst
         public Encapsulation<time>
     {
       public:
+
         //! @{
         VectorEncapsulation(const size_t size);
 
@@ -55,7 +61,7 @@ namespace pfasst
          */
         VectorEncapsulation(Encapsulation<time>&& other);
 
-        virtual ~VectorEncapsulation() = default;
+        virtual ~VectorEncapsulation();
         //! @}
 
         //! @{
@@ -88,6 +94,29 @@ namespace pfasst
          */
         virtual time norm0() const override;
         //! @}
+
+#ifdef WITH_MPI
+        //! @{
+        MPI_Request recv_request = MPI_REQUEST_NULL;
+        MPI_Request send_request = MPI_REQUEST_NULL;
+        //! @}
+
+        //! @{
+        inline MPICommunicator& as_mpi(ICommunicator* comm)
+        {
+          auto mpi = dynamic_cast<MPICommunicator*>(comm);
+          assert(mpi);
+          return *mpi;
+        }
+        //! @}
+
+        //! @{
+        virtual void post(ICommunicator* comm, int tag) override;
+        virtual void recv(ICommunicator* comm, int tag, bool blocking) override;
+        virtual void send(ICommunicator* comm, int tag, bool blocking) override;
+        virtual void broadcast(ICommunicator* comm) override;
+        //! @}
+#endif
 
     };
 

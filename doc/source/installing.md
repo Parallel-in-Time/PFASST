@@ -85,11 +85,6 @@ latest release from [GitHub][github_releases].
        `-Dpfasst_DISABLE_LIBCXX=OFF`.
        As libc++ is highly experimental on non-Darwin systems, this is a very exotic option.
 
-     * There are places in the code (mainly examples) that need a random number generator (RNG).
-       By default, `-Dpfasst_DEFAULT_RAND_SEED=ON` is set and the seed for the RNGs is set to `42`.
-       To overwrite this behaviour, set `-Dpfasst_DEFAULT_RAND_SEED=OFF` and 
-       `-Dpfasst_RANDOM_SEED=<YOUR_VALUE>`.
-
    * __Dependencies__
 
      * __Boost__

@@ -63,7 +63,7 @@ namespace pfasst
     /**
      * Compute quadrature matrix \\( Q \\) between two sets of nodes.
      *
-     * Computing the quadrature matrix \\( Q \\) for polynomial-based integration from one set of 
+     * Computing the quadrature matrix \\( Q \\) for polynomial-based integration from one set of
      * quadrature nodes (@p from) to another set of quadrature nodes (@p to).
      *
      * @tparam scalar precision of quadrature (i.e. `double`)
@@ -145,7 +145,7 @@ namespace pfasst
      * The \\( S \\) matrix provides a node-to-node quadrature where the \\( i \\)-th row of
      * \\( S \\) represents a quadrature from the \\( i-1 \\)-th node to the \\( i \\)-th node.
      *
-     * The procedure is simply subtracting the \\( i-1 \\)-th row of \\( Q \\) from the 
+     * The procedure is simply subtracting the \\( i-1 \\)-th row of \\( Q \\) from the
      * \\( i \\)-th row of \\( Q \\).
      *
      * @tparam scalar precision of quadrature (i.e. `double`)
@@ -264,6 +264,7 @@ namespace pfasst
         virtual const vector<precision>& get_q_vec() const;
         virtual const vector<precision>& get_nodes() const;
         virtual size_t get_num_nodes() const;
+
         /**
          * @throws pfasst::NotImplementedYet if not overwritten by implementation;
          *   required for quadrature of any kind
@@ -275,6 +276,11 @@ namespace pfasst
          */
         virtual bool right_is_node() const;
         //! @}
+
+        /**
+         * Compute a rough estimate of the numerical error... XXX
+         */
+        precision expected_error() const;
 
       protected:
         //! @{

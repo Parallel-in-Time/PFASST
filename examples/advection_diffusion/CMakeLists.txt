@@ -19,7 +19,7 @@ if(${pfasst_WITH_MPI})
     set(advec_mpi_examples
         mpi_pfasst
     )
-    set(all_advec_examples ${advec_mpi_examples})
+    set(all_advec_examples ${advec_examples} ${advec_mpi_examples})
 else()
     set(all_advec_examples ${advec_examples})
 endif()

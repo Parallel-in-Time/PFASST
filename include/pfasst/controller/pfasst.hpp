@@ -24,10 +24,7 @@ namespace pfasst
       ICommunicator* comm;  //!< communicator to use
       bool predict;         //!< whether to use a _predict_ sweep
 
-      /**
-       * @copydoc MLSDC::perform_sweeps()
-       */
-      virtual void perform_sweeps(size_t level) override;
+      void perform_sweeps(size_t level);
 
     public:
       /**
@@ -42,22 +39,22 @@ namespace pfasst
       /**
        * @copydoc MLSDC::cycle_down()
        */
-      virtual LevelIter cycle_down(LevelIter level_iter) override;
+      LevelIter cycle_down(LevelIter level_iter);
 
       /**
        * @copydoc MLSDC::cycle_up()
        */
-      virtual LevelIter cycle_up(LevelIter level_iter) override;
+      LevelIter cycle_up(LevelIter level_iter);
 
       /**
        * @copydoc MLSDC::cycle_bottom()
        */
-      virtual LevelIter cycle_bottom(LevelIter level_iter) override;
+      LevelIter cycle_bottom(LevelIter level_iter);
 
       /**
        * @copydoc MLSDC::cycle_v()
        */
-      virtual LevelIter cycle_v(LevelIter level_iter) override;
+      LevelIter cycle_v(LevelIter level_iter);
 
       /**
        * Predictor: restrict initial down, preform coarse sweeps, return to finest.
@@ -83,6 +80,7 @@ namespace pfasst
        * @param[in] level_iter level iterator providing information to compute the communication tag
        */
       virtual int tag(LevelIter level_iter);
+      virtual int stag(LevelIter level_iter);
 
       /**
        * Post current status and values to next processor.
