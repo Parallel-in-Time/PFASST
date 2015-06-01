@@ -10,7 +10,7 @@ spectral deferred correction* (MLSDC) algorithms.
 News
 ----
 
-* May XX, 2015: PFASST v0.5.0 release. Please see the [release notes](#releases) for more
+* June 01, 2015: PFASST v0.5.0 release. Please see the [release notes](#releases) for more
   information.
 
 * April 17, 2015: PFASST v0.4.0 release. Please see the [release notes](#releases) for more
@@ -50,10 +50,10 @@ Currently, it features the following content:
 Releases
 --------
 
-* **v0.5.0** The MPI Bugfix Release (2015/05/XX)
+* **v0.5.0** The MPI Bugfix Release (2015/06/31)
 
   A few important fixes to MPI behaviour.  
-  DOI: [][DOI_v050].  
+  DOI: [10.6084/m9.figshare.1431794][DOI_v050].  
   See [the Changelog](#page_changelog) for details.
 
 * **v0.4.0** The Big Improvement (2015/04/17)
@@ -84,7 +84,7 @@ Releases
 [DOI_v020]: http://dx.doi.org/10.5281/zenodo.11517
 [DOI_v030]: http://dx.doi.org/10.5281/zenodo.13221
 [DOI_v040]: http://dx.doi.org/10.6084/m9.figshare.1381721
-[DOI_v050]: 
+[DOI_v050]: http://dx.doi.org/10.6084/m9.figshare.1431794
 
 Release tags will be signed by one of the following PGP keys:
 
