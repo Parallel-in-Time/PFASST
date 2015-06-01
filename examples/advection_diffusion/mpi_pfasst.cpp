@@ -20,7 +20,7 @@ using namespace std;
 #include <pfasst/controller/pfasst.hpp>
 #include <pfasst/mpi_communicator.hpp>
 #include <pfasst/encap/automagic.hpp>
-#include <pfasst/encap/mpi_vector.hpp>
+#include <pfasst/encap/vector.hpp>
 
 #include "advection_diffusion_sweeper.hpp"
 #include "spectral_transfer_1d.hpp"
@@ -61,7 +61,7 @@ namespace pfasst
         vector<size_t> ndofs = { ndofs_c, ndofs_f };
 
         auto build_level = [ndofs](size_t level) {
-          auto factory  = make_shared<MPIVectorFactory<double>>(ndofs[level]);
+          auto factory  = make_shared<VectorFactory<double>>(ndofs[level]);
           auto sweeper  = make_shared<AdvectionDiffusionSweeper<>>(ndofs[level]);
           auto transfer = make_shared<SpectralTransfer1D<>>();
 

@@ -86,6 +86,10 @@ namespace pfasst
    */
   class IStatus
   {
+    public:
+      static const int NOT_CONVERGED = 0;
+      static const int CONVERGED = 1;
+
     protected:
       ICommunicator* comm;
 
@@ -139,9 +143,9 @@ namespace pfasst
       //! @}
 
       //! @{
-      virtual void post() = 0;
-      virtual void send() = 0;
-      virtual void recv() = 0;
+      virtual void post(int tag) = 0;
+      virtual void send(int tag) = 0;
+      virtual void recv(int tag) = 0;
       //! @}
   };
 
@@ -218,7 +222,7 @@ namespace pfasst
        * Perform one SDC sweep/iteration.
        *
        * Compute a correction and update solution values.
-       * Note that this function can assume that valid function values exist from a previous 
+       * Note that this function can assume that valid function values exist from a previous
        * pfasst::ISweeper::sweep() or pfasst::ISweeper::predict().
        */
       virtual void sweep() = 0;
@@ -310,7 +314,7 @@ namespace pfasst
        *
        * @param[in,out] dst            sweeper to interpolate onto (i.e. fine level)
        * @param[in]     src            sweeper to interpolate from (i.e. coarse level)
-       * @param[in]     interp_initial `true` if a delta for the initial condtion should also be 
+       * @param[in]     interp_initial `true` if a delta for the initial condtion should also be
        *   computed (PFASST)
        */
       virtual void interpolate(shared_ptr<ISweeper<time>> dst,

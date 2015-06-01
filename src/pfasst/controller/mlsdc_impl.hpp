@@ -20,7 +20,7 @@ namespace pfasst
   void MLSDC<time>::perform_sweeps(size_t level)
   {
     auto sweeper = this->get_level(level);
-    CLOG(INFO, "Controller") << "on level " << level + 1 << "/" << this->nlevels();
+    CVLOG(1, "Controller") << "on level " << level + 1 << "/" << this->nlevels();
     for (size_t s = 0; s < this->nsweeps[level]; s++) {
       if (predict) {
         sweeper->predict(initial & predict);
@@ -152,7 +152,7 @@ namespace pfasst
    * @note This method is recursive with two exit points.
    *   The two exit points:
    *     1. if @p level_iter points to the coarsest level
-   *     2. if MLSDC::cycle_bottom() results in a converged state
+   *     2. if MLSDC::cycle_down() results in a converged state
    */
   template<typename time>
   typename MLSDC<time>::LevelIter MLSDC<time>::cycle_v(typename MLSDC<time>::LevelIter level_iter)

@@ -1,14 +1,13 @@
 #ifndef _PFASST_ENCAP_IMEX_SWEEPER_HPP_
 #define _PFASST_ENCAP_IMEX_SWEEPER_HPP_
 
-#include <vector>
 #include <memory>
-using namespace std;
+#include <vector>
 
 #include "pfasst/encap/encapsulation.hpp"
 #include "pfasst/encap/encap_sweeper.hpp"
-#include "pfasst/encap/vector.hpp"
 
+using namespace std;
 
 namespace pfasst
 {
@@ -21,12 +20,12 @@ namespace pfasst
      *
      * This IMEX sweeper is for ODEs of the form
      * \\( \\dot{U} = F_{\\rm expl}(t,U) + F_{\\rm impl}(t, U) \\).
-     * To reduce complexity and computational effort the non-stiff part is treated explicitly and 
+     * To reduce complexity and computational effort the non-stiff part is treated explicitly and
      * the stiff part implicitly.
      *
-     * This sweeper requires three interfaces to be implemented: two routines to evaluate the 
-     * explicit \\( F_{\\rm expl} \\) and implicit \\( F_{\\rm impl} \\) pieces for a given state, 
-     * and one routine that solves (perhaps with an external solver) the backward-Euler equation 
+     * This sweeper requires three interfaces to be implemented: two routines to evaluate the
+     * explicit \\( F_{\\rm expl} \\) and implicit \\( F_{\\rm impl} \\) pieces for a given state,
+     * and one routine that solves (perhaps with an external solver) the backward-Euler equation
      * \\( U^{n+1} - \\Delta t F_{\\rm impl}(U^{n+1}) = RHS \\) for \\( U^{n+1} \\).
      *
      * @tparam time precision type of the time dimension

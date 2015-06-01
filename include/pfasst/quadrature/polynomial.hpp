@@ -114,7 +114,7 @@ namespace pfasst
          *
          * @returns roots sorted with respect to their value
          */
-        vector<CoeffT> roots(size_t num_iterations=20, CoeffT ztol=1.0e-20) const;
+        vector<CoeffT> roots(size_t num_iterations=100, CoeffT ztol=1.0e-20) const;
         //! @}
 
         //! @{
