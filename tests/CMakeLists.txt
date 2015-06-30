@@ -7,8 +7,6 @@ include_directories(
 )
 
 set(TESTS
-    test_quadrature
-    test_polynomial
 )
 
 foreach(test ${TESTS})
