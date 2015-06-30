@@ -98,62 +98,64 @@ endif()
 list(APPEND 3rdparty_INCLUDES "${Eigen3_INCLUDE_PATH}")
 
 
-if(pfasst_BUILD_EXAMPLES)
-    message(STATUS "--------------------------------------------------------------------------------")
-    message(STATUS "FFTW3")
+message(STATUS "--------------------------------------------------------------------------------")
+message(STATUS "FFTW3")
 
-    find_package(FFTW)
-    set_package_properties(FFTW
-        PROPERTIES
-          DESCRIPTION "FFTW3"
-          URL "http://fftw.org/"
-          TYPE OPTIONAL
-          PURPOSE "fast Fourier transformation"
+find_package(FFTW)
+set_package_properties(FFTW
+    PROPERTIES
+      DESCRIPTION "FFTW3"
+      URL "http://fftw.org/"
+      TYPE OPTIONAL
+      PURPOSE "fast Fourier transformation"
+)
+
+if(NOT FFTW_FOUND)
+    set(FFTW3_SOURCE_URL "http://fftw.org/fftw-3.3.4.tar.gz")
+    set(FFTW3_SOURCE_MD5 "2edab8c06b24feeb3b82bbb3ebf3e7b3")
+
+    message(STATUS "FFTW3 not found on your system")
+    message(STATUS " going to download and compile it from sources retrieved from:")
+    message(STATUS "  ${FFTW3_SOURCE_URL}")
+    set(fftw3_SOURCE_DIR "${pfasst_BINARY_DIR}/3rdparty/src/fftw3")
+    set(fftw3_INSTALL_DIR "${pfasst_BINARY_DIR}/3rdparty/src/fftw3-install")
+
+    ExternalProject_Add(
+        fftw3
+        LIST_SEPARATOR " "
+        URL ${FFTW3_SOURCE_URL}
+        URL_MD5 ${FFTW3_SOURCE_MD5}
+        TIMEOUT ${3rdparty_DOWNLOAD_TIMEOUT}
+        UPDATE_COMMAND ""
+        PATCH_COMMAND ""
+        BUILD_IN_SOURCE ON
+        CONFIGURE_COMMAND ${fftw3_SOURCE_DIR}/configure CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${CMAKE_CXX_FLAGS} --prefix=${fftw3_INSTALL_DIR} --libdir=${fftw3_INSTALL_DIR}/lib
+        BUILD_COMMAND make
+        TEST_COMMAND ""
+        INSTALL_DIR ${fftw3_SOURCE_DIR}-install
+        INSTALL_COMMAND make install
+        LOG_DOWNLOAD ON
+        LOG_CONFIGURE ON
+        LOG_BUILD ON
     )
+    # Specify include dir
+    set(FFTW_INCLUDE_PATH ${fftw3_INSTALL_DIR}/include)
+    set(FFTW_LIBRARIES ${fftw3_INSTALL_DIR}/lib/libfftw3.a)
 
-    if(NOT FFTW_FOUND)
-        set(FFTW3_SOURCE_URL "http://fftw.org/fftw-3.3.4.tar.gz")
-        set(FFTW3_SOURCE_MD5 "2edab8c06b24feeb3b82bbb3ebf3e7b3")
+    set(FFTW_FOUND TRUE)
 
-        message(STATUS "FFTW3 not found on your system")
-        message(STATUS " going to download and compile it from sources retrieved from:")
-        message(STATUS "  ${FFTW3_SOURCE_URL}")
-        set(fftw3_SOURCE_DIR "${pfasst_BINARY_DIR}/3rdparty/src/fftw3")
-        set(fftw3_INSTALL_DIR "${pfasst_BINARY_DIR}/3rdparty/src/fftw3-install")
+    list(APPEND pfasst_DEPENDEND_LIBS FFTW)
 
-        ExternalProject_Add(
-            fftw3
-            LIST_SEPARATOR " "
-            URL ${FFTW3_SOURCE_URL}
-            URL_MD5 ${FFTW3_SOURCE_MD5}
-            TIMEOUT ${3rdparty_DOWNLOAD_TIMEOUT}
-            UPDATE_COMMAND ""
-            PATCH_COMMAND ""
-            BUILD_IN_SOURCE ON
-            CONFIGURE_COMMAND ${fftw3_SOURCE_DIR}/configure CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${CMAKE_CXX_FLAGS} --prefix=${fftw3_INSTALL_DIR} --libdir=${fftw3_INSTALL_DIR}/lib
-            BUILD_COMMAND make
-            TEST_COMMAND ""
-            INSTALL_DIR ${fftw3_SOURCE_DIR}-install
-            INSTALL_COMMAND make install
-            LOG_DOWNLOAD ON
-            LOG_CONFIGURE ON
-            LOG_BUILD ON
-        )
-        # Specify include dir
-        set(FFTW_INCLUDE_PATH ${fftw3_INSTALL_DIR}/include)
-        set(FFTW_LIBRARIES ${fftw3_INSTALL_DIR}/lib/libfftw3.a)
-
-        set(FFTW_FOUND TRUE)
-
-        list(APPEND pfasst_DEPENDEND_LIBS FFTW)
-
-        msg_not_installed("FFTW3")
-    else()
-        set(FFTW_INCLUDE_PATH ${FFTW_INCLUDE_PATH} PARENT_SCOPE)
-        set(FFTW_LIBRARIES ${FFTW_LIBRARIES} PARENT_SCOPE)
-    endif()
-    set(FFTW_FOUND ${FFTW_FOUND} PARENT_SCOPE)
+    msg_not_installed("FFTW3")
+else()
+    set(FFTW_INCLUDE_PATH ${FFTW_INCLUDE_PATH} PARENT_SCOPE)
+    set(FFTW_LIBRARIES ${FFTW_LIBRARIES} PARENT_SCOPE)
 endif()
+set(FFTW_FOUND ${FFTW_FOUND} PARENT_SCOPE)
+
+list(APPEND 3rdparty_INCLUDES "${FFTW_INCLUDE_PATH}")
+list(APPEND 3rdparty_DEPENDEND_LIBS "${FFTW_LIBRARIES}")
+
 
 if(pfasst_BUILD_TESTS)
     set(TESTS_3rdparty_INCLUDES ${TESTS_3rdparty_INCLUDES})

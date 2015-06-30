@@ -7,8 +7,9 @@ include_directories(
 )
 
 set(TESTS
-    test_exceptions
-    test_logging
+    test_controller
+    test_sdc
+    test_status
 )
 
 foreach(test ${TESTS})
@@ -32,18 +33,6 @@ foreach(test ${TESTS})
         )
     endif()
     add_test(NAME ${test}
-        COMMAND ${CMAKE_BINARY_DIR}/tests/${test} --gtest_output=xml:${test}_out.xml
+        COMMAND ${CMAKE_BINARY_DIR}/tests/controller/${test} --gtest_output=xml:${test}_out.xml
     )
 endforeach(test)
-
-add_subdirectory(contrib)
-add_subdirectory(quadrature)
-add_subdirectory(comm)
-add_subdirectory(encap)
-add_subdirectory(sweeper)
-add_subdirectory(transfer)
-add_subdirectory(controller)
-
-if(${pfasst_BUILD_EXAMPLES})
-    add_subdirectory(examples)
-endif()
