@@ -31,7 +31,7 @@ namespace pfasst
   {
     this->tend = config::get_value<double>("tend", this->tend);
     this->dt = config::get_value<double>("dt", this->dt);
-    this->max_iterations = config::get_value<size_t>("num_iters", this->max_iterations);
+    this->max_iterations = config::get_value<size_t>("num_iter", this->max_iterations);
 
     // XXX: add some nice "nsteps" logic here
 
