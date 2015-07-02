@@ -291,7 +291,7 @@ namespace pfasst
      * Global     | `c`,`nocolor` | `bool`
      * Duration   | `dt`          | `double`
      * Duration   | `tend`        | `double`
-     * Duration   | `num_iters`   | `size_t`
+     * Duration   | `num_iter`    | `size_t`
      * Tolerances | `abs_res_tol` | `double`
      * Tolerances | `rel_res_tol` | `double`
      */
