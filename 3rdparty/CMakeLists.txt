@@ -35,6 +35,10 @@ list(APPEND 3rdparty_INCLUDES ${Boost_INCLUDE_DIRS})
 list(APPEND 3rdparty_DEPENDEND_LIBS ${Boost_LIBRARIES})
 
 
+###
+list(APPEND 3rdparty_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/leathers)
+
+
 message(STATUS "--------------------------------------------------------------------------------")
 message(STATUS "Eigen3")
 
