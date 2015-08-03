@@ -54,10 +54,6 @@ namespace pfasst
 
       virtual void add_transfer(shared_ptr<TransferT> transfer) override;
 
-      virtual const shared_ptr<typename TransferT::traits::coarse_sweeper_type> get_coarse() const override;
-      virtual       shared_ptr<typename TransferT::traits::coarse_sweeper_type> get_coarse() override;
-      virtual const shared_ptr<typename TransferT::traits::fine_sweeper_type> get_fine() const override;
-      virtual       shared_ptr<typename TransferT::traits::fine_sweeper_type> get_fine() override;
       virtual const shared_ptr<typename TransferT::traits::fine_sweeper_type> get_sweeper() const;
       virtual       shared_ptr<typename TransferT::traits::fine_sweeper_type> get_sweeper();
 

@@ -46,38 +46,6 @@ namespace pfasst
   }
 
   template<class TransferT>
-  const shared_ptr<typename TransferT::traits::coarse_sweeper_type>
-  SDC<TransferT>::get_coarse() const
-  {
-    CLOG(WARNING, "CONTROL") << "SDC Controller has no Coarse Level.";
-    return this->get_sweeper();
-  }
-
-  template<class TransferT>
-  shared_ptr<typename TransferT::traits::coarse_sweeper_type>
-  SDC<TransferT>::get_coarse()
-  {
-    CLOG(WARNING, "CONTROL") << "SDC Controller has no Coarse Level.";
-    return this->get_sweeper();
-  }
-
-  template<class TransferT>
-  const shared_ptr<typename TransferT::traits::fine_sweeper_type>
-  SDC<TransferT>::get_fine() const
-  {
-    CLOG(WARNING, "CONTROL") << "SDC Controller has no Fine Level.";
-    return this->get_sweeper();
-  }
-
-  template<class TransferT>
-  shared_ptr<typename TransferT::traits::fine_sweeper_type>
-  SDC<TransferT>::get_fine()
-  {
-    CLOG(WARNING, "CONTROL") << "SDC Controller has no Fine Level.";
-    return this->get_sweeper();
-  }
-
-  template<class TransferT>
   const shared_ptr<typename TransferT::traits::fine_sweeper_type>
   SDC<TransferT>::get_sweeper() const
   {
@@ -96,6 +64,11 @@ namespace pfasst
   SDC<TransferT>::setup()
   {
     Controller<TransferT>::setup();
+
+    if (this->get_num_levels() != 1) {
+      CLOG(ERROR, "CONTROL") << "One level (Sweeper) must have been added for SDC.";
+      throw logic_error("SDC requires one level");
+    }
 
     this->get_sweeper()->status() = this->get_status();
     this->get_sweeper()->setup();

@@ -7,6 +7,31 @@ namespace pfasst
 {
   namespace comm
   {
+    size_t Communicator::get_size() const
+    {
+      return 3;
+    }
+
+    size_t Communicator::get_rank() const
+    {
+      return 0;
+    }
+
+    size_t Communicator::get_root() const
+    {
+      return 0;
+    }
+
+    bool Communicator::is_first() const
+    {
+      return false;
+    }
+
+    bool Communicator::is_last() const
+    {
+      return false;
+    }
+
     void Communicator::send(const int* data, const int count, const int dest_rank, const int tag)
     {
       throw NotImplementedYet("send for generic data type");

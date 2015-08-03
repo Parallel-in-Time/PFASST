@@ -20,6 +20,13 @@ namespace pfasst
         Communicator& operator=(const Communicator& other) = default;
         Communicator& operator=(Communicator&& other) = default;
 
+        virtual size_t get_size() const;
+        virtual size_t get_rank() const;
+        virtual size_t get_root() const;
+
+        virtual bool is_first() const;
+        virtual bool is_last() const;
+
         virtual void send(const int* data, const int count,
                           const int dest_rank, const int tag);
         virtual void send(const double* data, const int count,

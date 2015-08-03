@@ -7,7 +7,6 @@ using namespace std;
 #include "pfasst/globals.hpp"
 #include "pfasst/exceptions.hpp"
 #include "pfasst/controller/status.hpp"
-#include "pfasst/comm/interface.hpp"
 
 
 namespace pfasst
@@ -23,12 +22,8 @@ namespace pfasst
       typedef typename transfer_type::traits::fine_time_type time_type;
 
     protected:
-      shared_ptr<typename transfer_type::traits::coarse_sweeper_type> _coarse_level;
-      shared_ptr<typename transfer_type::traits::fine_sweeper_type>   _fine_level;
-
       shared_ptr<transfer_type>      _transfer;
       shared_ptr<Status<time_type>>  _status;
-      shared_ptr<comm::Communicator> _comm;
       bool                           _ready;
 
       virtual bool& ready();
@@ -44,9 +39,6 @@ namespace pfasst
       virtual       shared_ptr<Status<typename TransferT::traits::fine_time_type>>& status();
       virtual const shared_ptr<Status<typename TransferT::traits::fine_time_type>>  get_status() const;
 
-      virtual       shared_ptr<comm::Communicator>& communicator();
-      virtual const shared_ptr<comm::Communicator>  get_communicator() const;
-
       virtual size_t get_num_levels() const;
       virtual size_t get_num_steps() const;
       virtual bool   is_ready() const;
@@ -54,12 +46,8 @@ namespace pfasst
       template<class SweeperT>
       void add_sweeper(shared_ptr<SweeperT> sweeper, const bool as_coarse);
 
+      // XXX: might not be in interface
       virtual void add_transfer(shared_ptr<TransferT> transfer);
-
-      virtual const shared_ptr<typename TransferT::traits::coarse_sweeper_type> get_coarse() const;
-      virtual       shared_ptr<typename TransferT::traits::coarse_sweeper_type> get_coarse();
-      virtual const shared_ptr<typename TransferT::traits::fine_sweeper_type> get_fine() const;
-      virtual       shared_ptr<typename TransferT::traits::fine_sweeper_type> get_fine();
 
       virtual const shared_ptr<TransferT> get_transfer() const;
       virtual       shared_ptr<TransferT> get_transfer();

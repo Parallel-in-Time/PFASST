@@ -23,8 +23,12 @@ class SweeperMock
     MOCK_METHOD0_T(status, shared_ptr<pfasst::Status<typename SweeperTrait::time_type>>&());
     MOCK_CONST_METHOD0_T(get_status, const shared_ptr<pfasst::Status<typename SweeperTrait::time_type>>());
 
-    MOCK_METHOD0_T(encap_factory, shared_ptr<typename SweeperTrait::encap_type::factory_type>&());
-    MOCK_CONST_METHOD0_T(get_encap_factory, const shared_ptr<typename SweeperTrait::encap_type::factory_type>());
+//     MOCK_METHOD0_T(encap_factory, shared_ptr<typename SweeperTrait::encap_type::factory_type>&());
+//     MOCK_CONST_METHOD0_T(get_encap_factory, const shared_ptr<typename SweeperTrait::encap_type::factory_type>());
+
+    MOCK_METHOD0_T(initial_state, shared_ptr<typename SweeperTrait::encap_type>&());
+    MOCK_CONST_METHOD0_T(get_initial_state, const shared_ptr<typename SweeperTrait::encap_type>());
+    MOCK_CONST_METHOD0_T(get_end_state, const shared_ptr<typename SweeperTrait::encap_type>());
 
     MOCK_METHOD0_T(setup, void());
 

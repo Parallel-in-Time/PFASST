@@ -31,31 +31,10 @@ namespace pfasst
   }
 
   template<class TransferT>
-  shared_ptr<comm::Communicator>&
-  Controller<TransferT>::communicator()
-  {
-    return this->_comm;
-  }
-
-  template<class TransferT>
-  const shared_ptr<comm::Communicator>
-  Controller<TransferT>::get_communicator() const
-  {
-    return this->_comm;
-  }
-
-  template<class TransferT>
   size_t
   Controller<TransferT>::get_num_levels() const
   {
-    size_t num = 0;
-    if (this->_coarse_level != nullptr) {
-      num++;
-    }
-    if (this->_fine_level != nullptr) {
-      num++;
-    }
-    return num;
+    return 0;
   }
 
   template<class TransferT>
@@ -110,65 +89,13 @@ namespace pfasst
   template<class SweeperT>
   void
   Controller<TransferT>::add_sweeper(shared_ptr<SweeperT> sweeper, const bool as_coarse)
-  {
-    static_assert(is_same<SweeperT, typename TransferT::traits::fine_sweeper_type>::value
-                  || is_same<SweeperT, typename TransferT::traits::coarse_sweeper_type>::value,
-                  "Sweeper must be either a Coarse or Fine Sweeper Type.");
-
-    if (as_coarse) {
-      if (is_same<SweeperT, typename transfer_type::traits::coarse_sweeper_type>::value) {
-        this->_coarse_level = sweeper;
-      } else {
-        CLOG(ERROR, "CONTROL") << "Type of given Sweeper ("
-          << typeid(SweeperT).name() << ") is not applicable as Coarse Sweeper ("
-          << typeid(typename transfer_type::traits::coarse_sweeper_type).name() << ").";
-        throw logic_error("given sweeper can not be used as coarse sweeper");
-      }
-    } else {
-      if (is_same<SweeperT, typename transfer_type::traits::fine_sweeper_type>::value) {
-        this->_fine_level = sweeper;
-      } else {
-        CLOG(ERROR, "CONTROL") << "Type of given Sweeper ("
-          << typeid(SweeperT).name() << ") is not applicable as Fine Sweeper ("
-          << typeid(typename transfer_type::traits::fine_sweeper_type).name() << ").";
-        throw logic_error("given sweeper can not be used as fine sweeper");
-      }
-    }
-  }
+  {}
 
   template<class TransferT>
   void
   Controller<TransferT>::add_transfer(shared_ptr<TransferT> transfer)
   {
     this->_transfer = transfer;
-  }
-
-  template<class TransferT>
-  const shared_ptr<typename TransferT::traits::coarse_sweeper_type>
-  Controller<TransferT>::get_coarse() const
-  {
-    return this->_coarse_level;
-  }
-
-  template<class TransferT>
-  shared_ptr<typename TransferT::traits::coarse_sweeper_type>
-  Controller<TransferT>::get_coarse()
-  {
-    return this->_coarse_level;
-  }
-
-  template<class TransferT>
-  const shared_ptr<typename TransferT::traits::fine_sweeper_type>
-  Controller<TransferT>::get_fine() const
-  {
-    return this->_fine_level;
-  }
-
-  template<class TransferT>
-  shared_ptr<typename TransferT::traits::fine_sweeper_type>
-  Controller<TransferT>::get_fine()
-  {
-    return this->_fine_level;
   }
 
   template<class TransferT>
@@ -191,11 +118,6 @@ namespace pfasst
   {
     CLOG_IF(this->is_ready(), WARNING, "CONTROL")
       << "Controller has already been setup.";
-
-    if (this->get_num_levels() == 0) {
-      CLOG(ERROR, "CONTROL") << "At least one level (Sweeper) must have been added.";
-      throw logic_error("no levels defined");
-    }
 
     if (this->get_status()->get_t_end() <= 0.0) {
       CLOG(ERROR, "CONTROL") << "End time point must be larger than zero."
@@ -262,11 +184,13 @@ namespace pfasst
         << (this->get_status()->get_iteration() + 1)
         << ") will exceed maximum number of allowed iterations ("
         << this->get_status()->get_max_iterations() << ")";
+
       return false;
     } else {
       CLOG(INFO, "CONTROL") << "Advancing to next iteration ("
         << (this->get_status()->get_iteration() + 1) << ")";
       this->status()->iteration()++;
+
       return true;
     }
   }

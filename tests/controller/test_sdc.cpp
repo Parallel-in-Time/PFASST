@@ -9,7 +9,6 @@ using pfasst::SDC;
 #include <pfasst/transfer/traits.hpp>
 #include <pfasst/transfer/polynomial.hpp>
 
-#include "comm/mocks.hpp"
 #include "sweeper/mocks.hpp"
 #include "quadrature/mocks.hpp"
 #include "transfer/mocks.hpp"
@@ -33,13 +32,11 @@ class Interface
     shared_ptr<SDC<TransferType>> controller;
 
     shared_ptr<pfasst::Status<double>> status;
-    shared_ptr<CommMock> comm;
 
     virtual void SetUp()
     {
       this->controller = make_shared<SDC<TransferType>>();
       this->status = make_shared<pfasst::Status<double>>();
-      this->comm = make_shared<CommMock>();
     }
 };
 
@@ -59,19 +56,6 @@ TEST_F(Interface, status_can_be_modified)
   controller->status() = status;
   controller->status()->time() = 42.0;
   EXPECT_THAT(controller->get_status()->get_time(), Eq(42.0));
-}
-
-TEST_F(Interface, has_no_communicator_after_instantiation)
-{
-  EXPECT_THAT(controller->get_communicator(), IsNull());
-}
-
-TEST_F(Interface, communicator_can_be_assigned)
-{
-  ASSERT_THAT(controller->get_communicator(), Not(Eq(comm)));
-
-  controller->communicator() = comm;
-  EXPECT_THAT(controller->get_communicator(), Eq(comm));
 }
 
 TEST_F(Interface, computes_number_steps_fails_if_tend_or_dt_not_set)
@@ -101,7 +85,6 @@ class Setup
 
     vector<double> nodes{0.0, 0.5, 1.0};
     shared_ptr<pfasst::Status<double>> status;
-//     shared_ptr<CommMock> comm;
     shared_ptr<SweeperType> sweeper;
     shared_ptr<TransferType> transfer;
     shared_ptr<QuadType> quad;
@@ -111,7 +94,6 @@ class Setup
       this->controller = make_shared<SDC<TransferType>>();
       this->status = make_shared<pfasst::Status<double>>();
       this->controller->status() = status;
-//       this->comm = make_shared<CommMock>();
 
       this->quad = make_shared<QuadType>();
       ON_CALL(*(this->quad.get()), right_is_node()).WillByDefault(Return(true));
@@ -176,7 +158,6 @@ class Logic
 
     vector<double> nodes{0.0, 0.5, 1.0};
     shared_ptr<pfasst::Status<double>> status;
-//     shared_ptr<CommMock> comm;
     shared_ptr<SweeperType> sweeper;
     shared_ptr<QuadType> quad;
 
@@ -185,7 +166,6 @@ class Logic
       this->controller = make_shared<SDC<TransferType>>();
       this->status = make_shared<pfasst::Status<double>>();
       this->controller->status() = status;
-//       this->comm = make_shared<CommMock>();
       this->quad = make_shared<QuadType>();
       ON_CALL(*(this->quad.get()), right_is_node()).WillByDefault(Return(true));
       ON_CALL(*(this->quad.get()), get_nodes()).WillByDefault(ReturnRef(this->nodes));
