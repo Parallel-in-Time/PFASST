@@ -8,7 +8,6 @@
 using namespace std;
 
 #include "pfasst/quadrature.hpp"
-using namespace pfasst::quadrature;
 
 
 namespace pfasst

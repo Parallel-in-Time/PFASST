@@ -5,19 +5,20 @@ using pfasst::Controller;
 
 #include <pfasst/encap/traits.hpp>
 #include <pfasst/encap/vector.hpp>
-typedef pfasst::vector_encap_traits<double, double> VectorEncapTrait;
-typedef pfasst::encap::Encapsulation<VectorEncapTrait> VectorEncapsulation;
 
-#include <pfasst/sweeper/interface.hpp>
-typedef pfasst::Sweeper<pfasst::sweeper_traits<VectorEncapTrait>> SweeperType;
 #include <pfasst/transfer/traits.hpp>
-typedef pfasst::transfer_traits<SweeperType, SweeperType> TransferTraits;
 #include <pfasst/transfer/polynomial.hpp>
-typedef pfasst::PolynomialTransfer<TransferTraits> TransferType;
 
 #include "comm/mocks.hpp"
 #include "controller/mocks.hpp"
 #include "sweeper/mocks.hpp"
+#include "transfer/mocks.hpp"
+
+typedef pfasst::vector_encap_traits<double, double>           VectorEncapTrait;
+typedef pfasst::encap::Encapsulation<VectorEncapTrait>        VectorEncapsulation;
+typedef SweeperMock<pfasst::sweeper_traits<VectorEncapTrait>> SweeperType;
+typedef pfasst::transfer_traits<SweeperType, SweeperType, 2>  TransferTraits;
+typedef TransferMock<TransferTraits>                          TransferType;
 
 
 typedef ::testing::Types<Controller<TransferType>> ControllerTypes;
@@ -30,13 +31,13 @@ class Interface
   protected:
     shared_ptr<Controller<TransferType>> controller;
 
-    shared_ptr<StatusMock<double>> status;
+    shared_ptr<pfasst::Status<double>> status;
     shared_ptr<CommMock> comm;
 
     virtual void SetUp()
     {
       this->controller = make_shared<Controller<TransferType>>();
-      this->status = make_shared<StatusMock<double>>();
+      this->status = make_shared<pfasst::Status<double>>();
       this->comm = make_shared<CommMock>();
     }
 };
@@ -46,10 +47,10 @@ TEST_F(Interface, has_a_status)
   EXPECT_THAT(controller->get_status(), NotNull());
 }
 
-TEST_F(Interface, status_can_not_be_assigned)
+TEST_F(Interface, status_can_be_assigned)
 {
   controller->status() = status;
-  EXPECT_THAT(controller->get_status(), Not(Eq(status)));
+  EXPECT_THAT(controller->get_status(), Eq(status));
 }
 
 TEST_F(Interface, status_can_be_modified)
@@ -65,6 +66,8 @@ TEST_F(Interface, has_no_communicator_after_instantiation)
 
 TEST_F(Interface, communicator_can_be_assigned)
 {
+  ASSERT_THAT(controller->get_communicator(), Not(Eq(comm)));
+
   controller->communicator() = comm;
   EXPECT_THAT(controller->get_communicator(), Eq(comm));
 }
@@ -91,7 +94,7 @@ class Setup
   protected:
     shared_ptr<Controller<TransferType>> controller;
 
-    shared_ptr<StatusMock<double>> status;
+    shared_ptr<pfasst::Status<double>> status;
     shared_ptr<CommMock> comm;
     shared_ptr<SweeperType> sweeper1;
     shared_ptr<SweeperType> sweeper2;
@@ -100,7 +103,7 @@ class Setup
     virtual void SetUp()
     {
       this->controller = make_shared<Controller<TransferType>>();
-      this->status = make_shared<StatusMock<double>>();
+      this->status = make_shared<pfasst::Status<double>>();
       this->comm = make_shared<CommMock>();
       this->sweeper1 = make_shared<SweeperType>();
       this->sweeper2 = make_shared<SweeperType>();
@@ -163,7 +166,7 @@ class Logic
   protected:
     shared_ptr<Controller<TransferType>> controller;
 
-    shared_ptr<StatusMock<double>> status;
+    shared_ptr<pfasst::Status<double>> status;
     shared_ptr<CommMock> comm;
     shared_ptr<SweeperType> sweeper1;
     shared_ptr<SweeperType> sweeper2;
@@ -171,7 +174,7 @@ class Logic
     virtual void SetUp()
     {
       this->controller = make_shared<Controller<TransferType>>();
-      this->status = make_shared<StatusMock<double>>();
+      this->status = make_shared<pfasst::Status<double>>();
       this->comm = make_shared<CommMock>();
       this->sweeper1 = make_shared<SweeperType>();
       this->sweeper2 = make_shared<SweeperType>();

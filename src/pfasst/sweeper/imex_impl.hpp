@@ -158,6 +158,11 @@ namespace pfasst
 
   template<class SweeperTrait, typename Enabled>
   void
+  IMEX<SweeperTrait, Enabled>::post_step()
+  {}
+
+  template<class SweeperTrait, typename Enabled>
+  void
   IMEX<SweeperTrait, Enabled>::advance()
   {
     assert(this->get_end_state() != nullptr);

@@ -182,11 +182,6 @@ class Interface
     }
 };
 
-TEST_F(Interface, no_implementation_of_advancing)
-{
-  EXPECT_THROW(sweeper.advance(), pfasst::NotImplementedYet);
-}
-
 TEST_F(Interface, no_implementation_of_reevaluation)
 {
   EXPECT_THROW(sweeper.reevaluate(), pfasst::NotImplementedYet);

@@ -99,6 +99,8 @@ namespace pfasst
       virtual void sweep();
       virtual void post_sweep();
 
+      virtual void post_step();
+
       virtual void advance();
 
       virtual void spread();

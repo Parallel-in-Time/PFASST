@@ -13,7 +13,7 @@ typedef pfasst::encap::Encapsulation<VectorEncapTrait> VectorEncapsulation;
 #include "pfasst/sweeper/interface.hpp"
 typedef pfasst::Sweeper<pfasst::sweeper_traits<VectorEncapTrait>> Sweeper;
 
-typedef ::testing::Types<PolynomialTransfer<pfasst::transfer_traits<Sweeper, Sweeper>>> PolynomialTransferTypes;
+typedef ::testing::Types<PolynomialTransfer<pfasst::transfer_traits<Sweeper, Sweeper, 2>>> PolynomialTransferTypes;
 INSTANTIATE_TYPED_TEST_CASE_P(PolynomialTransfer, Concepts, PolynomialTransferTypes);
 
 

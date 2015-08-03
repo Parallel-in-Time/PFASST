@@ -49,18 +49,19 @@ namespace pfasst
       IMEX<SweeperTrait, Enabled>& operator=(const IMEX<SweeperTrait, Enabled>& other) = default;
       IMEX<SweeperTrait, Enabled>& operator=(IMEX<SweeperTrait, Enabled>&& other) = default;
 
-      virtual void setup();
+      virtual void setup() override;
 
-      virtual void pre_predict();
-      virtual void predict();
-      virtual void post_predict();
+      virtual void pre_predict() override;
+      virtual void predict() override;
+      virtual void post_predict() override;
 
-      virtual void pre_sweep();
-      virtual void sweep();
-      virtual void post_sweep();
+      virtual void pre_sweep() override;
+      virtual void sweep() override;
+      virtual void post_sweep() override;
 
-      virtual void advance();
-      virtual void reevaluate(const bool initial_only=false);
+      virtual void post_step() override;
+      virtual void advance() override;
+      virtual void reevaluate(const bool initial_only = false) override;
   };
 }  // ::pfasst
 

@@ -10,7 +10,7 @@ typedef pfasst::vector_encap_traits<double, double> VectorEncapTrait;
 #include "pfasst/sweeper/interface.hpp"
 typedef pfasst::Sweeper<pfasst::sweeper_traits<VectorEncapTrait>> Sweeper;
 
-typedef ::testing::Types<Spectral1DTransfer<pfasst::transfer_traits<Sweeper, Sweeper>>> Spectral1DTransferTypes;
+typedef ::testing::Types<Spectral1DTransfer<pfasst::transfer_traits<Sweeper, Sweeper, 2>>> Spectral1DTransferTypes;
 INSTANTIATE_TYPED_TEST_CASE_P(Spectral1DTransfer, Concepts, Spectral1DTransferTypes);
 
 
@@ -18,8 +18,8 @@ class Interpolation
   : public ::testing::Test
 {
   protected:
-    typedef Spectral1DTransfer<pfasst::transfer_traits<Sweeper, Sweeper>> transfer_type;
-    typedef pfasst::encap::VectorEncapsulation<double, double>            encap_type;
+    typedef Spectral1DTransfer<pfasst::transfer_traits<Sweeper, Sweeper, 2>> transfer_type;
+    typedef pfasst::encap::VectorEncapsulation<double, double>               encap_type;
 
     transfer_type          transfer;
     shared_ptr<Sweeper>    coarse_sweeper;

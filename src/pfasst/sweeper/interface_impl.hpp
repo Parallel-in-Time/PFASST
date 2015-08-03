@@ -251,10 +251,13 @@ namespace pfasst
 
   template<class SweeperTrait, typename Enabled>
   void
+  Sweeper<SweeperTrait, Enabled>::post_step()
+  {}
+
+  template<class SweeperTrait, typename Enabled>
+  void
   Sweeper<SweeperTrait, Enabled>::advance()
-  {
-    throw NotImplementedYet("advancing the sweeper to the next time step");
-  }
+  {}
 
   template<class SweeperTrait, typename Enabled>
   void
@@ -330,7 +333,7 @@ namespace pfasst
     assert(this->get_quadrature() != nullptr);
 
     if (this->get_quadrature()->right_is_node()) {
-      assert(this->end_state() != nullptr);
+      assert(this->get_end_state() != nullptr);
       assert(this->get_states().size() > 0);
 
       this->end_state()->data() = this->get_states().back()->get_data();

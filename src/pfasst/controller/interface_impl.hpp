@@ -17,7 +17,7 @@ namespace pfasst
   {}
 
   template<class TransferT>
-  shared_ptr<Status<typename TransferT::traits::fine_time_type>>
+  shared_ptr<Status<typename TransferT::traits::fine_time_type>>&
   Controller<TransferT>::status()
   {
     return this->_status;
@@ -235,16 +235,17 @@ namespace pfasst
     const time_type delta_time = num_steps * this->get_status()->get_dt();
     const time_type new_time = this->get_status()->get_time() + delta_time;
 
-    if (new_time > this->get_status()->get_t_end()) {
+    if (new_time > this->get_status()->get_t_end()
+        || almost_equal(new_time, this->get_status()->get_t_end())) {
       CLOG(WARNING, "CONTROL") << "Advancing " << num_steps
-        << ((num_steps > 1) ? " steps " : " step ")
+        << ((num_steps > 1) ? " time steps " : " time step ")
         << "with dt=" << this->get_status()->get_dt() << " to t=" << new_time
         << " will exceed T_end=" << this->get_status()->get_t_end() << " by "
         << (new_time - this->get_status()->get_t_end());
       return false;
     } else {
       CLOG(INFO, "CONTROL") << "Advancing " << num_steps
-        << ((num_steps > 1) ? " steps " : " step ")
+        << ((num_steps > 1) ? " time steps " : " time step ")
         << "with dt=" << this->get_status()->get_dt() << " to t=" << new_time;
       this->status()->time() += delta_time;
       this->status()->step() += num_steps;

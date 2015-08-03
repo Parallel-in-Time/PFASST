@@ -12,7 +12,7 @@ typedef pfasst::vector_encap_traits<double, double> VectorEncapTrait;
 #include "pfasst/sweeper/interface.hpp"
 typedef pfasst::Sweeper<pfasst::sweeper_traits<VectorEncapTrait>> Sweeper;
 
-typedef ::testing::Types<Transfer<pfasst::transfer_traits<Sweeper, Sweeper>>> TransferTypes;
+typedef ::testing::Types<Transfer<pfasst::transfer_traits<Sweeper, Sweeper, 2>>> TransferTypes;
 INSTANTIATE_TYPED_TEST_CASE_P(Transfer, Concepts, TransferTypes);
 
 
@@ -20,8 +20,8 @@ class Interface
   : public ::testing::Test
 {
   protected:
-    typedef Transfer<pfasst::transfer_traits<Sweeper, Sweeper>> transfer_type;
-    typedef pfasst::encap::VectorEncapsulation<double, double>  encap_type;
+    typedef Transfer<pfasst::transfer_traits<Sweeper, Sweeper, 2>> transfer_type;
+    typedef pfasst::encap::VectorEncapsulation<double, double>     encap_type;
 
     transfer_type          transfer;
     shared_ptr<Sweeper>    coarse_sweeper;

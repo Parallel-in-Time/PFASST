@@ -96,6 +96,9 @@ namespace pfasst
   SDC<TransferT>::setup()
   {
     Controller<TransferT>::setup();
+
+    this->get_sweeper()->status() = this->get_status();
+    this->get_sweeper()->setup();
   }
 
   template<class TransferT>
@@ -105,14 +108,11 @@ namespace pfasst
     Controller<TransferT>::run();
 
     // iterate over time steps
-    for(; this->get_status()->get_time() < this->get_status()->get_t_end(); this->advance_time()) {
+    do {
       const bool do_initial = this->get_status()->get_step() == 0;
 
       // iterate on current time step
-      for (
-        this->status()->iteration() = 0;
-        this->get_status()->get_iteration() < this->get_status()->get_max_iterations();
-      ) {
+      do {
         const bool do_prediction = this->get_status()->get_iteration() == 0;
 
         if (do_prediction) {
@@ -124,22 +124,35 @@ namespace pfasst
           this->get_sweeper()->sweep();
           this->get_sweeper()->post_sweep();
         }
+      } while(this->advance_iteration());
+    } while(this->advance_time());
+  }
 
-        if (this->get_sweeper()->converged()) {
-          break;
-        }
+  template<class TransferT>
+  bool
+  SDC<TransferT>::advance_time(const size_t& num_steps)
+  {
+    this->get_sweeper()->post_step();
 
-        if (this->advance_iteration()) {
-          this->get_sweeper()->save();
-        }
-      }
-
-      this->get_sweeper()->post_step();
-
-      if (this->advance_time()) {
-        this->get_sweeper()->advance();
-      }
+    if (Controller<TransferT>::advance_time(num_steps)) {
+      this->get_sweeper()->advance();
+      return true;
+    } else {
+      return false;
     }
   }
 
+  template<class TransferT>
+  bool
+  SDC<TransferT>::advance_iteration()
+  {
+    if (this->get_sweeper()->converged()) {
+      return false;
+    } else if (Controller<TransferT>::advance_iteration()) {
+      this->get_sweeper()->save();
+      return true;
+    } else {
+      return false;
+    }
+  }
 }  // ::pfasst

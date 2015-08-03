@@ -41,8 +41,8 @@ namespace pfasst
       Controller<TransferT>& operator=(const Controller<TransferT>& other) = default;
       Controller<TransferT>& operator=(Controller<TransferT>&& other) = default;
 
-      virtual       shared_ptr<Status<typename TransferT::traits::fine_time_type>> status();
-      virtual const shared_ptr<Status<typename TransferT::traits::fine_time_type>> get_status() const;
+      virtual       shared_ptr<Status<typename TransferT::traits::fine_time_type>>& status();
+      virtual const shared_ptr<Status<typename TransferT::traits::fine_time_type>>  get_status() const;
 
       virtual       shared_ptr<comm::Communicator>& communicator();
       virtual const shared_ptr<comm::Communicator>  get_communicator() const;
