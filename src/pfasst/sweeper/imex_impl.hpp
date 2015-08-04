@@ -64,7 +64,7 @@ namespace pfasst
       const time_type ds = dt * (nodes[m + 1] - nodes.front());
 
       shared_ptr<encap_type> rhs = this->get_states()[m];
-      rhs->scale_add(ds, this->_expl_rhs[m]);
+      rhs->scaled_add(ds, this->_expl_rhs[m]);
       this->implicit_solve(this->_impl_rhs[m + 1], this->states()[m + 1], tm, ds, rhs);
       tm += ds;
       this->_expl_rhs[m + 1] = this->evaluate_rhs_expl(tm, this->get_states()[m + 1]);
@@ -90,7 +90,6 @@ namespace pfasst
     CLOG_IF(this->get_quadrature()->left_is_node(), WARNING, "SWEEPER")
       << "IMEX Sweeper for quadrature nodes containing t_0 not implemented and tested.";
 
-    const time_type t = this->get_status()->get_time();
     const time_type dt = this->get_status()->get_dt();
     const auto q_mat = this->get_quadrature()->get_q_mat();
     const auto nodes = this->get_quadrature()->get_nodes();
@@ -103,11 +102,11 @@ namespace pfasst
       // XXX: nodes[m] - nodes[0] ?!
       const size_t ds = dt * (nodes[m] - nodes.front());
 
-      this->_q_integrals[m + 1]->scale_add(-ds, this->_expl_rhs[m]);
-      this->_q_integrals[m + 1]->scale_add(-ds, this->_impl_rhs[m + 1]);
+      this->_q_integrals[m + 1]->scaled_add(-ds, this->_expl_rhs[m]);
+      this->_q_integrals[m + 1]->scaled_add(-ds, this->_impl_rhs[m + 1]);
     }
     for (size_t m = 0; m < this->_q_integrals.size(); ++m) {
-      this->_q_integrals[m]->scale_add(1.0, this->get_tau()[m]);
+      this->_q_integrals[m]->scaled_add(1.0, this->get_tau()[m]);
     }
   }
 
@@ -141,8 +140,8 @@ namespace pfasst
 
       shared_ptr<encap_type> rhs = this->get_initial_state();
       rhs->data() = this->get_states()[m]->data();
-      rhs->scale_add(ds, this->_expl_rhs[m]);
-      rhs->scale_add(1.0, this->_q_integrals[m + 1]);
+      rhs->scaled_add(ds, this->_expl_rhs[m]);
+      rhs->scaled_add(1.0, this->_q_integrals[m + 1]);
       this->implicit_solve(this->_impl_rhs[m + 1], this->states()[m + 1], tm, ds, rhs);
       tm += ds;
       this->_expl_rhs[m + 1] = this->evaluate_rhs_expl(tm, this->get_states()[m + 1]);
@@ -225,8 +224,8 @@ namespace pfasst
       assert(this->get_initial_state() != nullptr);
 
       this->end_state() = this->get_initial_state();
-      this->end_state()->scale_add(1.0, encap::mat_mul_vec(dt, this->get_quadrature()->get_b_mat(), this->_expl_rhs)[0]);
-      this->end_state()->scale_add(1.0, encap::mat_mul_vec(dt, this->get_quadrature()->get_b_mat(), this->_impl_rhs)[0]);
+      this->end_state()->scaled_add(1.0, encap::mat_mul_vec(dt, this->get_quadrature()->get_b_mat(), this->_expl_rhs)[0]);
+      this->end_state()->scaled_add(1.0, encap::mat_mul_vec(dt, this->get_quadrature()->get_b_mat(), this->_impl_rhs)[0]);
     }
   }
 
@@ -243,11 +242,11 @@ namespace pfasst
       assert(this->get_states()[m] != nullptr);
 
       this->residuals()[m] = this->get_initial_state();
-      this->residuals()[m]->scale_add(-1.0, this->get_states()[m]);
+      this->residuals()[m]->scaled_add(-1.0, this->get_states()[m]);
 
       for (size_t n = 0; n <= m; ++n) {
         assert(this->get_tau()[n] != nullptr);
-        this->residuals()[m]->scale_add(1.0, this->get_tau()[n]);
+        this->residuals()[m]->scaled_add(1.0, this->get_tau()[n]);
       }
     }
 

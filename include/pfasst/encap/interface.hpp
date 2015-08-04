@@ -79,10 +79,11 @@ namespace pfasst
       : public enable_shared_from_this<Encapsulation<EncapsulationTrait>>
     {
       public:
-        typedef typename EncapsulationTrait::time_type             time_type;
-        typedef typename EncapsulationTrait::spacial_type          spacial_type;
-        typedef typename EncapsulationTrait::data_type             data_type;
-        typedef          EncapsulationFactory<EncapsulationTrait>  factory_type;
+        typedef          EncapsulationTrait            traits;
+        typedef typename traits::time_type             time_type;
+        typedef typename traits::spacial_type          spacial_type;
+        typedef typename traits::data_type             data_type;
+        typedef          EncapsulationFactory<traits>  factory_type;
 
       static_assert(is_arithmetic<time_type>::value,
                     "time precision must be an arithmetic type");

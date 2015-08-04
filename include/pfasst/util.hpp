@@ -24,7 +24,6 @@ namespace pfasst
   template<typename precision>
   static bool almost_zero(const precision& a)
   {
-    LOG(DEBUG) << "is " << abs(a) << " almost zero wtr. epsilon=" << numeric_limits<precision>::epsilon() << "?";
     return abs(a) < numeric_limits<precision>::epsilon();
   }
 }  // ::pfasst

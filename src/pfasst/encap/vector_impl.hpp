@@ -103,7 +103,7 @@ namespace pfasst
                    vector<typename EncapsulationTrait::spacial_type>,
                    typename EncapsulationTrait::data_type
                  >::value
-               >::type>::scale_add(const typename EncapsulationTrait::time_type& a,
+               >::type>::scaled_add(const typename EncapsulationTrait::time_type& a,
                                    const shared_ptr<Encapsulation<EncapsulationTrait>> y)
     {
       assert(this->get_data().size() == y->data().size());

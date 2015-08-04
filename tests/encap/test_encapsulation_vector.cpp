@@ -67,7 +67,7 @@ TEST(Operation, in_place_axpy)
   shared_ptr<VectorEncapsulation> vec_y = \
     make_shared<VectorEncapsulation>(vector<double>{1.0, 1.0, 1.0});
 
-  vec_x.scale_add(0.5, vec_y);
+  vec_x.scaled_add(0.5, vec_y);
   EXPECT_THAT(vec_x.get_data(), Pointwise(Eq(), vector<double>{1.5, 2.5, 3.5}));
 }
 

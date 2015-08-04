@@ -150,7 +150,7 @@ class Logic
 {
   protected:
     typedef          IMEX<pfasst::sweeper_traits<VectorEncapTrait>> sweeper_type;
-    typedef typename sweeper_type::encap_type                          encap_type;
+    typedef typename sweeper_type::encap_type                       encap_type;
 
     sweeper_type sweeper;
 

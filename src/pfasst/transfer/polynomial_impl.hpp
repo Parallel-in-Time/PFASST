@@ -25,14 +25,14 @@ namespace pfasst
     // c_delta = restrict(f_0)
     this->restrict_data(fine->get_initial_state(), coarse_delta);
     // c_delta -= c_0
-    coarse_delta->scale_add(-1.0, coarse->get_initial_state());
+    coarse_delta->scaled_add(-1.0, coarse->get_initial_state());
 
     // f_delta
     auto fine_delta = fine_factory->create();
     // f_delta = interpolate(c_delta)
     this->interpolate_data(coarse_delta, fine_delta);
     // f_0 -= f_delta
-    fine->initial_state()->scale_add(-1.0, fine_delta);
+    fine->initial_state()->scaled_add(-1.0, fine_delta);
 
     fine->reevaluate(true);
   }
@@ -62,7 +62,7 @@ namespace pfasst
 
     for (size_t m = 0; m < num_coarse_nodes; ++m) {
       coarse_delta = coarse->get_states()[m];
-      coarse_delta->scale_add(-1.0, coarse->get_previous_states()[m]);
+      coarse_delta->scaled_add(-1.0, coarse->get_previous_states()[m]);
       this->interpolate_data(coarse_delta, fine_delta[m]);
     }
 

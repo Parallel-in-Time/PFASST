@@ -19,7 +19,7 @@ namespace pfasst
     {
       shared_ptr<Encapsulation<EncapsulationTrait>> result = \
         make_shared<Encapsulation<EncapsulationTrait>>(*y);
-      result->scale_add(a, x);
+      result->scaled_add(a, x);
       return result;
     }
 
@@ -47,7 +47,7 @@ namespace pfasst
 
       for (size_t n = 0; n < rows; ++n) {
         for (size_t m = 0; m < cols; ++m) {
-          x[n]->scale_add(a * mat(n, m), y[m]);
+          x[n]->scaled_add(a * mat(n, m), y[m]);
         }
       }
     }

@@ -28,10 +28,11 @@ namespace pfasst
       : public enable_shared_from_this<Encapsulation<EncapsulationTrait>>
     {
       public:
-        typedef typename EncapsulationTrait::time_type            time_type;
-        typedef typename EncapsulationTrait::spacial_type         spacial_type;
-        typedef typename EncapsulationTrait::data_type            data_type;
-        typedef          EncapsulationFactory<EncapsulationTrait> factory_type;
+        typedef          EncapsulationTrait           traits;
+        typedef typename traits::time_type            time_type;
+        typedef typename traits::spacial_type         spacial_type;
+        typedef typename traits::data_type            data_type;
+        typedef          EncapsulationFactory<traits> factory_type;
 
       protected:
         data_type _data;
@@ -52,7 +53,7 @@ namespace pfasst
 
         virtual void zero();
         //! this += a*y
-        virtual void scale_add(const typename EncapsulationTrait::time_type& a,
+        virtual void scaled_add(const typename EncapsulationTrait::time_type& a,
                                const shared_ptr<Encapsulation<EncapsulationTrait>> y);
 
         virtual typename EncapsulationTrait::spacial_type norm0() const;
