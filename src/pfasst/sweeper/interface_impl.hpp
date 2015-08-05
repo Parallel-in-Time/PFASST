@@ -186,6 +186,8 @@ namespace pfasst
   void
   Sweeper<SweeperTrait, Enabled>::setup()
   {
+    CLOG(DEBUG, "SWEEPER") << "setting up sweeper with " << to_string(*(this->get_status().get()));
+
     if (this->get_quadrature() == nullptr) {
       throw runtime_error("Quadrature not yet set.");
     }
@@ -216,17 +218,23 @@ namespace pfasst
   template<class SweeperTrait, typename Enabled>
   void
   Sweeper<SweeperTrait, Enabled>::pre_predict()
-  {}
+  {
+    CLOG(DEBUG, "SWEEPER") << "pre-predicting";
+  }
 
   template<class SweeperTrait, typename Enabled>
   void
   Sweeper<SweeperTrait, Enabled>::predict()
-  {}
+  {
+    CLOG(DEBUG, "SWEEPER") << "predicting";
+  }
 
   template<class SweeperTrait, typename Enabled>
   void
   Sweeper<SweeperTrait, Enabled>::post_predict()
   {
+    CLOG(DEBUG, "SWEEPER") << "post-predicting";
+
     assert(this->get_status() != nullptr);
     this->integrate_end_state(this->get_status()->get_dt());
   }
@@ -234,25 +242,46 @@ namespace pfasst
   template<class SweeperTrait, typename Enabled>
   void
   Sweeper<SweeperTrait, Enabled>::pre_sweep()
-  {}
+  {
+    CLOG(DEBUG, "SWEEPER") << "pre-sweeping";
+  }
 
   template<class SweeperTrait, typename Enabled>
   void
   Sweeper<SweeperTrait, Enabled>::sweep()
-  {}
+  {
+    CLOG(DEBUG, "SWEEPER") << "sweeping";
+  }
 
   template<class SweeperTrait, typename Enabled>
   void
   Sweeper<SweeperTrait, Enabled>::post_sweep()
   {
+    CLOG(DEBUG, "SWEEPER") << "post-sweeping";
+
     assert(this->get_status() != nullptr);
     this->integrate_end_state(this->get_status()->get_dt());
+
+    CVLOG(3, "SWEEPER") << "solution at nodes:";
+    for (size_t m = 0; m <= this->get_quadrature()->get_num_nodes(); ++m) {
+      CVLOG(3, "SWEEPER") << "\t" << m << ": " << to_string(this->get_states()[m]);
+    }
+    CVLOG(3, "SWEEPER") << "solution at t_end:" << to_string(this->get_end_state());
   }
 
   template<class SweeperTrait, typename Enabled>
   void
   Sweeper<SweeperTrait, Enabled>::post_step()
-  {}
+  {
+    CLOG(DEBUG, "SWEEPER") << "post step";
+
+    CVLOG(3, "SWEEPER") << "initial value: " << to_string(this->get_initial_state());
+    CVLOG(3, "SWEEPER") << "solution at nodes:";
+    for (size_t m = 0; m <= this->get_quadrature()->get_num_nodes(); ++m) {
+      CVLOG(3, "SWEEPER") << "\t" << m << ": " << to_string(this->get_states()[m]);
+    }
+    CVLOG(3, "SWEEPER") << "solution at t_end: " << to_string(this->get_end_state());
+  }
 
   template<class SweeperTrait, typename Enabled>
   void
@@ -263,6 +292,8 @@ namespace pfasst
   void
   Sweeper<SweeperTrait, Enabled>::spread()
   {
+    CLOG(DEBUG, "SWEEPER") << "spreading initial value to all states";
+
     assert(this->get_initial_state() != nullptr);
 
     for(size_t m = 1; m < this->get_states().size(); ++m) {
@@ -275,12 +306,16 @@ namespace pfasst
   void
   Sweeper<SweeperTrait, Enabled>::save()
   {
+    CLOG(DEBUG, "SWEEPER") << "saving states to previous states";
+
     assert(this->get_quadrature() != nullptr);
     assert(this->get_states().size() == this->get_quadrature()->get_num_nodes() + 1);
     assert(this->get_previous_states().size() == this->get_states().size());
 
     for (size_t m = 0; m < this->get_states().size(); ++m) {
+      CVLOG(2, "SWEEPER") << "\t" << m << ": " << to_string(this->get_states()[m]);
       this->previous_states()[m]->data() = this->get_states()[m]->get_data();
+      CVLOG(2, "SWEEPER") << "\t\t-> " << to_string(this->get_previous_states()[m]);
     }
   }
 
@@ -304,6 +339,8 @@ namespace pfasst
   bool
   Sweeper<SweeperTrait, Enabled>::converged()
   {
+    CLOG(DEBUG, "SWEEPER") << "convergence check";
+
     if (this->_abs_residual_tol > 0.0 || this->_rel_residual_tol > 0.0) {
       this->compute_residuals();
       const size_t num_residuals = this->get_residuals().size();
@@ -331,12 +368,14 @@ namespace pfasst
   {
     UNUSED(dt);
     assert(this->get_quadrature() != nullptr);
+    CLOG(DEBUG, "SWEEPER") << "integrating end state";
 
     if (this->get_quadrature()->right_is_node()) {
       assert(this->get_end_state() != nullptr);
       assert(this->get_states().size() > 0);
 
       this->end_state()->data() = this->get_states().back()->get_data();
+      CVLOG(1, "SWEEPER") << "end state: " << to_string(this->get_end_state());
     } else {
       throw NotImplementedYet("integration of end state for quadrature not including right time interval boundary");
     }

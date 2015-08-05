@@ -80,6 +80,8 @@ namespace pfasst
   {
     Controller<TransferT>::run();
 
+    CLOG(INFO, "CONTROL") << "Initial Value: " << to_string(this->get_sweeper()->get_initial_state());
+
     // iterate over time steps
     do {
       const bool do_initial = this->get_status()->get_step() == 0;
@@ -119,6 +121,8 @@ namespace pfasst
   bool
   SDC<TransferT>::advance_iteration()
   {
+    this->get_sweeper()->post_sweep();
+
     if (this->get_sweeper()->converged()) {
       return false;
     } else if (Controller<TransferT>::advance_iteration()) {

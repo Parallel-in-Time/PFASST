@@ -20,6 +20,7 @@ using Matrix = Eigen::Matrix<precision, Eigen::Dynamic, Eigen::Dynamic, Eigen::R
 #include <leathers/pop>
 
 #include "pfasst/config.hpp"
+#include "pfasst/util.hpp"
 #include "pfasst/exceptions.hpp"
 #include "pfasst/quadrature/polynomial.hpp"
 #include "pfasst/quadrature/interface.hpp"
@@ -87,15 +88,19 @@ namespace pfasst
     }
 
     /**
-     * @todo write documentation
+     * Computes interpolation matrix.
+     *
+     * Returns the interpolation matrix \\( M \\in \\mathbb{R}^{m\\times n} \\),
+     * \\( m_{i,j} = l_j(x_i) \\) with \\( l_j(x_i) \\) being the \\( j \\)-th Lagrange polynomial
+     * evaluated at the \\( i \\)-th entry of @p x .
      *
      * @tparam precision numerical type of the interpolation (e.g. `double`)
      */
     template<typename precision>
-    Matrix<precision> compute_interp(vector<precision> dst, vector<precision> src)
+    Matrix<precision> compute_interp(const vector<precision>& x, const vector<precision>& y)
     {
-      const size_t ndst = dst.size();
-      const size_t nsrc = src.size();
+      const size_t ndst = y.size();
+      const size_t nsrc = x.size();
 
       Matrix<precision> mat(ndst, nsrc);
 
@@ -106,11 +111,11 @@ namespace pfasst
 
           for (size_t k = 0; k < nsrc; k++) {
             if (k == j) { continue; }
-            den *= src[j] - src[k];
-            num *= dst[i] - src[k];
+            num *= y[i] - x[k];
+            den *= x[j] - x[k];
           }
 
-          if (abs(num) > 1e-32) {
+          if (almost_zero(num)) {
             mat(i, j) = num / den;
           } else {
             mat(i, j) = 0.0;

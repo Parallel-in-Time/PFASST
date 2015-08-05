@@ -1,5 +1,8 @@
 #include "pfasst/controller/status.hpp"
 
+#include <sstream>
+using namespace std;
+
 
 namespace pfasst
 {
@@ -147,3 +150,17 @@ namespace pfasst
     comm->bcast((int*)&(this->_detail.state), 1, root_rank);
   }
 }  // ::pfasst
+
+
+template<typename precision>
+string to_string(const pfasst::Status<precision>& status)
+{
+  stringstream out;
+  out << "Status("
+      << "t=" << status.get_time()
+      << ", dt=" << status.get_dt()
+      << ", t_end=" << status.get_t_end()
+      << ", k_max=" << status.get_max_iterations()
+      << ")";
+  return out.str();
+}

@@ -112,6 +112,11 @@ namespace pfasst
   };
 }  // ::pfasst
 
+
+template<typename precision>
+string to_string(const pfasst::Status<precision>& status);
+
+
 #include "pfasst/controller/status_impl.hpp"
 
 #endif  // _PFASST__CONTROLLER__STATUS_HPP_

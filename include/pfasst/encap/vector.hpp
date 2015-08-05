@@ -102,6 +102,13 @@ namespace pfasst
   }  // ::pfasst::encap
 }  // ::pfasst
 
+
+template<
+  typename time_precision,
+  typename spacial_precision
+>
+string to_string(const shared_ptr<pfasst::encap::VectorEncapsulation<time_precision, spacial_precision>>& sp);
+
 #include "pfasst/encap/vector_impl.hpp"
 
 #endif  // _PFASST__ENCAP__VECTOR_HPP_

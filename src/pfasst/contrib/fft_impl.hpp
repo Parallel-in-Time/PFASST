@@ -37,10 +37,10 @@ namespace pfasst
     complex<precision>*
     FFT<precision>::forward(const shared_ptr<encap::VectorEncapsulation<time_precision, precision>> x)
     {
-      const size_t ndofs = x->data().size();
+      const size_t ndofs = x->get_data().size();
       auto wk = get_workspace(ndofs);
       for (size_t i = 0; i < ndofs; i++) {
-        wk->z[i] = x->data()[i];
+        wk->z[i] = x->get_data()[i];
       }
       fftw_execute_dft(wk->ffft, wk->wk, wk->wk);
       return wk->z;
@@ -50,7 +50,7 @@ namespace pfasst
     void
     FFT<precision>::backward(shared_ptr<encap::VectorEncapsulation<time_precision, precision>> x)
     {
-      const size_t ndofs = x->data().size();
+      const size_t ndofs = x->get_data().size();
       auto wk = get_workspace(ndofs);
       fftw_execute_dft(wk->ifft, wk->wk, wk->wk);
       for (size_t i = 0; i < ndofs; i++) {

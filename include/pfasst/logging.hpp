@@ -9,7 +9,9 @@
 #ifndef NDEBUG
   #include <iostream>  // used by pfasst::log::test_logging_levels()
 #endif
+#include <memory>
 #include <string>
+#include <sstream>
 using namespace std;
 
 #ifdef WITH_MPI
@@ -488,6 +490,17 @@ namespace pfasst
     }
   }  // ::pfasst::log
 }  // ::pfasst
+
+
+template<
+  typename T
+>
+string to_string(const shared_ptr<T>& sp)
+{
+  stringstream out;
+  out << "<" << sp.get() << ">" << *(sp.get());
+  return out.str();
+}
 
 
 #endif  // _PFASST__LOGGING_HPP_

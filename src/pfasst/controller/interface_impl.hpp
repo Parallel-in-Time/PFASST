@@ -159,18 +159,23 @@ namespace pfasst
 
     if (new_time > this->get_status()->get_t_end()
         || almost_equal(new_time, this->get_status()->get_t_end())) {
-      CLOG(WARNING, "CONTROL") << "Advancing " << num_steps
+      CLOG(WARNING, "CONTROL") << "Not advancing " << num_steps
         << ((num_steps > 1) ? " time steps " : " time step ")
         << "with dt=" << this->get_status()->get_dt() << " to t=" << new_time
-        << " will exceed T_end=" << this->get_status()->get_t_end() << " by "
+        << " as it will exceed T_end=" << this->get_status()->get_t_end() << " by "
         << (new_time - this->get_status()->get_t_end());
+
       return false;
+
     } else {
       CLOG(INFO, "CONTROL") << "Advancing " << num_steps
         << ((num_steps > 1) ? " time steps " : " time step ")
         << "with dt=" << this->get_status()->get_dt() << " to t=" << new_time;
+
       this->status()->time() += delta_time;
       this->status()->step() += num_steps;
+      this->status()->iteration() = 0;
+
       return true;
     }
   }
@@ -180,15 +185,17 @@ namespace pfasst
   Controller<TransferT>::advance_iteration()
   {
     if (this->get_status()->get_iteration() + 1 > this->get_status()->get_max_iterations()) {
-      CLOG(WARNING, "CONTROL") << "Advancing to next iteration ("
+      CLOG(WARNING, "CONTROL") << "Not advancing to next iteration ("
         << (this->get_status()->get_iteration() + 1)
-        << ") will exceed maximum number of allowed iterations ("
+        << ") as it will exceed maximum number of allowed iterations ("
         << this->get_status()->get_max_iterations() << ")";
 
       return false;
+
     } else {
       CLOG(INFO, "CONTROL") << "Advancing to next iteration ("
         << (this->get_status()->get_iteration() + 1) << ")";
+
       this->status()->iteration()++;
 
       return true;

@@ -47,6 +47,7 @@ namespace pfasst
       protected:
         //! @{
         virtual void compute_nodes() override;
+        virtual void compute_weights() override;
         //! @}
     };
   }  // ::pfasst::quadrature

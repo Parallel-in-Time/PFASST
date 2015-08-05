@@ -292,12 +292,21 @@ class QmatTest
 
 TEST_P(QmatTest, AllNodes)
 {
-  for (int m = 0; m < this->quad->get_q_mat().rows(); ++m) {
-    long double qsum = 0;
-    for (int j = 0; j < this->quad->get_q_mat().cols(); ++j) {
-      qsum += this->quad->get_q_mat()(m,j);
+  const size_t rows = this->quad->get_q_mat().rows();
+
+  for (size_t m = 0; m < rows; ++m) {
+    cout << "row " << m << ": " << this->quad->get_q_mat().row(m) << endl;
+    if (qtype == QuadratureType::GaussRadau) {
+      if (m > 0) {
+        EXPECT_NEAR(this->quad->get_q_mat().row(m).sum(),
+                    this->quad->get_nodes()[m - 1],
+                    (long double)(3E-12));
+      }
+    } else {
+      EXPECT_NEAR(this->quad->get_q_mat().row(m).sum(),
+                  this->quad->get_nodes()[m],
+                  (long double)(3E-12));
     }
-    EXPECT_NEAR(qsum, this->quad->get_nodes()[m], (long double)(3E-12));
   }
 }
 

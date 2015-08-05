@@ -1,5 +1,6 @@
 #include "pfasst/sweeper/imex.hpp"
 
+
 namespace pfasst
 {
   template<class SweeperTrait, typename Enabled>
@@ -38,7 +39,20 @@ namespace pfasst
   template<class SweeperTrait, typename Enabled>
   void
   IMEX<SweeperTrait, Enabled>::pre_predict()
-  {}
+  {
+    Sweeper<SweeperTrait, Enabled>::pre_predict();
+
+    assert(this->get_quadrature() != nullptr);
+    const size_t num_nodes = this->get_quadrature()->get_num_nodes();
+
+    CVLOG(2, "SWEEPER") << "values:";
+    for (size_t m = 0; m <= num_nodes; ++m) {
+      CVLOG(2, "SWEEPER") << "\t" << m << ":";
+      CVLOG(2, "SWEEPER") << "\t\tstate: " << to_string(this->get_states()[m]);
+      CVLOG(2, "SWEEPER") << "\t\texpl:  " << to_string(this->_expl_rhs[m]);
+      CVLOG(2, "SWEEPER") << "\t\timpl:  " << to_string(this->_impl_rhs[m]);
+    }
+  }
 
   template<class SweeperTrait, typename Enabled>
   void
@@ -59,15 +73,29 @@ namespace pfasst
     const auto nodes = this->get_quadrature()->get_nodes();
     const size_t num_nodes = nodes.size();
 
+    this->_expl_rhs.front() = this->evaluate_rhs_expl(t, this->get_states().front());
+
     time_type tm = t;
+    CLOG(DEBUG, "SWEEPER") << "predicting for t=" << t << ", dt=" << dt;
     for (size_t m = 0; m < num_nodes; ++m) {
       const time_type ds = dt * (nodes[m + 1] - nodes.front());
 
-      shared_ptr<encap_type> rhs = this->get_states()[m];
+      CVLOG(1, "SWEEPER") << "\tm=" << m << " -> " << (m + 1) << ":"
+                          << " ds=" << ds
+                                    << " (" << dt << "*(" << nodes[m+1] << "-" << nodes.front() << "))";
+      CVLOG(2, "SWEEPER") << "\t\tu[" << m << "]:      " << to_string(this->get_states()[m]);
+
+      shared_ptr<encap_type> rhs = this->get_encap_factory()->create();
+      rhs->data() = this->get_states()[m]->get_data();
       rhs->scaled_add(ds, this->_expl_rhs[m]);
       this->implicit_solve(this->_impl_rhs[m + 1], this->states()[m + 1], tm, ds, rhs);
       tm += ds;
       this->_expl_rhs[m + 1] = this->evaluate_rhs_expl(tm, this->get_states()[m + 1]);
+
+      CVLOG(1, "SWEEPER") << "\t\t-> m=" << (m+1);
+      CVLOG(1, "SWEEPER") << "\t\t     u["<<m+1<<"]: " << to_string(this->get_states()[m + 1]);
+      CVLOG(2, "SWEEPER") << "\t\t  f_ex["<<m+1<<"]: " << to_string(this->_expl_rhs[m + 1]);
+      CVLOG(2, "SWEEPER") << "\t\t  f_im["<<m+1<<"]: " << to_string(this->_impl_rhs[m + 1]);
     }
   }
 
@@ -95,18 +123,29 @@ namespace pfasst
     const auto nodes = this->get_quadrature()->get_nodes();
     const size_t num_nodes = this->get_quadrature()->get_num_nodes();
 
+    CVLOG(2, "SWEEPER") << "values:";
+    for (size_t m = 0; m <= num_nodes; ++m) {
+      CVLOG(2, "SWEEPER") << "\t" << m << ":";
+      CVLOG(2, "SWEEPER") << "\t\tstate: " << to_string(this->get_states()[m]);
+      CVLOG(2, "SWEEPER") << "\t\texpl:  " << to_string(this->_expl_rhs[m]);
+      CVLOG(2, "SWEEPER") << "\t\timpl:  " << to_string(this->_impl_rhs[m]);
+    }
+
+    CLOG(DEBUG, "SWEEPER") << "computing integrals";
     this->_q_integrals = encap::mat_mul_vec(dt, q_mat, this->_expl_rhs);
     encap::mat_apply(this->_q_integrals, dt, q_mat, this->_impl_rhs, false);
 
     for (size_t m = 1; m < num_nodes; ++m) {
       // XXX: nodes[m] - nodes[0] ?!
-      const size_t ds = dt * (nodes[m] - nodes.front());
+      const time_type ds = dt * (nodes[m] - nodes.front());
 
       this->_q_integrals[m + 1]->scaled_add(-ds, this->_expl_rhs[m]);
       this->_q_integrals[m + 1]->scaled_add(-ds, this->_impl_rhs[m + 1]);
     }
+
     for (size_t m = 0; m < this->_q_integrals.size(); ++m) {
       this->_q_integrals[m]->scaled_add(1.0, this->get_tau()[m]);
+      CVLOG(1, "SWEEPER") << "\t" << m << ": " << to_string(this->_q_integrals[m]);
     }
   }
 
@@ -129,22 +168,30 @@ namespace pfasst
 
     this->_expl_rhs.front() = this->evaluate_rhs_expl(t, this->get_states().front());
 
-    size_t tm = t;
+    time_type tm = t;
     // note: m=0 is initial value and not a quadrature node
     for (size_t m = 0; m < num_nodes; ++m) {
       // XXX: nodes[m] - nodes[0] ?!
-      const size_t ds = dt * (nodes[m + 1] - nodes.front());
+      const time_type ds = dt * (nodes[m + 1] - nodes.front());
+
+      CVLOG(1, "SWEEPER") << "\t" << m << ":"
+                          << " ds=" << ds << " (" << dt << " * (" << nodes[m+1] << " - " << nodes.front() << "))";
 
       // we don't reevaluate F at first note as it should have been done after setting it
       // TODO: may need to add some checks for that later...
 
-      shared_ptr<encap_type> rhs = this->get_initial_state();
-      rhs->data() = this->get_states()[m]->data();
+      shared_ptr<encap_type> rhs = this->get_encap_factory()->create();
+      rhs->data() = this->get_states()[m]->get_data();
       rhs->scaled_add(ds, this->_expl_rhs[m]);
       rhs->scaled_add(1.0, this->_q_integrals[m + 1]);
+      CVLOG(2, "SWEEPER") << "\t\trhs:      " << to_string(rhs);
       this->implicit_solve(this->_impl_rhs[m + 1], this->states()[m + 1], tm, ds, rhs);
       tm += ds;
       this->_expl_rhs[m + 1] = this->evaluate_rhs_expl(tm, this->get_states()[m + 1]);
+
+      CVLOG(1, "SWEEPER") << "\t\tstate["<<m+1<<"]: " << to_string(this->get_states()[m + 1]);
+      CVLOG(1, "SWEEPER") << "\t\texpl["<<m+1<<"]:  " << to_string(this->_expl_rhs[m + 1]);
+      CVLOG(1, "SWEEPER") << "\t\timpl["<<m+1<<"]:  " << to_string(this->_impl_rhs[m + 1]);
     }
   }
 
@@ -158,13 +205,16 @@ namespace pfasst
   template<class SweeperTrait, typename Enabled>
   void
   IMEX<SweeperTrait, Enabled>::post_step()
-  {}
+  {
+    Sweeper<SweeperTrait, Enabled>::post_step();
+  }
 
   template<class SweeperTrait, typename Enabled>
   void
   IMEX<SweeperTrait, Enabled>::advance()
   {
     assert(this->get_end_state() != nullptr);
+    CLOG(DEBUG, "SWEEPER") << "advancing";
 
     this->initial_state()->data() = this->get_end_state()->get_data();
     assert(this->get_quadrature() != nullptr);
@@ -177,7 +227,7 @@ namespace pfasst
       this->_impl_rhs.front()->data() = this->_impl_rhs.back()->get_data();
     } else {
       // TODO: this might not be necessary as it is probably dealt with in pre_predict and pre_sweep
-      throw NotImplementedYet("advancing IMEX for nodes not containing left and right time interval borders");
+//       throw NotImplementedYet("advancing IMEX for nodes not containing left and right time interval borders");
     }
   }
 
@@ -226,6 +276,7 @@ namespace pfasst
       this->end_state() = this->get_initial_state();
       this->end_state()->scaled_add(1.0, encap::mat_mul_vec(dt, this->get_quadrature()->get_b_mat(), this->_expl_rhs)[0]);
       this->end_state()->scaled_add(1.0, encap::mat_mul_vec(dt, this->get_quadrature()->get_b_mat(), this->_impl_rhs)[0]);
+      CVLOG(1, "SWEEPER") << "end state: " << to_string(this->get_end_state());
     }
   }
 
@@ -233,13 +284,18 @@ namespace pfasst
   void
   IMEX<SweeperTrait, Enabled>::compute_residuals()
   {
+    CLOG(DEBUG, "SWEEPER") << "computing residuals";
+
     assert(this->get_status() != nullptr);
     assert(this->get_quadrature() != nullptr);
-    const time_type& dt = this->get_status()->get_dt();
+    assert(this->get_initial_state() != nullptr);
 
-    for (size_t m = 0; this->get_quadrature()->get_num_nodes(); ++m) {
-      assert(this->get_initial_state() != nullptr);
+    const time_type dt = this->get_status()->get_dt();
+
+    for (size_t m = 0; m < this->get_quadrature()->get_num_nodes(); ++m) {
+      CVLOG(1, "SWEEPER") << "\t" << m << ":";
       assert(this->get_states()[m] != nullptr);
+      assert(this->residuals()[m] != nullptr);
 
       this->residuals()[m] = this->get_initial_state();
       this->residuals()[m]->scaled_add(-1.0, this->get_states()[m]);
@@ -248,6 +304,7 @@ namespace pfasst
         assert(this->get_tau()[n] != nullptr);
         this->residuals()[m]->scaled_add(1.0, this->get_tau()[n]);
       }
+      CVLOG(1, "SWEEPER") << "\t\t-> " << to_string(this->get_residuals()[m]);
     }
 
     encap::mat_apply(this->residuals(), dt, this->get_quadrature()->get_q_mat(), this->_expl_rhs, false);

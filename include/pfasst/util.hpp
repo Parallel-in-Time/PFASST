@@ -3,6 +3,9 @@
 
 #include <algorithm>
 #include <limits>
+#include <sstream>
+#include <string>
+#include <vector>
 using namespace std;
 
 #include "pfasst/logging.hpp"
@@ -25,6 +28,19 @@ namespace pfasst
   static bool almost_zero(const precision& a)
   {
     return abs(a) < numeric_limits<precision>::epsilon();
+  }
+
+  template<typename T>
+  static string join(const vector<T>& vec, const string& sep)
+  {
+    stringstream out;
+    out << "[";
+    for (size_t i = 0; i < vec.size() - 1; ++i) {
+      out << vec[i] << sep;
+    }
+    out << vec.back();
+    out << "]";
+    return out.str();
   }
 }  // ::pfasst
 

@@ -5,6 +5,7 @@
 using namespace std;
 
 #include "pfasst/logging.hpp"
+#include "pfasst/util.hpp"
 
 
 namespace pfasst
@@ -21,7 +22,9 @@ namespace pfasst
                  >::value
                >::type>::Encapsulation(const size_t size)
       : Encapsulation<EncapsulationTrait>(typename EncapsulationTrait::data_type(size))
-    {}
+    {
+      this->zero();
+    }
 
     template<class EncapsulationTrait>
     Encapsulation<
@@ -239,3 +242,12 @@ namespace pfasst
     }
   }  // ::pfasst::encap
 }  // ::pfasst
+
+
+template<typename time_precision, typename spacial_precision>
+string to_string(const shared_ptr<pfasst::encap::VectorEncapsulation<time_precision, spacial_precision>>& sp)
+{
+  stringstream out;
+  out << "Vector<" << sp.get() << ">" << pfasst::join(sp->get_data(), ", ");
+  return out.str();
+}

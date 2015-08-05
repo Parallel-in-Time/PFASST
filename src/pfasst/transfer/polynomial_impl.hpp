@@ -184,8 +184,8 @@ namespace pfasst
                                                           const vector<typename TransferTraits::coarse_time_type>& coarse_nodes)
   {
     if (this->tmat.rows() == 0) {
-      this->tmat = quadrature::compute_interp<typename TransferTraits::fine_time_type>(fine_nodes,
-                                                                                       coarse_nodes);
+      this->tmat = quadrature::compute_interp<typename TransferTraits::fine_time_type>(coarse_nodes,
+                                                                                       fine_nodes);
     }
   }
 
