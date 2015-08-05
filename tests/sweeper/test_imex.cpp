@@ -24,6 +24,7 @@ class Setup
 
     vector<double> nodes{0.0, 0.5, 1.0};
     shared_ptr<NiceMock<QuadratureMock<double>>> quadrature = make_shared<NiceMock<QuadratureMock<double>>>();
+    shared_ptr<NiceMock<StatusMock<double>>>     status = make_shared<NiceMock<StatusMock<double>>>();
 
     virtual void SetUp()
     {
@@ -34,13 +35,21 @@ class Setup
 
 TEST_F(Setup, quadrature_is_required_for_setup)
 {
-  EXPECT_THAT(sweeper.quadrature(), IsNull());
+  ASSERT_THAT(sweeper.quadrature(), IsNull());
+  ASSERT_THAT(sweeper.get_quadrature(), IsNull());
 
-  EXPECT_CALL(*(quadrature.get()), get_num_nodes()).Times(AtLeast(1));
-  EXPECT_CALL(*(quadrature.get()), get_nodes()).Times(AtLeast(1));
+  ASSERT_THAT(sweeper.status(), IsNull());
+  ASSERT_THAT(sweeper.get_status(), IsNull());
+
+  EXPECT_THROW(sweeper.setup(), runtime_error);
 
   sweeper.quadrature() = quadrature;
   EXPECT_THAT(sweeper.quadrature(), NotNull());
+  EXPECT_THAT(sweeper.get_quadrature(), NotNull());
+
+  sweeper.status() = status;
+  EXPECT_THAT(sweeper.status(), NotNull());
+  EXPECT_THAT(sweeper.get_status(), NotNull());
 
   sweeper.setup();
 }
@@ -55,6 +64,7 @@ TEST_F(Setup, state_data_initialized_after_setup)
   EXPECT_THAT(sweeper.tau(), IsEmpty());
   EXPECT_THAT(sweeper.get_residuals(), IsEmpty());
 
+  sweeper.status() = status;
   sweeper.quadrature() = quadrature;
   auto num_nodes = quadrature->get_num_nodes();
   sweeper.setup();
@@ -91,8 +101,8 @@ class DataAccess
 
     vector<double> nodes{0.0, 0.5, 1.0};
     shared_ptr<NiceMock<QuadratureMock<double>>> quadrature = make_shared<NiceMock<QuadratureMock<double>>>();
-
-    shared_ptr<encap_type> encap = make_shared<encap_type>(vector<double>{1.0, 2.0, 3.0});
+    shared_ptr<encap_type>                       encap = make_shared<encap_type>(vector<double>{1.0, 2.0, 3.0});
+    shared_ptr<NiceMock<StatusMock<double>>>     status = make_shared<NiceMock<StatusMock<double>>>();
 
     virtual void SetUp()
     {
@@ -100,6 +110,7 @@ class DataAccess
       ON_CALL(*(quadrature.get()), get_num_nodes()).WillByDefault(Return(nodes.size()));
       ON_CALL(*(quadrature.get()), get_nodes()).WillByDefault(ReturnRef(nodes));
       sweeper.quadrature() = quadrature;
+      sweeper.status() = status;
       sweeper.setup();
     }
 };
@@ -172,10 +183,10 @@ class Logic
       }
       ON_CALL(*(quadrature.get()), get_b_mat()).WillByDefault(ReturnRef(b_mat));
       sweeper.quadrature() = quadrature;
-      sweeper.setup();
-
       ON_CALL(*(status.get()), get_dt()).WillByDefault(Return(1.0));
       sweeper.status() = status;
+      sweeper.setup();
+
     }
 };
 

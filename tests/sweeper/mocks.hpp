@@ -44,6 +44,8 @@ class SweeperMock
     MOCK_METHOD0_T(spread, void());
     MOCK_METHOD0_T(save, void());
 
+    MOCK_METHOD0_T(post_step, void());
+
     MOCK_METHOD1_T(reevaluate, void(const bool initial_only));
     MOCK_METHOD1_T(integrate, vector<shared_ptr<typename SweeperTrait::encap_type>>(const typename SweeperTrait::time_type& dt));
 

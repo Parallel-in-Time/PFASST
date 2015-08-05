@@ -121,8 +121,6 @@ namespace pfasst
   bool
   SDC<TransferT>::advance_iteration()
   {
-    this->get_sweeper()->post_sweep();
-
     if (this->get_sweeper()->converged()) {
       return false;
     } else if (Controller<TransferT>::advance_iteration()) {

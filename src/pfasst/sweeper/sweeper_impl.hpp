@@ -186,6 +186,9 @@ namespace pfasst
   void
   Sweeper<SweeperTrait, Enabled>::setup()
   {
+    if (this->get_status() == nullptr) {
+      throw runtime_error("Status not yet set.");
+    }
     CLOG(DEBUG, "SWEEPER") << "setting up sweeper with " << to_string(this->get_status());
 
     if (this->get_quadrature() == nullptr) {
