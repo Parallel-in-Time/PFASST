@@ -53,6 +53,6 @@ namespace pfasst
   }  // ::pfasst::comm
 }  // ::pfasst
 
-#include "pfasst/comm/interface_impl.hpp"
+#include "pfasst/comm/communicator_impl.hpp"
 
 #endif  // _PFASST__COMMUNICATOR_HPP_

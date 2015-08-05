@@ -493,12 +493,13 @@ namespace pfasst
 
 
 template<
-  typename T
+  class T
 >
 string to_string(const shared_ptr<T>& sp)
 {
   stringstream out;
-  out << "<" << sp.get() << ">" << *(sp.get());
+  out << "<" << sp.get() << ">";
+  sp->log(out);
   return out.str();
 }
 

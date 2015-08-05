@@ -1,7 +1,7 @@
 #ifndef _PFASST__TRANSFER__POLYNOMIAL_HPP_
 #define _PFASST__TRANSFER__POLYNOMIAL_HPP_
 
-#include "pfasst/transfer/interface.hpp"
+#include "pfasst/transfer/transfer.hpp"
 
 #include <memory>
 #include <vector>

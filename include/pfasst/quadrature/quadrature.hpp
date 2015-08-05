@@ -306,6 +306,6 @@ namespace pfasst
   }  // ::pfasst::quadrature
 }  // ::pfasst
 
-#include "pfasst/quadrature/interface_impl.hpp"
+#include "pfasst/quadrature/quadrature_impl.hpp"
 
 #endif  // _PFASST__QUADRATURE__INTERFACE_HPP_

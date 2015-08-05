@@ -1,6 +1,6 @@
 #include "fixtures/test_helpers.hpp"
 
-#include <pfasst/controller/interface.hpp>
+#include <pfasst/controller/controller.hpp>
 using pfasst::Controller;
 
 #include <pfasst/encap/traits.hpp>

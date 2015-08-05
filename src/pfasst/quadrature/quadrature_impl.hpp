@@ -1,4 +1,4 @@
-#include "pfasst/quadrature/interface.hpp"
+#include "pfasst/quadrature/quadrature.hpp"
 
 namespace pfasst
 {

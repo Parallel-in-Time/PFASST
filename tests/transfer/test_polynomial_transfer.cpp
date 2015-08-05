@@ -10,7 +10,7 @@ typedef pfasst::encap::Encapsulation<VectorEncapTrait> VectorEncapsulation;
 
 // #include "sweeper/mocks.hpp"
 // typedef SweeperMock<double, VectorEncapsulation> Sweeper;
-#include "pfasst/sweeper/interface.hpp"
+#include "pfasst/sweeper/sweeper.hpp"
 typedef pfasst::Sweeper<pfasst::sweeper_traits<VectorEncapTrait>> Sweeper;
 
 typedef ::testing::Types<PolynomialTransfer<pfasst::transfer_traits<Sweeper, Sweeper, 2>>> PolynomialTransferTypes;

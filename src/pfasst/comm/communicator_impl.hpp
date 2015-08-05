@@ -1,4 +1,4 @@
-#include "pfasst/comm/interface.hpp"
+#include "pfasst/comm/communicator.hpp"
 
 #include "pfasst/exceptions.hpp"
 

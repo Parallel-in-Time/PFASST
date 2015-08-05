@@ -23,7 +23,7 @@ using Matrix = Eigen::Matrix<precision, Eigen::Dynamic, Eigen::Dynamic, Eigen::R
 #include "pfasst/util.hpp"
 #include "pfasst/exceptions.hpp"
 #include "pfasst/quadrature/polynomial.hpp"
-#include "pfasst/quadrature/interface.hpp"
+#include "pfasst/quadrature/quadrature.hpp"
 #include "pfasst/quadrature/gauss_lobatto.hpp"
 #include "pfasst/quadrature/gauss_legendre.hpp"
 #include "pfasst/quadrature/gauss_radau.hpp"

@@ -1,6 +1,6 @@
 #include "fixtures/test_helpers.hpp"
 
-#include <pfasst/transfer/interface.hpp>
+#include <pfasst/transfer/transfer.hpp>
 using pfasst::Transfer;
 
 #include <pfasst/encap/traits.hpp>
@@ -9,7 +9,7 @@ typedef pfasst::vector_encap_traits<double, double> VectorEncapTrait;
 
 // #include "sweeper/mocks.hpp"
 // typedef SweeperMock<double, VectorEncapsulation> Sweeper;
-#include "pfasst/sweeper/interface.hpp"
+#include "pfasst/sweeper/sweeper.hpp"
 typedef pfasst::Sweeper<pfasst::sweeper_traits<VectorEncapTrait>> Sweeper;
 
 typedef ::testing::Types<Transfer<pfasst::transfer_traits<Sweeper, Sweeper, 2>>> TransferTypes;

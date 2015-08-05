@@ -62,6 +62,6 @@ namespace pfasst
   };
 }  // ::pfasst
 
-#include "pfasst/controller/interface_impl.hpp"
+#include "pfasst/controller/controller_impl.hpp"
 
 #endif  // _PFASST__CONTROLLER__INTERFACE_HPP_

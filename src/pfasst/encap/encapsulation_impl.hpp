@@ -1,4 +1,4 @@
-#include "pfasst/encap/interface.hpp"
+#include "pfasst/encap/encapsulation.hpp"
 
 #include <cassert>
 using namespace std;

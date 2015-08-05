@@ -4,8 +4,8 @@
 #include <memory>
 using namespace std;
 
-#include "pfasst/controller/interface.hpp"
-#include "pfasst/comm/interface.hpp"
+#include "pfasst/controller/controller.hpp"
+#include "pfasst/comm/communicator.hpp"
 
 
 namespace pfasst

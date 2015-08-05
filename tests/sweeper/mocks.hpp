@@ -3,7 +3,7 @@
 #include <memory>
 using namespace std;
 
-#include "pfasst/sweeper/interface.hpp"
+#include "pfasst/sweeper/sweeper.hpp"
 
 
 template<

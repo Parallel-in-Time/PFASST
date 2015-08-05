@@ -1,6 +1,6 @@
 #include "fixtures/test_helpers.hpp"
 
-#include <pfasst/comm/interface.hpp>
+#include <pfasst/comm/communicator.hpp>
 
 
 class CommMock

@@ -3,7 +3,7 @@
 #include <memory>
 using namespace std;
 
-#include "pfasst/transfer/interface.hpp"
+#include "pfasst/transfer/transfer.hpp"
 
 
 template<

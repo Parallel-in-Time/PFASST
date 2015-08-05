@@ -8,8 +8,8 @@ using namespace std;
 
 #include "pfasst/globals.hpp"
 #include "pfasst/logging.hpp"
-#include "pfasst/encap/interface.hpp"
-#include "pfasst/comm/interface.hpp"
+#include "pfasst/encap/encapsulation.hpp"
+#include "pfasst/comm/communicator.hpp"
 
 
 namespace pfasst
@@ -25,7 +25,8 @@ namespace pfasst
                                      vector<typename EncapsulationTrait::spacial_type>,
                                      typename EncapsulationTrait::data_type
                                    >::value>::type>
-      : public enable_shared_from_this<Encapsulation<EncapsulationTrait>>
+      :   public enable_shared_from_this<Encapsulation<EncapsulationTrait>>
+        , public el::Loggable
     {
       public:
         typedef          EncapsulationTrait           traits;
@@ -63,6 +64,8 @@ namespace pfasst
         virtual void recv(shared_ptr<comm::Communicator> comm, const int src_rank, const int tag,
                           const bool blocking);
         virtual void bcast(shared_ptr<comm::Communicator> comm, const int root_rank);
+
+        virtual void log(el::base::type::ostream_t& os) const override;
     };
 
     template<
@@ -102,12 +105,6 @@ namespace pfasst
   }  // ::pfasst::encap
 }  // ::pfasst
 
-
-template<
-  typename time_precision,
-  typename spacial_precision
->
-string to_string(const shared_ptr<pfasst::encap::VectorEncapsulation<time_precision, spacial_precision>>& sp);
 
 #include "pfasst/encap/vector_impl.hpp"
 

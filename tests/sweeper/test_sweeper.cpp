@@ -3,7 +3,7 @@
 #include <vector>
 using namespace std;
 
-#include <pfasst/sweeper/interface.hpp>
+#include <pfasst/sweeper/sweeper.hpp>
 using pfasst::Sweeper;
 
 #include <pfasst/encap/traits.hpp>

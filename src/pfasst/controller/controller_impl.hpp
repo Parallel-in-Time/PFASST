@@ -1,4 +1,4 @@
-#include "pfasst/controller/interface.hpp"
+#include "pfasst/controller/controller.hpp"
 
 #include <cmath>
 using namespace std;

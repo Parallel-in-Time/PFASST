@@ -1,6 +1,6 @@
 #include "fixtures/test_helpers.hpp"
 
-#include <pfasst/quadrature/interface.hpp>
+#include <pfasst/quadrature/quadrature.hpp>
 
 
 template<typename precision>

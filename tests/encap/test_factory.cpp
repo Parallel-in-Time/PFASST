@@ -4,7 +4,7 @@
 using namespace std;
 
 #include <pfasst/encap/traits.hpp>
-#include <pfasst/encap/interface.hpp>
+#include <pfasst/encap/encapsulation.hpp>
 #include <pfasst/encap/vector.hpp>
 typedef pfasst::vector_encap_traits<double, double> VectorEncapTrait;
 typedef pfasst::encap::Encapsulation<VectorEncapTrait> VectorEncapsulation;

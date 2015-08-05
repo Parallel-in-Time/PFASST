@@ -186,6 +186,20 @@ namespace pfasst
       comm->bcast(this->data().data(), this->get_data().size(), root_rank);
     }
 
+    template<class EncapsulationTrait>
+    void
+    Encapsulation<
+      EncapsulationTrait, 
+      typename enable_if<
+                 is_same<
+                   vector<typename EncapsulationTrait::spacial_type>,
+                   typename EncapsulationTrait::data_type
+                 >::value
+               >::type>::log(el::base::type::ostream_t& os) const
+    {
+      os << "Vector" << pfasst::join(this->get_data(), ", ");
+    }
+
 
     template<class EncapsulationTrait>
     EncapsulationFactory<
@@ -242,12 +256,3 @@ namespace pfasst
     }
   }  // ::pfasst::encap
 }  // ::pfasst
-
-
-template<typename time_precision, typename spacial_precision>
-string to_string(const shared_ptr<pfasst::encap::VectorEncapsulation<time_precision, spacial_precision>>& sp)
-{
-  stringstream out;
-  out << "Vector<" << sp.get() << ">" << pfasst::join(sp->get_data(), ", ");
-  return out.str();
-}

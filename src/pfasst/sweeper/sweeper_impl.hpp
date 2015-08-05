@@ -1,4 +1,4 @@
-#include "pfasst/sweeper/interface.hpp"
+#include "pfasst/sweeper/sweeper.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -186,7 +186,7 @@ namespace pfasst
   void
   Sweeper<SweeperTrait, Enabled>::setup()
   {
-    CLOG(DEBUG, "SWEEPER") << "setting up sweeper with " << to_string(*(this->get_status().get()));
+    CLOG(DEBUG, "SWEEPER") << "setting up sweeper with " << to_string(this->get_status());
 
     if (this->get_quadrature() == nullptr) {
       throw runtime_error("Quadrature not yet set.");

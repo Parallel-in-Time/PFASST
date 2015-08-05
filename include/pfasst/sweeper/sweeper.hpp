@@ -7,9 +7,9 @@
 using namespace std;
 
 #include "pfasst/sweeper/traits.hpp"
-#include "pfasst/comm/interface.hpp"
+#include "pfasst/comm/communicator.hpp"
 #include "pfasst/controller/status.hpp"
-#include "pfasst/encap/interface.hpp"
+#include "pfasst/encap/encapsulation.hpp"
 #include "pfasst/quadrature.hpp"
 using pfasst::quadrature::IQuadrature;
 
@@ -112,6 +112,6 @@ namespace pfasst
   };
 }
 
-#include "pfasst/sweeper/interface_impl.hpp"
+#include "pfasst/sweeper/sweeper_impl.hpp"
 
 #endif  // _PFASST__SWEEPER__INTERFACE_HPP_

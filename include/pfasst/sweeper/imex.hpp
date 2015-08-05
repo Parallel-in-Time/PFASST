@@ -1,7 +1,7 @@
 #ifndef _PFASST__SWEEPER__IMEX_HPP_
 #define _PFASST__SWEEPER__IMEX_HPP_
 
-#include "pfasst/sweeper/interface.hpp"
+#include "pfasst/sweeper/sweeper.hpp"
 
 
 namespace pfasst

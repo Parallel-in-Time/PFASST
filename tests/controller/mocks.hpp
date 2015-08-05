@@ -1,8 +1,8 @@
 #include "fixtures/test_helpers.hpp"
 
-#include "pfasst/controller/interface.hpp"
+#include "pfasst/controller/controller.hpp"
 #include "pfasst/controller/status.hpp"
-#include "pfasst/comm/interface.hpp"
+#include "pfasst/comm/communicator.hpp"
 
 
 template<typename precision>

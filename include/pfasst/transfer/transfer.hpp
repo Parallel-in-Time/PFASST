@@ -65,6 +65,6 @@ namespace pfasst
   };
 }  // ::pfasst
 
-#include "pfasst/transfer/interface_impl.hpp"
+#include "pfasst/transfer/transfer_impl.hpp"
 
 #endif  // _PFASST__TRANSFER__INTERFACE_HPP_

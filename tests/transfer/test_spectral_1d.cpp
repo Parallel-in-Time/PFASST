@@ -7,7 +7,7 @@ using pfasst::Spectral1DTransfer;
 #include <pfasst/encap/vector.hpp>
 typedef pfasst::vector_encap_traits<double, double> VectorEncapTrait;
 
-#include "pfasst/sweeper/interface.hpp"
+#include "pfasst/sweeper/sweeper.hpp"
 typedef pfasst::Sweeper<pfasst::sweeper_traits<VectorEncapTrait>> Sweeper;
 
 typedef ::testing::Types<Spectral1DTransfer<pfasst::transfer_traits<Sweeper, Sweeper, 2>>> Spectral1DTransferTypes;

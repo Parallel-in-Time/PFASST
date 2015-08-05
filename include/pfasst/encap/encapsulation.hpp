@@ -15,7 +15,7 @@ using Matrix = Eigen::Matrix<precision, Eigen::Dynamic, Eigen::Dynamic, Eigen::R
 #include "pfasst/globals.hpp"
 #include "pfasst/logging.hpp"
 #include "pfasst/encap/traits.hpp"
-#include "pfasst/comm/interface.hpp"
+#include "pfasst/comm/communicator.hpp"
 
 
 namespace pfasst
@@ -76,7 +76,8 @@ namespace pfasst
       typename Enabled
     >
     class Encapsulation
-      : public enable_shared_from_this<Encapsulation<EncapsulationTrait>>
+      :   public enable_shared_from_this<Encapsulation<EncapsulationTrait>>
+        , el::Loggable
     {
       public:
         typedef          EncapsulationTrait            traits;
@@ -135,6 +136,8 @@ namespace pfasst
         virtual void recv(shared_ptr<comm::Communicator> comm, const int src_rank, const int tag,
                           const bool blocking);
         virtual void bcast(shared_ptr<comm::Communicator> comm, const int root_rank);
+
+        virtual void log(el::base::type::ostream_t& os) const override;
     };
 
 
@@ -162,6 +165,6 @@ namespace pfasst
   }  // ::encap
 }  // ::pfasst
 
-#include "pfasst/encap/interface_impl.hpp"
+#include "pfasst/encap/encapsulation_impl.hpp"
 
 #endif  // _PFASST__ENCAP__INTERFACE_HPP_

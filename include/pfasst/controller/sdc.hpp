@@ -7,7 +7,7 @@ using namespace std;
 #include "pfasst/globals.hpp"
 #include "pfasst/exceptions.hpp"
 #include "pfasst/controller/status.hpp"
-#include "pfasst/controller/interface.hpp"
+#include "pfasst/controller/controller.hpp"
 
 
 namespace pfasst

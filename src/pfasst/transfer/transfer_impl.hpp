@@ -1,4 +1,4 @@
-#include "pfasst/transfer/interface.hpp"
+#include "pfasst/transfer/transfer.hpp"
 
 #include <memory>
 using namespace std;

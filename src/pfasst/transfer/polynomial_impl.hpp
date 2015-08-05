@@ -7,7 +7,7 @@ using namespace std;
 #include "pfasst/globals.hpp"
 #include "pfasst/logging.hpp"
 #include "pfasst/quadrature.hpp"
-#include "pfasst/encap/interface.hpp"
+#include "pfasst/encap/encapsulation.hpp"
 
 
 namespace pfasst

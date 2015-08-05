@@ -1,7 +1,7 @@
 #ifndef _PFASST__SWEEPER__TRAITS_HPP_
 #define _PFASST__SWEEPER__TRAITS_HPP_
 
-#include "pfasst/encap/interface.hpp"
+#include "pfasst/encap/encapsulation.hpp"
 
 
 namespace pfasst
