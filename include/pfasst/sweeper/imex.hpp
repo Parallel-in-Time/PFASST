@@ -24,8 +24,9 @@ namespace pfasst
       vector<shared_ptr<encap_type>> _expl_rhs;
       vector<shared_ptr<encap_type>> _impl_rhs;
 
-      size_t num_expl_f_evals;
-      size_t num_impl_f_evals;
+      size_t _num_expl_f_evals;
+      size_t _num_impl_f_evals;
+      size_t _num_impl_solves;
 
       virtual void integrate_end_state(const typename SweeperTrait::time_type& dt) override;
       virtual void compute_residuals() override;

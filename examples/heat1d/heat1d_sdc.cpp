@@ -37,18 +37,14 @@ namespace pfasst
 
         sdc.add_sweeper(sweeper);
 
+        sdc.status()->time() = 0.0;
         sdc.status()->dt() = 0.01;
         sdc.status()->t_end() = 0.01;
         sdc.status()->max_iterations() = 2;
 
         sdc.setup();
 
-        sweeper->initial_state()->zero();
-//         fill(sweeper->initial_state()->data().begin(), sweeper->initial_state()->data().end(), 0.5);
-//         sweeper->initial_state()->data()[2] = 0.5;
-//         sweeper->initial_state()->data()[3] = 1.0;
-//         sweeper->initial_state()->data()[4] = 0.5;
-        sweeper->initial_state() = sweeper->exact(0.0);
+        sweeper->initial_state() = sweeper->exact(sdc.get_status()->get_time());
 
         sdc.run();
       }

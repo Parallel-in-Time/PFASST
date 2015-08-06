@@ -47,10 +47,11 @@ namespace pfasst
         auto result = this->get_encap_factory()->create();
 
         // taken from pySDC
-        //   np.sin(2*np.pi*xvalues)*np.exp(-t*(2*np.pi)**2*self.nu)
-        const spacial_type dx = 1.0 / (spacial_type(this->get_num_dofs()) + 1);
+        //   xvalues = np.array([(i) * self.dx for i in range(self.nvars)])
+        //   me.values = np.sin(2 * np.pi * xvalues) * np.exp(-t * (2 * np.pi)**2 * self.nu)
+        const spacial_type dx = 1.0 / spacial_type(this->get_num_dofs());
         for (size_t i = 0; i < this->get_num_dofs(); ++i) {
-          result->data()[i] = sin(pi<spacial_type>() * (i + 1) * dx) * exp(-t * pow(two_pi<spacial_type>(), 2) * this->_nu);
+          result->data()[i] = sin(two_pi<spacial_type>() * i * dx) * exp(-t * pow(two_pi<spacial_type>(), 2) * this->_nu);
         }
 
         return result;
@@ -97,11 +98,13 @@ namespace pfasst
         IMEX<SweeperTrait, Enabled>::post_step();
 
         CLOG(INFO, "SWEEPER") << "number function evaluations:";
-        CLOG(INFO, "SWEEPER") << "  expl: " << this->num_expl_f_evals;
-        CLOG(INFO, "SWEEPER") << "  impl: " << this->num_impl_f_evals;
+        CLOG(INFO, "SWEEPER") << "  expl:        " << this->_num_expl_f_evals;
+        CLOG(INFO, "SWEEPER") << "  impl:        " << this->_num_impl_f_evals;
+        CLOG(INFO, "SWEEPER") << "  impl solves: " << this->_num_impl_solves;
 
-        this->num_expl_f_evals = 0;
-        this->num_impl_f_evals = 0;
+        this->_num_expl_f_evals = 0;
+        this->_num_impl_f_evals = 0;
+        this->_num_impl_solves = 0;
       }
 
       template<class SweeperTrait, typename Enabled>
@@ -131,14 +134,17 @@ namespace pfasst
         auto result = this->get_encap_factory()->create();
 
         // taken form pySDC
-        const spacial_type PI = pi<spacial_type>();
-        const spacial_type PIsqr = pi_sqr<spacial_type>();
-        const spacial_type dx = 1.0 / (spacial_type(this->get_num_dofs()) + 1);
-        for (size_t i = 0; i < this->get_num_dofs(); ++i) {
-          result->data()[i] = -1.0 * sin(PI * (i+1) * dx) * (sin(t) - this->_nu * PIsqr * cos(t));
-        }
+        //   # xvalues = np.array([(i+1)*self.dx for i in range(self.nvars)])
+        //   fexpl.values = np.zeros(self.nvars)  # -np.sin(np.pi * xvalues) * (np.sin(t) - self.nu * np.pi**2 * np.cos(t))
+//         const spacial_type PI = pi<spacial_type>();
+//         const spacial_type PIsqr = pi_sqr<spacial_type>();
+//         const spacial_type dx = 1.0 / (spacial_type(this->get_num_dofs()) + 1);
+//         for (size_t i = 0; i < this->get_num_dofs(); ++i) {
+//           result->data()[i] = -1.0 * sin(PI * (i + 1) * dx) * (sin(t) - this->_nu * PIsqr * cos(t));
+//         }
+        result->zero();
 
-        this->num_expl_f_evals++;
+        this->_num_expl_f_evals++;
 
         CVLOG(5, "SWEEPER") << "\t  -> " << to_string(result);
         return result;
@@ -163,7 +169,7 @@ namespace pfasst
         auto result = this->get_encap_factory()->create();
         this->_fft.backward(result);
 
-        this->num_impl_f_evals++;
+        this->_num_impl_f_evals++;
 
         CVLOG(5, "SWEEPER") << "\t  -> " << to_string(result);
         return result;
@@ -177,7 +183,7 @@ namespace pfasst
                                                     const typename SweeperTrait::time_type& dt,
                                                     const shared_ptr<typename SweeperTrait::encap_type> rhs)
       {
-        CVLOG(2, "SWEEPER") << "implicit spacial solve at t=" << t << " with dt=" << dt;
+        CVLOG(2, "SWEEPER") << "IMPLICIT spacial SOLVE at t=" << t << " with dt=" << dt;
         CVLOG(5, "SWEEPER") << "\tf:   " << to_string(f);
         CVLOG(5, "SWEEPER") << "\tu:   " << to_string(u);
         CVLOG(5, "SWEEPER") << "\trhs: " << to_string(rhs);
@@ -193,6 +199,8 @@ namespace pfasst
         for (size_t i = 0; i < this->get_num_dofs(); ++i) {
           f->data()[i] = (u->get_data()[i] - rhs->get_data()[i]) / dt;
         }
+
+        this->_num_impl_solves++;
 
         CVLOG(5, "SWEEPER") << "\t->";
         CVLOG(5, "SWEEPER") << "\t  f: " << to_string(f);

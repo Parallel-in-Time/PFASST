@@ -9,6 +9,9 @@ namespace pfasst
       , _q_integrals(0)
       , _expl_rhs(0)
       , _impl_rhs(0)
+      , _num_expl_f_evals(0)
+      , _num_impl_f_evals(0)
+      , _num_impl_solves(0)
   {}
 
   template<class SweeperTrait, typename Enabled>
@@ -84,10 +87,10 @@ namespace pfasst
     for (size_t m = 0; m < num_nodes; ++m) {
       const time_type ds = dt * (nodes[m + 1] - nodes.front());
 
-      CVLOG(1, "SWEEPER") << "\tm=" << m << " -> " << (m + 1) << ":"
+      CVLOG(1, "SWEEPER") << "m=" << m << " -> " << (m + 1) << ":"
                           << " ds=" << ds
                                     << " (" << dt << "*(" << nodes[m+1] << "-" << nodes.front() << "))";
-      CVLOG(2, "SWEEPER") << "\t\tu[" << m << "]:      " << to_string(this->get_states()[m]);
+      CVLOG(2, "SWEEPER") << "  u[" << m << "]: " << to_string(this->get_states()[m]);
 
       shared_ptr<encap_type> rhs = this->get_encap_factory()->create();
       rhs->data() = this->get_states()[m]->get_data();
@@ -99,10 +102,11 @@ namespace pfasst
       tm += ds;
       this->_expl_rhs[m + 1] = this->evaluate_rhs_expl(tm, this->get_states()[m + 1]);
 
-      CVLOG(1, "SWEEPER") << "\t\t-> m=" << (m+1);
-      CVLOG(1, "SWEEPER") << "\t\t     u["<<m+1<<"]: " << to_string(this->get_states()[m + 1]);
-      CVLOG(2, "SWEEPER") << "\t\t  f_ex["<<m+1<<"]: " << to_string(this->_expl_rhs[m + 1]);
-      CVLOG(2, "SWEEPER") << "\t\t  f_im["<<m+1<<"]: " << to_string(this->_impl_rhs[m + 1]);
+      CVLOG(1, "SWEEPER") << "==> m=" << (m+1);
+      CVLOG(1, "SWEEPER") << "\t     u["<<m+1<<"]: " << to_string(this->get_states()[m + 1]);
+      CVLOG(2, "SWEEPER") << "\t  f_ex["<<m+1<<"]: " << to_string(this->_expl_rhs[m + 1]);
+      CVLOG(2, "SWEEPER") << "\t  f_im["<<m+1<<"]: " << to_string(this->_impl_rhs[m + 1]);
+      CVLOG(1, "SWEEPER") << "";
     }
   }
 
@@ -206,6 +210,7 @@ namespace pfasst
       CVLOG(1, "SWEEPER") << "\t\tstate["<<m+1<<"]: " << to_string(this->get_states()[m + 1]);
       CVLOG(1, "SWEEPER") << "\t\texpl["<<m+1<<"]:  " << to_string(this->_expl_rhs[m + 1]);
       CVLOG(1, "SWEEPER") << "\t\timpl["<<m+1<<"]:  " << to_string(this->_impl_rhs[m + 1]);
+      CVLOG(1, "SWEEPER") << "";
     }
   }
 
