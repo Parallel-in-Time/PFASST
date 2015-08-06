@@ -73,7 +73,11 @@ namespace pfasst
     const auto nodes = this->get_quadrature()->get_nodes();
     const size_t num_nodes = nodes.size();
 
+    CLOG(INFO, "SWEEPER") << "Predicting from t=" << t << " over " << num_nodes << " nodes"
+                          << " to t=" << (t + dt);
+
     this->_expl_rhs.front() = this->evaluate_rhs_expl(t, this->get_states().front());
+    this->_impl_rhs.front() = this->evaluate_rhs_impl(t, this->get_states().front());
 
     time_type tm = t;
     CLOG(DEBUG, "SWEEPER") << "predicting for t=" << t << ", dt=" << dt;
@@ -87,7 +91,10 @@ namespace pfasst
 
       shared_ptr<encap_type> rhs = this->get_encap_factory()->create();
       rhs->data() = this->get_states()[m]->get_data();
+      CVLOG(3, "SWEEPER") << "\trhs = " << to_string(rhs);
       rhs->scaled_add(ds, this->_expl_rhs[m]);
+      CVLOG(3, "SWEEPER") << "\t   += " << ds << " * " << to_string(this->_expl_rhs[m]);
+      CVLOG(3, "SWEEPER") << "\t    = " << to_string(rhs);
       this->implicit_solve(this->_impl_rhs[m + 1], this->states()[m + 1], tm, ds, rhs);
       tm += ds;
       this->_expl_rhs[m + 1] = this->evaluate_rhs_expl(tm, this->get_states()[m + 1]);
@@ -166,7 +173,11 @@ namespace pfasst
     const auto nodes = this->get_quadrature()->get_nodes();
     const size_t num_nodes = this->get_quadrature()->get_num_nodes();
 
+    CLOG(INFO, "SWEEPER") << "Sweeping from t=" << t << " over " << num_nodes << " nodes"
+                          << " to t=" << (t + dt);
+
     this->_expl_rhs.front() = this->evaluate_rhs_expl(t, this->get_states().front());
+    this->_impl_rhs.front() = this->evaluate_rhs_impl(t, this->get_states().front());
 
     time_type tm = t;
     // note: m=0 is initial value and not a quadrature node
@@ -182,9 +193,12 @@ namespace pfasst
 
       shared_ptr<encap_type> rhs = this->get_encap_factory()->create();
       rhs->data() = this->get_states()[m]->get_data();
+      CVLOG(3, "SWEEPER") << "\trhs = " << to_string(rhs);
+      CVLOG(3, "SWEEPER") << "\t   += " << ds << " * " << to_string(this->_expl_rhs[m]);
       rhs->scaled_add(ds, this->_expl_rhs[m]);
+      CVLOG(3, "SWEEPER") << "\t   += 1.0 * " << to_string(this->_q_integrals[m + 1]);
       rhs->scaled_add(1.0, this->_q_integrals[m + 1]);
-      CVLOG(2, "SWEEPER") << "\t\trhs:      " << to_string(rhs);
+      CVLOG(3, "SWEEPER") << "\t    = " << to_string(rhs);
       this->implicit_solve(this->_impl_rhs[m + 1], this->states()[m + 1], tm, ds, rhs);
       tm += ds;
       this->_expl_rhs[m + 1] = this->evaluate_rhs_expl(tm, this->get_states()[m + 1]);
@@ -246,12 +260,15 @@ namespace pfasst
 
         this->_expl_rhs.front() = this->evaluate_rhs_expl(t0, this->_expl_rhs.front());
         this->_impl_rhs.front() = this->evaluate_rhs_impl(t0, this->_impl_rhs.front());
+
       } else {
         throw NotImplementedYet("reevaluation for quadrature not containing left interval boundary");
       }
+
     } else {
       const time_type dt = this->get_status()->get_dt();
       const auto nodes = this->get_quadrature()->get_nodes();
+
       for (size_t m = 0; this->get_quadrature()->get_num_nodes(); ++m) {
         const time_type t = t0 + dt * nodes[m];
         assert(this->_expl_rhs[m] != nullptr && this->_impl_rhs[m] != nullptr);
@@ -273,7 +290,7 @@ namespace pfasst
       assert(this->get_quadrature() != nullptr);
       assert(this->get_initial_state() != nullptr);
 
-      this->end_state() = this->get_initial_state();
+      this->end_state()->data() = this->get_initial_state()->get_data();
       this->end_state()->scaled_add(1.0, encap::mat_mul_vec(dt, this->get_quadrature()->get_b_mat(), this->_expl_rhs)[0]);
       this->end_state()->scaled_add(1.0, encap::mat_mul_vec(dt, this->get_quadrature()->get_b_mat(), this->_impl_rhs)[0]);
       CVLOG(1, "SWEEPER") << "end state: " << to_string(this->get_end_state());
@@ -293,18 +310,20 @@ namespace pfasst
     const time_type dt = this->get_status()->get_dt();
 
     for (size_t m = 0; m < this->get_quadrature()->get_num_nodes(); ++m) {
-      CVLOG(1, "SWEEPER") << "\t" << m << ":";
       assert(this->get_states()[m] != nullptr);
       assert(this->residuals()[m] != nullptr);
 
-      this->residuals()[m] = this->get_initial_state();
+      this->residuals()[m]->data() = this->get_initial_state()->get_data();
+      CVLOG(5, "SWEEPER") << "\tres["<<m<<"] = " << to_string(this->get_residuals()[m]);
       this->residuals()[m]->scaled_add(-1.0, this->get_states()[m]);
+      CVLOG(5, "SWEEPER") << "\t      -= " << to_string(this->get_states()[m]);
 
       for (size_t n = 0; n <= m; ++n) {
         assert(this->get_tau()[n] != nullptr);
+        CVLOG(5, "SWEEPER") << "\t      += " << to_string(this->get_tau()[n]);
         this->residuals()[m]->scaled_add(1.0, this->get_tau()[n]);
       }
-      CVLOG(1, "SWEEPER") << "\t\t-> " << to_string(this->get_residuals()[m]);
+      CVLOG(1, "SWEEPER") << "\t       = " << to_string(this->get_residuals()[m]);
     }
 
     encap::mat_apply(this->residuals(), dt, this->get_quadrature()->get_q_mat(), this->_expl_rhs, false);

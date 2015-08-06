@@ -222,7 +222,7 @@ namespace pfasst
                    vector<typename EncapsulationTrait::spacial_type>,
                    typename EncapsulationTrait::data_type
                  >::value
-               >::type>::create()
+               >::type>::create() const
     {
       return make_shared<Encapsulation<EncapsulationTrait>>(this->size());
     }

@@ -160,10 +160,11 @@ namespace pfasst
         EncapsulationFactory<EncapsulationTrait>&
         operator=(EncapsulationFactory<EncapsulationTrait>&& other) = default;
 
-        shared_ptr<Encapsulation<EncapsulationTrait>> create();
+        shared_ptr<Encapsulation<EncapsulationTrait>> create() const;
     };
   }  // ::encap
 }  // ::pfasst
+
 
 #include "pfasst/encap/encapsulation_impl.hpp"
 

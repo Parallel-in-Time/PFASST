@@ -61,7 +61,7 @@ namespace pfasst
     auto coarse_delta = coarse_factory->create();
 
     for (size_t m = 0; m < num_coarse_nodes; ++m) {
-      coarse_delta = coarse->get_states()[m];
+      coarse_delta->data() = coarse->get_states()[m]->get_data();
       coarse_delta->scaled_add(-1.0, coarse->get_previous_states()[m]);
       this->interpolate_data(coarse_delta, fine_delta[m]);
     }
@@ -167,8 +167,8 @@ namespace pfasst
 
     vector<shared_ptr<coarse_encap_type>> restricted_and_coarse(2 * num_coarse_nodes);
     for (size_t m = 0; m < num_coarse_nodes; ++m) {
-      restricted_and_coarse[m] = restricted_fine_integral[m];
-      restricted_and_coarse[num_coarse_nodes + m] = coarse_integral[m];
+      restricted_and_coarse[m]->data() = restricted_fine_integral[m]->get_data();
+      restricted_and_coarse[num_coarse_nodes + m]->data() = coarse_integral[m]->get_data();
     }
 
     // TODO: FAS w.t.r. Q not S

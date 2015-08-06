@@ -97,7 +97,7 @@ namespace pfasst
         EncapsulationFactory<EncapsulationTrait>& operator=(const EncapsulationFactory<EncapsulationTrait>& other) = default;
         EncapsulationFactory<EncapsulationTrait>& operator=(EncapsulationFactory<EncapsulationTrait>&& other) = default;
 
-        virtual shared_ptr<Encapsulation<EncapsulationTrait>> create();
+        virtual shared_ptr<Encapsulation<EncapsulationTrait>> create() const;
 
         virtual void set_size(const size_t& size);
         virtual size_t size() const;

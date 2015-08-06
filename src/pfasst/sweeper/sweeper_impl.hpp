@@ -240,6 +240,13 @@ namespace pfasst
 
     assert(this->get_status() != nullptr);
     this->integrate_end_state(this->get_status()->get_dt());
+
+    assert(this->get_quadrature() != nullptr);
+    CVLOG(3, "SWEEPER") << "solution at nodes:";
+    for (size_t m = 0; m <= this->get_quadrature()->get_num_nodes(); ++m) {
+      CVLOG(3, "SWEEPER") << "\t" << m << ": " << to_string(this->get_states()[m]);
+    }
+    CVLOG(3, "SWEEPER") << "solution at t_end:" << to_string(this->get_end_state());
   }
 
   template<class SweeperTrait, typename Enabled>
@@ -265,6 +272,7 @@ namespace pfasst
     assert(this->get_status() != nullptr);
     this->integrate_end_state(this->get_status()->get_dt());
 
+    assert(this->get_quadrature() != nullptr);
     CVLOG(3, "SWEEPER") << "solution at nodes:";
     for (size_t m = 0; m <= this->get_quadrature()->get_num_nodes(); ++m) {
       CVLOG(3, "SWEEPER") << "\t" << m << ": " << to_string(this->get_states()[m]);
@@ -278,6 +286,7 @@ namespace pfasst
   {
     CLOG(DEBUG, "SWEEPER") << "post step";
 
+    assert(this->get_quadrature() != nullptr);
     CVLOG(3, "SWEEPER") << "initial value: " << to_string(this->get_initial_state());
     CVLOG(3, "SWEEPER") << "solution at nodes:";
     for (size_t m = 0; m <= this->get_quadrature()->get_num_nodes(); ++m) {
@@ -289,7 +298,9 @@ namespace pfasst
   template<class SweeperTrait, typename Enabled>
   void
   Sweeper<SweeperTrait, Enabled>::advance()
-  {}
+  {
+    CLOG(DEBUG, "SWEEPER") << "advancing to next time step";
+  }
 
   template<class SweeperTrait, typename Enabled>
   void
@@ -361,8 +372,10 @@ namespace pfasst
 
       return (   *(max_element(abs_norms.cbegin(), abs_norms.cend())) < this->_abs_residual_tol
               || *(max_element(rel_norms.cbegin(), rel_norms.cend())) < this->_rel_residual_tol);
+    } else {
+      CLOG(WARNING, "SWEEPER") << "No residual tolerances set. Thus skipping convergence check.";
+      return false;
     }
-    return false;
   }
 
   template<class SweeperTrait, typename Enabled>

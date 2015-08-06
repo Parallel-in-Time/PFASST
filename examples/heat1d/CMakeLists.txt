@@ -1,27 +1,26 @@
 set(examples_to_install ${examples_to_install})
 
-message(STATUS "  advection_diffusion")
+message(STATUS "  H")
 include_directories(
     ${3rdparty_INCLUDES}
     ${pfasst_INCLUDES}
 )
 
-set(advec_examples
-    advec_diff_sdc
+set(heat_examples
+    heat1d_sdc
 )
 
-set(advec_mpi_examples)
+set(heat_mpi_examples)
 
 if(${pfasst_WITH_MPI})
-    set(advec_mpi_examples
-        advec_diff_mpi
+    set(heat_mpi_examples
     )
-    set(all_advec_examples ${advec_examples} ${advec_mpi_examples})
+    set(all_heat_examples ${heat_examples} ${heat_mpi_examples})
 else()
-    set(all_advec_examples ${advec_examples})
+    set(all_heat_examples ${heat_examples})
 endif()
 
-foreach(example ${all_advec_examples})
+foreach(example ${all_heat_examples})
     add_executable(${example} ${CMAKE_CURRENT_SOURCE_DIR}/${example}.cpp)
     if(NOT FFTW_FOUND)
         add_dependencies(${example} fftw3)
@@ -38,4 +37,4 @@ foreach(example ${all_advec_examples})
     endif()
 endforeach(example)
 
-set(examples_to_install ${examples_to_install} ${all_advec_examples} PARENT_SCOPE)
+set(examples_to_install ${examples_to_install} ${all_heat_examples} PARENT_SCOPE)

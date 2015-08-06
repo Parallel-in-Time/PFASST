@@ -7,7 +7,7 @@ using namespace std;
 #include <pfasst/controller/sdc.hpp>
 #include <pfasst/transfer/spectral_1d.hpp>
 
-#include "advec_diff_sweeper.hpp"
+#include "heat1d_sweeper.hpp"
 
 using pfasst::encap::VectorEncapsulation;
 using pfasst::quadrature::quadrature_factory;
@@ -15,10 +15,10 @@ using pfasst::quadrature::QuadratureType;
 using pfasst::Spectral1DTransfer;
 using pfasst::SDC;
 
-using pfasst::examples::advec_diff::AdvecDiff;
+using pfasst::examples::heat1d::Heat1D;
 
 typedef VectorEncapsulation<double, double>                                      EncapType;
-typedef AdvecDiff<pfasst::sweeper_traits<typename EncapType::traits>>            SweeperType;
+typedef Heat1D<pfasst::sweeper_traits<typename EncapType::traits>>               SweeperType;
 typedef Spectral1DTransfer<pfasst::transfer_traits<SweeperType, SweeperType, 1>> TransferType;
 
 
@@ -26,7 +26,7 @@ namespace pfasst
 {
   namespace examples
   {
-    namespace advec_diff
+    namespace heat1d
     {
       void run()
       {
@@ -37,8 +37,8 @@ namespace pfasst
 
         sdc.add_sweeper(sweeper);
 
-        sdc.status()->dt() = 0.1;
-        sdc.status()->t_end() = 0.2;
+        sdc.status()->dt() = 0.01;
+        sdc.status()->t_end() = 0.01;
         sdc.status()->max_iterations() = 2;
 
         sdc.setup();
@@ -61,5 +61,5 @@ int main(int argc, char** argv)
 {
   pfasst::log::start_log(argc, argv);
 
-  pfasst::examples::advec_diff::run();
+  pfasst::examples::heat1d::run();
 }
