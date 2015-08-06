@@ -42,7 +42,9 @@ Currently, it features the following content:
 * \ref Examples
 * \subpage #page_contributing
 * \subpage #page_style_guide
+* \subpage #page_design
 * \subpage #page_troubleshooting
+* \subpage #page_todos
 
 [documentation]: https://pint.fz-juelich.de/ci/view/PFASST/job/PFASST_LATEST_STABLE_DOCU/doxygen
 

@@ -16,6 +16,9 @@ namespace pfasst
 {
   namespace encap
   {
+    /**
+     * Specialization of Encapsulation for `std::vector`.
+     */
     template<
       class EncapsulationTrait
     >
@@ -53,7 +56,6 @@ namespace pfasst
         virtual const typename EncapsulationTrait::data_type& get_data() const;
 
         virtual void zero();
-        //! this += a*y
         virtual void scaled_add(const typename EncapsulationTrait::time_type& a,
                                const shared_ptr<Encapsulation<EncapsulationTrait>> y);
 
@@ -68,6 +70,9 @@ namespace pfasst
         virtual void log(el::base::type::ostream_t& os) const override;
     };
 
+    /**
+     * Shortcut for encapsulation of `std::vector` data types.
+     */
     template<
       typename time_precision,
       typename spacial_precision
