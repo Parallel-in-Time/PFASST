@@ -65,13 +65,22 @@ namespace pfasst
 
         assert(this->get_quadrature() != nullptr);
         const time_type t = this->get_status()->get_time();
+        const time_type dt = this->get_status()->get_dt();
 
         this->compute_residuals();
         auto error = this->compute_error(this->get_end_state(), t);
 
-        CLOG(INFO, "SWEEPER") << "at t_end:";
-        CLOG(INFO, "SWEEPER") << "  norm_0(residual): " << encap::norm0(this->get_residuals().back());
-        CLOG(INFO, "SWEEPER") << "  norm_0(error):    " << encap::norm0(error);
+        assert(this->get_quadrature() != nullptr);
+        auto nodes = this->get_quadrature()->get_nodes();
+        const auto num_nodes = this->get_quadrature()->get_num_nodes();
+        nodes.insert(nodes.begin(), time_type(t));
+
+        for (size_t m = 0; m < num_nodes + 1; ++m) {
+          const time_type ds = dt * (nodes[m+1] - nodes[m]);
+          CLOG(INFO, "USER") << "t["<<m<<"]=" << LOG_FIXED << (ds * nodes[m]);
+          CLOG(INFO, "USER") << "  |residual| = " << LOG_FLOAT << encap::norm0(this->get_residuals()[m]);
+          CLOG(INFO, "USER") << "  |error|    = " << LOG_FLOAT << encap::norm0(error[m]);
+        }
       }
 
       template<class SweeperTrait, typename Enabled>
@@ -80,15 +89,24 @@ namespace pfasst
       {
         IMEX<SweeperTrait, Enabled>::post_sweep();
 
-        assert(this->get_quadrature() != nullptr);
+        assert(this->get_status() != nullptr);
         const time_type t = this->get_status()->get_time();
+        const time_type dt = this->get_status()->get_dt();
 
         this->compute_residuals();
         auto error = this->compute_error(this->get_end_state(), t);
 
-        CLOG(INFO, "SWEEPER") << "at t_end:";
-        CLOG(INFO, "SWEEPER") << "  norm_0(residual): " << encap::norm0(this->get_residuals().back());
-        CLOG(INFO, "SWEEPER") << "  norm_0(error):    " << encap::norm0(error);
+        assert(this->get_quadrature() != nullptr);
+        auto nodes = this->get_quadrature()->get_nodes();
+        const auto num_nodes = this->get_quadrature()->get_num_nodes();
+        nodes.insert(nodes.begin(), time_type(t));
+
+        for (size_t m = 0; m < num_nodes + 1; ++m) {
+          const time_type ds = dt * (nodes[m+1] - nodes[0]);
+          CLOG(INFO, "USER") << "t["<<m<<"]=" << LOG_FIXED << (ds * nodes[m]);
+          CLOG(INFO, "USER") << "  |residual| = " << LOG_FLOAT << encap::norm0(this->get_residuals()[m]);
+          CLOG(INFO, "USER") << "  |error|    = " << LOG_FLOAT << encap::norm0(error[m]);
+        }
       }
 
       template<class SweeperTrait, typename Enabled>
@@ -97,10 +115,10 @@ namespace pfasst
       {
         IMEX<SweeperTrait, Enabled>::post_step();
 
-        CLOG(INFO, "SWEEPER") << "number function evaluations:";
-        CLOG(INFO, "SWEEPER") << "  expl:        " << this->_num_expl_f_evals;
-        CLOG(INFO, "SWEEPER") << "  impl:        " << this->_num_impl_f_evals;
-        CLOG(INFO, "SWEEPER") << "  impl solves: " << this->_num_impl_solves;
+        CLOG(INFO, "USER") << "number function evaluations:";
+        CLOG(INFO, "USER") << "  expl:        " << this->_num_expl_f_evals;
+        CLOG(INFO, "USER") << "  impl:        " << this->_num_impl_f_evals;
+        CLOG(INFO, "USER") << "  impl solves: " << this->_num_impl_solves;
 
         this->_num_expl_f_evals = 0;
         this->_num_impl_f_evals = 0;
@@ -116,11 +134,29 @@ namespace pfasst
 
 
       template<class SweeperTrait, typename Enabled>
-      shared_ptr<typename SweeperTrait::encap_type>
+      vector<shared_ptr<typename SweeperTrait::encap_type>>
       Heat1D<SweeperTrait, Enabled>::compute_error(const shared_ptr<typename SweeperTrait::encap_type> q,
                                                    const typename SweeperTrait::time_type& t)
       {
-        return pfasst::encap::axpy(-1.0, this->exact(t), q);
+        assert(this->get_status() != nullptr);
+        const time_type dt = this->get_status()->get_dt();
+
+        assert(this->get_quadrature() != nullptr);
+        auto nodes = this->get_quadrature()->get_nodes();
+        const auto num_nodes = this->get_quadrature()->get_num_nodes();
+        nodes.insert(nodes.begin(), time_type(t));
+
+        vector<shared_ptr<encap_type>> error;
+        error.resize(num_nodes + 1);
+        generate(error.begin(), error.end(),
+                 bind(&encap_type::factory_type::create, this->encap_factory()));
+
+        for (size_t m = 1; m < num_nodes + 1; ++m) {
+          const time_type ds = dt * (nodes[m] - nodes[0]);
+          error[m] = pfasst::encap::axpy(-1.0, this->exact(t + ds), q);
+        }
+
+        return error;
       }
 
       template<class SweeperTrait, typename Enabled>
@@ -128,8 +164,8 @@ namespace pfasst
       Heat1D<SweeperTrait, Enabled>::evaluate_rhs_expl(const typename SweeperTrait::time_type& t,
                                                        const shared_ptr<typename SweeperTrait::encap_type> u)
       {
-        CVLOG(2, "SWEEPER") << "evaluating EXPLICIT part at t=" << t;
-        CVLOG(5, "SWEEPER") << "\tu:   " << to_string(u);
+        CVLOG(2, "USER") << "evaluating EXPLICIT part at t=" << t;
+        CVLOG(5, "USER") << "\tu:   " << to_string(u);
 
         auto result = this->get_encap_factory()->create();
 
@@ -146,7 +182,7 @@ namespace pfasst
 
         this->_num_expl_f_evals++;
 
-        CVLOG(5, "SWEEPER") << "\t  -> " << to_string(result);
+        CVLOG(5, "USER") << "\t  -> " << to_string(result);
         return result;
       }
 
@@ -155,8 +191,8 @@ namespace pfasst
       Heat1D<SweeperTrait, Enabled>::evaluate_rhs_impl(const typename SweeperTrait::time_type& t,
                                                        const shared_ptr<typename SweeperTrait::encap_type> u)
       {
-        CVLOG(2, "SWEEPER") << "evaluating IMPLICIT part at t=" << t;
-        CVLOG(5, "SWEEPER") << "\tu:   " << to_string(u);
+        CVLOG(2, "USER") << "evaluating IMPLICIT part at t=" << t;
+        CVLOG(5, "USER") << "\tu:   " << to_string(u);
 
         // taken from Matt's original Advection-Diffusion example from old PFASST++
         spacial_type c = this->_nu / spacial_type(this->get_num_dofs());
@@ -171,7 +207,7 @@ namespace pfasst
 
         this->_num_impl_f_evals++;
 
-        CVLOG(5, "SWEEPER") << "\t  -> " << to_string(result);
+        CVLOG(5, "USER") << "\t  -> " << to_string(result);
         return result;
       }
 
@@ -183,10 +219,10 @@ namespace pfasst
                                                     const typename SweeperTrait::time_type& dt,
                                                     const shared_ptr<typename SweeperTrait::encap_type> rhs)
       {
-        CVLOG(2, "SWEEPER") << "IMPLICIT spacial SOLVE at t=" << t << " with dt=" << dt;
-        CVLOG(5, "SWEEPER") << "\tf:   " << to_string(f);
-        CVLOG(5, "SWEEPER") << "\tu:   " << to_string(u);
-        CVLOG(5, "SWEEPER") << "\trhs: " << to_string(rhs);
+        CVLOG(2, "USER") << "IMPLICIT spacial SOLVE at t=" << t << " with dt=" << dt;
+        CVLOG(5, "USER") << "\tf:   " << to_string(f);
+        CVLOG(5, "USER") << "\tu:   " << to_string(u);
+        CVLOG(5, "USER") << "\trhs: " << to_string(rhs);
 
         spacial_type c = this->_nu * dt;
 
@@ -202,9 +238,9 @@ namespace pfasst
 
         this->_num_impl_solves++;
 
-        CVLOG(5, "SWEEPER") << "\t->";
-        CVLOG(5, "SWEEPER") << "\t  f: " << to_string(f);
-        CVLOG(5, "SWEEPER") << "\t  u: " << to_string(u);
+        CVLOG(5, "USER") << "\t->";
+        CVLOG(5, "USER") << "\t  f: " << to_string(f);
+        CVLOG(5, "USER") << "\t  u: " << to_string(u);
       }
     }  // ::pfasst::examples::advec_diff
   }  // ::pfasst::examples

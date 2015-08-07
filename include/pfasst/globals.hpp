@@ -51,7 +51,6 @@
 #define PP_CAT(x,y) PP_CAT1(x,y)
 
 //! @see [Stackoverflow Q&A](http://stackoverflow.com/a/8990275/588243) for reference
- *   for reference
 #define PP_CAT1(x,y) x##y
 
 namespace detail

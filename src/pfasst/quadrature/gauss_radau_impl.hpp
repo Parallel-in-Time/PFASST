@@ -22,7 +22,7 @@ namespace pfasst
       this->compute_nodes();
       this->compute_weights();
 
-      CLOG(INFO, "QUAD") << "Gauss-Radau (right) on [0.0, 1.0] with " << num_nodes
+      CLOG(INFO, "QUAD") << LOG_FIXED << "Gauss-Radau (right) on [0.0, 1.0] with " << num_nodes
                          << " nodes at " << this->get_nodes();
       CLOG(DEBUG, "QUAD") << "Q:" << endl << this->get_q_mat();
     }

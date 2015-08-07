@@ -1,7 +1,6 @@
 #include "pfasst/controller/status.hpp"
 
-#include <sstream>
-using namespace std;
+#include <pfasst/logging.hpp>
 
 
 namespace pfasst
@@ -153,7 +152,7 @@ namespace pfasst
   template<typename precision>
   void Status<precision>::log(el::base::type::ostream_t& os) const
   {
-    os << "Status("
+    os << LOG_FIXED << "Status("
        << "t=" << this->get_time()
        << ", dt=" << this->get_dt()
        << ", t_end=" << this->get_t_end()

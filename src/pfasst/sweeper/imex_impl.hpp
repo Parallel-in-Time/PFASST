@@ -23,7 +23,7 @@ namespace pfasst
     CLOG_IF(this->get_quadrature()->left_is_node(), WARNING, "SWEEPER")
       << "IMEX Sweeper for quadrature nodes containing t_0 not implemented and tested.";
 
-    const auto num_nodes = this->quadrature()->get_num_nodes();
+    const auto num_nodes = this->get_quadrature()->get_num_nodes();
     assert(this->get_states().size() == num_nodes + 1);
 
     this->_q_integrals.resize(num_nodes + 1);
@@ -46,14 +46,16 @@ namespace pfasst
     Sweeper<SweeperTrait, Enabled>::pre_predict();
 
     assert(this->get_quadrature() != nullptr);
+    auto nodes = this->get_quadrature()->get_nodes();
+    nodes.insert(nodes.begin(), time_type(0.0));
     const size_t num_nodes = this->get_quadrature()->get_num_nodes();
 
-    CVLOG(2, "SWEEPER") << "values:";
+    CVLOG(2, "SWEEPER") << "initial values for prediction";
     for (size_t m = 0; m <= num_nodes; ++m) {
-      CVLOG(2, "SWEEPER") << "\t" << m << ":";
-      CVLOG(2, "SWEEPER") << "\t\tstate: " << to_string(this->get_states()[m]);
-      CVLOG(2, "SWEEPER") << "\t\texpl:  " << to_string(this->_expl_rhs[m]);
-      CVLOG(2, "SWEEPER") << "\t\timpl:  " << to_string(this->_impl_rhs[m]);
+      CVLOG(2, "SWEEPER") << LOG_FIXED << "  t["<<m<<"]=" << nodes[m];
+      CVLOG(2, "SWEEPER") << LOG_FLOAT << "       u: " << to_string(this->get_states()[m]);
+      CVLOG(2, "SWEEPER") << LOG_FLOAT << "    f_ex: " << to_string(this->_expl_rhs[m]);
+      CVLOG(2, "SWEEPER") << LOG_FLOAT << "    f_im: " << to_string(this->_impl_rhs[m]);
     }
   }
 
@@ -73,39 +75,47 @@ namespace pfasst
     const time_type dt = this->get_status()->get_dt();
 
     assert(this->get_quadrature() != nullptr);
-    const auto nodes = this->get_quadrature()->get_nodes();
-    const size_t num_nodes = nodes.size();
-
-    CLOG(INFO, "SWEEPER") << "Predicting from t=" << t << " over " << num_nodes << " nodes"
-                          << " to t=" << (t + dt);
+    auto nodes = this->get_quadrature()->get_nodes();
+    nodes.insert(nodes.begin(), time_type(0.0));
+    const size_t num_nodes = this->get_quadrature()->get_num_nodes();
 
     this->_expl_rhs.front() = this->evaluate_rhs_expl(t, this->get_states().front());
-    this->_impl_rhs.front() = this->evaluate_rhs_impl(t, this->get_states().front());
+
+    CLOG(INFO, "SWEEPER") << LOG_FIXED << "Predicting from t=" << t << " over " << num_nodes << " nodes"
+                          << " to t=" << (t + dt) << " (dt=" << dt << ")";
 
     time_type tm = t;
-    CLOG(DEBUG, "SWEEPER") << "predicting for t=" << t << ", dt=" << dt;
     for (size_t m = 0; m < num_nodes; ++m) {
-      const time_type ds = dt * (nodes[m + 1] - nodes.front());
+      const time_type ds = dt * (nodes[m + 1] - nodes[m]);
 
-      CVLOG(1, "SWEEPER") << "m=" << m << " -> " << (m + 1) << ":"
-                          << " ds=" << ds
-                                    << " (" << dt << "*(" << nodes[m+1] << "-" << nodes.front() << "))";
-      CVLOG(2, "SWEEPER") << "  u[" << m << "]: " << to_string(this->get_states()[m]);
+      CVLOG(1, "SWEEPER") << LOG_FIXED << "propagating from t["<<m<<"]=" << (dt * nodes[m])
+                          << " to t["<<(m+1)<<"]=" << (dt * nodes[m+1])
+                          << " with ds = dt * (t["<<(m+1)<<"] - t["<<m<<"]) = "
+                          << ds << " = " << dt << " * (" << nodes[m+1] << " - " << nodes[m] << ")";
+      CVLOG(2, "SWEEPER") << LOG_FLOAT << "  u["<<m<<"] = " << to_string(this->get_states()[m]);
 
+      // compute right hand side for implicit solve (i.e. the explicit part of the propagation)
       shared_ptr<encap_type> rhs = this->get_encap_factory()->create();
       rhs->data() = this->get_states()[m]->get_data();
-      CVLOG(3, "SWEEPER") << "\trhs = " << to_string(rhs);
+      CVLOG(2, "SWEEPER") << "  rhs = u["<<m<<"]         = " << to_string(rhs);
       rhs->scaled_add(ds, this->_expl_rhs[m]);
-      CVLOG(3, "SWEEPER") << "\t   += " << ds << " * " << to_string(this->_expl_rhs[m]);
-      CVLOG(3, "SWEEPER") << "\t    = " << to_string(rhs);
+      CVLOG(2, "SWEEPER") << "     += ds * f_ex["<<m<<"] = " << LOG_FIXED << ds << " * "
+                                                             << LOG_FLOAT << to_string(this->_expl_rhs[m]);
+      CVLOG(2, "SWEEPER") << "                     = " << to_string(rhs);
+
+      // solve the implicit part
+      CVLOG(2, "SWEEPER") << "  solve(u["<<(m+1)<<"] - ds * f_im["<<(m+1)<<"] = rhs)";
       this->implicit_solve(this->_impl_rhs[m + 1], this->states()[m + 1], tm, ds, rhs);
+      CVLOG(2, "SWEEPER") << "  u["<<(m+1)<<"] = " << to_string(this->get_states()[m + 1]);
+
+      // reevaluate the explicit part with the new solution value
       tm += ds;
       this->_expl_rhs[m + 1] = this->evaluate_rhs_expl(tm, this->get_states()[m + 1]);
 
-      CVLOG(1, "SWEEPER") << "==> m=" << (m+1);
-      CVLOG(1, "SWEEPER") << "\t     u["<<m+1<<"]: " << to_string(this->get_states()[m + 1]);
-      CVLOG(2, "SWEEPER") << "\t  f_ex["<<m+1<<"]: " << to_string(this->_expl_rhs[m + 1]);
-      CVLOG(2, "SWEEPER") << "\t  f_im["<<m+1<<"]: " << to_string(this->_impl_rhs[m + 1]);
+      CVLOG(1, "SWEEPER") << LOG_FIXED << "  ==> values at t["<<(m+1)<<"]=" << (dt * nodes[m+1]);
+      CVLOG(1, "SWEEPER") << LOG_FLOAT << "         u["<<m+1<<"]: " << to_string(this->get_states()[m + 1]);
+      CVLOG(2, "SWEEPER") << LOG_FLOAT << "      f_ex["<<m+1<<"]: " << to_string(this->_expl_rhs[m + 1]);
+      CVLOG(2, "SWEEPER") << LOG_FLOAT << "      f_im["<<m+1<<"]: " << to_string(this->_impl_rhs[m + 1]);
       CVLOG(1, "SWEEPER") << "";
     }
   }
@@ -131,32 +141,43 @@ namespace pfasst
 
     const time_type dt = this->get_status()->get_dt();
     const auto q_mat = this->get_quadrature()->get_q_mat();
-    const auto nodes = this->get_quadrature()->get_nodes();
+    auto nodes = this->get_quadrature()->get_nodes();
+    nodes.insert(nodes.begin(), time_type(0.0));
     const size_t num_nodes = this->get_quadrature()->get_num_nodes();
 
-    CVLOG(2, "SWEEPER") << "values:";
+    CVLOG(2, "SWEEPER") << "initial values for sweeping";
     for (size_t m = 0; m <= num_nodes; ++m) {
-      CVLOG(2, "SWEEPER") << "\t" << m << ":";
-      CVLOG(2, "SWEEPER") << "\t\tstate: " << to_string(this->get_states()[m]);
-      CVLOG(2, "SWEEPER") << "\t\texpl:  " << to_string(this->_expl_rhs[m]);
-      CVLOG(2, "SWEEPER") << "\t\timpl:  " << to_string(this->_impl_rhs[m]);
+      CVLOG(2, "SWEEPER") << "  t["<<m<<"]=" << LOG_FIXED << (dt * nodes[m]);
+      CVLOG(2, "SWEEPER") << LOG_FLOAT << "       u: " << to_string(this->get_states()[m]);
+      CVLOG(2, "SWEEPER") << LOG_FLOAT << "    f_ex: " << to_string(this->_expl_rhs[m]);
+      CVLOG(2, "SWEEPER") << LOG_FLOAT << "    f_im: " << to_string(this->_impl_rhs[m]);
     }
 
-    CLOG(DEBUG, "SWEEPER") << "computing integrals";
+    CVLOG(1, "SWEEPER") << "computing integrals";
+    CVLOG(2, "SWEEPER") << "  Q_int     = dt * Q * f_ex";
     this->_q_integrals = encap::mat_mul_vec(dt, q_mat, this->_expl_rhs);
+    CVLOG(2, "SWEEPER") << "           += dt * Q * f_im";
     encap::mat_apply(this->_q_integrals, dt, q_mat, this->_impl_rhs, false);
 
-    for (size_t m = 1; m < num_nodes; ++m) {
-      // XXX: nodes[m] - nodes[0] ?!
-      const time_type ds = dt * (nodes[m] - nodes.front());
+    // notes[0] == 0 thus q[0] -= ds * f_ex[0] can be omitted
 
+    CVLOG(2, "SWEEPER") << "  subtracting function evaluations of previous iteration";
+    for (size_t m = 0; m < num_nodes; ++m) {
+      // XXX: nodes[m] - nodes[m] ?!
+      const time_type ds = dt * (nodes[m + 1] - nodes[m]);
+
+      CVLOG(1, "SWEEPER") << LOG_FIXED << "  Q_int["<<(m+1)<<"] -= ds * f_ex["<<m<<"] = "
+                                       << ds << " * " << LOG_FLOAT << to_string(this->_expl_rhs[m]);
       this->_q_integrals[m + 1]->scaled_add(-ds, this->_expl_rhs[m]);
+      CVLOG(1, "SWEEPER") << LOG_FIXED << "  Q_int["<<(m+1)<<"] -= ds * f_im["<<(m+1)<<"] = "
+                                       << ds << " * " << LOG_FLOAT << to_string(this->_impl_rhs[m+1]);
       this->_q_integrals[m + 1]->scaled_add(-ds, this->_impl_rhs[m + 1]);
     }
 
-    for (size_t m = 0; m < this->_q_integrals.size(); ++m) {
+    for (size_t m = 0; m < num_nodes + 1; ++m) {
+      CVLOG(1, "SWEEPER") << LOG_FLOAT << "  Q_int["<<m<<"] += tau["<<m<<"] = " << to_string(this->get_tau()[m]);
       this->_q_integrals[m]->scaled_add(1.0, this->get_tau()[m]);
-      CVLOG(1, "SWEEPER") << "\t" << m << ": " << to_string(this->_q_integrals[m]);
+      CVLOG(1, "SWEEPER") << LOG_FLOAT << "            = " << to_string(this->_q_integrals[m]);
     }
   }
 
@@ -174,14 +195,14 @@ namespace pfasst
 
     const time_type t = this->get_status()->get_time();
     const time_type dt = this->get_status()->get_dt();
-    const auto nodes = this->get_quadrature()->get_nodes();
+    auto nodes = this->get_quadrature()->get_nodes();
+    nodes.insert(nodes.begin(), time_type(0.0));
     const size_t num_nodes = this->get_quadrature()->get_num_nodes();
 
-    CLOG(INFO, "SWEEPER") << "Sweeping from t=" << t << " over " << num_nodes << " nodes"
-                          << " to t=" << (t + dt);
-
     this->_expl_rhs.front() = this->evaluate_rhs_expl(t, this->get_states().front());
-    this->_impl_rhs.front() = this->evaluate_rhs_impl(t, this->get_states().front());
+
+    CLOG(INFO, "SWEEPER") << LOG_FIXED << "Sweeping from t=" << t << " over " << num_nodes
+                          << " nodes to t=" << (t + dt) << " (dt=" << dt << ")";
 
     time_type tm = t;
     // note: m=0 is initial value and not a quadrature node
@@ -189,27 +210,36 @@ namespace pfasst
       // XXX: nodes[m] - nodes[0] ?!
       const time_type ds = dt * (nodes[m + 1] - nodes.front());
 
-      CVLOG(1, "SWEEPER") << "\t" << m << ":"
-                          << " ds=" << ds << " (" << dt << " * (" << nodes[m+1] << " - " << nodes.front() << "))";
+      CVLOG(1, "SWEEPER") << LOG_FIXED << "propagating from t["<<m<<"]=" << (dt * nodes[m])
+                          << " to t["<<(m+1)<<"]=" << (dt * nodes[m+1])
+                          << " with ds = dt * (t["<<(m+1)<<"] - t["<<m<<"]) = "
+                          << ds << " = " << dt << " * (" << nodes[m+1] << " - " << nodes[m] << ")";
+      CVLOG(2, "SWEEPER") << LOG_FLOAT << "  u["<<m<<"] = " << to_string(this->get_states()[m]);
 
-      // we don't reevaluate F at first note as it should have been done after setting it
-      // TODO: may need to add some checks for that later...
-
+      // compute right hand side for implicit solve (i.e. the explicit part of the propagation)
       shared_ptr<encap_type> rhs = this->get_encap_factory()->create();
       rhs->data() = this->get_states()[m]->get_data();
-      CVLOG(3, "SWEEPER") << "\trhs = " << to_string(rhs);
-      CVLOG(3, "SWEEPER") << "\t   += " << ds << " * " << to_string(this->_expl_rhs[m]);
+      CVLOG(2, "SWEEPER") << "  rhs = u["<<m<<"]           = " << to_string(rhs);
       rhs->scaled_add(ds, this->_expl_rhs[m]);
-      CVLOG(3, "SWEEPER") << "\t   += 1.0 * " << to_string(this->_q_integrals[m + 1]);
+      CVLOG(2, "SWEEPER") << "     += ds * f_ex["<<m<<"]   = " << LOG_FIXED << ds << " * "
+                                                               << LOG_FLOAT << to_string(this->_expl_rhs[m]);
       rhs->scaled_add(1.0, this->_q_integrals[m + 1]);
-      CVLOG(3, "SWEEPER") << "\t    = " << to_string(rhs);
+      CVLOG(2, "SWEEPER") << "     += 1.0 * q_int["<<(m+1)<<"] = " << to_string(this->_q_integrals[m + 1]);
+      CVLOG(2, "SWEEPER") << "      = " << to_string(rhs);
+
+      // solve the implicit part
+      CVLOG(2, "SWEEPER") << "  solve(u["<<(m+1)<<"] - ds * f_im["<<(m+1)<<"] = rhs)";
       this->implicit_solve(this->_impl_rhs[m + 1], this->states()[m + 1], tm, ds, rhs);
+      CVLOG(2, "SWEEPER") << "  u["<<(m+1)<<"] = " << to_string(this->get_states()[m + 1]);
+
+      // reevaluate the explicit part with the new solution value
       tm += ds;
       this->_expl_rhs[m + 1] = this->evaluate_rhs_expl(tm, this->get_states()[m + 1]);
 
-      CVLOG(1, "SWEEPER") << "\t\tstate["<<m+1<<"]: " << to_string(this->get_states()[m + 1]);
-      CVLOG(1, "SWEEPER") << "\t\texpl["<<m+1<<"]:  " << to_string(this->_expl_rhs[m + 1]);
-      CVLOG(1, "SWEEPER") << "\t\timpl["<<m+1<<"]:  " << to_string(this->_impl_rhs[m + 1]);
+      CVLOG(1, "SWEEPER") << LOG_FIXED << "  ==> values at t["<<(m+1)<<"]=" << (dt * nodes[m+1]);
+      CVLOG(1, "SWEEPER") << LOG_FLOAT << "         u["<<m+1<<"]: " << to_string(this->get_states()[m + 1]);
+      CVLOG(2, "SWEEPER") << LOG_FLOAT << "      f_ex["<<m+1<<"]: " << to_string(this->_expl_rhs[m + 1]);
+      CVLOG(2, "SWEEPER") << LOG_FLOAT << "      f_im["<<m+1<<"]: " << to_string(this->_impl_rhs[m + 1]);
       CVLOG(1, "SWEEPER") << "";
     }
   }
@@ -313,26 +343,35 @@ namespace pfasst
     assert(this->get_initial_state() != nullptr);
 
     const time_type dt = this->get_status()->get_dt();
+    const size_t num_nodes = this->get_quadrature()->get_num_nodes() + 1;
 
-    for (size_t m = 0; m < this->get_quadrature()->get_num_nodes(); ++m) {
+    for (size_t m = 0; m < num_nodes; ++m) {
       assert(this->get_states()[m] != nullptr);
       assert(this->residuals()[m] != nullptr);
 
+      CVLOG(5, "SWEEPER") << "  res["<<m<<"] = u[0]   = " << to_string(this->get_initial_state());
       this->residuals()[m]->data() = this->get_initial_state()->get_data();
-      CVLOG(5, "SWEEPER") << "\tres["<<m<<"] = " << to_string(this->get_residuals()[m]);
+      CVLOG(5, "SWEEPER") << "        -= u["<<m<<"]   = " << to_string(this->get_states()[m]);
       this->residuals()[m]->scaled_add(-1.0, this->get_states()[m]);
-      CVLOG(5, "SWEEPER") << "\t      -= " << to_string(this->get_states()[m]);
 
       for (size_t n = 0; n <= m; ++n) {
         assert(this->get_tau()[n] != nullptr);
-        CVLOG(5, "SWEEPER") << "\t      += " << to_string(this->get_tau()[n]);
+        CVLOG(5, "SWEEPER") << "        += tau["<<n<<"] = " << to_string(this->get_tau()[n]);
         this->residuals()[m]->scaled_add(1.0, this->get_tau()[n]);
       }
-      CVLOG(1, "SWEEPER") << "\t       = " << to_string(this->get_residuals()[m]);
     }
 
+    CVLOG(5, "SWEEPER") << "  res += dt * Q * F_ex";
     encap::mat_apply(this->residuals(), dt, this->get_quadrature()->get_q_mat(), this->_expl_rhs, false);
+
+    CVLOG(5, "SWEEPER") << "  res += dt * Q * F_im";
     encap::mat_apply(this->residuals(), dt, this->get_quadrature()->get_q_mat(), this->_impl_rhs, false);
+
+    CVLOG(2, "SWEEPER") << "  ==>";
+    for (size_t m = 0; m < num_nodes; ++m) {
+      CVLOG(2, "SWEEPER") << "    |res["<<m<<"]| = " << LOG_FLOAT << this->get_residuals()[m]->norm0()
+                          << "    res["<<m<<"] = " << to_string(this->get_residuals()[m]);
+    }
   }
 
   template<class SweeperTrait, typename Enabled>

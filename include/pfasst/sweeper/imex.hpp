@@ -53,6 +53,9 @@ namespace pfasst
       virtual void setup() override;
 
       virtual void pre_predict() override;
+      /**
+       * first order Euler method
+       */
       virtual void predict() override;
       virtual void post_predict() override;
 

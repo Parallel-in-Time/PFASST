@@ -75,7 +75,7 @@ namespace pfasst
   static string join(const vector<T>& vec, const string& sep)
   {
     stringstream out;
-    out << "[";
+    out << "[" << LOG_FLOAT;
     for (size_t i = 0; i < vec.size() - 1; ++i) {
       out << vec[i] << sep;
     }

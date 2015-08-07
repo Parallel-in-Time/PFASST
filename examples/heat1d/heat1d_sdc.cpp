@@ -1,7 +1,7 @@
 #include <memory>
 using namespace std;
 
-#include <pfasst/logging.hpp>
+#include <pfasst.hpp>
 #include <pfasst/quadrature.hpp>
 #include <pfasst/encap/vector.hpp>
 #include <pfasst/controller/sdc.hpp>
@@ -55,7 +55,7 @@ namespace pfasst
 
 int main(int argc, char** argv)
 {
-  pfasst::log::start_log(argc, argv);
+  pfasst::init(argc, argv);
 
   pfasst::examples::heat1d::run();
 }

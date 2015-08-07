@@ -244,9 +244,9 @@ namespace pfasst
     assert(this->get_quadrature() != nullptr);
     CVLOG(3, "SWEEPER") << "solution at nodes:";
     for (size_t m = 0; m <= this->get_quadrature()->get_num_nodes(); ++m) {
-      CVLOG(3, "SWEEPER") << "\t" << m << ": " << to_string(this->get_states()[m]);
+      CVLOG(3, "SWEEPER") << "  " << m << ": " << to_string(this->get_states()[m]);
     }
-    CVLOG(3, "SWEEPER") << "solution at t_end:" << to_string(this->get_end_state());
+    CVLOG(3, "SWEEPER") << "solution at t_end: " << to_string(this->get_end_state());
   }
 
   template<class SweeperTrait, typename Enabled>
