@@ -39,10 +39,12 @@ namespace pfasst
       shared_ptr<IQuadrature<typename traits::time_type>>    _quadrature;
       shared_ptr<typename traits::encap_type::factory_type>  _factory;
 
+      //! size = #nodes + 1
       vector<shared_ptr<typename traits::encap_type>>        _states;
       vector<shared_ptr<typename traits::encap_type>>        _previous_states;
       shared_ptr<typename traits::encap_type>                _end_state;
 
+      //! size = #nodes + 1
       vector<shared_ptr<typename traits::encap_type>>        _tau;
       vector<shared_ptr<typename traits::encap_type>>        _residuals;
 

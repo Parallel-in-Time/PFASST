@@ -20,6 +20,10 @@ namespace pfasst
       typedef typename sweeper_traits::spacial_type spacial_type;
 
     protected:
+      Matrix<time_type> _q_delta_expl;
+      Matrix<time_type> _q_delta_impl;
+
+      //! size = #nodes + 1
       vector<shared_ptr<encap_type>> _q_integrals;
       vector<shared_ptr<encap_type>> _expl_rhs;
       vector<shared_ptr<encap_type>> _impl_rhs;
@@ -41,6 +45,8 @@ namespace pfasst
                                   const typename SweeperTrait::time_type& t,
                                   const typename SweeperTrait::time_type& dt,
                                   const shared_ptr<typename SweeperTrait::encap_type> rhs);
+
+      virtual void compute_delta_matrices();
 
     public:
       explicit IMEX();

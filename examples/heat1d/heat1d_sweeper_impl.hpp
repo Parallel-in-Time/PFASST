@@ -54,6 +54,8 @@ namespace pfasst
           result->data()[i] = sin(two_pi<spacial_type>() * i * dx) * exp(-t * pow(two_pi<spacial_type>(), 2) * this->_nu);
         }
 
+        CVLOG(2, "USER") << LOG_FIXED << "EXACT t=" << t << ": " << LOG_FLOAT << to_string(result);
+
         return result;
       }
 
@@ -68,7 +70,7 @@ namespace pfasst
         const time_type dt = this->get_status()->get_dt();
 
         this->compute_residuals();
-        auto error = this->compute_error(this->get_end_state(), t);
+        auto error = this->compute_error(t);
 
         assert(this->get_quadrature() != nullptr);
         auto nodes = this->get_quadrature()->get_nodes();
@@ -76,8 +78,7 @@ namespace pfasst
         nodes.insert(nodes.begin(), time_type(t));
 
         for (size_t m = 0; m < num_nodes + 1; ++m) {
-          const time_type ds = dt * (nodes[m+1] - nodes[m]);
-          CLOG(INFO, "USER") << "t["<<m<<"]=" << LOG_FIXED << (ds * nodes[m]);
+          CLOG(INFO, "USER") << "t["<<m<<"]=" << LOG_FIXED << (dt * nodes[m]);
           CLOG(INFO, "USER") << "  |residual| = " << LOG_FLOAT << encap::norm0(this->get_residuals()[m]);
           CLOG(INFO, "USER") << "  |error|    = " << LOG_FLOAT << encap::norm0(error[m]);
         }
@@ -94,7 +95,7 @@ namespace pfasst
         const time_type dt = this->get_status()->get_dt();
 
         this->compute_residuals();
-        auto error = this->compute_error(this->get_end_state(), t);
+        auto error = this->compute_error(t);
 
         assert(this->get_quadrature() != nullptr);
         auto nodes = this->get_quadrature()->get_nodes();
@@ -102,8 +103,7 @@ namespace pfasst
         nodes.insert(nodes.begin(), time_type(t));
 
         for (size_t m = 0; m < num_nodes + 1; ++m) {
-          const time_type ds = dt * (nodes[m+1] - nodes[0]);
-          CLOG(INFO, "USER") << "t["<<m<<"]=" << LOG_FIXED << (ds * nodes[m]);
+          CLOG(INFO, "USER") << "t["<<m<<"]=" << LOG_FIXED << (dt * nodes[m]);
           CLOG(INFO, "USER") << "  |residual| = " << LOG_FLOAT << encap::norm0(this->get_residuals()[m]);
           CLOG(INFO, "USER") << "  |error|    = " << LOG_FLOAT << encap::norm0(error[m]);
         }
@@ -135,8 +135,7 @@ namespace pfasst
 
       template<class SweeperTrait, typename Enabled>
       vector<shared_ptr<typename SweeperTrait::encap_type>>
-      Heat1D<SweeperTrait, Enabled>::compute_error(const shared_ptr<typename SweeperTrait::encap_type> q,
-                                                   const typename SweeperTrait::time_type& t)
+      Heat1D<SweeperTrait, Enabled>::compute_error(const typename SweeperTrait::time_type& t)
       {
         assert(this->get_status() != nullptr);
         const time_type dt = this->get_status()->get_dt();
@@ -153,7 +152,9 @@ namespace pfasst
 
         for (size_t m = 1; m < num_nodes + 1; ++m) {
           const time_type ds = dt * (nodes[m] - nodes[0]);
-          error[m] = pfasst::encap::axpy(-1.0, this->exact(t + ds), q);
+          error[m] = pfasst::encap::axpy(-1.0, this->exact(t + ds), this->get_states()[m]);
+          CVLOG(2, "USER") << LOG_FIXED << "error t=" << t + ds << ": "
+                           << LOG_FLOAT << to_string(error[m]);
         }
 
         return error;
@@ -164,8 +165,8 @@ namespace pfasst
       Heat1D<SweeperTrait, Enabled>::evaluate_rhs_expl(const typename SweeperTrait::time_type& t,
                                                        const shared_ptr<typename SweeperTrait::encap_type> u)
       {
-        CVLOG(2, "USER") << "evaluating EXPLICIT part at t=" << t;
-        CVLOG(5, "USER") << "\tu:   " << to_string(u);
+        CVLOG(2, "USER") << LOG_FIXED << "evaluating EXPLICIT part at t=" << t;
+        CVLOG(5, "USER") << LOG_FLOAT << "\tu:   " << to_string(u);
 
         auto result = this->get_encap_factory()->create();
 
@@ -191,8 +192,8 @@ namespace pfasst
       Heat1D<SweeperTrait, Enabled>::evaluate_rhs_impl(const typename SweeperTrait::time_type& t,
                                                        const shared_ptr<typename SweeperTrait::encap_type> u)
       {
-        CVLOG(2, "USER") << "evaluating IMPLICIT part at t=" << t;
-        CVLOG(5, "USER") << "\tu:   " << to_string(u);
+        CVLOG(2, "USER") << LOG_FIXED << "evaluating IMPLICIT part at t=" << t;
+        CVLOG(5, "USER") << LOG_FLOAT << "\tu:   " << to_string(u);
 
         // taken from Matt's original Advection-Diffusion example from old PFASST++
         spacial_type c = this->_nu / spacial_type(this->get_num_dofs());
@@ -219,10 +220,10 @@ namespace pfasst
                                                     const typename SweeperTrait::time_type& dt,
                                                     const shared_ptr<typename SweeperTrait::encap_type> rhs)
       {
-        CVLOG(2, "USER") << "IMPLICIT spacial SOLVE at t=" << t << " with dt=" << dt;
-        CVLOG(5, "USER") << "\tf:   " << to_string(f);
-        CVLOG(5, "USER") << "\tu:   " << to_string(u);
-        CVLOG(5, "USER") << "\trhs: " << to_string(rhs);
+        CVLOG(2, "USER") << LOG_FIXED << "IMPLICIT spacial SOLVE at t=" << t << " with dt=" << dt;
+        CVLOG(5, "USER") << LOG_FLOAT << "\tf:   " << to_string(f);
+        CVLOG(5, "USER") << LOG_FLOAT << "\tu:   " << to_string(u);
+        CVLOG(5, "USER") << LOG_FLOAT << "\trhs: " << to_string(rhs);
 
         spacial_type c = this->_nu * dt;
 

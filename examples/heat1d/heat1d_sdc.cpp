@@ -32,14 +32,14 @@ namespace pfasst
       {
         SDC<TransferType> sdc;
 
-        auto sweeper = make_shared<SweeperType>(8);
+        auto sweeper = make_shared<SweeperType>(32);
         sweeper->quadrature() = quadrature_factory<double>(3, QuadratureType::GaussRadau);
 
         sdc.add_sweeper(sweeper);
 
         sdc.status()->time() = 0.0;
-        sdc.status()->dt() = 0.01;
-        sdc.status()->t_end() = 0.01;
+        sdc.status()->dt() = 0.05;
+        sdc.status()->t_end() = 0.05;
         sdc.status()->max_iterations() = 2;
 
         sdc.setup();

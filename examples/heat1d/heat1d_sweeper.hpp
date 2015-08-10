@@ -53,8 +53,7 @@ namespace pfasst
                                       const typename SweeperTrait::time_type& dt,
                                       const shared_ptr<typename SweeperTrait::encap_type> rhs) override;
 
-          virtual vector<shared_ptr<typename SweeperTrait::encap_type>> compute_error(const shared_ptr<typename SweeperTrait::encap_type> q,
-                                                                                      const typename SweeperTrait::time_type& t);
+          virtual vector<shared_ptr<typename SweeperTrait::encap_type>> compute_error(const typename SweeperTrait::time_type& t);
 
         public:
           explicit Heat1D(const size_t& ndofs);
