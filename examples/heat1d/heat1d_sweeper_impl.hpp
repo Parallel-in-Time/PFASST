@@ -15,6 +15,7 @@ using boost::math::constants::pi_sqr;
 #include <pfasst/globals.hpp>
 #include <pfasst/util.hpp>
 #include <pfasst/logging.hpp>
+#include <pfasst/config.hpp>
 
 
 namespace pfasst
@@ -23,6 +24,13 @@ namespace pfasst
   {
     namespace heat1d
     {
+      template<class SweeperTrait, typename Enabled>
+      void
+      Heat1D<SweeperTrait, Enabled>::init_opts()
+      {
+        config::options::add_option<size_t>("Heat 1D", "num_dofs", "number spacial degrees of freedom");
+      }
+
       template<class SweeperTrait, typename Enabled>
       Heat1D<SweeperTrait, Enabled>::Heat1D(const size_t& ndofs)
         :   IMEX<SweeperTrait, Enabled>()
@@ -61,56 +69,6 @@ namespace pfasst
 
       template<class SweeperTrait, typename Enabled>
       void
-      Heat1D<SweeperTrait, Enabled>::post_predict()
-      {
-        IMEX<SweeperTrait, Enabled>::post_predict();
-
-        assert(this->get_quadrature() != nullptr);
-        const time_type t = this->get_status()->get_time();
-        const time_type dt = this->get_status()->get_dt();
-
-        this->compute_residuals();
-        auto error = this->compute_error(t);
-
-        assert(this->get_quadrature() != nullptr);
-        auto nodes = this->get_quadrature()->get_nodes();
-        const auto num_nodes = this->get_quadrature()->get_num_nodes();
-        nodes.insert(nodes.begin(), time_type(t));
-
-        for (size_t m = 0; m < num_nodes + 1; ++m) {
-          CLOG(INFO, "USER") << "t["<<m<<"]=" << LOG_FIXED << (dt * nodes[m]);
-          CLOG(INFO, "USER") << "  |residual| = " << LOG_FLOAT << encap::norm0(this->get_residuals()[m]);
-          CLOG(INFO, "USER") << "  |error|    = " << LOG_FLOAT << encap::norm0(error[m]);
-        }
-      }
-
-      template<class SweeperTrait, typename Enabled>
-      void
-      Heat1D<SweeperTrait, Enabled>::post_sweep()
-      {
-        IMEX<SweeperTrait, Enabled>::post_sweep();
-
-        assert(this->get_status() != nullptr);
-        const time_type t = this->get_status()->get_time();
-        const time_type dt = this->get_status()->get_dt();
-
-        this->compute_residuals();
-        auto error = this->compute_error(t);
-
-        assert(this->get_quadrature() != nullptr);
-        auto nodes = this->get_quadrature()->get_nodes();
-        const auto num_nodes = this->get_quadrature()->get_num_nodes();
-        nodes.insert(nodes.begin(), time_type(t));
-
-        for (size_t m = 0; m < num_nodes + 1; ++m) {
-          CLOG(INFO, "USER") << "t["<<m<<"]=" << LOG_FIXED << (dt * nodes[m]);
-          CLOG(INFO, "USER") << "  |residual| = " << LOG_FLOAT << encap::norm0(this->get_residuals()[m]);
-          CLOG(INFO, "USER") << "  |error|    = " << LOG_FLOAT << encap::norm0(error[m]);
-        }
-      }
-
-      template<class SweeperTrait, typename Enabled>
-      void
       Heat1D<SweeperTrait, Enabled>::post_step()
       {
         IMEX<SweeperTrait, Enabled>::post_step();
@@ -126,6 +84,32 @@ namespace pfasst
       }
 
       template<class SweeperTrait, typename Enabled>
+      bool
+      Heat1D<SweeperTrait, Enabled>::converged()
+      {
+        const bool converged = IMEX<SweeperTrait, Enabled>::converged();
+
+        assert(this->get_status() != nullptr);
+        const time_type t = this->get_status()->get_time();
+        const time_type dt = this->get_status()->get_dt();
+
+        auto error = this->compute_error(t);
+
+        assert(this->get_quadrature() != nullptr);
+        auto nodes = this->get_quadrature()->get_nodes();
+        const auto num_nodes = this->get_quadrature()->get_num_nodes();
+        nodes.insert(nodes.begin(), time_type(t));
+
+        for (size_t m = 0; m < num_nodes + 1; ++m) {
+          CLOG(INFO, "USER") << "t["<<m<<"]=" << LOG_FIXED << (dt * nodes[m]);
+          CLOG(INFO, "USER") << "  |residual| = " << LOG_FLOAT << encap::norm0(this->get_residuals()[m]);
+          CLOG(INFO, "USER") << "  |error|    = " << LOG_FLOAT << encap::norm0(error[m]);
+        }
+
+        return converged;
+      }
+
+      template<class SweeperTrait, typename Enabled>
       size_t
       Heat1D<SweeperTrait, Enabled>::get_num_dofs() const
       {
@@ -137,6 +121,8 @@ namespace pfasst
       vector<shared_ptr<typename SweeperTrait::encap_type>>
       Heat1D<SweeperTrait, Enabled>::compute_error(const typename SweeperTrait::time_type& t)
       {
+        CLOG(DEBUG, "USER") << "computing error";
+
         assert(this->get_status() != nullptr);
         const time_type dt = this->get_status()->get_dt();
 

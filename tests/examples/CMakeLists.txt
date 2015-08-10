@@ -1,3 +1,2 @@
-
-#add_subdirectory(advection_diffusion)
+add_subdirectory(heat1d)
 

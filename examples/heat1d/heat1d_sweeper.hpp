@@ -34,6 +34,8 @@ namespace pfasst
           typedef typename traits::time_type    time_type;
           typedef typename traits::spacial_type spacial_type;
 
+          static void init_opts();
+
         private:
           time_type    _t0;
           spacial_type _nu;
@@ -65,9 +67,9 @@ namespace pfasst
 
           virtual shared_ptr<typename SweeperTrait::encap_type> exact(const typename SweeperTrait::time_type& t);
 
-          virtual void post_predict() override;
-          virtual void post_sweep() override;
           virtual void post_step() override;
+
+          virtual bool converged() override;
 
           virtual size_t get_num_dofs() const;
       };

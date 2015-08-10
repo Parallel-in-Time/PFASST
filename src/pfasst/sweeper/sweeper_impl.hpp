@@ -164,8 +164,11 @@ namespace pfasst
   void
   Sweeper<SweeperTrait, Enabled>::set_options()
   {
+    CLOG(DEBUG, "SWEEPER") << "setting options";
     this->_abs_residual_tol = config::get_value<typename traits::spacial_type>("abs_res_tol", this->_abs_residual_tol);
     this->_rel_residual_tol = config::get_value<typename traits::spacial_type>("rel_res_tol", this->_rel_residual_tol);
+    CVLOG(1, "SWEEPER") << "absolut residual tolerance:  " << this->_abs_residual_tol;
+    CVLOG(1, "SWEEPER") << "relative residual tolerance: " << this->_rel_residual_tol;
   }
 
   template<class SweeperTrait, typename Enabled>
@@ -358,17 +361,35 @@ namespace pfasst
     if (this->_abs_residual_tol > 0.0 || this->_rel_residual_tol > 0.0) {
       this->compute_residuals();
       const size_t num_residuals = this->get_residuals().size();
-      vector<typename traits::spacial_type> abs_norms(num_residuals), rel_norms(num_residuals);
+      vector<typename traits::spacial_type>   abs_norms(num_residuals)
+                                            , rel_norms(num_residuals);
 
-      transform(this->get_residuals().cbegin(), this->get_residuals().cend(),
-                abs_norms.begin(),
-                [](const shared_ptr<typename traits::encap_type>& residual)
-                { return residual->norm0(); });
-      transform(this->get_residuals().cbegin(), this->get_residuals().cend(), abs_norms.cbegin(),
-                rel_norms.begin(),
-                [](const shared_ptr<typename traits::encap_type>& residual,
-                   const typename traits::spacial_type& absnorm)
-                { return absnorm / residual->norm0(); });
+      assert(this->get_residuals().back() != nullptr);
+      abs_norms.back() = this->get_residuals().back()->norm0();
+
+      for (size_t m = 0; m < num_residuals - 1; ++m) {
+        assert(this->get_residuals()[m] != nullptr);
+        const auto norm = this->get_residuals()[m]->norm0();
+        abs_norms[m] = norm;
+        rel_norms[m] = abs_norms[m] / abs_norms.back();
+      }
+      rel_norms.back() = 1.0;
+
+      CVLOG(1, "SWEEPER") << "absolute residuals: " << abs_norms;
+      CVLOG(1, "SWEEPER") << "relative residuals: " << rel_norms;
+
+      auto max_abs_norm = *(max_element(abs_norms.cbegin(), abs_norms.cend()));
+      auto max_rel_norm = *(max_element(rel_norms.cbegin(), rel_norms.cend()));
+
+      if (max_abs_norm < this->_abs_residual_tol) {
+        CLOG(INFO, "SWEEPER") << "Sweeper has converged w.r.t. absolute residual tolerance: "
+                              << LOG_FLOAT << max_abs_norm << " < " << this->_abs_residual_tol;
+      } else if (max_rel_norm < this->_rel_residual_tol) {
+        CLOG(INFO, "SWEEPER") << "Sweeper has converged w.r.t. relative residual tolerance: "
+                              << LOG_FLOAT << max_rel_norm << " < " << this->_rel_residual_tol;
+      } else {
+        CLOG(INFO, "SWEEPER") << "Sweeper has not yet converged to neither residual tolerance.";
+      }
 
       return (   *(max_element(abs_norms.cbegin(), abs_norms.cend())) < this->_abs_residual_tol
               || *(max_element(rel_norms.cbegin(), rel_norms.cend())) < this->_rel_residual_tol);

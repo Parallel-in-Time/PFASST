@@ -28,19 +28,21 @@ namespace pfasst
   {
     namespace heat1d
     {
-      void run()
+      void run(const size_t& ndofs, const size_t& nnodes, const QuadratureType& quad_type,
+               const double& t_0, const double& dt, const double& t_end, const size_t& niter)
       {
         SDC<TransferType> sdc;
 
-        auto sweeper = make_shared<SweeperType>(32);
-        sweeper->quadrature() = quadrature_factory<double>(3, QuadratureType::GaussRadau);
+        auto sweeper = make_shared<SweeperType>(ndofs);
+        sweeper->quadrature() = quadrature_factory<double>(nnodes, quad_type);
 
         sdc.add_sweeper(sweeper);
+        sdc.set_options();
 
-        sdc.status()->time() = 0.0;
-        sdc.status()->dt() = 0.05;
-        sdc.status()->t_end() = 0.05;
-        sdc.status()->max_iterations() = 2;
+        sdc.status()->time() = t_0;
+        sdc.status()->dt() = dt;
+        sdc.status()->t_end() = t_end;
+        sdc.status()->max_iterations() = niter;
 
         sdc.setup();
 
@@ -55,7 +57,32 @@ namespace pfasst
 
 int main(int argc, char** argv)
 {
-  pfasst::init(argc, argv);
+  pfasst::init(argc, argv,
+               SweeperType::init_opts);
 
-  pfasst::examples::heat1d::run();
+  const size_t ndofs = pfasst::config::get_value<size_t>("num_dofs", 8);
+  const size_t nnodes = pfasst::config::get_value<size_t>("num_nodes", 3);
+  const pfasst::quadrature::QuadratureType quad_type = pfasst::quadrature::QuadratureType::GaussRadau;
+//   const pfasst::quadrature::QuadratureType quad_type = pfasst::config::get_value<pfasst::quadrature::QuadratureType>("quad_type", pfasst::quadrature::QuadratureType::GaussRadau);
+  const double t_0 = 0.0;
+//   const double t_0 = pfasst::config::get_value<double>("t_0", 0.0);
+  const double dt = pfasst::config::get_value<double>("dt", 0.01);
+  double t_end = pfasst::config::get_value<double>("tend", -1);
+  size_t nsteps = pfasst::config::get_value<size_t>("num_steps", 0);
+  if (t_end == -1 && nsteps == 0) {
+    CLOG(ERROR, "USER") << "Either t_end or num_steps must be specified.";
+    throw runtime_error("either t_end or num_steps must be specified");
+  } else if (t_end != -1 && nsteps != 0) {
+    if (!pfasst::almost_equal(t_0 + nsteps * dt, t_end)) {
+      CLOG(ERROR, "USER") << "t_0 + nsteps * dt != t_end ("
+                          << t_0 << " + " << nsteps << " * " << dt << " = " << (t_0 + nsteps * dt)
+                          << " != " << t_end << ")";
+      throw runtime_error("t_0 + nsteps * dt != t_end");
+    }
+  } else if (nsteps != 0) {
+    t_end = t_0 + dt * nsteps;
+  }
+  const size_t niter = pfasst::config::get_value<size_t>("num_iters", 5);
+
+  pfasst::examples::heat1d::run(ndofs, nnodes, quad_type, t_0, dt, t_end, niter);
 }

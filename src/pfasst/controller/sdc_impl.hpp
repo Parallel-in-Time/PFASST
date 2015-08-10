@@ -61,6 +61,15 @@ namespace pfasst
 
   template<class TransferT>
   void
+  SDC<TransferT>::set_options()
+  {
+    Controller<TransferT>::set_options();
+
+    this->get_sweeper()->set_options();
+  }
+
+  template<class TransferT>
+  void
   SDC<TransferT>::setup()
   {
     Controller<TransferT>::setup();
@@ -122,11 +131,14 @@ namespace pfasst
   SDC<TransferT>::advance_iteration()
   {
     if (this->get_sweeper()->converged()) {
+      CLOG(INFO, "CONTROL") << "Sweeper has converged.";
       return false;
     } else if (Controller<TransferT>::advance_iteration()) {
+      CLOG(INFO, "CONTROL") << "Sweeper has not yet converged and additional iterations to do.";
       this->get_sweeper()->save();
       return true;
     } else {
+      CLOG(INFO, "CONTROL") << "Sweeper has not yet converged and no more iterations to do.";
       return false;
     }
   }

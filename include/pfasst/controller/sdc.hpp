@@ -57,6 +57,8 @@ namespace pfasst
       virtual const shared_ptr<typename TransferT::traits::fine_sweeper_type> get_sweeper() const;
       virtual       shared_ptr<typename TransferT::traits::fine_sweeper_type> get_sweeper();
 
+      virtual void set_options() override;
+
       virtual void setup() override;
       virtual void run() override;
 
