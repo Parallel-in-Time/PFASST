@@ -90,9 +90,9 @@ namespace pfasst
     /**
      * Computes interpolation matrix.
      *
-     * Returns the interpolation matrix \\( M \\in \\mathbb{R}^{m\\times n} \\),
-     * \\( m_{i,j} = l_j(x_i) \\) with \\( l_j(x_i) \\) being the \\( j \\)-th Lagrange polynomial
-     * evaluated at the \\( i \\)-th entry of @p x .
+     * Returns the interpolation matrix \\( M \\in \\mathbb{R}^{m\\times n} \\) for interpolation
+     * from nodes @p x to nodes @p y with \\( m_{i,j} = l_j(y_i) \\) with \\( l_j(y_i) \\) being the
+     * \\( j \\)-th Lagrange polynomial evaluated at the \\( i \\)-th entry of @p y .
      *
      * @tparam precision numerical type of the interpolation (e.g. `double`)
      */
@@ -115,7 +115,7 @@ namespace pfasst
             den *= x[j] - x[k];
           }
 
-          if (almost_zero(num)) {
+          if (!almost_zero(num)) {
             mat(i, j) = num / den;
           } else {
             mat(i, j) = 0.0;

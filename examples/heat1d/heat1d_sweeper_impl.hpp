@@ -62,7 +62,7 @@ namespace pfasst
           result->data()[i] = sin(two_pi<spacial_type>() * i * dx) * exp(-t * pow(two_pi<spacial_type>(), 2) * this->_nu);
         }
 
-        CVLOG(2, "USER") << LOG_FIXED << "EXACT t=" << t << ": " << LOG_FLOAT << to_string(result);
+        CVLOG(2, this->get_logger_id()) << LOG_FIXED << "EXACT t=" << t << ": " << LOG_FLOAT << to_string(result);
 
         return result;
       }
@@ -73,10 +73,10 @@ namespace pfasst
       {
         IMEX<SweeperTrait, Enabled>::post_step();
 
-        CLOG(INFO, "USER") << "number function evaluations:";
-        CLOG(INFO, "USER") << "  expl:        " << this->_num_expl_f_evals;
-        CLOG(INFO, "USER") << "  impl:        " << this->_num_impl_f_evals;
-        CLOG(INFO, "USER") << "  impl solves: " << this->_num_impl_solves;
+        CLOG(INFO, this->get_logger_id()) << "number function evaluations:";
+        CLOG(INFO, this->get_logger_id()) << "  expl:        " << this->_num_expl_f_evals;
+        CLOG(INFO, this->get_logger_id()) << "  impl:        " << this->_num_impl_f_evals;
+        CLOG(INFO, this->get_logger_id()) << "  impl solves: " << this->_num_impl_solves;
 
         this->_num_expl_f_evals = 0;
         this->_num_impl_f_evals = 0;
@@ -101,9 +101,9 @@ namespace pfasst
         nodes.insert(nodes.begin(), time_type(t));
 
         for (size_t m = 0; m < num_nodes + 1; ++m) {
-          CLOG(INFO, "USER") << "t["<<m<<"]=" << LOG_FIXED << (dt * nodes[m]);
-          CLOG(INFO, "USER") << "  |residual| = " << LOG_FLOAT << encap::norm0(this->get_residuals()[m]);
-          CLOG(INFO, "USER") << "  |error|    = " << LOG_FLOAT << encap::norm0(error[m]);
+          CLOG(INFO, this->get_logger_id()) << "t["<<m<<"]=" << LOG_FIXED << (dt * nodes[m])
+                             << "      |residual| = " << LOG_FLOAT << encap::norm0(this->get_residuals()[m])
+                             << "      |error| = " << LOG_FLOAT << encap::norm0(error[m]);
         }
 
         return converged;
@@ -121,7 +121,7 @@ namespace pfasst
       vector<shared_ptr<typename SweeperTrait::encap_type>>
       Heat1D<SweeperTrait, Enabled>::compute_error(const typename SweeperTrait::time_type& t)
       {
-        CLOG(DEBUG, "USER") << "computing error";
+        CLOG(DEBUG, this->get_logger_id()) << "computing error";
 
         assert(this->get_status() != nullptr);
         const time_type dt = this->get_status()->get_dt();
@@ -139,7 +139,7 @@ namespace pfasst
         for (size_t m = 1; m < num_nodes + 1; ++m) {
           const time_type ds = dt * (nodes[m] - nodes[0]);
           error[m] = pfasst::encap::axpy(-1.0, this->exact(t + ds), this->get_states()[m]);
-          CVLOG(2, "USER") << LOG_FIXED << "error t=" << t + ds << ": "
+          CVLOG(2, this->get_logger_id()) << LOG_FIXED << "error t=" << t + ds << ": "
                            << LOG_FLOAT << to_string(error[m]);
         }
 
@@ -151,8 +151,8 @@ namespace pfasst
       Heat1D<SweeperTrait, Enabled>::evaluate_rhs_expl(const typename SweeperTrait::time_type& t,
                                                        const shared_ptr<typename SweeperTrait::encap_type> u)
       {
-        CVLOG(2, "USER") << LOG_FIXED << "evaluating EXPLICIT part at t=" << t;
-        CVLOG(5, "USER") << LOG_FLOAT << "\tu:   " << to_string(u);
+        CVLOG(2, this->get_logger_id()) << LOG_FIXED << "evaluating EXPLICIT part at t=" << t;
+        CVLOG(5, this->get_logger_id()) << LOG_FLOAT << "\tu:   " << to_string(u);
 
         auto result = this->get_encap_factory()->create();
 
@@ -169,7 +169,7 @@ namespace pfasst
 
         this->_num_expl_f_evals++;
 
-        CVLOG(5, "USER") << "\t  -> " << to_string(result);
+        CVLOG(5, this->get_logger_id()) << "\t  -> " << to_string(result);
         return result;
       }
 
@@ -178,8 +178,8 @@ namespace pfasst
       Heat1D<SweeperTrait, Enabled>::evaluate_rhs_impl(const typename SweeperTrait::time_type& t,
                                                        const shared_ptr<typename SweeperTrait::encap_type> u)
       {
-        CVLOG(2, "USER") << LOG_FIXED << "evaluating IMPLICIT part at t=" << t;
-        CVLOG(5, "USER") << LOG_FLOAT << "\tu:   " << to_string(u);
+        CVLOG(2, this->get_logger_id()) << LOG_FIXED << "evaluating IMPLICIT part at t=" << t;
+        CVLOG(5, this->get_logger_id()) << LOG_FLOAT << "\tu:   " << to_string(u);
 
         // taken from Matt's original Advection-Diffusion example from old PFASST++
         spacial_type c = this->_nu / spacial_type(this->get_num_dofs());
@@ -194,7 +194,7 @@ namespace pfasst
 
         this->_num_impl_f_evals++;
 
-        CVLOG(5, "USER") << "\t  -> " << to_string(result);
+        CVLOG(5, this->get_logger_id()) << "\t  -> " << to_string(result);
         return result;
       }
 
@@ -206,10 +206,10 @@ namespace pfasst
                                                     const typename SweeperTrait::time_type& dt,
                                                     const shared_ptr<typename SweeperTrait::encap_type> rhs)
       {
-        CVLOG(2, "USER") << LOG_FIXED << "IMPLICIT spacial SOLVE at t=" << t << " with dt=" << dt;
-        CVLOG(5, "USER") << LOG_FLOAT << "\tf:   " << to_string(f);
-        CVLOG(5, "USER") << LOG_FLOAT << "\tu:   " << to_string(u);
-        CVLOG(5, "USER") << LOG_FLOAT << "\trhs: " << to_string(rhs);
+        CVLOG(2, this->get_logger_id()) << LOG_FIXED << "IMPLICIT spacial SOLVE at t=" << t << " with dt=" << dt;
+        CVLOG(5, this->get_logger_id()) << LOG_FLOAT << "\tf:   " << to_string(f);
+        CVLOG(5, this->get_logger_id()) << LOG_FLOAT << "\tu:   " << to_string(u);
+        CVLOG(5, this->get_logger_id()) << LOG_FLOAT << "\trhs: " << to_string(rhs);
 
         spacial_type c = this->_nu * dt;
 
@@ -225,9 +225,9 @@ namespace pfasst
 
         this->_num_impl_solves++;
 
-        CVLOG(5, "USER") << "\t->";
-        CVLOG(5, "USER") << "\t  f: " << to_string(f);
-        CVLOG(5, "USER") << "\t  u: " << to_string(u);
+        CVLOG(5, this->get_logger_id()) << "\t->";
+        CVLOG(5, this->get_logger_id()) << "\t  f: " << to_string(f);
+        CVLOG(5, this->get_logger_id()) << "\t  u: " << to_string(u);
       }
     }  // ::pfasst::examples::advec_diff
   }  // ::pfasst::examples

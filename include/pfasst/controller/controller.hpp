@@ -25,6 +25,7 @@ namespace pfasst
       shared_ptr<transfer_type>      _transfer;
       shared_ptr<Status<time_type>>  _status;
       bool                           _ready;
+      string                         _logger_id;
 
       virtual bool& ready();
 
@@ -42,6 +43,9 @@ namespace pfasst
       virtual size_t get_num_levels() const;
       virtual size_t get_num_steps() const;
       virtual bool   is_ready() const;
+
+      virtual       void  set_logger_id(const string& logger_id);
+      virtual const char* get_logger_id() const;
 
       template<class SweeperT>
       void add_sweeper(shared_ptr<SweeperT> sweeper, const bool as_coarse);

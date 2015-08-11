@@ -72,6 +72,7 @@ namespace pfasst
       virtual void post_step() override;
       virtual void advance() override;
       virtual void reevaluate(const bool initial_only = false) override;
+      virtual vector<shared_ptr<typename SweeperTrait::encap_type>> integrate(const typename SweeperTrait::time_type& dt) override;
   };
 }  // ::pfasst
 

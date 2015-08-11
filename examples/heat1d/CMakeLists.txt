@@ -8,6 +8,7 @@ include_directories(
 
 set(heat_examples
     heat1d_sdc
+    heat1d_mlsdc
 )
 
 set(heat_mpi_examples)

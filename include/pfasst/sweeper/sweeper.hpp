@@ -52,6 +52,8 @@ namespace pfasst
       typename traits::spacial_type                          _abs_residual_tol;
       typename traits::spacial_type                          _rel_residual_tol;
 
+      string                                                 _logger_id;
+
       virtual void integrate_end_state(const typename SweeperTrait::time_type& dt);
       virtual void compute_residuals();
 
@@ -86,6 +88,9 @@ namespace pfasst
       virtual const shared_ptr<typename SweeperTrait::encap_type>          get_end_state() const;
       virtual const vector<shared_ptr<typename SweeperTrait::encap_type>>  get_tau() const;
       virtual const vector<shared_ptr<typename SweeperTrait::encap_type>>  get_residuals() const;
+
+      virtual       void  set_logger_id(const string& logger_id);
+      virtual const char* get_logger_id() const;
 
       virtual void set_options();
       virtual void set_abs_residual_tol(const typename SweeperTrait::spacial_type& abs_res_tol);

@@ -14,6 +14,7 @@ namespace pfasst
   Controller<TransferT>::Controller()
     :   _status(make_shared<Status<typename TransferT::traits::fine_time_type>>())
       , _ready(false)
+      , _logger_id("CONTROL")
   {}
 
   template<class TransferT>
@@ -42,20 +43,20 @@ namespace pfasst
   Controller<TransferT>::get_num_steps() const
   {
     if (this->get_status()->get_t_end() <= 0) {
-      CLOG(ERROR, "CONTROL") << "Time end point must be non-zero positive."
+      CLOG(ERROR, this->get_logger_id()) << "Time end point must be non-zero positive."
         << " NOT " << this->get_status()->get_t_end();
       throw logic_error("time end point must be non-zero positive");
     }
 
     if (this->get_status()->get_dt() <= 0.0) {
-      CLOG(ERROR, "CONTROL") << "Time delta must be non-zero positive."
+      CLOG(ERROR, this->get_logger_id()) << "Time delta must be non-zero positive."
         << " NOT " << this->get_status()->get_dt();
       throw logic_error("time delta must be non-zero positive");
     }
 
     const auto div = this->get_status()->get_t_end() / this->get_status()->get_dt();
     CLOG_IF(!almost_equal(div * this->get_status()->get_dt(),
-                          (size_t)div * this->get_status()->get_dt()), WARNING, "CONTROL")
+                          (size_t)div * this->get_status()->get_dt()), WARNING, this->get_logger_id())
       << "End time point not an integral multiple of time delta: "
       << this->get_status()->get_t_end() << " / " << this->get_status()->get_dt()
       << " = " << div << " != " << (size_t)div;
@@ -75,6 +76,20 @@ namespace pfasst
   Controller<TransferT>::is_ready() const
   {
     return this->_ready;
+  }
+
+  template<class TransferT>
+  void
+  Controller<TransferT>::set_logger_id(const string& logger_id)
+  {
+    this->_logger_id = logger_id;
+  }
+
+  template<class TransferT>
+  const char*
+  Controller<TransferT>::get_logger_id() const
+  {
+    return this->_logger_id.c_str();
   }
 
   template<class TransferT>
@@ -116,24 +131,26 @@ namespace pfasst
   void
   Controller<TransferT>::setup()
   {
-    CLOG_IF(this->is_ready(), WARNING, "CONTROL")
+    CLOG_IF(this->is_ready(), WARNING, this->get_logger_id())
       << "Controller has already been setup.";
 
+    CVLOG(1, this->get_logger_id()) << "setting up controller";
+
     if (this->get_status()->get_t_end() <= 0.0) {
-      CLOG(ERROR, "CONTROL") << "End time point must be larger than zero."
+      CLOG(ERROR, this->get_logger_id()) << "End time point must be larger than zero."
         << " (" << this->get_status()->get_t_end() << ")";
       throw logic_error("end time point must be larger zero");
     }
 
     const auto num_steps = this->get_num_steps();
     if (num_steps * this->get_status()->get_dt() != this->get_status()->get_t_end()) {
-      CLOG(ERROR, "CONTROL") << "End time point not an integral multiple of time delta. "
+      CLOG(ERROR, this->get_logger_id()) << "End time point not an integral multiple of time delta. "
         << " (" << num_steps << " * " << this->get_status()->get_dt()
         << " = " << num_steps * this->get_status()->get_dt() << " != " << this->get_status()->get_t_end() << ")";
       throw logic_error("time end point is not an integral multiple of time delta");
     }
 
-    CLOG_IF(this->get_status()->get_max_iterations() == 0, WARNING, "CONTROL")
+    CLOG_IF(this->get_status()->get_max_iterations() == 0, WARNING, this->get_logger_id())
       << "You sould define a maximum number of iterations to avoid endless runs."
       << " (" << this->get_status()->get_max_iterations() << ")";
 
@@ -145,7 +162,7 @@ namespace pfasst
   Controller<TransferT>::run()
   {
     if (!this->is_ready()) {
-      CLOG(ERROR, "CONTROL") << "Controller is not ready to run. setup() not called yet.";
+      CLOG(ERROR, this->get_logger_id()) << "Controller is not ready to run. setup() not called yet.";
       throw logic_error("controller not ready to run");
     }
   }
@@ -159,7 +176,7 @@ namespace pfasst
 
     if (new_time > this->get_status()->get_t_end()
         || almost_equal(new_time, this->get_status()->get_t_end())) {
-      CLOG(WARNING, "CONTROL") << "Not advancing " << num_steps
+      CLOG(WARNING, this->get_logger_id()) << "Not advancing " << num_steps
         << ((num_steps > 1) ? " time steps " : " time step ")
         << "with dt=" << this->get_status()->get_dt() << " to t=" << new_time
         << " as it will exceed T_end=" << this->get_status()->get_t_end() << " by "
@@ -168,7 +185,7 @@ namespace pfasst
       return false;
 
     } else {
-      CLOG(INFO, "CONTROL") << "Advancing " << num_steps
+      CLOG(INFO, this->get_logger_id()) << "Advancing " << num_steps
         << ((num_steps > 1) ? " time steps " : " time step ")
         << "with dt=" << this->get_status()->get_dt() << " to t=" << new_time;
 
@@ -185,7 +202,7 @@ namespace pfasst
   Controller<TransferT>::advance_iteration()
   {
     if (this->get_status()->get_iteration() + 1 > this->get_status()->get_max_iterations()) {
-      CLOG(WARNING, "CONTROL") << "Not advancing to next iteration ("
+      CLOG(WARNING, this->get_logger_id()) << "Not advancing to next iteration ("
         << (this->get_status()->get_iteration() + 1)
         << ") as it will exceed maximum number of allowed iterations ("
         << this->get_status()->get_max_iterations() << ")";
@@ -193,7 +210,7 @@ namespace pfasst
       return false;
 
     } else {
-      CLOG(INFO, "CONTROL") << "Advancing to next iteration ("
+      CLOG(INFO, this->get_logger_id()) << "Advancing to next iteration ("
         << (this->get_status()->get_iteration() + 1) << ")";
 
       this->status()->iteration()++;

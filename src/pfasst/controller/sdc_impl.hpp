@@ -42,7 +42,7 @@ namespace pfasst
   void
   SDC<TransferT>::add_transfer(shared_ptr<TransferT> transfer)
   {
-    CLOG(WARNING, "CONTROL") << "SDC Controller does not require a transfer operator.";
+    CLOG(WARNING, this->get_logger_id()) << "SDC Controller does not require a transfer operator.";
   }
 
   template<class TransferT>
@@ -75,7 +75,7 @@ namespace pfasst
     Controller<TransferT>::setup();
 
     if (this->get_num_levels() != 1) {
-      CLOG(ERROR, "CONTROL") << "One level (Sweeper) must have been added for SDC.";
+      CLOG(ERROR, this->get_logger_id()) << "One level (Sweeper) must have been added for SDC.";
       throw logic_error("SDC requires one level");
     }
 
@@ -89,7 +89,7 @@ namespace pfasst
   {
     Controller<TransferT>::run();
 
-    CLOG(INFO, "CONTROL") << "Initial Value: " << to_string(this->get_sweeper()->get_initial_state());
+    CLOG(INFO, this->get_logger_id()) << "Initial Value: " << to_string(this->get_sweeper()->get_initial_state());
 
     // iterate over time steps
     do {
@@ -131,14 +131,14 @@ namespace pfasst
   SDC<TransferT>::advance_iteration()
   {
     if (this->get_sweeper()->converged()) {
-      CLOG(INFO, "CONTROL") << "Sweeper has converged.";
+      CLOG(INFO, this->get_logger_id()) << "Sweeper has converged.";
       return false;
     } else if (Controller<TransferT>::advance_iteration()) {
-      CLOG(INFO, "CONTROL") << "Sweeper has not yet converged and additional iterations to do.";
+      CLOG(INFO, this->get_logger_id()) << "Sweeper has not yet converged and additional iterations to do.";
       this->get_sweeper()->save();
       return true;
     } else {
-      CLOG(INFO, "CONTROL") << "Sweeper has not yet converged and no more iterations to do.";
+      CLOG(INFO, this->get_logger_id()) << "Sweeper has not yet converged and no more iterations to do.";
       return false;
     }
   }

@@ -18,10 +18,13 @@ namespace pfasst
   Spectral1DTransfer<TransferTraits, Enabled>::interpolate_data(const shared_ptr<typename TransferTraits::coarse_encap_type> coarse,
                                                                 shared_ptr<typename TransferTraits::fine_encap_type> fine)
   {
+    CVLOG(1, "TRANS") << "interpolate data";
+
     const size_t coarse_ndofs = coarse->get_data().size();
     const size_t fine_ndofs = fine->get_data().size();
     assert(coarse_ndofs > 0);
     assert(fine_ndofs >= coarse_ndofs);
+
 
     complex<fine_spacial_type>* coarse_z = this->fft.forward(coarse);
     complex<fine_spacial_type>* fine_z = this->fft.get_workspace(fine_ndofs)->z;
@@ -51,6 +54,8 @@ namespace pfasst
   Spectral1DTransfer<TransferTraits, Enabled>::restrict_data(const shared_ptr<typename TransferTraits::fine_encap_type> fine,
                                                              shared_ptr<typename TransferTraits::coarse_encap_type> coarse)
   {
+    CVLOG(1, "TRANS") << "restrict data";
+
     const size_t coarse_ndofs = coarse->get_data().size();
     const size_t fine_ndofs = fine->get_data().size();
     assert(coarse_ndofs > 0);

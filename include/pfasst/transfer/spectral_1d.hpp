@@ -18,8 +18,7 @@ namespace pfasst
     typename Enabled = void
   >
   class Spectral1DTransfer
-    :   public PolynomialTransfer<TransferTraits, Enabled>
-      , public enable_shared_from_this<Spectral1DTransfer<TransferTraits, Enabled>>
+    : public PolynomialTransfer<TransferTraits, Enabled>
   {
     public:
       typedef          TransferTraits              traits;

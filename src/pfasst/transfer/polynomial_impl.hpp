@@ -17,6 +17,8 @@ namespace pfasst
   PolynomialTransfer<TransferTraits, Enabled>::interpolate_initial(const shared_ptr<typename TransferTraits::coarse_sweeper_type> coarse,
                                                                    shared_ptr<typename TransferTraits::fine_sweeper_type> fine)
   {
+    CVLOG(1, "TRANS") << "interpolate initial value only";
+
     auto coarse_factory = coarse->get_encap_factory();
     auto fine_factory = fine->get_encap_factory();
 
@@ -31,6 +33,7 @@ namespace pfasst
     auto fine_delta = fine_factory->create();
     // f_delta = interpolate(c_delta)
     this->interpolate_data(coarse_delta, fine_delta);
+
     // f_0 -= f_delta
     fine->initial_state()->scaled_add(-1.0, fine_delta);
 
@@ -43,31 +46,36 @@ namespace pfasst
                                                            shared_ptr<typename TransferTraits::fine_sweeper_type> fine,
                                                            const bool initial)
   {
+    CVLOG(1, "TRANS") << "interpolate";
+
     if (initial) {
       this->interpolate_initial(coarse, fine);
     }
 
-    this->setup_tmat(fine->get_quadrature()->get_nodes(), coarse->get_quadrature()->get_nodes());
+    this->setup_tmat(fine->get_quadrature(), coarse->get_quadrature());
 
-    const size_t num_fine_nodes = fine->get_quadrature()->get_num_nodes();
-    const size_t num_coarse_nodes = coarse->get_quadrature()->get_num_nodes();
+    const size_t num_fine_nodes = fine->get_quadrature()->get_num_nodes() + 1;
+    const size_t num_coarse_nodes = coarse->get_quadrature()->get_num_nodes() + 1;
 
     auto coarse_factory = coarse->get_encap_factory();
     auto fine_factory = fine->get_encap_factory();
 
-    vector<shared_ptr<fine_encap_type>> fine_delta(num_coarse_nodes);
-    generate(fine_delta.begin(), fine_delta.end(),
+    // compute coarse level correction
+    vector<shared_ptr<fine_encap_type>> fine_deltas(num_coarse_nodes);
+    generate(fine_deltas.begin(), fine_deltas.end(),
              [fine_factory]() { return fine_factory->create(); });
     auto coarse_delta = coarse_factory->create();
 
     for (size_t m = 0; m < num_coarse_nodes; ++m) {
       coarse_delta->data() = coarse->get_states()[m]->get_data();
       coarse_delta->scaled_add(-1.0, coarse->get_previous_states()[m]);
-      this->interpolate_data(coarse_delta, fine_delta[m]);
+      this->interpolate_data(coarse_delta, fine_deltas[m]);
     }
 
-    encap::mat_apply(fine->states(), 1.0, this->tmat, fine_delta, true);
+    // add coarse level correction onto fine level's states
+    encap::mat_apply(fine->states(), 1.0, this->tmat, fine_deltas, false);
 
+    // update function evaluations on fine level
     fine->reevaluate();
   }
 
@@ -85,6 +93,8 @@ namespace pfasst
   PolynomialTransfer<TransferTraits, Enabled>::restrict_initial(const shared_ptr<typename TransferTraits::fine_sweeper_type> fine,
                                                                 shared_ptr<typename TransferTraits::coarse_sweeper_type> coarse)
   {
+    CVLOG(1, "TRANS") << "restrict initial value only";
+
     this->restrict_data(fine->get_initial_state(), coarse->initial_state());
   }
 
@@ -94,6 +104,8 @@ namespace pfasst
                                                         shared_ptr<typename TransferTraits::coarse_sweeper_type> coarse,
                                                         const bool initial)
   {
+    CVLOG(1, "TRANS") << "restrict";
+
     if (initial) {
       this->restrict_initial(fine, coarse);
     }
@@ -132,84 +144,53 @@ namespace pfasst
                                                    const shared_ptr<typename TransferTraits::fine_sweeper_type> fine,
                                                    shared_ptr<typename TransferTraits::coarse_sweeper_type> coarse)
   {
+    CVLOG(1, "TRANS") << "compute FAS correction";
+
     const auto coarse_nodes = coarse->get_quadrature()->get_nodes();
     const auto fine_nodes = fine->get_quadrature()->get_nodes();
     const size_t num_coarse_nodes = coarse->get_quadrature()->get_num_nodes();
     const size_t num_fine_nodes = fine->get_quadrature()->get_num_nodes();
 
+    if (num_fine_nodes != num_coarse_nodes) {
+      CLOG(ERROR, "TRANS") << "FAS Correction for different time scales not supported yet.";
+      throw NotImplementedYet("fas correction for different time scales");
+    } else if (!equal(coarse_nodes.cbegin(), coarse_nodes.cend(), fine_nodes.cbegin())) {
+      CLOG(ERROR, "TRANS") << "FAS Correction for different time nodes not supported yet.";
+      throw NotImplementedYet("fas correction for different sets of nodes");
+    }
+    assert(coarse_nodes.size() == fine_nodes.size());
+
     auto coarse_factory = coarse->get_encap_factory();
     auto fine_factory = fine->get_encap_factory();
 
-    vector<shared_ptr<coarse_encap_type>> coarse_integral(num_coarse_nodes);
-    vector<shared_ptr<fine_encap_type>> fine_integral(num_fine_nodes);
-    vector<shared_ptr<coarse_encap_type>> restricted_fine_integral(num_coarse_nodes);
+    vector<shared_ptr<coarse_encap_type>> fas(num_coarse_nodes + 1);
+    generate(fas.begin(), fas.end(), [coarse_factory]() { return coarse_factory->create(); });
 
-    generate(coarse_integral.begin(), coarse_integral.end(),
-             [coarse_factory]() { return coarse_factory->create(); });
-    generate(fine_integral.begin(), fine_integral.end(),
-             [fine_factory]() { return fine_factory->create(); });
-    generate(restricted_fine_integral.begin(), restricted_fine_integral.end(),
-             [coarse_factory]() { return coarse_factory->create(); });
+    const auto coarse_integral = coarse->integrate(dt);
+    const auto fine_integral = fine->integrate(dt);
 
-    coarse_integral = coarse->integrate(dt);
-    fine_integral = fine->integrate(dt);
-
-    const int factor = ((int)num_fine_nodes - 1) / ((int)num_coarse_nodes - 1);
-
-    for (size_t m = 0; m < num_coarse_nodes; ++m) {
-      if (coarse_nodes[m] != fine_nodes[m * factor]) {
-        CLOG(ERROR, "TRANS") << "coarse nodes are not nested within fine ones."
-                             << "coarse: " << coarse_nodes << " fine: " << fine_nodes;
-        throw NotImplementedYet("non-nested nodes");
-      }
-      this->restrict_data(fine_integral[m * factor], restricted_fine_integral[m]);
+    for (size_t m = 0; m < num_coarse_nodes + 1; ++m) {
+      this->restrict_data(fine_integral[m], fas[m]);
+      fas[m]->scaled_add(-1.0, coarse_integral[m]);
+      coarse->tau()[m]->data() = fas[m]->get_data();
     }
-
-    vector<shared_ptr<coarse_encap_type>> restricted_and_coarse(2 * num_coarse_nodes);
-    for (size_t m = 0; m < num_coarse_nodes; ++m) {
-      restricted_and_coarse[m]->data() = restricted_fine_integral[m]->get_data();
-      restricted_and_coarse[num_coarse_nodes + m]->data() = coarse_integral[m]->get_data();
-    }
-
-    // TODO: FAS w.t.r. Q not S
-    this->setup_fmat(num_coarse_nodes);
-
-    encap::mat_apply(coarse->tau(), 1.0, fmat, restricted_and_coarse, true);
   }
 
 
   template<class TransferTraits, typename Enabled>
   void
-  PolynomialTransfer<TransferTraits, Enabled>::setup_tmat(const vector<typename TransferTraits::fine_time_type>& fine_nodes,
-                                                          const vector<typename TransferTraits::coarse_time_type>& coarse_nodes)
+  PolynomialTransfer<TransferTraits, Enabled>::setup_tmat(const shared_ptr<quadrature::IQuadrature<typename TransferTraits::fine_time_type>> fine_quad,
+                                                          const shared_ptr<quadrature::IQuadrature<typename TransferTraits::coarse_time_type>> coarse_quad)
   {
     if (this->tmat.rows() == 0) {
+      auto coarse_nodes = coarse_quad->get_nodes();
+      auto fine_nodes = fine_quad->get_nodes();
+
+      coarse_nodes.insert(coarse_nodes.begin(), 0.0);
+      fine_nodes.insert(fine_nodes.begin(), 0.0);
+
       this->tmat = quadrature::compute_interp<typename TransferTraits::fine_time_type>(coarse_nodes,
                                                                                        fine_nodes);
-    }
-  }
-
-  template<class TransferTraits, typename Enabled>
-  void
-  PolynomialTransfer<TransferTraits, Enabled>::setup_fmat(const size_t& num_coarse)
-  {
-    if (this->fmat.rows() == 0) {
-      // XXX: +1 ?!
-      this->fmat.resize(num_coarse + 1, 2 * (num_coarse + 1));
-      this->fmat.fill(0.0);
-
-      // XXX: m=1...num_coarse ?!
-      for (size_t m = 1; m < num_coarse; m++) {
-        this->fmat(m, m) = 1.0;
-        this->fmat(m, num_coarse + m) = -1.0;
-
-        // subtract 0-to-(m-1) FAS so resulting FAS is (m-1)-to-m FAS,
-        //  which will be required in the sweeper logic
-//         for (size_t n = 0; n < m; n++) {
-//           this->fmat(m, n) = -1.0;
-//           this->fmat(m, num_coarse + n) = 1.0;
-//         }
-      }
     }
   }
 }  // ::pfasst

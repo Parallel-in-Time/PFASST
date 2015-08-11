@@ -295,7 +295,6 @@ TEST_P(QmatTest, AllNodes)
   const size_t rows = this->quad->get_q_mat().rows();
 
   for (size_t m = 0; m < rows; ++m) {
-    cout << "row " << m << ": " << this->quad->get_q_mat().row(m) << endl;
     if (qtype == QuadratureType::GaussRadau) {
       if (m > 0) {
         EXPECT_NEAR(this->quad->get_q_mat().row(m).sum(),
@@ -318,6 +317,17 @@ INSTANTIATE_TEST_CASE_P(Quadrature, QmatTest,
                                                          QuadratureType::GaussRadau,
                                                          QuadratureType::ClenshawCurtis,
                                                          QuadratureType::Uniform)));
+
+
+TEST(Interpolation, compute_interpolation_matrix_for_equal_nodes)
+{
+  vector<double> nodes{0.0, 0.5, 1.0};
+
+  auto mat = pfasst::quadrature::compute_interp(nodes, nodes);
+  for (size_t diag = 0; diag < 3; ++diag) {
+    EXPECT_THAT(mat(diag, diag), DoubleEq(1.0));
+  }
+}
 
 
 TEST_MAIN()

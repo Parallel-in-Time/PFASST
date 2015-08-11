@@ -17,8 +17,7 @@ namespace pfasst
     typename Enabled = void
   >
   class PolynomialTransfer
-    :   public Transfer<TransferTraits, Enabled>
-      , public enable_shared_from_this<PolynomialTransfer<TransferTraits, Enabled>>
+    : public Transfer<TransferTraits, Enabled>
   {
     public:
       typedef          TransferTraits              traits;
@@ -37,9 +36,8 @@ namespace pfasst
       Matrix<fine_time_type> tmat;
       Matrix<fine_time_type> fmat;
 
-      virtual void setup_tmat(const vector<typename TransferTraits::fine_time_type>& fine_nodes,
-                              const vector<typename TransferTraits::coarse_time_type>& coarse_nodes);
-      virtual void setup_fmat(const size_t& num_coarse);
+      virtual void setup_tmat(const shared_ptr<quadrature::IQuadrature<typename TransferTraits::fine_time_type>> fine_quad,
+                              const shared_ptr<quadrature::IQuadrature<typename TransferTraits::coarse_time_type>> coarse_quad);
 
     public:
       PolynomialTransfer() = default;

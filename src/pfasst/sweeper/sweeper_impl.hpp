@@ -24,6 +24,7 @@ namespace pfasst
       , _status(nullptr)
       , _abs_residual_tol(0.0)
       , _rel_residual_tol(0.0)
+      , _logger_id("SWEEPER")
   {}
 
   template<class SweeperTrait, typename Enabled>
@@ -73,7 +74,7 @@ namespace pfasst
   Sweeper<SweeperTrait, Enabled>::initial_state()
   {
     if (this->get_states().size() == 0) {
-      CLOG(ERROR, "SWEEPER") << "Sweeper need to be setup first before querying initial state.";
+      CLOG(ERROR, this->get_logger_id()) << "Sweeper need to be setup first before querying initial state.";
       throw runtime_error("sweeper not setup before querying initial state");
     }
     return this->states().front();
@@ -84,7 +85,7 @@ namespace pfasst
   Sweeper<SweeperTrait, Enabled>::get_initial_state() const
   {
     if (this->get_states().size() == 0) {
-      CLOG(ERROR, "SWEEPER") << "Sweeper need to be setup first before querying initial state.";
+      CLOG(ERROR, this->get_logger_id()) << "Sweeper need to be setup first before querying initial state.";
       throw runtime_error("sweeper not setup before querying initial state");
     }
     return this->get_states().front();
@@ -162,13 +163,27 @@ namespace pfasst
 
   template<class SweeperTrait, typename Enabled>
   void
+  Sweeper<SweeperTrait, Enabled>::set_logger_id(const string& logger_id)
+  {
+    this->_logger_id = logger_id;
+  }
+
+  template<class SweeperTrait, typename Enabled>
+  const char*
+  Sweeper<SweeperTrait, Enabled>::get_logger_id() const
+  {
+    return this->_logger_id.c_str();
+  }
+
+  template<class SweeperTrait, typename Enabled>
+  void
   Sweeper<SweeperTrait, Enabled>::set_options()
   {
-    CLOG(DEBUG, "SWEEPER") << "setting options";
+    CLOG(DEBUG, this->get_logger_id()) << "setting options";
     this->_abs_residual_tol = config::get_value<typename traits::spacial_type>("abs_res_tol", this->_abs_residual_tol);
     this->_rel_residual_tol = config::get_value<typename traits::spacial_type>("rel_res_tol", this->_rel_residual_tol);
-    CVLOG(1, "SWEEPER") << "absolut residual tolerance:  " << this->_abs_residual_tol;
-    CVLOG(1, "SWEEPER") << "relative residual tolerance: " << this->_rel_residual_tol;
+    CVLOG(1, this->get_logger_id()) << "absolut residual tolerance:  " << this->_abs_residual_tol;
+    CVLOG(1, this->get_logger_id()) << "relative residual tolerance: " << this->_rel_residual_tol;
   }
 
   template<class SweeperTrait, typename Enabled>
@@ -192,7 +207,7 @@ namespace pfasst
     if (this->get_status() == nullptr) {
       throw runtime_error("Status not yet set.");
     }
-    CLOG(DEBUG, "SWEEPER") << "setting up sweeper with " << to_string(this->get_status());
+    CLOG(DEBUG, this->get_logger_id()) << "setting up sweeper with " << to_string(this->get_status());
 
     if (this->get_quadrature() == nullptr) {
       throw runtime_error("Quadrature not yet set.");
@@ -225,91 +240,91 @@ namespace pfasst
   void
   Sweeper<SweeperTrait, Enabled>::pre_predict()
   {
-    CLOG(DEBUG, "SWEEPER") << "pre-predicting";
+    CLOG(DEBUG, this->get_logger_id()) << "pre-predicting";
   }
 
   template<class SweeperTrait, typename Enabled>
   void
   Sweeper<SweeperTrait, Enabled>::predict()
   {
-    CLOG(DEBUG, "SWEEPER") << "predicting";
+    CLOG(DEBUG, this->get_logger_id()) << "predicting";
   }
 
   template<class SweeperTrait, typename Enabled>
   void
   Sweeper<SweeperTrait, Enabled>::post_predict()
   {
-    CLOG(DEBUG, "SWEEPER") << "post-predicting";
+    CLOG(DEBUG, this->get_logger_id()) << "post-predicting";
 
     assert(this->get_status() != nullptr);
     this->integrate_end_state(this->get_status()->get_dt());
 
     assert(this->get_quadrature() != nullptr);
-    CVLOG(3, "SWEEPER") << "solution at nodes:";
+    CVLOG(3, this->get_logger_id()) << "solution at nodes:";
     for (size_t m = 0; m <= this->get_quadrature()->get_num_nodes(); ++m) {
-      CVLOG(3, "SWEEPER") << "  " << m << ": " << to_string(this->get_states()[m]);
+      CVLOG(3, this->get_logger_id()) << "  " << m << ": " << to_string(this->get_states()[m]);
     }
-    CVLOG(3, "SWEEPER") << "solution at t_end: " << to_string(this->get_end_state());
+    CVLOG(3, this->get_logger_id()) << "solution at t_end: " << to_string(this->get_end_state());
   }
 
   template<class SweeperTrait, typename Enabled>
   void
   Sweeper<SweeperTrait, Enabled>::pre_sweep()
   {
-    CLOG(DEBUG, "SWEEPER") << "pre-sweeping";
+    CLOG(DEBUG, this->get_logger_id()) << "pre-sweeping";
   }
 
   template<class SweeperTrait, typename Enabled>
   void
   Sweeper<SweeperTrait, Enabled>::sweep()
   {
-    CLOG(DEBUG, "SWEEPER") << "sweeping";
+    CLOG(DEBUG, this->get_logger_id()) << "sweeping";
   }
 
   template<class SweeperTrait, typename Enabled>
   void
   Sweeper<SweeperTrait, Enabled>::post_sweep()
   {
-    CLOG(DEBUG, "SWEEPER") << "post-sweeping";
+    CLOG(DEBUG, this->get_logger_id()) << "post-sweeping";
 
     assert(this->get_status() != nullptr);
     this->integrate_end_state(this->get_status()->get_dt());
 
     assert(this->get_quadrature() != nullptr);
-    CVLOG(3, "SWEEPER") << "solution at nodes:";
+    CVLOG(3, this->get_logger_id()) << "solution at nodes:";
     for (size_t m = 0; m <= this->get_quadrature()->get_num_nodes(); ++m) {
-      CVLOG(3, "SWEEPER") << "\t" << m << ": " << to_string(this->get_states()[m]);
+      CVLOG(3, this->get_logger_id()) << "\t" << m << ": " << to_string(this->get_states()[m]);
     }
-    CVLOG(3, "SWEEPER") << "solution at t_end:" << to_string(this->get_end_state());
+    CVLOG(3, this->get_logger_id()) << "solution at t_end:" << to_string(this->get_end_state());
   }
 
   template<class SweeperTrait, typename Enabled>
   void
   Sweeper<SweeperTrait, Enabled>::post_step()
   {
-    CLOG(DEBUG, "SWEEPER") << "post step";
+    CLOG(DEBUG, this->get_logger_id()) << "post step";
 
     assert(this->get_quadrature() != nullptr);
-    CVLOG(3, "SWEEPER") << "initial value: " << to_string(this->get_initial_state());
-    CVLOG(3, "SWEEPER") << "solution at nodes:";
+    CVLOG(3, this->get_logger_id()) << "initial value: " << to_string(this->get_initial_state());
+    CVLOG(3, this->get_logger_id()) << "solution at nodes:";
     for (size_t m = 0; m <= this->get_quadrature()->get_num_nodes(); ++m) {
-      CVLOG(3, "SWEEPER") << "\t" << m << ": " << to_string(this->get_states()[m]);
+      CVLOG(3, this->get_logger_id()) << "\t" << m << ": " << to_string(this->get_states()[m]);
     }
-    CVLOG(3, "SWEEPER") << "solution at t_end: " << to_string(this->get_end_state());
+    CVLOG(3, this->get_logger_id()) << "solution at t_end: " << to_string(this->get_end_state());
   }
 
   template<class SweeperTrait, typename Enabled>
   void
   Sweeper<SweeperTrait, Enabled>::advance()
   {
-    CLOG(DEBUG, "SWEEPER") << "advancing to next time step";
+    CLOG(DEBUG, this->get_logger_id()) << "advancing to next time step";
   }
 
   template<class SweeperTrait, typename Enabled>
   void
   Sweeper<SweeperTrait, Enabled>::spread()
   {
-    CLOG(DEBUG, "SWEEPER") << "spreading initial value to all states";
+    CLOG(DEBUG, this->get_logger_id()) << "spreading initial value to all states";
 
     assert(this->get_initial_state() != nullptr);
 
@@ -323,16 +338,16 @@ namespace pfasst
   void
   Sweeper<SweeperTrait, Enabled>::save()
   {
-    CLOG(DEBUG, "SWEEPER") << "saving states to previous states";
+    CLOG(DEBUG, this->get_logger_id()) << "saving states to previous states";
 
     assert(this->get_quadrature() != nullptr);
     assert(this->get_states().size() == this->get_quadrature()->get_num_nodes() + 1);
     assert(this->get_previous_states().size() == this->get_states().size());
 
     for (size_t m = 0; m < this->get_states().size(); ++m) {
-      CVLOG(2, "SWEEPER") << "\t" << m << ": " << to_string(this->get_states()[m]);
+      CVLOG(2, this->get_logger_id()) << "\t" << m << ": " << to_string(this->get_states()[m]);
       this->previous_states()[m]->data() = this->get_states()[m]->get_data();
-      CVLOG(2, "SWEEPER") << "\t\t-> " << to_string(this->get_previous_states()[m]);
+      CVLOG(2, this->get_logger_id()) << "\t\t-> " << to_string(this->get_previous_states()[m]);
     }
   }
 
@@ -356,7 +371,7 @@ namespace pfasst
   bool
   Sweeper<SweeperTrait, Enabled>::converged()
   {
-    CLOG(DEBUG, "SWEEPER") << "convergence check";
+    CLOG(DEBUG, this->get_logger_id()) << "convergence check";
 
     if (this->_abs_residual_tol > 0.0 || this->_rel_residual_tol > 0.0) {
       this->compute_residuals();
@@ -375,26 +390,26 @@ namespace pfasst
       }
       rel_norms.back() = 1.0;
 
-      CVLOG(1, "SWEEPER") << "absolute residuals: " << abs_norms;
-      CVLOG(1, "SWEEPER") << "relative residuals: " << rel_norms;
+      CVLOG(1, this->get_logger_id()) << "absolute residuals: " << abs_norms;
+      CVLOG(1, this->get_logger_id()) << "relative residuals: " << rel_norms;
 
       auto max_abs_norm = *(max_element(abs_norms.cbegin(), abs_norms.cend()));
       auto max_rel_norm = *(max_element(rel_norms.cbegin(), rel_norms.cend()));
 
       if (max_abs_norm < this->_abs_residual_tol) {
-        CLOG(INFO, "SWEEPER") << "Sweeper has converged w.r.t. absolute residual tolerance: "
+        CLOG(INFO, this->get_logger_id()) << "Sweeper has converged w.r.t. absolute residual tolerance: "
                               << LOG_FLOAT << max_abs_norm << " < " << this->_abs_residual_tol;
       } else if (max_rel_norm < this->_rel_residual_tol) {
-        CLOG(INFO, "SWEEPER") << "Sweeper has converged w.r.t. relative residual tolerance: "
+        CLOG(INFO, this->get_logger_id()) << "Sweeper has converged w.r.t. relative residual tolerance: "
                               << LOG_FLOAT << max_rel_norm << " < " << this->_rel_residual_tol;
       } else {
-        CLOG(INFO, "SWEEPER") << "Sweeper has not yet converged to neither residual tolerance.";
+        CLOG(INFO, this->get_logger_id()) << "Sweeper has not yet converged to neither residual tolerance.";
       }
 
       return (   *(max_element(abs_norms.cbegin(), abs_norms.cend())) < this->_abs_residual_tol
               || *(max_element(rel_norms.cbegin(), rel_norms.cend())) < this->_rel_residual_tol);
     } else {
-      CLOG(WARNING, "SWEEPER") << "No residual tolerances set. Thus skipping convergence check.";
+      CLOG(WARNING, this->get_logger_id()) << "No residual tolerances set. Thus skipping convergence check.";
       return false;
     }
   }
@@ -405,14 +420,14 @@ namespace pfasst
   {
     UNUSED(dt);
     assert(this->get_quadrature() != nullptr);
-    CLOG(DEBUG, "SWEEPER") << "integrating end state";
+    CLOG(DEBUG, this->get_logger_id()) << "integrating end state";
 
     if (this->get_quadrature()->right_is_node()) {
       assert(this->get_end_state() != nullptr);
       assert(this->get_states().size() > 0);
 
       this->end_state()->data() = this->get_states().back()->get_data();
-      CVLOG(1, "SWEEPER") << "end state: " << to_string(this->get_end_state());
+      CVLOG(1, this->get_logger_id()) << "end state: " << to_string(this->get_end_state());
     } else {
       throw NotImplementedYet("integration of end state for quadrature not including right time interval boundary");
     }
