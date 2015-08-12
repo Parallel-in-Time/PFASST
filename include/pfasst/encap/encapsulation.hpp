@@ -140,7 +140,7 @@ namespace pfasst
       typename Enabled
     >
     class Encapsulation
-      :   public enable_shared_from_this<Encapsulation<EncapsulationTrait>>
+      :   public enable_shared_from_this<Encapsulation<EncapsulationTrait, Enabled>>
         , el::Loggable
     {
       public:
@@ -184,8 +184,15 @@ namespace pfasst
         //! @}
 
       public:
+        /*
+         * Note on non-default ctors:
+         * Explicitly requesting default ctors and copy- and move-assignment operators works fine
+         * with clang but triggers compile errors 'cannot be defaulted' with GCC.
+         * Thus I had to manually specify these.
+         * Move ctor must be noexcept to comply with ISO C++11.
+         */
         //! @{
-        Encapsulation() = default;
+        Encapsulation();
         /**
          * Encapsulating existing data by copying.
          *
@@ -194,12 +201,12 @@ namespace pfasst
          * @param[in] data
          */
         Encapsulation(const typename EncapsulationTrait::data_type& data);
-        Encapsulation(const Encapsulation<EncapsulationTrait>& other) = default;
-        Encapsulation(Encapsulation<EncapsulationTrait>&& other) = default;
-        ~Encapsulation() = default;
-        Encapsulation<EncapsulationTrait>& operator=(const typename EncapsulationTrait::data_type& data);
-        Encapsulation<EncapsulationTrait>& operator=(const Encapsulation<EncapsulationTrait>& other) = default;
-        Encapsulation<EncapsulationTrait>& operator=(Encapsulation<EncapsulationTrait>&& other) = default;
+        Encapsulation(const Encapsulation<EncapsulationTrait, Enabled>& other);
+        Encapsulation(Encapsulation<EncapsulationTrait, Enabled>&& other) noexcept;
+        virtual ~Encapsulation() = default;
+        Encapsulation<EncapsulationTrait, Enabled>& operator=(const typename EncapsulationTrait::data_type& data);
+        Encapsulation<EncapsulationTrait, Enabled>& operator=(const Encapsulation<EncapsulationTrait, Enabled>& other);
+        Encapsulation<EncapsulationTrait, Enabled>& operator=(Encapsulation<EncapsulationTrait, Enabled>&& other);
         //! @}
 
         //! @name Accessor
@@ -307,14 +314,12 @@ namespace pfasst
         typedef typename EncapsulationTrait::data_type     data_type;
 
         //! @{
-        EncapsulationFactory() = default;
-        EncapsulationFactory(const EncapsulationFactory<EncapsulationTrait>& other) = default;
-        EncapsulationFactory(EncapsulationFactory<EncapsulationTrait>&& other) = default;
+        EncapsulationFactory();
+        EncapsulationFactory(const EncapsulationFactory<EncapsulationTrait>& other);
+        EncapsulationFactory(EncapsulationFactory<EncapsulationTrait>&& other);
         virtual ~EncapsulationFactory() = default;
-        EncapsulationFactory<EncapsulationTrait>&
-        operator=(const EncapsulationFactory<EncapsulationTrait>& other) = default;
-        EncapsulationFactory<EncapsulationTrait>&
-        operator=(EncapsulationFactory<EncapsulationTrait>&& other) = default;
+        EncapsulationFactory<EncapsulationTrait>& operator=(const EncapsulationFactory<EncapsulationTrait>& other);
+        EncapsulationFactory<EncapsulationTrait>& operator=(EncapsulationFactory<EncapsulationTrait>&& other);
         //! @}
 
         //! @{

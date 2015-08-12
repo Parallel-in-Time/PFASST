@@ -58,12 +58,14 @@ namespace pfasst
           virtual vector<shared_ptr<typename SweeperTrait::encap_type>> compute_error(const typename SweeperTrait::time_type& t);
 
         public:
-          explicit Heat1D(const size_t& ndofs);
+          explicit Heat1D(const size_t& ndofs, const typename SweeperTrait::spacial_type& nu = 0.02);
           Heat1D(const Heat1D<SweeperTrait, Enabled>& other) = default;
           Heat1D(Heat1D<SweeperTrait, Enabled>&& other) = default;
           virtual ~Heat1D() = default;
           Heat1D<SweeperTrait, Enabled>& operator=(const Heat1D<SweeperTrait, Enabled>& other) = default;
           Heat1D<SweeperTrait, Enabled>& operator=(Heat1D<SweeperTrait, Enabled>&& other) = default;
+
+          virtual void set_options() override;
 
           virtual shared_ptr<typename SweeperTrait::encap_type> exact(const typename SweeperTrait::time_type& t);
 

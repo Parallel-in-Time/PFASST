@@ -10,7 +10,17 @@ namespace pfasst
   template<class TransferT>
   SDC<TransferT>::SDC()
     : Controller<TransferT>()
-  {}
+  {
+    SDC<TransferT>::init_loggers();
+    this->set_logger_id("SDC");
+  }
+
+  template<class TransferT>
+  void
+  SDC<TransferT>::init_loggers()
+  {
+    log::add_custom_logger("SDC");
+  }
 
   template<class TransferT>
   size_t

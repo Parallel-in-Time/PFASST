@@ -27,6 +27,8 @@ namespace pfasst
       typedef          TransferT                             transfer_type;
       typedef typename transfer_type::traits::fine_time_type time_type;
 
+      static void init_loggers();
+
     protected:
       shared_ptr<typename transfer_type::traits::fine_sweeper_type> _sweeper;
       shared_ptr<void>                                              _coarse_level;

@@ -13,7 +13,19 @@ namespace pfasst
   template<class TransferT>
   TwoLevelPfasst<TransferT>::TwoLevelPfasst()
     : Controller<TransferT>()
-  {}
+  {
+    TwoLevelMLSDC<TransferT>::init_loggers();
+    this->set_logger_id("PFASST");
+  }
+
+  template<class TransferT>
+  void
+  TwoLevelPfasst<TransferT>::init_loggers()
+  {
+    log::add_custom_logger("PFASST");
+    log::add_custom_logger("LVL_COARSE");
+    log::add_custom_logger("LVL_FINE");
+  }
 
   template<class TransferT>
   shared_ptr<comm::Communicator>&
@@ -44,68 +56,10 @@ namespace pfasst
   }
 
   template<class TransferT>
-  template<class SweeperT>
-  void
-  TwoLevelPfasst<TransferT>::add_sweeper(shared_ptr<SweeperT> sweeper, const bool as_coarse)
-  {
-    static_assert(is_same<SweeperT, typename TransferT::traits::fine_sweeper_type>::value
-                  || is_same<SweeperT, typename TransferT::traits::coarse_sweeper_type>::value,
-                  "Sweeper must be either a Coarse or Fine Sweeper Type.");
-
-    if (as_coarse) {
-      if (is_same<SweeperT, typename transfer_type::traits::coarse_sweeper_type>::value) {
-        this->_coarse_level = sweeper;
-      } else {
-        CLOG(ERROR, "CONTROL") << "Type of given Sweeper ("
-          << typeid(SweeperT).name() << ") is not applicable as Coarse Sweeper ("
-          << typeid(typename transfer_type::traits::coarse_sweeper_type).name() << ").";
-        throw logic_error("given sweeper can not be used as coarse sweeper");
-      }
-    } else {
-      if (is_same<SweeperT, typename transfer_type::traits::fine_sweeper_type>::value) {
-        this->_fine_level = sweeper;
-      } else {
-        CLOG(ERROR, "CONTROL") << "Type of given Sweeper ("
-          << typeid(SweeperT).name() << ") is not applicable as Fine Sweeper ("
-          << typeid(typename transfer_type::traits::fine_sweeper_type).name() << ").";
-        throw logic_error("given sweeper can not be used as fine sweeper");
-      }
-    }
-  }
-
-  template<class TransferT>
-  const shared_ptr<typename TransferT::traits::coarse_sweeper_type>
-  TwoLevelPfasst<TransferT>::get_coarse() const
-  {
-    return this->_coarse_level;
-  }
-
-  template<class TransferT>
-  shared_ptr<typename TransferT::traits::coarse_sweeper_type>
-  TwoLevelPfasst<TransferT>::get_coarse()
-  {
-    return this->_coarse_level;
-  }
-
-  template<class TransferT>
-  const shared_ptr<typename TransferT::traits::fine_sweeper_type>
-  TwoLevelPfasst<TransferT>::get_fine() const
-  {
-    return this->_fine_level;
-  }
-
-  template<class TransferT>
-  shared_ptr<typename TransferT::traits::fine_sweeper_type>
-  TwoLevelPfasst<TransferT>::get_fine()
-  {
-    return this->_fine_level;
-  }
-
-  template<class TransferT>
   void
   TwoLevelPfasst<TransferT>::set_options()
   {
-    Controller<TransferT>::set_options();
+    TwoLevelMLSDC<TransferT>::set_options();
   }
 
 
@@ -114,9 +68,10 @@ namespace pfasst
   TwoLevelPfasst<TransferT>::setup()
   {
     assert(this->get_communicator() != nullptr);
-    assert(this->get_transfer() != nullptr);
 
-    Controller<TransferT>::setup();
+    TwoLevelMLSDC<TransferT>::setup();
+
+    assert(this->get_transfer() != nullptr);
 
     if (this->get_num_levels() != 2) {
       CLOG(ERROR, "CONTROL") << "Two levels (Sweeper) must have been added for Two-Level-PFASST.";
@@ -217,71 +172,6 @@ namespace pfasst
   TwoLevelPfasst<TransferT>::advance_iteration()
   {
     return Controller<TransferT>::advance_iteration();
-  }
-
-
-  template<class TransferT>
-  void
-  TwoLevelPfasst<TransferT>::predict_coarse()
-  {
-    this->status()->state() = State::PRE_ITER_COARSE;
-    this->get_coarse()->pre_predict();
-
-    this->status()->state() = State::ITER_COARSE;
-    this->get_coarse()->predict();
-
-    this->status()->state() = State::POST_ITER_COARSE;
-    this->get_coarse()->post_predict();
-
-    this->status()->state() = State::PREDICTING;
-  }
-
-  template<class TransferT>
-  void
-  TwoLevelPfasst<TransferT>::predict_fine()
-  {
-    this->status()->state() = State::PRE_ITER_FINE;
-    this->get_fine()->pre_predict();
-
-    this->status()->state() = State::ITER_FINE;
-    this->get_fine()->predict();
-
-    this->status()->state() = State::POST_ITER_FINE;
-    this->get_fine()->post_predict();
-
-    this->status()->state() = State::PREDICTING;
-  }
-
-  template<class TransferT>
-  void
-  TwoLevelPfasst<TransferT>::sweep_coarse()
-  {
-    this->status()->state() = State::PRE_ITER_COARSE;
-    this->get_coarse()->pre_sweep();
-
-    this->status()->state() = State::ITER_COARSE;
-    this->get_coarse()->sweep();
-
-    this->status()->state() = State::POST_ITER_COARSE;
-    this->get_coarse()->post_sweep();
-
-    this->status()->state() = State::ITERATING;
-  }
-
-  template<class TransferT>
-  void
-  TwoLevelPfasst<TransferT>::sweep_fine()
-  {
-    this->status()->state() = State::PRE_ITER_FINE;
-    this->get_fine()->pre_sweep();
-
-    this->status()->state() = State::ITER_FINE;
-    this->get_fine()->sweep();
-
-    this->status()->state() = State::POST_ITER_FINE;
-    this->get_fine()->post_sweep();
-
-    this->status()->state() = State::ITERATING;
   }
 
   template<class TransferT>

@@ -21,7 +21,7 @@ namespace pfasst
                    typename EncapsulationTrait::data_type
                  >::value
                >::type>::Encapsulation(const size_t size)
-      : Encapsulation<EncapsulationTrait>(typename EncapsulationTrait::data_type(size))
+      : _data(size)
     {
       this->zero();
     }
@@ -41,6 +41,32 @@ namespace pfasst
     }
 
     template<class EncapsulationTrait>
+    Encapsulation<
+      EncapsulationTrait, 
+      typename enable_if<
+                 is_same<
+                   vector<typename EncapsulationTrait::spacial_type>,
+                   typename EncapsulationTrait::data_type
+                 >::value
+               >::type>::Encapsulation(const Encapsulation<EncapsulationTrait>& other)
+      : Encapsulation<EncapsulationTrait>()
+    {
+      this->data() = other.get_data();
+    }
+
+    template<class EncapsulationTrait>
+    Encapsulation<
+      EncapsulationTrait, 
+      typename enable_if<
+                 is_same<
+                   vector<typename EncapsulationTrait::spacial_type>,
+                   typename EncapsulationTrait::data_type
+                 >::value
+               >::type>::Encapsulation(Encapsulation<EncapsulationTrait>&& other) noexcept
+      : _data(move(other.data()))
+    {}
+
+    template<class EncapsulationTrait>
     Encapsulation<EncapsulationTrait>&
     Encapsulation<
       EncapsulationTrait, 
@@ -52,6 +78,36 @@ namespace pfasst
                >::type>::operator=(const typename EncapsulationTrait::data_type& data)
     {
       this->data() = data;
+      return *this;
+    }
+
+    template<class EncapsulationTrait>
+    Encapsulation<EncapsulationTrait>&
+    Encapsulation<
+      EncapsulationTrait, 
+      typename enable_if<
+                 is_same<
+                   vector<typename EncapsulationTrait::spacial_type>,
+                   typename EncapsulationTrait::data_type
+                 >::value
+               >::type>::operator=(const Encapsulation<EncapsulationTrait>& other)
+    {
+      this->data() = other.get_data();
+      return *this;
+    }
+
+    template<class EncapsulationTrait>
+    Encapsulation<EncapsulationTrait>&
+    Encapsulation<
+      EncapsulationTrait, 
+      typename enable_if<
+                 is_same<
+                   vector<typename EncapsulationTrait::spacial_type>,
+                   typename EncapsulationTrait::data_type
+                 >::value
+               >::type>::operator=(Encapsulation<EncapsulationTrait>&& other)
+    {
+      this->data() = move(other.data());
       return *this;
     }
 

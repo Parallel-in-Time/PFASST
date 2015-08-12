@@ -1,10 +1,12 @@
 #include <memory>
 using namespace std;
 
+#include <mpi.h>
+
 #include <pfasst.hpp>
 #include <pfasst/quadrature.hpp>
 #include <pfasst/encap/vector.hpp>
-#include <pfasst/controller/two_level_mlsdc.hpp>
+#include <pfasst/controller/two_level_pfasst.hpp>
 #include <pfasst/transfer/spectral_1d.hpp>
 
 #include "heat1d_sweeper.hpp"
@@ -13,7 +15,7 @@ using pfasst::encap::VectorEncapsulation;
 using pfasst::quadrature::quadrature_factory;
 using pfasst::quadrature::QuadratureType;
 using pfasst::Spectral1DTransfer;
-using pfasst::TwoLevelMLSDC;
+using pfasst::TwoLevelPfasst;
 
 using pfasst::examples::heat1d::Heat1D;
 
@@ -32,31 +34,31 @@ namespace pfasst
       void run(const size_t& ndofs, const size_t& nnodes, const QuadratureType& quad_type,
                const double& t_0, const double& dt, const double& t_end, const size_t& niter)
       {
-        TwoLevelMLSDC<TransferType> mlsdc;
+        TwoLevelPfasst<TransferType> pfasst;
 
         auto coarse = make_shared<SweeperType>(ndofs);
         coarse->quadrature() = quadrature_factory<double>(nnodes, quad_type);
-        auto fine = make_shared<SweeperType>(ndofs);
+        auto fine = make_shared<SweeperType>(ndofs * 2);
         fine->quadrature() = quadrature_factory<double>(nnodes, quad_type);
 
         auto transfer = make_shared<TransferType>();
 
-        mlsdc.add_sweeper(coarse, true);
-        mlsdc.add_sweeper(fine, false);
-        mlsdc.add_transfer(transfer);
-        mlsdc.set_options();
+        pfasst.add_sweeper(coarse, true);
+        pfasst.add_sweeper(fine, false);
+        pfasst.add_transfer(transfer);
+        pfasst.set_options();
 
-        mlsdc.status()->time() = t_0;
-        mlsdc.status()->dt() = dt;
-        mlsdc.status()->t_end() = t_end;
-        mlsdc.status()->max_iterations() = niter;
+        pfasst.status()->time() = t_0;
+        pfasst.status()->dt() = dt;
+        pfasst.status()->t_end() = t_end;
+        pfasst.status()->max_iterations() = niter;
 
-        mlsdc.setup();
+        pfasst.setup();
 
-        coarse->initial_state() = coarse->exact(mlsdc.get_status()->get_time());
-        fine->initial_state() = fine->exact(mlsdc.get_status()->get_time());
+        coarse->initial_state() = coarse->exact(pfasst.get_status()->get_time());
+        fine->initial_state() = fine->exact(pfasst.get_status()->get_time());
 
-        mlsdc.run();
+        pfasst.run();
       }
     }  // ::pfasst::examples::advec_diff
   } // ::pfasst::examples

@@ -29,13 +29,14 @@ namespace pfasst
       Heat1D<SweeperTrait, Enabled>::init_opts()
       {
         config::options::add_option<size_t>("Heat 1D", "num_dofs", "number spacial degrees of freedom");
+        config::options::add_option<spacial_type>("Heat 1D", "nu", "thermal diffusivity");
       }
 
       template<class SweeperTrait, typename Enabled>
-      Heat1D<SweeperTrait, Enabled>::Heat1D(const size_t& ndofs)
+      Heat1D<SweeperTrait, Enabled>::Heat1D(const size_t& ndofs, const typename SweeperTrait::spacial_type& nu)
         :   IMEX<SweeperTrait, Enabled>()
           , _t0(0.0)
-          , _nu(0.02)
+          , _nu(nu)
           , _lap(ndofs)
       {
         this->encap_factory()->set_size(ndofs);
@@ -46,6 +47,15 @@ namespace pfasst
                                                 : spacial_type(i) - spacial_type(ndofs));
           this->_lap[i] = pfasst::almost_zero(kx * kx) ? 0.0 : -kx * kx;
         }
+      }
+
+      template<class SweeperTrait, typename Enabled>
+      void
+      Heat1D<SweeperTrait, Enabled>::set_options()
+      {
+        IMEX<SweeperTrait, Enabled>::set_options();
+
+        this->_nu = config::get_value<typename traits::spacial_type>("nu", 0.2);
       }
 
       template<class SweeperTrait, typename Enabled>

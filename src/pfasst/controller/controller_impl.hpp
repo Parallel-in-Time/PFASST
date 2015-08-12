@@ -96,7 +96,7 @@ namespace pfasst
   void
   Controller<TransferT>::set_options()
   {
-    this->status()->max_iterations() = config::get_value<size_t>("max_iters", this->get_status()->get_max_iterations());
+    this->status()->max_iterations() = config::get_value<size_t>("num_iters", this->get_status()->get_max_iterations());
     this->status()->t_end() = config::get_value<typename TransferT::traits::fine_time_type>("t_end", this->get_status()->get_t_end());
   }
 

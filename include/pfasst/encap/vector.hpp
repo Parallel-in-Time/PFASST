@@ -42,15 +42,15 @@ namespace pfasst
         data_type _data;
 
       public:
-        Encapsulation() = default;
-        Encapsulation(const size_t size);
+        // see note on ctors in Encapsulation interface
+        explicit Encapsulation(const size_t size = 0);
         Encapsulation(const typename EncapsulationTrait::data_type& data);
-        Encapsulation(const Encapsulation<EncapsulationTrait>& other) = default;
-        Encapsulation(Encapsulation<EncapsulationTrait>&& other) = default;
+        Encapsulation(const Encapsulation<EncapsulationTrait>& other);
+        Encapsulation(Encapsulation<EncapsulationTrait>&& other) noexcept;
         virtual ~Encapsulation() = default;
         Encapsulation<EncapsulationTrait>& operator=(const typename EncapsulationTrait::data_type& data);
-        Encapsulation<EncapsulationTrait>& operator=(const Encapsulation<EncapsulationTrait>& other) = default;
-        Encapsulation<EncapsulationTrait>& operator=(Encapsulation<EncapsulationTrait>&& other) = default;
+        Encapsulation<EncapsulationTrait>& operator=(const Encapsulation<EncapsulationTrait>& other);
+        Encapsulation<EncapsulationTrait>& operator=(Encapsulation<EncapsulationTrait>&& other);
 
         virtual       typename EncapsulationTrait::data_type& data();
         virtual const typename EncapsulationTrait::data_type& get_data() const;
@@ -95,12 +95,12 @@ namespace pfasst
         size_t _size;
 
       public:
-        explicit EncapsulationFactory(const size_t size=0);
-        EncapsulationFactory(const EncapsulationFactory<EncapsulationTrait>& other) = default;
-        EncapsulationFactory(EncapsulationFactory<EncapsulationTrait>&& other) = default;
+        explicit EncapsulationFactory(const size_t size = 0);
+        EncapsulationFactory(const EncapsulationFactory<EncapsulationTrait>& other);
+        EncapsulationFactory(EncapsulationFactory<EncapsulationTrait>&& other);
         virtual ~EncapsulationFactory() = default;
-        EncapsulationFactory<EncapsulationTrait>& operator=(const EncapsulationFactory<EncapsulationTrait>& other) = default;
-        EncapsulationFactory<EncapsulationTrait>& operator=(EncapsulationFactory<EncapsulationTrait>&& other) = default;
+        EncapsulationFactory<EncapsulationTrait>& operator=(const EncapsulationFactory<EncapsulationTrait>& other);
+        EncapsulationFactory<EncapsulationTrait>& operator=(EncapsulationFactory<EncapsulationTrait>&& other);
 
         virtual shared_ptr<Encapsulation<EncapsulationTrait>> create() const;
 

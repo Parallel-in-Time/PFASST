@@ -159,7 +159,7 @@ const string OUT::reset = "\033[0m";
  *
  * @see pfasst::log::add_custom_logger()
  */
-#define LOGGER_ID_LENGTH 7
+#define LOGGER_ID_LENGTH 10
 
 #define LOG_FLOAT std::scientific << std::setprecision(LOG_PRECISION)
 #define LOG_FIXED std::fixed << std::setprecision(LOG_PRECISION)

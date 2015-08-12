@@ -1,6 +1,6 @@
 set(examples_to_install ${examples_to_install})
 
-message(STATUS "  H")
+message(STATUS "  Heat 1D")
 include_directories(
     ${3rdparty_INCLUDES}
     ${pfasst_INCLUDES}
@@ -11,11 +11,11 @@ set(heat_examples
     heat1d_mlsdc
 )
 
-set(heat_mpi_examples)
+set(heat_mpi_examples
+    heat1d_pfasst
+)
 
 if(${pfasst_WITH_MPI})
-    set(heat_mpi_examples
-    )
     set(all_heat_examples ${heat_examples} ${heat_mpi_examples})
 else()
     set(all_heat_examples ${heat_examples})

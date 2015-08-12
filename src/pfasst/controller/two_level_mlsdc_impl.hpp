@@ -165,8 +165,6 @@ namespace pfasst
   bool
   TwoLevelMLSDC<TransferT>::advance_time(const size_t& num_steps)
   {
-//     this->get_fine()->post_step();
-
     if (Controller<TransferT>::advance_time(num_steps)) {
       this->get_fine()->advance();
       this->get_coarse()->advance();
