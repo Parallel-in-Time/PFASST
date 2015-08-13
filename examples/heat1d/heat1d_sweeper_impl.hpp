@@ -28,7 +28,8 @@ namespace pfasst
       void
       Heat1D<SweeperTrait, Enabled>::init_opts()
       {
-        config::options::add_option<size_t>("Heat 1D", "num_dofs", "number spacial degrees of freedom");
+        config::options::add_option<size_t>("Heat 1D", "num_dofs", "number spacial degrees of freedom on fine level");
+        config::options::add_option<size_t>("Heat 1D", "coarse_factor", "coarsening factor");
         config::options::add_option<spacial_type>("Heat 1D", "nu", "thermal diffusivity");
       }
 
@@ -112,7 +113,8 @@ namespace pfasst
 
         for (size_t m = 0; m < num_nodes + 1; ++m) {
           CLOG(INFO, this->get_logger_id()) << "t["<<m<<"]=" << LOG_FIXED << (dt * nodes[m])
-                             << "      |residual| = " << LOG_FLOAT << encap::norm0(this->get_residuals()[m])
+                             << "      |abs residual| = " << LOG_FLOAT << this->_abs_res_norms[m]
+                             << "      |rel residual| = " << LOG_FLOAT << this->_rel_res_norms[m]
                              << "      |error| = " << LOG_FLOAT << encap::norm0(error[m]);
         }
 

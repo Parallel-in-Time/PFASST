@@ -210,8 +210,8 @@ namespace pfasst
       return false;
 
     } else {
-      CLOG(INFO, this->get_logger_id()) << "Advancing to next iteration ("
-        << (this->get_status()->get_iteration() + 1) << ")";
+      CLOG(INFO, this->get_logger_id()) << "Advancing to next iteration -> "
+        << (this->get_status()->get_iteration() + 1);
 
       this->status()->iteration()++;
 

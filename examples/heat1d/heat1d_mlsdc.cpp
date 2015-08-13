@@ -29,12 +29,13 @@ namespace pfasst
   {
     namespace heat1d
     {
-      void run(const size_t& ndofs, const size_t& nnodes, const QuadratureType& quad_type,
-               const double& t_0, const double& dt, const double& t_end, const size_t& niter)
+      void run(const size_t& ndofs, const size_t& coarse_factor, const size_t& nnodes,
+               const QuadratureType& quad_type, const double& t_0, const double& dt,
+               const double& t_end, const size_t& niter)
       {
         TwoLevelMLSDC<TransferType> mlsdc;
 
-        auto coarse = make_shared<SweeperType>(ndofs);
+        auto coarse = make_shared<SweeperType>(ndofs / coarse_factor);
         coarse->quadrature() = quadrature_factory<double>(nnodes, quad_type);
         auto fine = make_shared<SweeperType>(ndofs);
         fine->quadrature() = quadrature_factory<double>(nnodes, quad_type);
@@ -68,7 +69,8 @@ int main(int argc, char** argv)
   pfasst::init(argc, argv,
                SweeperType::init_opts);
 
-  const size_t ndofs = pfasst::config::get_value<size_t>("num_dofs", 4);
+  const size_t ndofs = pfasst::config::get_value<size_t>("num_dofs", 8);
+  const size_t coarse_factor = pfasst::config::get_value<size_t>("coarse_factor", 2);
   const size_t nnodes = pfasst::config::get_value<size_t>("num_nodes", 3);
   const pfasst::quadrature::QuadratureType quad_type = pfasst::quadrature::QuadratureType::GaussRadau;
 //   const pfasst::quadrature::QuadratureType quad_type = pfasst::config::get_value<pfasst::quadrature::QuadratureType>("quad_type", pfasst::quadrature::QuadratureType::GaussRadau);
@@ -92,5 +94,5 @@ int main(int argc, char** argv)
   }
   const size_t niter = pfasst::config::get_value<size_t>("num_iters", 5);
 
-  pfasst::examples::heat1d::run(ndofs, nnodes, quad_type, t_0, dt, t_end, niter);
+  pfasst::examples::heat1d::run(ndofs, coarse_factor, nnodes, quad_type, t_0, dt, t_end, niter);
 }

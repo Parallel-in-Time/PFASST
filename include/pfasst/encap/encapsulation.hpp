@@ -184,15 +184,8 @@ namespace pfasst
         //! @}
 
       public:
-        /*
-         * Note on non-default ctors:
-         * Explicitly requesting default ctors and copy- and move-assignment operators works fine
-         * with clang but triggers compile errors 'cannot be defaulted' with GCC.
-         * Thus I had to manually specify these.
-         * Move ctor must be noexcept to comply with ISO C++11.
-         */
         //! @{
-        Encapsulation();
+        Encapsulation() = default;
         /**
          * Encapsulating existing data by copying.
          *
@@ -201,12 +194,12 @@ namespace pfasst
          * @param[in] data
          */
         Encapsulation(const typename EncapsulationTrait::data_type& data);
-        Encapsulation(const Encapsulation<EncapsulationTrait, Enabled>& other);
-        Encapsulation(Encapsulation<EncapsulationTrait, Enabled>&& other) noexcept;
+        Encapsulation(const Encapsulation<EncapsulationTrait, Enabled>& other)= default;
+        Encapsulation(Encapsulation<EncapsulationTrait, Enabled>&& other) = default;
         virtual ~Encapsulation() = default;
         Encapsulation<EncapsulationTrait, Enabled>& operator=(const typename EncapsulationTrait::data_type& data);
-        Encapsulation<EncapsulationTrait, Enabled>& operator=(const Encapsulation<EncapsulationTrait, Enabled>& other);
-        Encapsulation<EncapsulationTrait, Enabled>& operator=(Encapsulation<EncapsulationTrait, Enabled>&& other);
+        Encapsulation<EncapsulationTrait, Enabled>& operator=(const Encapsulation<EncapsulationTrait, Enabled>& other)= default;
+        Encapsulation<EncapsulationTrait, Enabled>& operator=(Encapsulation<EncapsulationTrait, Enabled>&& other)= default;
         //! @}
 
         //! @name Accessor

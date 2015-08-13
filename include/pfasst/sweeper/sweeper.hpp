@@ -47,6 +47,8 @@ namespace pfasst
       //! size = #nodes + 1
       vector<shared_ptr<typename traits::encap_type>>        _tau;
       vector<shared_ptr<typename traits::encap_type>>        _residuals;
+      vector<typename traits::spacial_type>                  _abs_res_norms;
+      vector<typename traits::spacial_type>                  _rel_res_norms;
 
       shared_ptr<Status<typename traits::time_type>>         _status;
       typename traits::spacial_type                          _abs_residual_tol;

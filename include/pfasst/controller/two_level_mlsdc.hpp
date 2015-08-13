@@ -30,7 +30,6 @@ namespace pfasst
       virtual void sweep_coarse();
       virtual void sweep_fine();
 
-      virtual void predictor();
       virtual void cycle_down();
       virtual void cycle_up();
 

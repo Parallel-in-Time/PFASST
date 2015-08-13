@@ -141,22 +141,42 @@ namespace pfasst
     Controller<TransferT>::run();
 
     do {
-      CLOG(INFO, this->get_logger_id()) << "processing time step " << this->get_status()->get_step();
+      CLOG(INFO, this->get_logger_id()) << "";
+      CLOG(INFO, this->get_logger_id()) << "Time Step " << (this->get_status()->get_step() + 1)
+                                        << " of " << this->get_num_steps();
 
-      this->predictor();
+      this->status()->state() = State::PREDICTING;
 
       // iterate on each time step
       do {
-        this->status()->state() = State::ITERATING;
+        if (this->get_status()->get_state() == State::PREDICTING) {
+          CLOG(INFO, this->get_logger_id()) << "";
+          CLOG(INFO, this->get_logger_id()) << "MLSDC Prediction step";
 
-        this->sweep_fine();
+          assert(this->get_status()->get_iteration() == 0);
 
-        this->cycle_down();
-        this->sweep_coarse();
+          // restrict fine initial condition ...
+          this->get_transfer()->restrict_initial(this->get_fine(), this->get_coarse());
+          // ... and spread it to all nodes on the coarse level
+          this->get_coarse()->spread();
+          this->get_coarse()->save();
 
-        // TODO: set status here !?
+          this->predict_coarse();
+          this->get_coarse()->save();
 
-        this->cycle_up();
+          this->cycle_up();
+          this->sweep_fine();
+
+        } else {
+          CLOG(INFO, this->get_logger_id()) << "";
+          CLOG(INFO, this->get_logger_id()) << "Iteration " << this->get_status()->get_iteration();
+
+          this->cycle_down();
+          this->sweep_coarse();
+
+          this->cycle_up();
+          this->sweep_fine();
+        }
       } while(this->advance_iteration());
     } while(this->advance_time());
   }
@@ -197,7 +217,7 @@ namespace pfasst
   void
   TwoLevelMLSDC<TransferT>::predict_coarse()
   {
-    CLOG(INFO, this->get_logger_id()) << "predicting on COARSE";
+    CLOG(INFO, this->get_logger_id()) << "Predicting on COARSE level";
 
     this->status()->state() = State::PRE_ITER_COARSE;
     this->get_coarse()->pre_predict();
@@ -209,14 +229,13 @@ namespace pfasst
     this->get_coarse()->post_predict();
 
     this->status()->state() = State::PREDICTING;
-    CLOG(INFO, this->get_logger_id()) << "predicting on COARSE DONE";
   }
 
   template<class TransferT>
   void
   TwoLevelMLSDC<TransferT>::predict_fine()
   {
-    CLOG(INFO, this->get_logger_id()) << "predicting on FINE";
+    CLOG(INFO, this->get_logger_id()) << "Predicting on FINE level";
 
     this->status()->state() = State::PRE_ITER_FINE;
     this->get_fine()->pre_predict();
@@ -228,14 +247,13 @@ namespace pfasst
     this->get_fine()->post_predict();
 
     this->status()->state() = State::PREDICTING;
-    CLOG(INFO, this->get_logger_id()) << "predicting on FINE DONE";
   }
 
   template<class TransferT>
   void
   TwoLevelMLSDC<TransferT>::sweep_coarse()
   {
-    CLOG(INFO, this->get_logger_id()) << "sweeping on COARSE";
+    CLOG(INFO, this->get_logger_id()) << "Sweeping on COARSE level";
 
     this->status()->state() = State::PRE_ITER_COARSE;
     this->get_coarse()->pre_sweep();
@@ -247,14 +265,13 @@ namespace pfasst
     this->get_coarse()->post_sweep();
 
     this->status()->state() = State::ITERATING;
-    CLOG(INFO, this->get_logger_id()) << "sweeping on COARSE DONE";
   }
 
   template<class TransferT>
   void
   TwoLevelMLSDC<TransferT>::sweep_fine()
   {
-    CLOG(INFO, this->get_logger_id()) << "sweeping on FINE";
+    CLOG(INFO, this->get_logger_id()) << "Sweeping on FINE level";
 
     this->status()->state() = State::PRE_ITER_FINE;
     this->get_fine()->pre_sweep();
@@ -266,7 +283,6 @@ namespace pfasst
     this->get_fine()->post_sweep();
 
     this->status()->state() = State::ITERATING;
-    CLOG(INFO, this->get_logger_id()) << "sweeping on FINE DONE";
   }
 
   template<class TransferT>
@@ -275,7 +291,6 @@ namespace pfasst
   {
     CVLOG(1, this->get_logger_id()) << "cycle down to coarse level";
 
-    // TODO: check convergence state here !?
     this->get_transfer()->restrict(this->get_fine(), this->get_coarse(), true);
     this->get_transfer()->fas(this->get_status()->get_dt(), this->get_fine(), this->get_coarse());
     this->get_coarse()->save();
@@ -288,34 +303,5 @@ namespace pfasst
     CVLOG(1, this->get_logger_id()) << "cycle up to fine level";
 
     this->get_transfer()->interpolate(this->get_coarse(), this->get_fine(), true);
-    this->get_transfer()->interpolate_initial(this->get_coarse(), this->get_fine());
-  }
-
-  template<class TransferT>
-  void
-  TwoLevelMLSDC<TransferT>::predictor()
-  {
-    assert(this->get_status()->get_iteration() == 0);
-    this->status()->state() = State::PREDICTING;
-
-    CLOG(INFO, this->get_logger_id()) << "MLSDC prediction";
-
-    this->get_fine()->spread();
-
-    // restrict fine initial condition
-    this->get_transfer()->restrict_initial(this->get_fine(), this->get_coarse());
-    this->get_coarse()->spread();
-    this->get_coarse()->save();
-
-    // predict on coarse level
-    this->predict_coarse();
-    this->get_coarse()->save();
-
-    // return to fine level
-    this->get_transfer()->interpolate(this->get_coarse(), this->get_fine(), true);
-
-    this->get_fine()->save();
-
-    CLOG(INFO, this->get_logger_id()) << "MLSDC prediction DONE";
   }
 }  // ::pfasst

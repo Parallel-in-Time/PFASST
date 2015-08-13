@@ -42,15 +42,9 @@ namespace pfasst
         data_type _data;
 
       public:
-        // see note on ctors in Encapsulation interface
         explicit Encapsulation(const size_t size = 0);
         Encapsulation(const typename EncapsulationTrait::data_type& data);
-        Encapsulation(const Encapsulation<EncapsulationTrait>& other);
-        Encapsulation(Encapsulation<EncapsulationTrait>&& other) noexcept;
-        virtual ~Encapsulation() = default;
         Encapsulation<EncapsulationTrait>& operator=(const typename EncapsulationTrait::data_type& data);
-        Encapsulation<EncapsulationTrait>& operator=(const Encapsulation<EncapsulationTrait>& other);
-        Encapsulation<EncapsulationTrait>& operator=(Encapsulation<EncapsulationTrait>&& other);
 
         virtual       typename EncapsulationTrait::data_type& data();
         virtual const typename EncapsulationTrait::data_type& get_data() const;

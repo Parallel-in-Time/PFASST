@@ -22,19 +22,19 @@ namespace pfasst
     auto coarse_factory = coarse->get_encap_factory();
     auto fine_factory = fine->get_encap_factory();
 
-    // c_delta
+    // c_delta = restrict(u_0^F) - u_0^C
     auto coarse_delta = coarse_factory->create();
-    // c_delta = restrict(f_0)
+    // c_delta = restrict(u_0)
     this->restrict_data(fine->get_initial_state(), coarse_delta);
     // c_delta -= c_0
     coarse_delta->scaled_add(-1.0, coarse->get_initial_state());
 
-    // f_delta
+    // f_delta = interpolate(c_delta)
     auto fine_delta = fine_factory->create();
     // f_delta = interpolate(c_delta)
     this->interpolate_data(coarse_delta, fine_delta);
 
-    // f_0 -= f_delta
+    // u_0^F = u_0^F - f_delta
     fine->initial_state()->scaled_add(-1.0, fine_delta);
 
     fine->reevaluate(true);
@@ -48,12 +48,18 @@ namespace pfasst
   {
     CVLOG(1, "TRANS") << "interpolate";
 
+    if (coarse->get_quadrature()->left_is_node() || fine->get_quadrature()->left_is_node()) {
+      CLOG(ERROR, "TRANS") << "Time interpolation with left time point as a node is still not supported.";
+      throw NotImplementedYet("time interpolation with left time point as node");
+    }
+
     if (initial) {
       this->interpolate_initial(coarse, fine);
     }
 
     this->setup_tmat(fine->get_quadrature(), coarse->get_quadrature());
 
+    // +1 here for additional value in states
     const size_t num_fine_nodes = fine->get_quadrature()->get_num_nodes() + 1;
     const size_t num_coarse_nodes = coarse->get_quadrature()->get_num_nodes() + 1;
 
@@ -66,7 +72,8 @@ namespace pfasst
              [fine_factory]() { return fine_factory->create(); });
     auto coarse_delta = coarse_factory->create();
 
-    for (size_t m = 0; m < num_coarse_nodes; ++m) {
+    // u_m^F = u_m^F - interpolate(u_m^C - prev_u_m^C)
+    for (size_t m = 1; m < num_coarse_nodes; ++m) {
       coarse_delta->data() = coarse->get_states()[m]->get_data();
       coarse_delta->scaled_add(-1.0, coarse->get_previous_states()[m]);
       this->interpolate_data(coarse_delta, fine_deltas[m]);
@@ -106,24 +113,32 @@ namespace pfasst
   {
     CVLOG(1, "TRANS") << "restrict";
 
+    if (coarse->get_quadrature()->left_is_node() || fine->get_quadrature()->left_is_node()) {
+      CLOG(ERROR, "TRANS") << "Time restriction with left time point as a node is still not supported.";
+      throw NotImplementedYet("time restriction with left time point as node");
+    }
+
+
     if (initial) {
       this->restrict_initial(fine, coarse);
     }
 
+    // +1 here for additional value in states
     const auto coarse_nodes = coarse->get_quadrature()->get_nodes();
     const auto fine_nodes = fine->get_quadrature()->get_nodes();
-    const size_t num_coarse_nodes = coarse->get_quadrature()->get_num_nodes();
-    const size_t num_fine_nodes = fine->get_quadrature()->get_num_nodes();
+    const size_t num_coarse_nodes = coarse->get_quadrature()->get_num_nodes() + 1;
+    const size_t num_fine_nodes = fine->get_quadrature()->get_num_nodes() + 1;
 
-    const int factor = ((int)num_fine_nodes - 1) / ((int)num_coarse_nodes - 1);
+    // this commented out stuff is probably required for non-equal sets of time nodes
+//     const int factor = ((int)num_fine_nodes - 1) / ((int)num_coarse_nodes - 1);
 
-    for (size_t m = 0; m < num_coarse_nodes; ++m) {
-      if (coarse_nodes[m] != fine_nodes[m * factor]) {
-        CLOG(ERROR, "TRANS") << "coarse nodes are not nested within fine ones."
-                             << "coarse: " << coarse_nodes << " fine: " << fine_nodes;
-        throw NotImplementedYet("non-nested nodes");
-      }
-      this->restrict_data(fine->get_states()[m * factor], coarse->states()[m]);
+    for (size_t m = 1; m < num_coarse_nodes; ++m) {
+//       if (coarse_nodes[m] != fine_nodes[m * factor]) {
+//         CLOG(ERROR, "TRANS") << "coarse nodes are not nested within fine ones."
+//                              << "coarse: " << coarse_nodes << " fine: " << fine_nodes;
+//         throw NotImplementedYet("non-nested nodes");
+//       }
+      this->restrict_data(fine->get_states()[m], coarse->states()[m]);
     }
 
     coarse->reevaluate();
@@ -188,6 +203,9 @@ namespace pfasst
 
       coarse_nodes.insert(coarse_nodes.begin(), 0.0);
       fine_nodes.insert(fine_nodes.begin(), 0.0);
+
+      CLOG_IF(!equal(coarse_nodes.cbegin(), coarse_nodes.cend(), fine_nodes.cbegin()),
+              WARNING, "TRANS") << "interpolation for different sets of nodes not tested.";
 
       this->tmat = quadrature::compute_interp<typename TransferTraits::fine_time_type>(coarse_nodes,
                                                                                        fine_nodes);
