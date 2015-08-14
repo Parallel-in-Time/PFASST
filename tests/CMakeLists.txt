@@ -7,7 +7,6 @@ include_directories(
 )
 
 set(TESTS
-    test_exceptions
     test_logging
 )
 

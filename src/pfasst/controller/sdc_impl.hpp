@@ -1,5 +1,8 @@
 #include "pfasst/controller/sdc.hpp"
 
+#include <stdexcept>
+using namespace std;
+
 #include "pfasst/util.hpp"
 #include "pfasst/config.hpp"
 #include "pfasst/logging.hpp"

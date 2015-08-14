@@ -5,23 +5,27 @@
 using namespace std;
 
 #include "pfasst/globals.hpp"
-#include "pfasst/exceptions.hpp"
+#include "pfasst/comm/communicator.hpp"
 #include "pfasst/controller/status.hpp"
 
 
 namespace pfasst
 {
   template<
-    class TransferT
+    class TransferT,
+    class CommT = comm::Communicator
   >
   class Controller
-    : public enable_shared_from_this<Controller<TransferT>>
+    : public enable_shared_from_this<Controller<TransferT, CommT>>
   {
     public:
       typedef          TransferT                             transfer_type;
+      typedef          CommT                                 comm_type;
       typedef typename transfer_type::traits::fine_time_type time_type;
 
     protected:
+      shared_ptr<comm_type>          _comm;
+
       shared_ptr<transfer_type>      _transfer;
       shared_ptr<Status<time_type>>  _status;
       bool                           _ready;
@@ -31,11 +35,14 @@ namespace pfasst
 
     public:
       Controller();
-      Controller(const Controller<TransferT>& other) = default;
-      Controller(Controller<TransferT>&& other) = default;
+      Controller(const Controller<TransferT, CommT>& other) = default;
+      Controller(Controller<TransferT, CommT>&& other) = default;
       virtual ~Controller() = default;
-      Controller<TransferT>& operator=(const Controller<TransferT>& other) = default;
-      Controller<TransferT>& operator=(Controller<TransferT>&& other) = default;
+      Controller<TransferT, CommT>& operator=(const Controller<TransferT, CommT>& other) = default;
+      Controller<TransferT, CommT>& operator=(Controller<TransferT, CommT>&& other) = default;
+
+      virtual       shared_ptr<CommT>& communicator();
+      virtual const shared_ptr<CommT>  get_communicator() const;
 
       virtual       shared_ptr<Status<typename TransferT::traits::fine_time_type>>& status();
       virtual const shared_ptr<Status<typename TransferT::traits::fine_time_type>>  get_status() const;

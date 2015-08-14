@@ -6,6 +6,7 @@ using namespace std;
 #include <pfasst.hpp>
 #include <pfasst/quadrature.hpp>
 #include <pfasst/encap/vector.hpp>
+#include <pfasst/comm/mpi_p2p.hpp>
 #include <pfasst/controller/two_level_pfasst.hpp>
 #include <pfasst/transfer/spectral_1d.hpp>
 
@@ -16,6 +17,7 @@ using pfasst::quadrature::quadrature_factory;
 using pfasst::quadrature::QuadratureType;
 using pfasst::Spectral1DTransfer;
 using pfasst::TwoLevelPfasst;
+typedef pfasst::comm::MpiP2P CommType;
 
 using pfasst::examples::heat1d::Heat1D;
 
@@ -34,7 +36,8 @@ namespace pfasst
       void run(const size_t& ndofs, const size_t& nnodes, const QuadratureType& quad_type,
                const double& t_0, const double& dt, const double& t_end, const size_t& niter)
       {
-        TwoLevelPfasst<TransferType> pfasst;
+        TwoLevelPfasst<TransferType, CommType> pfasst;
+        pfasst.communicator() = make_shared<CommType>(MPI_COMM_WORLD);
 
         auto coarse = make_shared<SweeperType>(ndofs);
         coarse->quadrature() = quadrature_factory<double>(nnodes, quad_type);
@@ -67,6 +70,8 @@ namespace pfasst
 
 int main(int argc, char** argv)
 {
+  MPI_Init(&argc, &argv);
+
   pfasst::init(argc, argv,
                SweeperType::init_opts);
 
@@ -95,4 +100,6 @@ int main(int argc, char** argv)
   const size_t niter = pfasst::config::get_value<size_t>("num_iters", 5);
 
   pfasst::examples::heat1d::run(ndofs, nnodes, quad_type, t_0, dt, t_end, niter);
+
+  MPI_Finalize();
 }

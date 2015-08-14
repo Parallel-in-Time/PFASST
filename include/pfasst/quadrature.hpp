@@ -21,7 +21,6 @@ using Matrix = Eigen::Matrix<precision, Eigen::Dynamic, Eigen::Dynamic, Eigen::R
 
 #include "pfasst/config.hpp"
 #include "pfasst/util.hpp"
-#include "pfasst/exceptions.hpp"
 #include "pfasst/quadrature/polynomial.hpp"
 #include "pfasst/quadrature/quadrature.hpp"
 #include "pfasst/quadrature/gauss_lobatto.hpp"
@@ -48,7 +47,7 @@ namespace pfasst
      * @param[in] qtype type descriptor of the quadrature
      * @returns instance of pfasst::quadrature::IQuadrature of specified type with desired number
      *   of nodes
-     * @throws pfasst::ValueError if @p qtype is not a valid quadrature type descriptor
+     * @throws invalid_argument if @p qtype is not a valid quadrature type descriptor
      */
     template<typename precision>
     shared_ptr<IQuadrature<precision>> quadrature_factory(const size_t nnodes,
@@ -65,7 +64,7 @@ namespace pfasst
       } else if (qtype == QuadratureType::Uniform) {
         return make_shared<Uniform<precision>>(nnodes);
       } else {
-        throw ValueError("invalid node type passed to compute_nodes.");
+        throw invalid_argument("invalid node type passed to compute_nodes.");
         return nullptr;
       }
     }

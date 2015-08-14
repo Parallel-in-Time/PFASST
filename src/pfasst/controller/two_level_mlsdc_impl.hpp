@@ -10,26 +10,26 @@ using namespace std;
 
 namespace pfasst
 {
-  template<class TransferT>
-  TwoLevelMLSDC<TransferT>::TwoLevelMLSDC()
-    : Controller<TransferT>()
+  template<class TransferT, class CommT>
+  TwoLevelMLSDC<TransferT, CommT>::TwoLevelMLSDC()
+    : Controller<TransferT, CommT>()
   {
-    TwoLevelMLSDC<TransferT>::init_loggers();
+    TwoLevelMLSDC<TransferT, CommT>::init_loggers();
     this->set_logger_id("MLSDC");
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   void
-  TwoLevelMLSDC<TransferT>::init_loggers()
+  TwoLevelMLSDC<TransferT, CommT>::init_loggers()
   {
     log::add_custom_logger("MLSDC");
     log::add_custom_logger("LVL_COARSE");
     log::add_custom_logger("LVL_FINE");
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   size_t
-  TwoLevelMLSDC<TransferT>::get_num_levels() const
+  TwoLevelMLSDC<TransferT, CommT>::get_num_levels() const
   {
     size_t num = 0;
     if (this->_coarse_level != nullptr) {
@@ -41,10 +41,10 @@ namespace pfasst
     return num;
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   template<class SweeperT>
   void
-  TwoLevelMLSDC<TransferT>::add_sweeper(shared_ptr<SweeperT> sweeper, const bool as_coarse)
+  TwoLevelMLSDC<TransferT, CommT>::add_sweeper(shared_ptr<SweeperT> sweeper, const bool as_coarse)
   {
     static_assert(is_same<SweeperT, typename TransferT::traits::fine_sweeper_type>::value
                   || is_same<SweeperT, typename TransferT::traits::coarse_sweeper_type>::value,
@@ -73,52 +73,52 @@ namespace pfasst
     }
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   const shared_ptr<typename TransferT::traits::coarse_sweeper_type>
-  TwoLevelMLSDC<TransferT>::get_coarse() const
+  TwoLevelMLSDC<TransferT, CommT>::get_coarse() const
   {
     return this->_coarse_level;
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   shared_ptr<typename TransferT::traits::coarse_sweeper_type>
-  TwoLevelMLSDC<TransferT>::get_coarse()
+  TwoLevelMLSDC<TransferT, CommT>::get_coarse()
   {
     return this->_coarse_level;
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   const shared_ptr<typename TransferT::traits::fine_sweeper_type>
-  TwoLevelMLSDC<TransferT>::get_fine() const
+  TwoLevelMLSDC<TransferT, CommT>::get_fine() const
   {
     return this->_fine_level;
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   shared_ptr<typename TransferT::traits::fine_sweeper_type>
-  TwoLevelMLSDC<TransferT>::get_fine()
+  TwoLevelMLSDC<TransferT, CommT>::get_fine()
   {
     return this->_fine_level;
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   void
-  TwoLevelMLSDC<TransferT>::set_options()
+  TwoLevelMLSDC<TransferT, CommT>::set_options()
   {
-    Controller<TransferT>::set_options();
+    Controller<TransferT, CommT>::set_options();
 
     this->get_fine()->set_options();
     this->get_coarse()->set_options();
   }
 
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   void
-  TwoLevelMLSDC<TransferT>::setup()
+  TwoLevelMLSDC<TransferT, CommT>::setup()
   {
     assert(this->get_transfer() != nullptr);
 
-    Controller<TransferT>::setup();
+    Controller<TransferT, CommT>::setup();
 
     if (this->get_num_levels() != 2) {
       CLOG(ERROR, this->get_logger_id()) << "Two levels (Sweeper) must have been added for Two-Level-MLSDC.";
@@ -134,11 +134,11 @@ namespace pfasst
     this->get_fine()->setup();
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   void
-  TwoLevelMLSDC<TransferT>::run()
+  TwoLevelMLSDC<TransferT, CommT>::run()
   {
-    Controller<TransferT>::run();
+    Controller<TransferT, CommT>::run();
 
     do {
       CLOG(INFO, this->get_logger_id()) << "";
@@ -181,11 +181,11 @@ namespace pfasst
     } while(this->advance_time());
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   bool
-  TwoLevelMLSDC<TransferT>::advance_time(const size_t& num_steps)
+  TwoLevelMLSDC<TransferT, CommT>::advance_time(const size_t& num_steps)
   {
-    if (Controller<TransferT>::advance_time(num_steps)) {
+    if (Controller<TransferT, CommT>::advance_time(num_steps)) {
       this->get_fine()->advance();
       this->get_coarse()->advance();
       return true;
@@ -194,14 +194,14 @@ namespace pfasst
     }
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   bool
-  TwoLevelMLSDC<TransferT>::advance_iteration()
+  TwoLevelMLSDC<TransferT, CommT>::advance_iteration()
   {
     if (this->get_fine()->converged()) {
       CLOG(INFO, this->get_logger_id()) << "FINE sweeper has converged.";
       return false;
-    } else if (Controller<TransferT>::advance_iteration()) {
+    } else if (Controller<TransferT, CommT>::advance_iteration()) {
       CLOG(INFO, this->get_logger_id()) << "FINE sweeper has not yet converged and additional iterations to do.";
       this->get_fine()->save();
       this->get_coarse()->save();
@@ -213,9 +213,9 @@ namespace pfasst
   }
 
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   void
-  TwoLevelMLSDC<TransferT>::predict_coarse()
+  TwoLevelMLSDC<TransferT, CommT>::predict_coarse()
   {
     CLOG(INFO, this->get_logger_id()) << "Predicting on COARSE level";
 
@@ -231,9 +231,9 @@ namespace pfasst
     this->status()->state() = State::PREDICTING;
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   void
-  TwoLevelMLSDC<TransferT>::predict_fine()
+  TwoLevelMLSDC<TransferT, CommT>::predict_fine()
   {
     CLOG(INFO, this->get_logger_id()) << "Predicting on FINE level";
 
@@ -249,9 +249,9 @@ namespace pfasst
     this->status()->state() = State::PREDICTING;
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   void
-  TwoLevelMLSDC<TransferT>::sweep_coarse()
+  TwoLevelMLSDC<TransferT, CommT>::sweep_coarse()
   {
     CLOG(INFO, this->get_logger_id()) << "Sweeping on COARSE level";
 
@@ -267,9 +267,9 @@ namespace pfasst
     this->status()->state() = State::ITERATING;
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   void
-  TwoLevelMLSDC<TransferT>::sweep_fine()
+  TwoLevelMLSDC<TransferT, CommT>::sweep_fine()
   {
     CLOG(INFO, this->get_logger_id()) << "Sweeping on FINE level";
 
@@ -285,9 +285,9 @@ namespace pfasst
     this->status()->state() = State::ITERATING;
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   void
-  TwoLevelMLSDC<TransferT>::cycle_down()
+  TwoLevelMLSDC<TransferT, CommT>::cycle_down()
   {
     CVLOG(1, this->get_logger_id()) << "cycle down to coarse level";
 
@@ -296,9 +296,9 @@ namespace pfasst
     this->get_coarse()->save();
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   void
-  TwoLevelMLSDC<TransferT>::cycle_up()
+  TwoLevelMLSDC<TransferT, CommT>::cycle_up()
   {
     CVLOG(1, this->get_logger_id()) << "cycle up to fine level";
 

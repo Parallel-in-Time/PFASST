@@ -20,7 +20,6 @@ template<typename precision>
 using Index = typename Matrix<precision>::Index;
 
 #include "pfasst/globals.hpp"
-#include "pfasst/exceptions.hpp"
 #include "pfasst/quadrature/polynomial.hpp"
 
 
@@ -277,12 +276,12 @@ namespace pfasst
         virtual size_t get_num_nodes() const;
 
         /**
-         * @throws pfasst::NotImplementedYet if not overwritten by implementation;
+         * @throws runtime_error if not overwritten by implementation;
          *   required for quadrature of any kind
          */
         virtual bool left_is_node() const;
         /**
-         * @throws pfasst::NotImplementedYet if not overwritten by implementation;
+         * @throws runtime_error if not overwritten by implementation;
          *   required for quadrature of any kind
          */
         virtual bool right_is_node() const;
@@ -296,7 +295,7 @@ namespace pfasst
       protected:
         //! @{
         /**
-         * @throws pfasst::NotImplementedYet if not overwritten by implementation;
+         * @throws runtime_error if not overwritten by implementation;
          *   required for quadrature of any kind
          */
         virtual void compute_nodes();

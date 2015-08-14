@@ -1,5 +1,5 @@
-#ifndef _PFASST__COMMUNICATOR_HPP_
-#define _PFASST__COMMUNICATOR_HPP_
+#ifndef _PFASST__COMM__COMMUNICATOR_HPP_
+#define _PFASST__COMM__COMMUNICATOR_HPP_
 
 #include <memory>
 #include <type_traits>
@@ -11,12 +11,13 @@ namespace pfasst
   namespace comm
   {
     class Communicator
+      : public enable_shared_from_this<Communicator>
     {
       public:
         Communicator() = default;
         Communicator(const Communicator& other) = default;
         Communicator(Communicator&& other) = default;
-        ~Communicator() = default;
+        virtual ~Communicator() = default;
         Communicator& operator=(const Communicator& other) = default;
         Communicator& operator=(Communicator&& other) = default;
 
@@ -27,32 +28,24 @@ namespace pfasst
         virtual bool is_first() const;
         virtual bool is_last() const;
 
-        virtual void send(const int* data, const int count,
-                          const int dest_rank, const int tag);
-        virtual void send(const double* data, const int count,
-                          const int dest_rank, const int tag);
+        template<class DataT>
+        void send(const DataT* const data, const int count, const int dest_rank, const int tag);
 
-        virtual void isend(const int* data, const int count,
-                           const int dest_rank, const int tag);
-        virtual void isend(const double* data, const int count,
-                           const int dest_rank, const int tag);
+        template<class DataT>
+        void isend(const DataT* const data, const int count, const int dest_rank, const int tag);
 
-        virtual void recv(int* data, const int count,
-                          const int dest_rank, const int tag);
-        virtual void recv(double* data, const int count,
-                          const int dest_rank, const int tag);
+        template<class DataT>
+        void recv(DataT* data, const int count, const int dest_rank, const int tag);
 
-        virtual void irecv(int* data, const int count,
-                           const int src_rank, const int tag);
-        virtual void irecv(double* data, const int count,
-                           const int src_rank, const int tag);
+        template<class DataT>
+        void irecv(DataT* data, const int count, const int src_rank, const int tag);
 
-        virtual void bcast(int* data, const int count, const int root_rank);
-        virtual void bcast(double* data, const int count, const int root_rank);
+        template<class DataT>
+        void bcast(DataT* data, const int count, const int root_rank);
     };
   }  // ::pfasst::comm
 }  // ::pfasst
 
 #include "pfasst/comm/communicator_impl.hpp"
 
-#endif  // _PFASST__COMMUNICATOR_HPP_
+#endif  // _PFASST__COMM__COMMUNICATOR_HPP_

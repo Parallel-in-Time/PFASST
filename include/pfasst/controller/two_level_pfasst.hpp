@@ -5,27 +5,27 @@
 using namespace std;
 
 #include "pfasst/controller/two_level_mlsdc.hpp"
-#include "pfasst/comm/communicator.hpp"
+#include "pfasst/comm/mpi_p2p.hpp"
 
 
 namespace pfasst
 {
   template<
-    class TransferT
+    class TransferT,
+    class CommT = comm::MpiP2P
   >
   class TwoLevelPfasst
-    : public TwoLevelMLSDC<TransferT>
+    : public TwoLevelMLSDC<TransferT, CommT>
   {
     public:
       typedef          TransferT                             transfer_type;
+      typedef          CommT                                 comm_type;
       typedef typename transfer_type::traits::fine_time_type time_type;
 
-      static void init_loggers() override;
+      static void init_loggers();
 
     protected:
-      shared_ptr<comm::Communicator> _comm;
-
-      virtual void predictor() override;
+      virtual void predictor();
       virtual void cycle_down() override;
       virtual void cycle_up() override;
 
@@ -34,14 +34,11 @@ namespace pfasst
 
     public:
       TwoLevelPfasst();
-      TwoLevelPfasst(const TwoLevelPfasst<TransferT>& other) = default;
-      TwoLevelPfasst(TwoLevelPfasst<TransferT>&& other) = default;
+      TwoLevelPfasst(const TwoLevelPfasst<TransferT, CommT>& other) = default;
+      TwoLevelPfasst(TwoLevelPfasst<TransferT, CommT>&& other) = default;
       virtual ~TwoLevelPfasst() = default;
-      TwoLevelPfasst<TransferT>& operator=(const TwoLevelPfasst<TransferT>& other) = default;
-      TwoLevelPfasst<TransferT>& operator=(TwoLevelPfasst<TransferT>&& other) = default;
-
-      virtual       shared_ptr<comm::Communicator>& communicator();
-      virtual const shared_ptr<comm::Communicator>  get_communicator() const;
+      TwoLevelPfasst<TransferT, CommT>& operator=(const TwoLevelPfasst<TransferT, CommT>& other) = default;
+      TwoLevelPfasst<TransferT, CommT>& operator=(TwoLevelPfasst<TransferT, CommT>&& other) = default;
 
       virtual void set_options() override;
 

@@ -1,5 +1,6 @@
 #include "fixtures/test_helpers.hpp"
 
+#include <stdexcept>
 #include <vector>
 using namespace std;
 
@@ -182,7 +183,7 @@ class Interface
 
 TEST_F(Interface, no_implementation_of_reevaluation)
 {
-  EXPECT_THROW(sweeper.reevaluate(), pfasst::NotImplementedYet);
+  EXPECT_THROW(sweeper.reevaluate(), runtime_error);
 }
 
 TEST_F(Interface, no_implementation_of_residual_computation)
@@ -190,13 +191,13 @@ TEST_F(Interface, no_implementation_of_residual_computation)
   EXPECT_FALSE(sweeper.converged());
 
   sweeper.set_abs_residual_tol(1.0);
-  EXPECT_THROW(sweeper.converged(), pfasst::NotImplementedYet);
+  EXPECT_THROW(sweeper.converged(), runtime_error);
 
   sweeper.set_abs_residual_tol(0.0);
   EXPECT_FALSE(sweeper.converged());
 
   sweeper.set_rel_residual_tol(1.0);
-  EXPECT_THROW(sweeper.converged(), pfasst::NotImplementedYet);
+  EXPECT_THROW(sweeper.converged(), runtime_error);
 }
 
 
@@ -250,7 +251,7 @@ TEST_F(Logic, post_predict_fails_if_right_is_not_node)
   EXPECT_THAT(sweeper.get_end_state(), NotNull());
   EXPECT_THAT(sweeper.get_end_state()->data(), Pointwise(Not(Eq()), encap->data()));
 
-  EXPECT_THROW(sweeper.post_predict(), pfasst::NotImplementedYet);
+  EXPECT_THROW(sweeper.post_predict(), runtime_error);
 }
 
 TEST_F(Logic, post_sweep_finishes_end_state_if_right_is_node)
@@ -277,7 +278,7 @@ TEST_F(Logic, post_sweep_fails_if_right_is_not_node)
   EXPECT_THAT(sweeper.get_end_state(), NotNull());
   EXPECT_THAT(sweeper.get_end_state()->data(), Pointwise(Not(Eq()), encap->data()));
 
-  EXPECT_THROW(sweeper.post_sweep(), pfasst::NotImplementedYet);
+  EXPECT_THROW(sweeper.post_sweep(), runtime_error);
 }
 
 

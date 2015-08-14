@@ -5,18 +5,21 @@
 using namespace std;
 
 #include "pfasst/controller/controller.hpp"
+#include "pfasst/comm/communicator.hpp"
 
 
 namespace pfasst
 {
   template<
-    class TransferT
+    class TransferT,
+    class CommT = comm::Communicator
   >
   class TwoLevelMLSDC
-    : public Controller<TransferT>
+    : public Controller<TransferT, CommT>
   {
     public:
       typedef          TransferT                             transfer_type;
+      typedef          CommT                                 comm_type;
       typedef typename transfer_type::traits::fine_time_type time_type;
 
       static void init_loggers();
@@ -35,11 +38,11 @@ namespace pfasst
 
     public:
       TwoLevelMLSDC();
-      TwoLevelMLSDC(const TwoLevelMLSDC<TransferT>& other) = default;
-      TwoLevelMLSDC(TwoLevelMLSDC<TransferT>&& other) = default;
+      TwoLevelMLSDC(const TwoLevelMLSDC<TransferT, CommT>& other) = default;
+      TwoLevelMLSDC(TwoLevelMLSDC<TransferT, CommT>&& other) = default;
       virtual ~TwoLevelMLSDC() = default;
-      TwoLevelMLSDC<TransferT>& operator=(const TwoLevelMLSDC<TransferT>& other) = default;
-      TwoLevelMLSDC<TransferT>& operator=(TwoLevelMLSDC<TransferT>&& other) = default;
+      TwoLevelMLSDC<TransferT, CommT>& operator=(const TwoLevelMLSDC<TransferT, CommT>& other) = default;
+      TwoLevelMLSDC<TransferT, CommT>& operator=(TwoLevelMLSDC<TransferT, CommT>&& other) = default;
 
       virtual size_t get_num_levels() const override;
 

@@ -10,66 +10,38 @@ using namespace std;
 
 namespace pfasst
 {
-  template<class TransferT>
-  TwoLevelPfasst<TransferT>::TwoLevelPfasst()
-    : Controller<TransferT>()
+  template<class TransferT, class CommT>
+  TwoLevelPfasst<TransferT, CommT>::TwoLevelPfasst()
+    : TwoLevelMLSDC<TransferT, CommT>()
   {
-    TwoLevelMLSDC<TransferT>::init_loggers();
+    TwoLevelPfasst<TransferT, CommT>::init_loggers();
     this->set_logger_id("PFASST");
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   void
-  TwoLevelPfasst<TransferT>::init_loggers()
+  TwoLevelPfasst<TransferT, CommT>::init_loggers()
   {
     log::add_custom_logger("PFASST");
     log::add_custom_logger("LVL_COARSE");
     log::add_custom_logger("LVL_FINE");
   }
 
-  template<class TransferT>
-  shared_ptr<comm::Communicator>&
-  TwoLevelPfasst<TransferT>::communicator()
-  {
-    return this->_comm;
-  }
-
-  template<class TransferT>
-  const shared_ptr<comm::Communicator>
-  TwoLevelPfasst<TransferT>::get_communicator() const
-  {
-    return this->_comm;
-  }
-
-  template<class TransferT>
-  size_t
-  TwoLevelPfasst<TransferT>::get_num_levels() const
-  {
-    size_t num = 0;
-    if (this->_coarse_level != nullptr) {
-      num++;
-    }
-    if (this->_fine_level != nullptr) {
-      num++;
-    }
-    return num;
-  }
-
-  template<class TransferT>
+  template<class TransferT, class CommT>
   void
-  TwoLevelPfasst<TransferT>::set_options()
+  TwoLevelPfasst<TransferT, CommT>::set_options()
   {
-    TwoLevelMLSDC<TransferT>::set_options();
+    TwoLevelMLSDC<TransferT, CommT>::set_options();
   }
 
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   void
-  TwoLevelPfasst<TransferT>::setup()
+  TwoLevelPfasst<TransferT, CommT>::setup()
   {
     assert(this->get_communicator() != nullptr);
 
-    TwoLevelMLSDC<TransferT>::setup();
+    TwoLevelMLSDC<TransferT, CommT>::setup();
 
     assert(this->get_transfer() != nullptr);
 
@@ -84,11 +56,13 @@ namespace pfasst
     }
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   void
-  TwoLevelPfasst<TransferT>::run()
+  TwoLevelPfasst<TransferT, CommT>::run()
   {
-    Controller<TransferT>::run();
+    Controller<TransferT, CommT>::run();
+
+    assert(this->get_communicator() != nullptr);
 
     const size_t num_blocks = this->get_num_steps() / this->get_communicator()->get_size();
 
@@ -160,23 +134,23 @@ namespace pfasst
     }
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   bool
-  TwoLevelPfasst<TransferT>::advance_time(const size_t& num_steps)
+  TwoLevelPfasst<TransferT, CommT>::advance_time(const size_t& num_steps)
   {
-    return Controller<TransferT>::advance_time(num_steps);
+    return Controller<TransferT, CommT>::advance_time(num_steps);
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   bool
-  TwoLevelPfasst<TransferT>::advance_iteration()
+  TwoLevelPfasst<TransferT, CommT>::advance_iteration()
   {
-    return Controller<TransferT>::advance_iteration();
+    return Controller<TransferT, CommT>::advance_iteration();
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   void
-  TwoLevelPfasst<TransferT>::cycle_down()
+  TwoLevelPfasst<TransferT, CommT>::cycle_down()
   {
     // TODO: check convergence state here !?
 
@@ -192,9 +166,9 @@ namespace pfasst
     this->get_coarse()->save();
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   void
-  TwoLevelPfasst<TransferT>::cycle_up()
+  TwoLevelPfasst<TransferT, CommT>::cycle_up()
   {
     this->get_transfer()->interpolate(this->get_coarse(), this->get_fine(), true);
     if (!this->get_communicator()->is_first()) {
@@ -206,9 +180,9 @@ namespace pfasst
     this->get_transfer()->interpolate_initial(this->get_coarse(), this->get_fine());
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   void
-  TwoLevelPfasst<TransferT>::predictor()
+  TwoLevelPfasst<TransferT, CommT>::predictor()
   {
     assert(this->get_status()->get_iteration() == 0);
     this->status()->state() = State::PREDICTING;
@@ -239,17 +213,17 @@ namespace pfasst
     this->get_fine()->save();
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   void
-  TwoLevelPfasst<TransferT>::broadcast()
+  TwoLevelPfasst<TransferT, CommT>::broadcast()
   {
     this->get_fine()->get_end_state()->bcast(this->get_communicator(),
                                              this->get_communicator()->get_root());
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   int
-  TwoLevelPfasst<TransferT>::compute_tag() const
+  TwoLevelPfasst<TransferT, CommT>::compute_tag() const
   {
     // TODO: come up with a good way of computing unique but meaningful tags
     return 0;

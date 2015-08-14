@@ -1,5 +1,6 @@
 #include "pfasst/transfer/polynomial.hpp"
 
+#include <stdexcept>
 #include <memory>
 #include <vector>
 using namespace std;
@@ -50,7 +51,7 @@ namespace pfasst
 
     if (coarse->get_quadrature()->left_is_node() || fine->get_quadrature()->left_is_node()) {
       CLOG(ERROR, "TRANS") << "Time interpolation with left time point as a node is still not supported.";
-      throw NotImplementedYet("time interpolation with left time point as node");
+      throw runtime_error("time interpolation with left time point as node");
     }
 
     if (initial) {
@@ -92,7 +93,7 @@ namespace pfasst
                                                                 shared_ptr<typename TransferTraits::fine_encap_type> fine)
   {
     UNUSED(coarse); UNUSED(fine);
-    throw NotImplementedYet("interpolation for generic Encapsulations");
+    throw runtime_error("interpolation for generic Encapsulations");
   }
 
   template<class TransferTraits, typename Enabled>
@@ -115,7 +116,7 @@ namespace pfasst
 
     if (coarse->get_quadrature()->left_is_node() || fine->get_quadrature()->left_is_node()) {
       CLOG(ERROR, "TRANS") << "Time restriction with left time point as a node is still not supported.";
-      throw NotImplementedYet("time restriction with left time point as node");
+      throw runtime_error("time restriction with left time point as node");
     }
 
 
@@ -150,7 +151,7 @@ namespace pfasst
                                                              shared_ptr<typename TransferTraits::coarse_encap_type> coarse)
   {
     UNUSED(coarse); UNUSED(fine);
-    throw NotImplementedYet("restriction for generic Encapsulations");
+    throw runtime_error("restriction for generic Encapsulations");
   }
 
   template<class TransferTraits, typename Enabled>
@@ -168,10 +169,10 @@ namespace pfasst
 
     if (num_fine_nodes != num_coarse_nodes) {
       CLOG(ERROR, "TRANS") << "FAS Correction for different time scales not supported yet.";
-      throw NotImplementedYet("fas correction for different time scales");
+      throw runtime_error("fas correction for different time scales");
     } else if (!equal(coarse_nodes.cbegin(), coarse_nodes.cend(), fine_nodes.cbegin())) {
       CLOG(ERROR, "TRANS") << "FAS Correction for different time nodes not supported yet.";
-      throw NotImplementedYet("fas correction for different sets of nodes");
+      throw runtime_error("fas correction for different sets of nodes");
     }
     assert(coarse_nodes.size() == fine_nodes.size());
 

@@ -3,7 +3,6 @@
 #include <cassert>
 using namespace std;
 
-#include "pfasst/exceptions.hpp"
 #include "pfasst/logging.hpp"
 
 

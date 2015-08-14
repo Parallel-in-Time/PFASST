@@ -57,21 +57,21 @@ namespace pfasst
     template<typename precision>
     bool IQuadrature<precision>::left_is_node() const
     {
-      throw NotImplementedYet("Quadrature");
+      throw runtime_error("Quadrature");
       return LEFT_IS_NODE;
     }
 
     template<typename precision>
     bool IQuadrature<precision>::right_is_node() const
     {
-      throw NotImplementedYet("Quadrature");
+      throw runtime_error("Quadrature");
       return RIGHT_IS_NODE;
     }
 
     template<typename precision>
     void IQuadrature<precision>::compute_nodes()
     {
-      throw NotImplementedYet("Quadrature");
+      throw runtime_error("Quadrature");
     }
 
     template<typename precision>

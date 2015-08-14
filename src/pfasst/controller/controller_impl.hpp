@@ -10,37 +10,51 @@ using namespace std;
 
 namespace pfasst
 {
-  template<class TransferT>
-  Controller<TransferT>::Controller()
+  template<class TransferT, class CommT>
+  Controller<TransferT, CommT>::Controller()
     :   _status(make_shared<Status<typename TransferT::traits::fine_time_type>>())
       , _ready(false)
       , _logger_id("CONTROL")
   {}
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
+  shared_ptr<CommT>&
+  Controller<TransferT, CommT>::communicator()
+  {
+    return this->_comm;
+  }
+
+  template<class TransferT, class CommT>
+  const shared_ptr<CommT>
+  Controller<TransferT, CommT>::get_communicator() const
+  {
+    return this->_comm;
+  }
+
+  template<class TransferT, class CommT>
   shared_ptr<Status<typename TransferT::traits::fine_time_type>>&
-  Controller<TransferT>::status()
+  Controller<TransferT, CommT>::status()
   {
     return this->_status;
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   const shared_ptr<Status<typename TransferT::traits::fine_time_type>>
-  Controller<TransferT>::get_status() const
+  Controller<TransferT, CommT>::get_status() const
   {
     return this->_status;
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   size_t
-  Controller<TransferT>::get_num_levels() const
+  Controller<TransferT, CommT>::get_num_levels() const
   {
     return 0;
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   size_t
-  Controller<TransferT>::get_num_steps() const
+  Controller<TransferT, CommT>::get_num_steps() const
   {
     if (this->get_status()->get_t_end() <= 0) {
       CLOG(ERROR, this->get_logger_id()) << "Time end point must be non-zero positive."
@@ -64,72 +78,72 @@ namespace pfasst
     return (size_t)(this->get_status()->get_t_end() / this->get_status()->get_dt());
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   bool&
-  Controller<TransferT>::ready()
+  Controller<TransferT, CommT>::ready()
   {
     return this->_ready;
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   bool
-  Controller<TransferT>::is_ready() const
+  Controller<TransferT, CommT>::is_ready() const
   {
     return this->_ready;
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   void
-  Controller<TransferT>::set_logger_id(const string& logger_id)
+  Controller<TransferT, CommT>::set_logger_id(const string& logger_id)
   {
     this->_logger_id = logger_id;
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   const char*
-  Controller<TransferT>::get_logger_id() const
+  Controller<TransferT, CommT>::get_logger_id() const
   {
     return this->_logger_id.c_str();
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   void
-  Controller<TransferT>::set_options()
+  Controller<TransferT, CommT>::set_options()
   {
     this->status()->max_iterations() = config::get_value<size_t>("num_iters", this->get_status()->get_max_iterations());
     this->status()->t_end() = config::get_value<typename TransferT::traits::fine_time_type>("t_end", this->get_status()->get_t_end());
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   template<class SweeperT>
   void
-  Controller<TransferT>::add_sweeper(shared_ptr<SweeperT> sweeper, const bool as_coarse)
+  Controller<TransferT, CommT>::add_sweeper(shared_ptr<SweeperT> sweeper, const bool as_coarse)
   {}
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   void
-  Controller<TransferT>::add_transfer(shared_ptr<TransferT> transfer)
+  Controller<TransferT, CommT>::add_transfer(shared_ptr<TransferT> transfer)
   {
     this->_transfer = transfer;
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   const shared_ptr<TransferT>
-  Controller<TransferT>::get_transfer() const
+  Controller<TransferT, CommT>::get_transfer() const
   {
     return this->_transfer;
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   shared_ptr<TransferT>
-  Controller<TransferT>::get_transfer()
+  Controller<TransferT, CommT>::get_transfer()
   {
     return this->_transfer;
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   void
-  Controller<TransferT>::setup()
+  Controller<TransferT, CommT>::setup()
   {
     CLOG_IF(this->is_ready(), WARNING, this->get_logger_id())
       << "Controller has already been setup.";
@@ -157,9 +171,9 @@ namespace pfasst
     this->ready() = true;
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   void
-  Controller<TransferT>::run()
+  Controller<TransferT, CommT>::run()
   {
     if (!this->is_ready()) {
       CLOG(ERROR, this->get_logger_id()) << "Controller is not ready to run. setup() not called yet.";
@@ -167,9 +181,9 @@ namespace pfasst
     }
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   bool
-  Controller<TransferT>::advance_time(const size_t& num_steps)
+  Controller<TransferT, CommT>::advance_time(const size_t& num_steps)
   {
     const time_type delta_time = num_steps * this->get_status()->get_dt();
     const time_type new_time = this->get_status()->get_time() + delta_time;
@@ -197,9 +211,9 @@ namespace pfasst
     }
   }
 
-  template<class TransferT>
+  template<class TransferT, class CommT>
   bool
-  Controller<TransferT>::advance_iteration()
+  Controller<TransferT, CommT>::advance_iteration()
   {
     if (this->get_status()->get_iteration() + 1 > this->get_status()->get_max_iterations()) {
       CLOG(WARNING, this->get_logger_id()) << "Not advancing to next iteration ("

@@ -1,6 +1,9 @@
 #include "pfasst/comm/communicator.hpp"
 
-#include "pfasst/exceptions.hpp"
+#include <stdexcept>
+using namespace std;
+
+#include "pfasst/logging.hpp"
 
 
 namespace pfasst
@@ -9,7 +12,7 @@ namespace pfasst
   {
     size_t Communicator::get_size() const
     {
-      return 3;
+      return 0;
     }
 
     size_t Communicator::get_rank() const
@@ -32,49 +35,44 @@ namespace pfasst
       return false;
     }
 
-    void Communicator::send(const int* data, const int count, const int dest_rank, const int tag)
+    template<class DataT>
+    void Communicator::send(const DataT* const data, const int count, const int dest_rank, const int tag)
     {
-      throw NotImplementedYet("send for generic data type");
-    }
-    void Communicator::send(const double* data, const int count, const int dest_rank, const int tag)
-    {
-      throw NotImplementedYet("send for generic data type");
-    }
-
-    void Communicator::isend(const int* data, const int count, const int dest_rank, const int tag)
-    {
-      throw NotImplementedYet("isend for generic data type");
-    }
-    void Communicator::isend(const double* data, const int count, const int dest_rank, const int tag)
-    {
-      throw NotImplementedYet("isend for generic data type");
+      CLOG(ERROR, "COMM") << "blocking send of generic data types not implemented."
+                          << " type: " << typeid(data).name();
+      throw runtime_error("send for generic data type");
     }
 
-    void Communicator::recv(int* data, const int count, const int dest_rank, const int tag)
+    template<class DataT>
+    void Communicator::isend(const DataT* const data, const int count, const int dest_rank, const int tag)
     {
-      throw NotImplementedYet("recv for generic data type");
-    }
-    void Communicator::recv(double* data, const int count, const int dest_rank, const int tag)
-    {
-      throw NotImplementedYet("recv for generic data type");
-    }
-
-    void Communicator::irecv(int* data, const int count, const int src_rank, const int tag)
-    {
-      throw NotImplementedYet("irecv for generic data type");
-    }
-    void Communicator::irecv(double* data, const int count, const int src_rank, const int tag)
-    {
-      throw NotImplementedYet("irecv for generic data type");
+      CLOG(ERROR, "COMM") << "non-blocking send of generic data types not implemented."
+                          << " type: " << typeid(data).name();
+      throw runtime_error("isend for generic data type");
     }
 
-    void Communicator::bcast(int* data, const int count, const int root_rank)
+    template<class DataT>
+    void Communicator::recv(DataT* data, const int count, const int dest_rank, const int tag)
     {
-      throw NotImplementedYet("bcast for generic data type");
+      CLOG(ERROR, "COMM") << "blocking receive of generic data types not implemented."
+                          << " type: " << typeid(data).name();
+      throw runtime_error("recv for generic data type");
     }
-    void Communicator::bcast(double* data, const int count, const int root_rank)
+
+    template<class DataT>
+    void Communicator::irecv(DataT* data, const int count, const int src_rank, const int tag)
     {
-      throw NotImplementedYet("bcast for generic data type");
+      CLOG(ERROR, "COMM") << "non-blocking receive of generic data types not implemented."
+                          << " type: " << typeid(data).name();
+      throw runtime_error("irecv for generic data type");
+    }
+
+    template<class DataT>
+    void Communicator::bcast(DataT* data, const int count, const int root_rank)
+    {
+      CLOG(ERROR, "COMM") << "braodcast of generic data types not implemented."
+                          << " type: " << typeid(data).name();
+      throw runtime_error("bcast for generic data type");
     }
   }
 }

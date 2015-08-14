@@ -1,5 +1,8 @@
 #include "pfasst/sweeper/imex.hpp"
 
+#include <stdexcept>
+using namespace std;
+
 
 namespace pfasst
 {
@@ -348,7 +351,7 @@ namespace pfasst
   {
     try {
       Sweeper<SweeperTrait, Enabled>::integrate_end_state(dt);
-    } catch (NotImplementedYet niy) {
+    } catch (runtime_error err) {
       assert(this->get_quadrature() != nullptr);
       assert(this->get_initial_state() != nullptr);
 
@@ -405,7 +408,7 @@ namespace pfasst
                                                  const shared_ptr<typename SweeperTrait::encap_type> u)
   {
     UNUSED(t); UNUSED(u);
-    throw NotImplementedYet("evaluation of explicit part of right-hand-side");
+    throw runtime_error("evaluation of explicit part of right-hand-side");
   }
 
   template<class SweeperTrait, typename Enabled>
@@ -414,7 +417,7 @@ namespace pfasst
                                                  const shared_ptr<typename SweeperTrait::encap_type> u)
   {
     UNUSED(t); UNUSED(u);
-    throw NotImplementedYet("evaluation of implicit part of right-hand-side");
+    throw runtime_error("evaluation of implicit part of right-hand-side");
   }
 
   template<class SweeperTrait, typename Enabled>
@@ -426,7 +429,7 @@ namespace pfasst
                                               const shared_ptr<typename SweeperTrait::encap_type> rhs)
   {
     UNUSED(f); UNUSED(u); UNUSED(t); UNUSED(dt); UNUSED(dt); UNUSED(rhs);
-    throw NotImplementedYet("spacial solver");
+    throw runtime_error("spacial solver");
   }
 
   template<class SweeperTrait, typename Enabled>
@@ -438,7 +441,7 @@ namespace pfasst
     auto nodes = this->get_quadrature()->get_nodes();
     if (this->get_quadrature()->left_is_node()) {
       CLOG(ERROR, this->get_logger_id()) << "Don't know how to compute delta matrices for quadrature containing left time point.";
-      throw NotImplementedYet("IMEX with quadrature containing left time point");
+      throw runtime_error("IMEX with quadrature containing left time point");
     } else {
       nodes.insert(nodes.begin(), time_type(0.0));
     }

@@ -2,9 +2,9 @@
 
 #include <algorithm>
 #include <cassert>
+#include <stdexcept>
 using namespace std;
 
-#include "pfasst/exceptions.hpp"
 #include "pfasst/logging.hpp"
 #include "pfasst/quadrature.hpp"
 using pfasst::quadrature::IQuadrature;
@@ -356,7 +356,7 @@ namespace pfasst
   Sweeper<SweeperTrait, Enabled>::reevaluate(const bool initial_only)
   {
     UNUSED(initial_only);
-    throw NotImplementedYet("reevaluation of right-hand-side");
+    throw runtime_error("reevaluation of right-hand-side");
   }
 
   template<class SweeperTrait, typename Enabled>
@@ -364,7 +364,7 @@ namespace pfasst
   Sweeper<SweeperTrait, Enabled>::integrate(const typename SweeperTrait::time_type& dt)
   {
     UNUSED(dt);
-    throw NotImplementedYet("integration over dt");
+    throw runtime_error("integration over dt");
   }
 
   template<class SweeperTrait, typename Enabled>
@@ -428,7 +428,7 @@ namespace pfasst
       this->end_state()->data() = this->get_states().back()->get_data();
       CVLOG(1, this->get_logger_id()) << "end state: " << to_string(this->get_end_state());
     } else {
-      throw NotImplementedYet("integration of end state for quadrature not including right time interval boundary");
+      throw runtime_error("integration of end state for quadrature not including right time interval boundary");
     }
   }
 
@@ -436,6 +436,6 @@ namespace pfasst
   void
   Sweeper<SweeperTrait, Enabled>::compute_residuals()
   {
-    throw NotImplementedYet("computation of residuals");
+    throw runtime_error("computation of residuals");
   }
 }  // ::pfasst

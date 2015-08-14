@@ -1,10 +1,10 @@
 #include "pfasst/transfer/transfer.hpp"
 
 #include <memory>
+#include <stdexcept>
 using namespace std;
 
 #include "pfasst/globals.hpp"
-#include "pfasst/exceptions.hpp"
 
 
 namespace pfasst
@@ -15,7 +15,7 @@ namespace pfasst
                                                          shared_ptr<typename TransferTraits::fine_sweeper_type> fine)
   {
     UNUSED(coarse); UNUSED(fine);
-    throw NotImplementedYet("interpolation of initial values for generic Sweeper");
+    throw runtime_error("interpolation of initial values for generic Sweeper");
   }
 
   template<class TransferTraits, typename Enabled>
@@ -25,7 +25,7 @@ namespace pfasst
                                                  const bool initial)
   {
     UNUSED(coarse); UNUSED(fine); UNUSED(initial);
-    throw NotImplementedYet("interpolation for generic Sweeper");
+    throw runtime_error("interpolation for generic Sweeper");
   }
 
   template<class TransferTraits, typename Enabled>
@@ -34,7 +34,7 @@ namespace pfasst
                                                       shared_ptr<typename TransferTraits::fine_encap_type> fine)
   {
     UNUSED(coarse); UNUSED(fine);
-    throw NotImplementedYet("interpolation for generic Encapsulations");
+    throw runtime_error("interpolation for generic Encapsulations");
   }
 
   template<class TransferTraits, typename Enabled>
@@ -43,7 +43,7 @@ namespace pfasst
                                                       shared_ptr<typename TransferTraits::coarse_sweeper_type> coarse)
   {
     UNUSED(coarse); UNUSED(fine);
-    throw NotImplementedYet("restriction of initial value for generic Sweeper");
+    throw runtime_error("restriction of initial value for generic Sweeper");
   }
 
   template<class TransferTraits, typename Enabled>
@@ -53,7 +53,7 @@ namespace pfasst
                                               const bool initial)
   {
     UNUSED(coarse); UNUSED(fine); UNUSED(initial);
-    throw NotImplementedYet("restriction for generic Sweeper");
+    throw runtime_error("restriction for generic Sweeper");
   }
 
   template<class TransferTraits, typename Enabled>
@@ -62,7 +62,7 @@ namespace pfasst
                                                    shared_ptr<typename TransferTraits::coarse_encap_type> coarse)
   {
     UNUSED(coarse); UNUSED(fine);
-    throw NotImplementedYet("restriction for generic Encapsulations");
+    throw runtime_error("restriction for generic Encapsulations");
   }
 
   template<class TransferTraits, typename Enabled>
@@ -72,6 +72,6 @@ namespace pfasst
                                          shared_ptr<typename TransferTraits::coarse_sweeper_type> coarse)
   {
     UNUSED(dt); UNUSED(coarse); UNUSED(fine);
-    throw NotImplementedYet("FAS correction for generic Sweeper");
+    throw runtime_error("FAS correction for generic Sweeper");
   }
 }  // ::pfasst
