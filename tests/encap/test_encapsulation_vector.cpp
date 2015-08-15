@@ -15,10 +15,10 @@ using Matrix = Eigen::Matrix<precision, Eigen::Dynamic, Eigen::Dynamic, Eigen::R
 
 #include <pfasst/encap/traits.hpp>
 #include <pfasst/encap/vector.hpp>
-typedef pfasst::vector_encap_traits<double, double> VectorEncapTrait;
+#include <pfasst/comm/communicator.hpp>
+typedef pfasst::vector_encap_traits<double, double>    VectorEncapTrait;
 typedef pfasst::encap::Encapsulation<VectorEncapTrait> VectorEncapsulation;
-
-#include "comm/mocks.hpp"
+typedef pfasst::comm::Communicator                     CommType;
 
 
 typedef ::testing::Types<VectorEncapsulation> EncapTypes;
@@ -174,34 +174,29 @@ TEST(MatrixApplication, all_ones)
 
 TEST(Communication, sending)
 {
-  shared_ptr<NiceMock<CommMock>> comm = make_shared<NiceMock<CommMock>>();
+  shared_ptr<CommType> comm = make_shared<CommType>();
   shared_ptr<VectorEncapsulation> vec = \
     make_shared<VectorEncapsulation>(vector<double>{1.0, 2.0, 3.0});
-  EXPECT_CALL(*(comm.get()), send(Matcher<const double*>(vec->get_data().data()), 3, 1, 0)).Times(1);
   vec->send(comm, 1, 0, true);
 
-  EXPECT_CALL(*(comm.get()), isend(Matcher<const double*>(vec->get_data().data()), 3, 1, 0)).Times(1);
   vec->send(comm, 1, 0, false);
 }
 
 TEST(Communication, receiving)
 {
-  shared_ptr<NiceMock<CommMock>> comm = make_shared<NiceMock<CommMock>>();
+  shared_ptr<CommType> comm = make_shared<CommType>();
   shared_ptr<VectorEncapsulation> vec = \
     make_shared<VectorEncapsulation>(vector<double>{1.0, 2.0, 3.0});
-  EXPECT_CALL(*(comm.get()), recv(Matcher<double*>(vec->data().data()), 3, 1, 0)).Times(1);
   vec->recv(comm, 1, 0, true);
 
-  EXPECT_CALL(*(comm.get()), irecv(Matcher<double*>(vec->data().data()), 3, 1, 0)).Times(1);
   vec->recv(comm, 1, 0, false);
 }
 
 TEST(Communication, broadcasting)
 {
-  shared_ptr<NiceMock<CommMock>> comm = make_shared<NiceMock<CommMock>>();
+  shared_ptr<CommType> comm = make_shared<CommType>();
   shared_ptr<VectorEncapsulation> vec = \
     make_shared<VectorEncapsulation>(vector<double>{1.0, 2.0, 3.0});
-  EXPECT_CALL(*(comm.get()), bcast(Matcher<double*>(vec->data().data()), 3, 0)).Times(1);
   vec->bcast(comm, 0);
 }
 

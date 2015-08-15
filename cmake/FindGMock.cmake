@@ -73,6 +73,7 @@ function(_gmock_find_library _name)
     NAMES ${ARGN}
     HINTS
       $ENV{GMOCK_ROOT}
+      $ENV{LIBRARY_PATH}
       ${GMOCK_ROOT}
     PATH_SUFFIXES ${_gmock_libpath_suffixes}
   )
@@ -100,6 +101,7 @@ endif()
 find_path(GMOCK_INCLUDE_DIR gmock/gmock.h
   HINTS
     $ENV{GMOCK_ROOT}/include
+    $ENV{INCLUDE}
     ${GMOCK_ROOT}/include
 )
 mark_as_advanced(GMOCK_INCLUDE_DIR)

@@ -34,10 +34,4 @@ class StatusMock
 
     MOCK_METHOD0_T(residual, precision&());
     MOCK_CONST_METHOD0_T(get_residual, precision());
-
-    MOCK_METHOD4_T(send, void(shared_ptr<pfasst::comm::Communicator> comm, const int dest_rank,
-                              const int tag, const bool blocking));
-    MOCK_METHOD4_T(recv, void(shared_ptr<pfasst::comm::Communicator> comm, const int src_rank,
-                              const int tag, const bool blocking));
-    MOCK_METHOD2_T(bcast, void(shared_ptr<pfasst::comm::Communicator> comm, const int root_rank));
 };

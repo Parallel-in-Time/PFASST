@@ -7,7 +7,6 @@
 using namespace std;
 
 #include "pfasst/sweeper/traits.hpp"
-#include "pfasst/comm/communicator.hpp"
 #include "pfasst/controller/status.hpp"
 #include "pfasst/encap/encapsulation.hpp"
 #include "pfasst/quadrature.hpp"

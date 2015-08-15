@@ -116,8 +116,9 @@ namespace pfasst
   }
 
   template<typename precision>
-  void Status<precision>::send(shared_ptr<comm::Communicator> comm,
-                               const int dest_rank, const int tag, const bool blocking)
+  template<typename CommT>
+  void Status<precision>::send(shared_ptr<CommT> comm, const int dest_rank, const int tag,
+                               const bool blocking)
   {
     if (blocking) {
       comm->send(&(this->_detail.residual), 1, dest_rank, tag);
@@ -129,8 +130,9 @@ namespace pfasst
   }
 
   template<typename precision>
-  void Status<precision>::recv(shared_ptr<comm::Communicator> comm,
-                               const int src_rank, const int tag, const bool blocking)
+  template<typename CommT>
+  void Status<precision>::recv(shared_ptr<CommT> comm, const int src_rank, const int tag,
+                               const bool blocking)
   {
     if (blocking) {
       comm->recv((int*)&(this->_detail.state), 1, src_rank, tag + 1); // TODO: tag computation
@@ -142,8 +144,8 @@ namespace pfasst
   }
 
   template<typename precision>
-  void Status<precision>::bcast(shared_ptr<comm::Communicator> comm,
-                                const int root_rank)
+  template<typename CommT>
+  void Status<precision>::bcast(shared_ptr<CommT> comm, const int root_rank)
   {
     comm->bcast(&(this->_detail.residual), 1, root_rank);
     comm->bcast((int*)&(this->_detail.state), 1, root_rank);

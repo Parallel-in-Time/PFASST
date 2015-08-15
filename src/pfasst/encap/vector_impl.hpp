@@ -135,6 +135,7 @@ namespace pfasst
     }
 
     template<class EncapsulationTrait>
+    template<class CommT>
     void
     Encapsulation<
       EncapsulationTrait, 
@@ -143,7 +144,7 @@ namespace pfasst
                    vector<typename EncapsulationTrait::spacial_type>,
                    typename EncapsulationTrait::data_type
                  >::value
-               >::type>::send(shared_ptr<comm::Communicator> comm, const int dest_rank,
+               >::type>::send(shared_ptr<CommT> comm, const int dest_rank,
                               const int tag, const bool blocking)
     {
       if (blocking) {
@@ -154,6 +155,7 @@ namespace pfasst
     }
 
     template<class EncapsulationTrait>
+    template<class CommT>
     void
     Encapsulation<
       EncapsulationTrait, 
@@ -162,7 +164,7 @@ namespace pfasst
                    vector<typename EncapsulationTrait::spacial_type>,
                    typename EncapsulationTrait::data_type
                  >::value
-               >::type>::recv(shared_ptr<comm::Communicator> comm, const int src_rank,
+               >::type>::recv(shared_ptr<CommT> comm, const int src_rank,
                               const int tag, const bool blocking)
     {
       if (blocking) {
@@ -173,6 +175,7 @@ namespace pfasst
     }
 
     template<class EncapsulationTrait>
+    template<class CommT>
     void
     Encapsulation<
       EncapsulationTrait, 
@@ -181,7 +184,7 @@ namespace pfasst
                    vector<typename EncapsulationTrait::spacial_type>,
                    typename EncapsulationTrait::data_type
                  >::value
-               >::type>::bcast(shared_ptr<comm::Communicator> comm, const int root_rank)
+               >::type>::bcast(shared_ptr<CommT> comm, const int root_rank)
     {
       comm->bcast(this->data().data(), this->get_data().size(), root_rank);
     }

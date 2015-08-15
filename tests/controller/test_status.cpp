@@ -1,8 +1,9 @@
 #include "fixtures/test_helpers.hpp"
 
 #include <pfasst/controller/status.hpp>
+#include <pfasst/comm/communicator.hpp>
 
-#include "comm/mocks.hpp"
+typedef pfasst::comm::Communicator CommType;
 
 
 typedef ::testing::Types<pfasst::Status<double>> StatusTypes;
@@ -70,39 +71,29 @@ class Communication
 {
   protected:
     shared_ptr<pfasst::Status<double>> status;
-    shared_ptr<NiceMock<CommMock>> comm;
+    shared_ptr<CommType> comm;
 
   public:
     virtual void SetUp()
     {
       this->status = make_shared<pfasst::Status<double>>();
-      this->comm = make_shared<NiceMock<CommMock>>();
+      this->comm = make_shared<CommType>();
     }
 };
 
 TEST_F(Communication, can_be_send) {
-  EXPECT_CALL(*(comm.get()), send(Matcher<const double*>(Pointee(status->residual())), 1, 1, 0)).Times(1);
-  EXPECT_CALL(*(comm.get()), send(Matcher<const int*>(Pointee(status->state())), 1, 1, 1)).Times(1);
   status->send(comm, 1, 0, true);
 
-  EXPECT_CALL(*(comm.get()), isend(Matcher<const double*>(Pointee(status->residual())), 1, 1, 0)).Times(1);
-  EXPECT_CALL(*(comm.get()), isend(Matcher<const int*>(Pointee(status->state())), 1, 1, 1)).Times(1);
   status->send(comm, 1, 0, false);
 }
 
 TEST_F(Communication, can_be_received) {
-  EXPECT_CALL(*(comm.get()), recv(Matcher<double*>(Pointee(status->residual())), 1, 1, 0)).Times(1);
-  EXPECT_CALL(*(comm.get()), recv(Matcher<int*>(Pointee(status->state())), 1, 1, 1)).Times(1);
   status->recv(comm, 1, 0, true);
 
-  EXPECT_CALL(*(comm.get()), irecv(Matcher<double*>(Pointee(status->residual())), 1, 1, 0)).Times(1);
-  EXPECT_CALL(*(comm.get()), irecv(Matcher<int*>(Pointee(status->state())), 1, 1, 1)).Times(1);
   status->recv(comm, 1, 0, false);
 }
 
 TEST_F(Communication, can_be_broadcasted) {
-  EXPECT_CALL(*(comm.get()), bcast(Matcher<double*>(Pointee(status->residual())), 1, 0)).Times(1);
-  EXPECT_CALL(*(comm.get()), bcast(Matcher<int*>(Pointee(status->state())), 1, 0)).Times(1);
   status->bcast(comm, 0);
 }
 

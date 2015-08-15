@@ -145,7 +145,7 @@ namespace pfasst
     template<>
     void MpiP2P::irecv(double* data, const int count, const int src_rank, const int tag)
     {
-      throw runtime_error("non-blocking receive for generic data type");
+      auto request_index = make_pair(src_rank, tag);
     }
 
     template<class DataT>

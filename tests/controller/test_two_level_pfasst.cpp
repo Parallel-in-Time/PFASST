@@ -3,6 +3,7 @@
 #include <pfasst/controller/two_level_pfasst.hpp>
 using pfasst::TwoLevelPfasst;
 
+#include <pfasst/comm/mpi_p2p.hpp>
 #include <pfasst/encap/traits.hpp>
 #include <pfasst/encap/vector.hpp>
 
@@ -10,7 +11,6 @@ using pfasst::TwoLevelPfasst;
 #include <pfasst/transfer/polynomial.hpp>
 
 #include "comm/mocks.hpp"
-#include "controller/mocks.hpp"
 #include "sweeper/mocks.hpp"
 #include "transfer/mocks.hpp"
 
@@ -19,7 +19,7 @@ typedef pfasst::encap::Encapsulation<VectorEncapTrait>                  VectorEn
 typedef NiceMock<SweeperMock<pfasst::sweeper_traits<VectorEncapTrait>>> SweeperType;
 typedef pfasst::transfer_traits<SweeperType, SweeperType, 2>            TransferTraits;
 typedef NiceMock<TransferMock<TransferTraits>>                          TransferType;
-typedef CommMock                                              CommunicatorType;
+typedef pfasst::comm::MpiP2P                                            CommunicatorType;
 
 
 typedef ::testing::Types<TwoLevelPfasst<TransferType>> ControllerTypes;
@@ -112,16 +112,6 @@ class Setup
       this->status = make_shared<pfasst::Status<double>>();
 
       this->comm = make_shared<CommunicatorType>();
-      ON_CALL(*(this->comm.get()), get_size())
-        .WillByDefault(Return(2));
-      ON_CALL(*(this->comm.get()), get_rank())
-        .WillByDefault(Return(0));
-      ON_CALL(*(this->comm.get()), get_root())
-        .WillByDefault(Return(0));
-      ON_CALL(*(this->comm.get()), is_first())
-        .WillByDefault(Return(true));
-      ON_CALL(*(this->comm.get()), is_last())
-        .WillByDefault(Return(false));
 
       this->sweeper1 = make_shared<SweeperType>();
       this->sweeper2 = make_shared<SweeperType>();

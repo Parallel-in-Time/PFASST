@@ -15,7 +15,6 @@ using Matrix = Eigen::Matrix<precision, Eigen::Dynamic, Eigen::Dynamic, Eigen::R
 #include "pfasst/globals.hpp"
 #include "pfasst/logging.hpp"
 #include "pfasst/encap/traits.hpp"
-#include "pfasst/comm/communicator.hpp"
 
 
 namespace pfasst
@@ -264,7 +263,8 @@ namespace pfasst
          * @param[in] tag       accociation of the data
          * @param[in] blocking  `true` for blocking sending, `false` for non-blocking communication
          */
-        virtual void send(shared_ptr<comm::Communicator> comm, const int dest_rank, const int tag, const bool blocking);
+        template<class CommT>
+        void send(shared_ptr<CommT> comm, const int dest_rank, const int tag, const bool blocking);
 
         /**
          * Receiving encapsulated data over communicator.
@@ -274,7 +274,8 @@ namespace pfasst
          * @param[in] tag       accociation of the data
          * @param[in] blocking  `true` for blocking receiving, `false` for non-blocking communication
          */
-        virtual void recv(shared_ptr<comm::Communicator> comm, const int src_rank, const int tag, const bool blocking);
+        template<class CommT>
+        void recv(shared_ptr<CommT> comm, const int src_rank, const int tag, const bool blocking);
 
         /**
          * Sending encapsulated data over communicator.
@@ -282,7 +283,8 @@ namespace pfasst
          * @param[in] comm      Communicator used for broadcasting
          * @param[in] root_rank source processor of the data
          */
-        virtual void bcast(shared_ptr<comm::Communicator> comm, const int root_rank);
+        template<class CommT>
+        void bcast(shared_ptr<CommT> comm, const int root_rank);
         //! @}
     };
 
