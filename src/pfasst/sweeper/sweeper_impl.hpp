@@ -373,38 +373,38 @@ namespace pfasst
   {
     CLOG(DEBUG, this->get_logger_id()) << "convergence check";
 
+    this->compute_residuals();
+    const size_t num_residuals = this->get_residuals().size();
+    this->_abs_res_norms.resize(num_residuals);
+    this->_rel_res_norms.resize(num_residuals);
+
+    assert(this->get_residuals().back() != nullptr);
+    this->_abs_res_norms.back() = this->get_residuals().back()->norm0();
+
+    for (size_t m = 0; m < num_residuals; ++m) {
+      assert(this->get_residuals()[m] != nullptr);
+      const auto norm = this->get_residuals()[m]->norm0();
+      this->_abs_res_norms[m] = norm;
+      this->_rel_res_norms[m] = this->_abs_res_norms[m] / this->get_states()[m]->norm0();
+    }
+
+    CVLOG(1, this->get_logger_id()) << "absolute residuals: " << this->_abs_res_norms;
+    CVLOG(1, this->get_logger_id()) << "relative residuals: " << this->_rel_res_norms;
+
+    auto max_abs_norm = *(max_element(this->_abs_res_norms.cbegin(), this->_abs_res_norms.cend()));
+    auto max_rel_norm = *(max_element(this->_rel_res_norms.cbegin(), this->_rel_res_norms.cend()));
+
+    if (max_abs_norm < this->_abs_residual_tol) {
+      CLOG(INFO, this->get_logger_id()) << "Sweeper has converged w.r.t. absolute residual tolerance: "
+                            << LOG_FLOAT << max_abs_norm << " < " << this->_abs_residual_tol;
+    } else if (max_rel_norm < this->_rel_residual_tol) {
+      CLOG(INFO, this->get_logger_id()) << "Sweeper has converged w.r.t. relative residual tolerance: "
+                            << LOG_FLOAT << max_rel_norm << " < " << this->_rel_residual_tol;
+    } else {
+      CLOG(INFO, this->get_logger_id()) << "Sweeper has not yet converged to neither residual tolerance.";
+    }
+
     if (this->_abs_residual_tol > 0.0 || this->_rel_residual_tol > 0.0) {
-      this->compute_residuals();
-      const size_t num_residuals = this->get_residuals().size();
-      this->_abs_res_norms.resize(num_residuals);
-      this->_rel_res_norms.resize(num_residuals);
-
-      assert(this->get_residuals().back() != nullptr);
-      this->_abs_res_norms.back() = this->get_residuals().back()->norm0();
-
-      for (size_t m = 0; m < num_residuals; ++m) {
-        assert(this->get_residuals()[m] != nullptr);
-        const auto norm = this->get_residuals()[m]->norm0();
-        this->_abs_res_norms[m] = norm;
-        this->_rel_res_norms[m] = this->_abs_res_norms[m] / this->get_states()[m]->norm0();
-      }
-
-      CVLOG(1, this->get_logger_id()) << "absolute residuals: " << this->_abs_res_norms;
-      CVLOG(1, this->get_logger_id()) << "relative residuals: " << this->_rel_res_norms;
-
-      auto max_abs_norm = *(max_element(this->_abs_res_norms.cbegin(), this->_abs_res_norms.cend()));
-      auto max_rel_norm = *(max_element(this->_rel_res_norms.cbegin(), this->_rel_res_norms.cend()));
-
-      if (max_abs_norm < this->_abs_residual_tol) {
-        CLOG(INFO, this->get_logger_id()) << "Sweeper has converged w.r.t. absolute residual tolerance: "
-                              << LOG_FLOAT << max_abs_norm << " < " << this->_abs_residual_tol;
-      } else if (max_rel_norm < this->_rel_residual_tol) {
-        CLOG(INFO, this->get_logger_id()) << "Sweeper has converged w.r.t. relative residual tolerance: "
-                              << LOG_FLOAT << max_rel_norm << " < " << this->_rel_residual_tol;
-      } else {
-        CLOG(INFO, this->get_logger_id()) << "Sweeper has not yet converged to neither residual tolerance.";
-      }
-
       return (   *(max_element(this->_abs_res_norms.cbegin(), this->_abs_res_norms.cend())) < this->_abs_residual_tol
               || *(max_element(this->_rel_res_norms.cbegin(), this->_rel_res_norms.cend())) < this->_rel_residual_tol);
     } else {

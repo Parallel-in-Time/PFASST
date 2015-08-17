@@ -1,5 +1,6 @@
 #include "pfasst/comm/mpi_p2p.hpp"
 
+#include <exception>
 #include <string>
 using namespace std;
 
@@ -83,7 +84,7 @@ namespace pfasst
 
     bool MpiP2P::is_last() const
     {
-      return false;
+      return (this->get_rank() == this->get_size() - 1);
     }
 
     template<class DataT>
@@ -92,6 +93,14 @@ namespace pfasst
       CLOG(ERROR, "COMM_P2P") << "blocking send of generic data types not implemented."
                               << " type: " << typeid(data).name();
       throw runtime_error("blocking send for generic data type");
+    }
+
+    template<>
+    void MpiP2P::send(const int* const data, const int count, const int dest_rank, const int tag)
+    {
+      CLOG(DEBUG, "COMM_P2P") << "sending " << count << " int values with tag=" << tag << " to " << dest_rank;
+      int err = MPI_Send(data, count, MPI_INT, dest_rank, tag, this->_comm);
+      check_mpi_error(err);
     }
 
     template<>
@@ -114,7 +123,16 @@ namespace pfasst
     void MpiP2P::isend(const double* const data, const int count, const int dest_rank, const int tag)
     {
       auto request_index = make_pair(dest_rank, tag);
-      
+      auto request_map = this->_requests.insert(make_pair(request_index, MPI_Request()));
+      if (!request_map.second) {
+        CLOG(ERROR, "COMM_P2P") << "Failed to create request handle for non-blocking send of "
+                                << count << " double values to " << dest_rank << " with tag "
+                                << tag << ".";
+        throw runtime_error("failed to create request handle");
+      }
+
+      int err = MPI_Isend(data, count, MPI_DOUBLE, dest_rank, tag, this->_comm, &(this->_requests[request_index]));
+      check_mpi_error(err);
     }
 
     template<class DataT>
@@ -126,10 +144,19 @@ namespace pfasst
     }
 
     template<>
+    void MpiP2P::recv(int* data, const int count, const int dest_rank, const int tag)
+    {
+      this->_stati.push_back(MPI_Status_factory());
+      CLOG(DEBUG, "COMM_P2P") << "receiving " << count << " int values with tag=" << tag << " from " << dest_rank;
+      int err = MPI_Recv(data, count, MPI_INT, dest_rank, tag, this->_comm, &(this->_stati.back()));
+      check_mpi_error(err);
+    }
+
+    template<>
     void MpiP2P::recv(double* data, const int count, const int dest_rank, const int tag)
     {
       this->_stati.push_back(MPI_Status_factory());
-      CLOG(DEBUG, "COMM_P2P") << "receiving " << count << " double values with tag=" << tag << " to " << dest_rank;
+      CLOG(DEBUG, "COMM_P2P") << "receiving " << count << " double values with tag=" << tag << " from " << dest_rank;
       int err = MPI_Recv(data, count, MPI_DOUBLE, dest_rank, tag, this->_comm, &(this->_stati.back()));
       check_mpi_error(err);
     }
@@ -146,6 +173,16 @@ namespace pfasst
     void MpiP2P::irecv(double* data, const int count, const int src_rank, const int tag)
     {
       auto request_index = make_pair(src_rank, tag);
+      auto request_map = this->_requests.insert(make_pair(request_index, MPI_Request()));
+      if (!request_map.second) {
+        CLOG(ERROR, "COMM_P2P") << "Failed to create request handle for non-blocking receive of "
+                                << count << " double values from " << src_rank << " with tag "
+                                << tag << ".";
+        throw runtime_error("failed to create request handle");
+      }
+
+      int err = MPI_Irecv(data, count, MPI_DOUBLE, src_rank, tag, this->_comm, &(this->_requests[request_index]));
+      check_mpi_error(err);
     }
 
     template<class DataT>

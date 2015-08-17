@@ -198,6 +198,7 @@ namespace pfasst
   bool
   TwoLevelMLSDC<TransferT, CommT>::advance_iteration()
   {
+    this->get_coarse()->converged();
     if (this->get_fine()->converged()) {
       CLOG(INFO, this->get_logger_id()) << "FINE sweeper has converged.";
       return false;

@@ -46,12 +46,12 @@ namespace pfasst
     assert(this->get_transfer() != nullptr);
 
     if (this->get_num_levels() != 2) {
-      CLOG(ERROR, "CONTROL") << "Two levels (Sweeper) must have been added for Two-Level-PFASST.";
+      CLOG(ERROR, this->get_logger_id()) << "Two levels (Sweeper) must have been added for Two-Level-PFASST.";
       throw logic_error("Two-Level-PFASST requires two levels");
     }
 
     if (this->get_communicator()->get_size() < 2) {
-      CLOG(ERROR, "CONTROL") << "Two-Level-PFASST requires at least two processes.";
+      CLOG(ERROR, this->get_logger_id()) << "Two-Level-PFASST requires at least two processes.";
       throw logic_error("two processes required for Two-Level-PFASST");
     }
   }
@@ -67,58 +67,52 @@ namespace pfasst
     const size_t num_blocks = this->get_num_steps() / this->get_communicator()->get_size();
 
     if (num_blocks == 0) {
-      CLOG(ERROR, "CONTROL") << "Invalid Duration: There are more time processes than time steps.";
+      CLOG(ERROR, this->get_logger_id()) << "Invalid Duration: There are more time processes ("
+                                         << this->get_communicator()->get_size() << ") than time steps ("
+                                         << this->get_num_steps() << ").";
       throw logic_error("invalid duration: too many time processes for given time steps");
     }
 
     for (size_t curr_block = 0; curr_block < num_blocks; ++curr_block) {
       this->status()->step() = curr_block * this->get_communicator()->get_size() + this->get_communicator()->get_rank();
-      CLOG(DEBUG, "CONTROL") << "processing time step " << this->get_status()->get_step()
-        << " in time block " << curr_block;
+
+      CLOG(INFO, this->get_logger_id()) << "";
+      CLOG(INFO, this->get_logger_id()) << "Time Step " << (this->get_status()->get_step() + 1)
+      << " of " << this->get_num_steps();
+
+      this->status()->state() = State::PREDICTING;
 
       this->predictor();
 
       // iterate on each time step
       do {
-        shared_ptr<Status<typename TransferT::traits::fine_time_type>> prev_rank_status;
-        if (!this->get_communicator()->is_first()) {
-          prev_rank_status = make_shared<Status<typename TransferT::traits::fine_time_type>>();
-        }
+        CLOG(INFO, this->get_logger_id()) << "";
+        CLOG(INFO, this->get_logger_id()) << "Iteration " << this->get_status()->get_iteration();
 
         this->status()->state() = State::ITERATING;
 
-        this->sweep_fine();
-
-        this->cycle_down();
-
+        auto prev_rank_status = make_shared<Status<typename TransferT::traits::fine_time_type>>();
         if (!this->get_communicator()->is_first()) {
-          if (this->get_status()->get_state() > State::FAILED) {
-            assert(this->get_coarse()->get_initial_state() != nullptr);
-            this->get_coarse()->initial_state()->recv(this->get_communicator(),
-                                                      this->get_communicator()->get_rank() - 1,
-                                                      this->compute_tag(), true);
-          }
-
+          CVLOG(1, this->get_logger_id()) << "looking for state of previous process";
           prev_rank_status->recv(this->get_communicator(),
                                  this->get_communicator()->get_rank() - 1,
-                                 this->compute_tag(), true);
+                                 this->compute_tag(false, true), true);
+        }
+
+        if (prev_rank_status->get_state()== State::FAILED) {
+          CLOG(INFO, this->get_logger_id()) << "previous process failed";
+        }
+
+        this->cycle_down();
+        this->sweep_coarse();
+        
+        this->cycle_up();
+        this->sweep_fine();
+
+        if (!this->get_communicator()->is_first()) {
         }
 
         this->sweep_coarse();
-
-        // TODO: set status here !?
-
-        if (!this->get_communicator()->is_last()) {
-          assert(this->get_coarse()->get_end_state() != nullptr);
-          this->get_coarse()->get_end_state()->send(this->get_communicator(),
-                                                    this->get_communicator()->get_rank() + 1,
-                                                    this->compute_tag(), true);
-
-          this->get_status()->send(this->get_communicator(),
-                                   this->get_communicator()->get_rank() - 1,
-                                   this->compute_tag(), true);
-        }
-
         this->cycle_up();
 
         // convergence check
@@ -150,16 +144,117 @@ namespace pfasst
 
   template<class TransferT, class CommT>
   void
-  TwoLevelPfasst<TransferT, CommT>::cycle_down()
+  TwoLevelPfasst<TransferT, CommT>::predict_coarse()
   {
-    // TODO: check convergence state here !?
+    CLOG(INFO, this->get_logger_id()) << "Predicting on COARSE level";
+    
+    if (!this->get_communicator()->is_first()) {
+      CVLOG(1, this->get_logger_id()) << "receiving coarse initial";
+
+      this->get_coarse()->initial_state()->recv(this->communicator(), this->get_communicator()->get_rank() - 1,
+                                                this->compute_tag(true, false), true);
+    }
+
+    this->status()->state() = State::PRE_ITER_COARSE;
+    this->get_coarse()->pre_predict();
+
+    this->status()->state() = State::ITER_COARSE;
+    this->get_coarse()->predict();
+
+    this->status()->state() = State::POST_ITER_COARSE;
+    this->get_coarse()->post_predict();
+    
+    if (!this->get_communicator()->is_last()) {
+      CVLOG(1, this->get_logger_id()) << "sending coarse end";
+      this->get_coarse()->get_end_state()->send(this->communicator(), this->get_communicator()->get_rank() + 1,
+                                                this->compute_tag(true, false), true);
+    }
+
+    this->status()->state() = State::PREDICTING;
+  }
+
+  template<class TransferT, class CommT>
+  void
+  TwoLevelPfasst<TransferT, CommT>::predict_fine()
+  {
+    CLOG(INFO, this->get_logger_id()) << "Predicting on FINE level";
+
+    this->status()->state() = State::PRE_ITER_FINE;
+    this->get_fine()->pre_predict();
+
+    this->status()->state() = State::ITER_FINE;
+    this->get_fine()->predict();
+
+    this->status()->state() = State::POST_ITER_FINE;
+    this->get_fine()->post_predict();
+
+    this->status()->state() = State::PREDICTING;
+  }
+
+  template<class TransferT, class CommT>
+  void
+  TwoLevelPfasst<TransferT, CommT>::sweep_coarse()
+  {
+    CLOG(INFO, this->get_logger_id()) << "Sweeping on COARSE level";
+
+    if (!this->get_communicator()->is_first()) {
+      CVLOG(1, this->get_logger_id()) << "receiving coarse initial";
+
+      this->get_coarse()->initial_state()->recv(this->communicator(), this->get_communicator()->get_rank() - 1,
+                                                this->compute_tag(true, false), true);
+    }
+
+    this->status()->state() = State::PRE_ITER_COARSE;
+    this->get_coarse()->pre_sweep();
+
+    this->status()->state() = State::ITER_COARSE;
+    this->get_coarse()->sweep();
+
+    this->status()->state() = State::POST_ITER_COARSE;
+    this->get_coarse()->post_sweep();
 
     if (!this->get_communicator()->is_last()) {
+      CVLOG(1, this->get_logger_id()) << "sending coarse end state";
+      this->get_coarse()->get_end_state()->send(this->communicator(), this->get_communicator()->get_rank() + 1,
+                                                this->compute_tag(true, false), true);
+    }
+
+    this->status()->state() = State::ITERATING;
+  }
+
+  template<class TransferT, class CommT>
+  void
+  TwoLevelPfasst<TransferT, CommT>::sweep_fine()
+  {
+    CLOG(INFO, this->get_logger_id()) << "Sweeping on FINE level";
+
+    this->status()->state() = State::PRE_ITER_FINE;
+    this->get_fine()->pre_sweep();
+
+    this->status()->state() = State::ITER_FINE;
+    this->get_fine()->sweep();
+
+    this->status()->state() = State::POST_ITER_FINE;
+    this->get_fine()->post_sweep();
+    
+    if (!this->get_communicator()->is_last()) {
+      CVLOG(1, this->get_logger_id()) << "providing end state of fine level";
       assert(this->get_fine()->get_end_state() != nullptr);
       this->get_fine()->get_end_state()->send(this->get_communicator(),
                                               this->get_communicator()->get_rank() + 1,
-                                              this->compute_tag(), false);
+                                              this->compute_tag(false, false), false);
     }
+
+    this->status()->state() = State::ITERATING;
+  }
+
+  template<class TransferT, class CommT>
+  void
+  TwoLevelPfasst<TransferT, CommT>::cycle_down()
+  {
+    CVLOG(1, this->get_logger_id()) << "cycle down to coarse level";
+
+    // TODO: check convergence state here !?
 
     this->get_transfer()->restrict(this->get_fine(), this->get_coarse(), true);
     this->get_transfer()->fas(this->get_status()->get_dt(), this->get_fine(), this->get_coarse());
@@ -170,12 +265,15 @@ namespace pfasst
   void
   TwoLevelPfasst<TransferT, CommT>::cycle_up()
   {
+    CVLOG(1, this->get_logger_id()) << "cycle up to fine level";
+
     this->get_transfer()->interpolate(this->get_coarse(), this->get_fine(), true);
     if (!this->get_communicator()->is_first()) {
       assert(this->get_fine()->get_initial_state() != nullptr);
+      CVLOG(1, this->get_logger_id()) << "looking for new initial value of fine level";
       this->get_fine()->initial_state()->recv(this->get_communicator(),
                                               this->get_communicator()->get_rank() - 1,
-                                              this->compute_tag(), false);
+                                              this->compute_tag(false, false), false);
     }
     this->get_transfer()->interpolate_initial(this->get_coarse(), this->get_fine());
   }
@@ -185,22 +283,25 @@ namespace pfasst
   TwoLevelPfasst<TransferT, CommT>::predictor()
   {
     assert(this->get_status()->get_iteration() == 0);
-    this->status()->state() = State::PREDICTING;
 
-    this->get_fine()->spread();
+    CLOG(INFO, this->get_logger_id()) << "";
+    CLOG(INFO, this->get_logger_id()) << "PFASST Prediction step";
 
-    // restrict fine initial condition
+    // restrict fine initial condition ...
     this->get_transfer()->restrict_initial(this->get_fine(), this->get_coarse());
+    // ... and spread it to all nodes on the coarse level
     this->get_coarse()->spread();
     this->get_coarse()->save();
 
-    // perform sweeps on coarse level
+    // perform PFASST prediction sweeps on coarse level
     for (size_t predict_step = 0;
          predict_step <= this->get_communicator()->get_rank();
          ++predict_step) {
+      // do the sweeper's prediction once ...
       if (predict_step == 0) {
         this->predict_coarse();
       } else {
+        // and default sweeps for subsequent processes
         this->sweep_coarse();
       }
 
@@ -223,9 +324,13 @@ namespace pfasst
 
   template<class TransferT, class CommT>
   int
-  TwoLevelPfasst<TransferT, CommT>::compute_tag() const
+  TwoLevelPfasst<TransferT, CommT>::compute_tag(const bool coarse, const bool for_status) const
   {
-    // TODO: come up with a good way of computing unique but meaningful tags
-    return 0;
+    int tag = ((coarse) ? 1000000 : 2000000) + this->get_status()->get_iteration() * 100 + ((for_status) ? 1 : 0);
+    CVLOG(2, this->get_logger_id()) << "tag for " << ((coarse) ? "coarse" : "fine") << " level"
+                                    << " in iteration " << this->get_status()->get_iteration()
+                                    << " for " << ((for_status) ? "status" : "data") << "communication"
+                                    << " --> " << tag;
+    return tag;
   }
 }  // ::pfasst

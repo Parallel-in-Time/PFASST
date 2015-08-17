@@ -25,12 +25,17 @@ namespace pfasst
       static void init_loggers();
 
     protected:
+      virtual void predict_coarse() override;
+      virtual void predict_fine() override;
+      virtual void sweep_coarse() override;
+      virtual void sweep_fine() override;
+
       virtual void predictor();
       virtual void cycle_down() override;
       virtual void cycle_up() override;
 
       virtual void broadcast();
-      virtual int compute_tag() const;
+      virtual int compute_tag(const bool coarse, const bool for_status) const;
 
     public:
       TwoLevelPfasst();

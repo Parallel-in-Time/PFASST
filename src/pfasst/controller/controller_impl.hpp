@@ -188,8 +188,13 @@ namespace pfasst
     const time_type delta_time = num_steps * this->get_status()->get_dt();
     const time_type new_time = this->get_status()->get_time() + delta_time;
 
-    if (new_time > this->get_status()->get_t_end()
-        || almost_equal(new_time, this->get_status()->get_t_end())) {
+    if (almost_equal(new_time, this->get_status()->get_t_end())) {
+      CLOG(INFO, this->get_logger_id()) << "End time point reached: "
+                                        << this->get_status()->get_t_end();
+
+      return false;
+
+    } else if (new_time > this->get_status()->get_t_end()) {
       CLOG(WARNING, this->get_logger_id()) << "Not advancing " << num_steps
         << ((num_steps > 1) ? " time steps " : " time step ")
         << "with dt=" << this->get_status()->get_dt() << " to t=" << new_time
@@ -200,8 +205,8 @@ namespace pfasst
 
     } else {
       CLOG(INFO, this->get_logger_id()) << "Advancing " << num_steps
-        << ((num_steps > 1) ? " time steps " : " time step ")
-        << "with dt=" << this->get_status()->get_dt() << " to t=" << new_time;
+      << ((num_steps > 1) ? " time steps " : " time step ")
+      << "with dt=" << this->get_status()->get_dt() << " to t=" << new_time;
 
       this->status()->time() += delta_time;
       this->status()->step() += num_steps;
