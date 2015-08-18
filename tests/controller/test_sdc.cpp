@@ -192,7 +192,7 @@ TEST_F(Logic, advance_in_time_with_sufficient_t_end)
   controller->status()->step() = 1;
   controller->status()->t_end() = 2.0;
 
-  EXPECT_CALL(*(sweeper.get()), advance()).Times(1);
+  EXPECT_CALL(*(sweeper.get()), advance(_)).Times(1);
 
   EXPECT_TRUE(controller->advance_time());
 
@@ -207,7 +207,7 @@ TEST_F(Logic, advance_in_time_with_insufficient_t_end)
   controller->status()->step() = 1;
   controller->status()->t_end() = 1.0;
 
-  EXPECT_CALL(*(sweeper.get()), advance()).Times(0);
+  EXPECT_CALL(*(sweeper.get()), advance(_)).Times(0);
 
   EXPECT_FALSE(controller->advance_time());
 
@@ -222,7 +222,7 @@ TEST_F(Logic, advance_in_time_multiple_steps_at_once)
   controller->status()->step() = 1;
   controller->status()->t_end() = 2.0;
 
-  EXPECT_CALL(*(sweeper.get()), advance()).Times(1);
+  EXPECT_CALL(*(sweeper.get()), advance(_)).Times(1);
 
   EXPECT_TRUE(controller->advance_time(3));
 
@@ -282,7 +282,7 @@ TEST_F(Logic, single_time_step_sdc)
   EXPECT_CALL(*(sweeper.get()), sweep()).Times(3);
   EXPECT_CALL(*(sweeper.get()), post_sweep()).Times(3);
 
-  EXPECT_CALL(*(sweeper.get()), advance()).Times(0);
+  EXPECT_CALL(*(sweeper.get()), advance(_)).Times(0);
   EXPECT_CALL(*(sweeper.get()), post_step()).Times(1);
 
   controller->run();

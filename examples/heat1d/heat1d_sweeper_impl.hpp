@@ -133,7 +133,7 @@ namespace pfasst
       vector<shared_ptr<typename SweeperTrait::encap_type>>
       Heat1D<SweeperTrait, Enabled>::compute_error(const typename SweeperTrait::time_type& t)
       {
-        CLOG(DEBUG, this->get_logger_id()) << "computing error";
+        CVLOG(1, this->get_logger_id()) << "computing error";
 
         assert(this->get_status() != nullptr);
         const time_type dt = this->get_status()->get_dt();

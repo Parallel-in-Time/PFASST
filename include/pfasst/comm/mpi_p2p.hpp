@@ -51,6 +51,8 @@ namespace pfasst
         virtual bool is_first() const override;
         virtual bool is_last() const override;
 
+        virtual void abort(const int& err_code);
+
         template<class DataT>
         void send(const DataT* const data, const int count, const int dest_rank, const int tag);
 

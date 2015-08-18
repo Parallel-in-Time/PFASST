@@ -1,8 +1,10 @@
 #include "pfasst/comm/communicator.hpp"
 
+#include <exception>
 #include <stdexcept>
 using namespace std;
 
+#include "pfasst/globals.hpp"
 #include "pfasst/logging.hpp"
 
 
@@ -33,6 +35,12 @@ namespace pfasst
     bool Communicator::is_last() const
     {
       return false;
+    }
+    
+    void Communicator::abort(const int& err_code)
+    {
+      UNUSED(err_code);
+      std::abort();
     }
 
     template<class DataT>

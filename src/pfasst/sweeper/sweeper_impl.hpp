@@ -315,9 +315,9 @@ namespace pfasst
 
   template<class SweeperTrait, typename Enabled>
   void
-  Sweeper<SweeperTrait, Enabled>::advance()
+  Sweeper<SweeperTrait, Enabled>::advance(const size_t& num_steps)
   {
-    CLOG(DEBUG, this->get_logger_id()) << "advancing to next time step";
+    CLOG(DEBUG, this->get_logger_id()) << "advancing " << num_steps << " time steps";
   }
 
   template<class SweeperTrait, typename Enabled>

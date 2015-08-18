@@ -5,6 +5,26 @@
 using namespace std;
 
 #include "pfasst/logging.hpp"
+#include "pfasst/controller/status.hpp"
+
+
+MAKE_LOGGABLE(MPI_Status, mpi_status, os)
+{
+  if (   mpi_status.MPI_TAG == MPI_ANY_TAG
+         && mpi_status.MPI_SOURCE == MPI_ANY_SOURCE
+         && mpi_status.MPI_ERROR == MPI_SUCCESS) {
+    os << "MPI_Status(empty)";
+  } else {
+    char err_str[MPI_MAX_ERROR_STRING];
+    int err_len = 0;
+    int err = MPI_Error_string(mpi_status.MPI_ERROR, err_str, &err_len);
+    pfasst::comm::check_mpi_error(err);
+    os << "MPI_Status(source=" << to_string(mpi_status.MPI_SOURCE) << ", "
+    << "tag=" << to_string(mpi_status.MPI_TAG) << ", "
+    << "error=" << string(err_str, err_len) << ")";
+  }
+  return os;
+}
 
 
 namespace pfasst
@@ -87,6 +107,11 @@ namespace pfasst
       return (this->get_rank() == this->get_size() - 1);
     }
 
+    void MpiP2P::abort(const int& err_code)
+    {
+      MPI_Abort(this->_comm, err_code);
+    }
+
     template<class DataT>
     void MpiP2P::send(const DataT* const data, const int count, const int dest_rank, const int tag)
     {
@@ -95,11 +120,29 @@ namespace pfasst
       throw runtime_error("blocking send for generic data type");
     }
 
+//    template<>
+//    void MpiP2P::send(const int* const data, const int count, const int dest_rank, const int tag)
+//    {
+//      CLOG(DEBUG, "COMM_P2P") << "sending " << count << " int values with tag=" << tag << " to " << dest_rank;
+//      int err = MPI_Send(data, count, MPI_INT, dest_rank, tag, this->_comm);
+//      check_mpi_error(err);
+//    }
+
     template<>
-    void MpiP2P::send(const int* const data, const int count, const int dest_rank, const int tag)
+    void MpiP2P::send(const size_t* const data, const int count, const int dest_rank, const int tag)
     {
-      CLOG(DEBUG, "COMM_P2P") << "sending " << count << " int values with tag=" << tag << " to " << dest_rank;
-      int err = MPI_Send(data, count, MPI_INT, dest_rank, tag, this->_comm);
+      CLOG(DEBUG, "COMM_P2P") << "sending " << count << " size_t values as " << sizeof(size_t) << " bytes"
+                              << " with tag=" << tag << " to " << dest_rank;
+      int err = MPI_Send(data, count * sizeof(size_t), MPI_BYTE, dest_rank, tag, this->_comm);
+      check_mpi_error(err);
+    }
+
+    template<>
+    void MpiP2P::send(const State* const data, const int count, const int dest_rank, const int tag)
+    {
+      CLOG(DEBUG, "COMM_P2P") << "sending " << count << " State values as " << sizeof(State) << " bytes"
+      << " with tag=" << tag << " to " << dest_rank;
+      int err = MPI_Send(data, count * sizeof(State), MPI_BYTE, dest_rank, tag, this->_comm);
       check_mpi_error(err);
     }
 
@@ -122,13 +165,21 @@ namespace pfasst
     template<>
     void MpiP2P::isend(const double* const data, const int count, const int dest_rank, const int tag)
     {
+      CLOG(DEBUG, "COMM_P2P") << "non-blocking send of " << count << " double values with tag=" << tag << " to " << dest_rank;
+
       auto request_index = make_pair(dest_rank, tag);
-      auto request_map = this->_requests.insert(make_pair(request_index, MPI_Request()));
-      if (!request_map.second) {
-        CLOG(ERROR, "COMM_P2P") << "Failed to create request handle for non-blocking send of "
-                                << count << " double values to " << dest_rank << " with tag "
-                                << tag << ".";
-        throw runtime_error("failed to create request handle");
+
+      if (this->_requests.find(request_index) != this->_requests.end()) {
+        CLOG(WARNING, "COMM_P2P") << "request handle does already exists for tag=" << tag << " and destination " << dest_rank
+                                  << " which is still active";
+        auto stat = MPI_Status_factory();
+        CLOG(DEBUG, "COMM_P2P") << "waiting ...";
+        int err = MPI_Wait(&(this->_requests[request_index]), &stat);
+        check_mpi_error(err);
+        CLOG(DEBUG, "COMM_P2P") << "waited: " << stat;
+      } else {
+        MPI_Request this_request = MPI_REQUEST_NULL;
+        this->_requests.insert(make_pair(request_index, this_request));
       }
 
       int err = MPI_Isend(data, count, MPI_DOUBLE, dest_rank, tag, this->_comm, &(this->_requests[request_index]));
@@ -143,13 +194,36 @@ namespace pfasst
       throw runtime_error(" blocking recv for generic data type");
     }
 
+//    template<>
+//    void MpiP2P::recv(int* data, const int count, const int dest_rank, const int tag)
+//    {
+//      this->_stati.push_back(MPI_Status_factory());
+//      CLOG(DEBUG, "COMM_P2P") << "receiving " << count << " int values with tag=" << tag << " from " << dest_rank;
+//      int err = MPI_Recv(data, count, MPI_INT, dest_rank, tag, this->_comm, &(this->_stati.back()));
+//      check_mpi_error(err);
+//      CVLOG(1, "COMM_P2P") << "--> status: " << this->_stati.back();
+//    }
+
     template<>
-    void MpiP2P::recv(int* data, const int count, const int dest_rank, const int tag)
+    void MpiP2P::recv(size_t* data, const int count, const int dest_rank, const int tag)
     {
       this->_stati.push_back(MPI_Status_factory());
-      CLOG(DEBUG, "COMM_P2P") << "receiving " << count << " int values with tag=" << tag << " from " << dest_rank;
-      int err = MPI_Recv(data, count, MPI_INT, dest_rank, tag, this->_comm, &(this->_stati.back()));
+      CLOG(DEBUG, "COMM_P2P") << "receiving " << count << " size_t values as " << sizeof(size_t) << " bytes"
+                              << " with tag=" << tag << " from " << dest_rank;
+      int err = MPI_Recv(data, count * sizeof(size_t), MPI_BYTE, dest_rank, tag, this->_comm, &(this->_stati.back()));
       check_mpi_error(err);
+      CVLOG(1, "COMM_P2P") << "--> status: " << this->_stati.back();
+    }
+
+    template<>
+    void MpiP2P::recv(State* data, const int count, const int dest_rank, const int tag)
+    {
+      this->_stati.push_back(MPI_Status_factory());
+        CLOG(DEBUG, "COMM_P2P") << "receiving " << count << " State values as " << sizeof(State) << " bytes"
+      << " with tag=" << tag << " from " << dest_rank;
+      int err = MPI_Recv(data, count * sizeof(State), MPI_BYTE, dest_rank, tag, this->_comm, &(this->_stati.back()));
+      check_mpi_error(err);
+      CVLOG(1, "COMM_P2P") << "--> status: " << this->_stati.back();
     }
 
     template<>
@@ -159,6 +233,7 @@ namespace pfasst
       CLOG(DEBUG, "COMM_P2P") << "receiving " << count << " double values with tag=" << tag << " from " << dest_rank;
       int err = MPI_Recv(data, count, MPI_DOUBLE, dest_rank, tag, this->_comm, &(this->_stati.back()));
       check_mpi_error(err);
+      CVLOG(1, "COMM_P2P") << "--> status: " << this->_stati.back();
     }
 
     template<class DataT>
@@ -172,13 +247,21 @@ namespace pfasst
     template<>
     void MpiP2P::irecv(double* data, const int count, const int src_rank, const int tag)
     {
+      CLOG(DEBUG, "COMM_P2P") << "non-blocking receive of " << count << " double values with tag=" << tag << " from " << src_rank;
+
       auto request_index = make_pair(src_rank, tag);
-      auto request_map = this->_requests.insert(make_pair(request_index, MPI_Request()));
-      if (!request_map.second) {
-        CLOG(ERROR, "COMM_P2P") << "Failed to create request handle for non-blocking receive of "
-                                << count << " double values from " << src_rank << " with tag "
-                                << tag << ".";
-        throw runtime_error("failed to create request handle");
+
+      if (this->_requests.find(request_index) != this->_requests.end()) {
+        CLOG(WARNING, "COMM_P2P") << "request handle does already exists for tag=" << tag << " and source " << src_rank
+                                  << " which is still active";
+        auto stat = MPI_Status_factory();
+        CLOG(DEBUG, "COMM_P2P") << "waiting ...";
+        int err = MPI_Wait(&(this->_requests[request_index]), &stat);
+        check_mpi_error(err);
+        CLOG(DEBUG, "COMM_P2P") << "waited: " << stat;
+      } else {
+        MPI_Request this_request = MPI_REQUEST_NULL;
+        this->_requests.insert(make_pair(request_index, this_request));
       }
 
       int err = MPI_Irecv(data, count, MPI_DOUBLE, src_rank, tag, this->_comm, &(this->_requests[request_index]));

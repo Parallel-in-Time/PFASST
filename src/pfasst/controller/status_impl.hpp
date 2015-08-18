@@ -122,10 +122,12 @@ namespace pfasst
   {
     if (blocking) {
       comm->send(&(this->_detail.residual), 1, dest_rank, tag);
-      comm->send((int*)&(this->_detail.state), 1, dest_rank, tag + 1); // TODO: tag computation
+      comm->send(&(this->_detail.state), 1, dest_rank, tag + 1);
+      comm->send(&(this->_detail.iteration), 1, dest_rank, tag + 2);
     } else {
       comm->isend(&(this->_detail.residual), 1, dest_rank, tag);
-      comm->isend((int*)&(this->_detail.state), 1, dest_rank, tag + 1); // TODO: tag computation
+      comm->isend(&(this->_detail.state), 1, dest_rank, tag + 1);
+      comm->isend(&(this->_detail.iteration), 1, dest_rank, tag + 2);
     }
   }
 
@@ -135,10 +137,12 @@ namespace pfasst
                                const bool blocking)
   {
     if (blocking) {
-      comm->recv((int*)&(this->_detail.state), 1, src_rank, tag + 1); // TODO: tag computation
+      comm->recv(&(this->_detail.iteration), 1, src_rank, tag + 2);
+      comm->recv(&(this->_detail.state), 1, src_rank, tag + 1);
       comm->recv(&(this->_detail.residual), 1, src_rank, tag);
     } else {
-      comm->irecv((int*)&(this->_detail.state), 1, src_rank, tag + 1); // TODO: tag computation
+      comm->irecv(&(this->_detail.iteration), 1, src_rank, tag + 2);
+      comm->irecv(&(this->_detail.state), 1, src_rank, tag + 1);
       comm->irecv(&(this->_detail.residual), 1, src_rank, tag);
     }
   }
@@ -148,7 +152,8 @@ namespace pfasst
   void Status<precision>::bcast(shared_ptr<CommT> comm, const int root_rank)
   {
     comm->bcast(&(this->_detail.residual), 1, root_rank);
-    comm->bcast((int*)&(this->_detail.state), 1, root_rank);
+    comm->bcast(&(this->_detail.state), 1, root_rank);
+    comm->bcast(&(this->_detail.iteration), 1, root_rank);
   }
 
   template<typename precision>
@@ -158,7 +163,9 @@ namespace pfasst
        << "t=" << this->get_time()
        << ", dt=" << this->get_dt()
        << ", t_end=" << this->get_t_end()
+       << ", iter=" << this->get_iteration()
        << ", k_max=" << this->get_max_iterations()
+       << ", state=" << this->get_state()
        << ")";
   }
 }  // ::pfasst

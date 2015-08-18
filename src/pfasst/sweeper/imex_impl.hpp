@@ -282,7 +282,7 @@ namespace pfasst
 
   template<class SweeperTrait, typename Enabled>
   void
-  IMEX<SweeperTrait, Enabled>::advance()
+  IMEX<SweeperTrait, Enabled>::advance(const size_t& num_steps)
   {
     assert(this->get_end_state() != nullptr);
     CLOG(DEBUG, this->get_logger_id()) << "advancing";

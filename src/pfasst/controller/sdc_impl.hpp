@@ -132,7 +132,7 @@ namespace pfasst
     this->get_sweeper()->post_step();
 
     if (Controller<TransferT>::advance_time(num_steps)) {
-      this->get_sweeper()->advance();
+      this->get_sweeper()->advance(num_steps);
       return true;
     } else {
       return false;

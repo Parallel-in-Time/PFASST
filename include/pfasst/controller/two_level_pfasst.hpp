@@ -25,6 +25,9 @@ namespace pfasst
       static void init_loggers();
 
     protected:
+      shared_ptr<Status<time_type>> _prev_status;
+      size_t _time_block = 0;
+      
       virtual void predict_coarse() override;
       virtual void predict_fine() override;
       virtual void sweep_coarse() override;
@@ -35,7 +38,7 @@ namespace pfasst
       virtual void cycle_up() override;
 
       virtual void broadcast();
-      virtual int compute_tag(const bool coarse, const bool for_status) const;
+      virtual int compute_tag(const size_t& level, const bool for_status) const;
 
     public:
       TwoLevelPfasst();

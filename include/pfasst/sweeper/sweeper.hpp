@@ -109,7 +109,7 @@ namespace pfasst
 
       virtual void post_step();
 
-      virtual void advance();
+      virtual void advance(const size_t& num_steps = 1);
 
       virtual void spread();
       virtual void save();

@@ -40,7 +40,7 @@ class SweeperMock
     MOCK_METHOD0_T(sweep, void());
     MOCK_METHOD0_T(post_sweep, void());
 
-    MOCK_METHOD0_T(advance, void());
+    MOCK_METHOD1_T(advance, void(const size_t& num_steps));
     MOCK_METHOD0_T(spread, void());
     MOCK_METHOD0_T(save, void());
 
