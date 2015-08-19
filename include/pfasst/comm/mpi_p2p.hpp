@@ -39,7 +39,7 @@ namespace pfasst
         explicit MpiP2P(MPI_Comm comm = MPI_COMM_WORLD);
         MpiP2P(const MpiP2P& other) = default;
         MpiP2P(MpiP2P&& other) = default;
-        virtual ~MpiP2P() = default;  // TODO: might need to implement destructor to clean up pending MPI  stati
+        virtual ~MpiP2P() = default;  // TODO: might need to implement destructor to clean up pending MPI stati
         MpiP2P& operator=(const MpiP2P& other) = default;
         MpiP2P& operator=(MpiP2P&& other) = default;
 

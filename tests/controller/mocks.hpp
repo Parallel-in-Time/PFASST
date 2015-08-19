@@ -34,4 +34,6 @@ class StatusMock
 
     MOCK_METHOD0_T(residual, precision&());
     MOCK_CONST_METHOD0_T(get_residual, precision());
+    
+    MOCK_CONST_METHOD1_T(log, void(el::base::type::ostream_t& os));
 };

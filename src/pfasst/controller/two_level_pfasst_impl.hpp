@@ -65,6 +65,13 @@ namespace pfasst
 
     assert(this->get_communicator() != nullptr);
 
+    if (this->get_num_steps() % this->get_communicator()->get_size() != 0) {
+      CLOG(ERROR, this->get_logger_id()) << "Number of time steps (" << this->get_num_steps()
+                                         << ") must be a multiple of the number of processors ("
+                                         << this->get_communicator()->get_size() << ").";
+      throw logic_error("number time steps must be multiple of number processors");
+    }
+    
     const size_t num_blocks = this->get_num_steps() / this->get_communicator()->get_size();
 
     if (num_blocks == 0) {

@@ -1,10 +1,9 @@
 #include "fixtures/test_helpers.hpp"
 
 #include <pfasst/controller/status.hpp>
-#include <pfasst/comm/communicator.hpp>
 
-typedef pfasst::comm::Communicator CommType;
-
+#include "comm/mocks.hpp"
+typedef CommMock CommType;
 
 typedef ::testing::Types<pfasst::Status<double>> StatusTypes;
 INSTANTIATE_TYPED_TEST_CASE_P(Status, Concepts, StatusTypes);

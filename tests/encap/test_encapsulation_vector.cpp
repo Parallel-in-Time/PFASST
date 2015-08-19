@@ -15,10 +15,11 @@ using Matrix = Eigen::Matrix<precision, Eigen::Dynamic, Eigen::Dynamic, Eigen::R
 
 #include <pfasst/encap/traits.hpp>
 #include <pfasst/encap/vector.hpp>
-#include <pfasst/comm/communicator.hpp>
 typedef pfasst::vector_encap_traits<double, double>    VectorEncapTrait;
 typedef pfasst::encap::Encapsulation<VectorEncapTrait> VectorEncapsulation;
-typedef pfasst::comm::Communicator                     CommType;
+
+#include "comm/mocks.hpp"
+typedef CommMock                                       CommType;
 
 
 typedef ::testing::Types<VectorEncapsulation> EncapTypes;

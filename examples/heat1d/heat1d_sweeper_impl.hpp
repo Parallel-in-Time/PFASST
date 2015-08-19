@@ -193,7 +193,6 @@ namespace pfasst
         CVLOG(2, this->get_logger_id()) << LOG_FIXED << "evaluating IMPLICIT part at t=" << t;
         CVLOG(5, this->get_logger_id()) << LOG_FLOAT << "\tu:   " << to_string(u);
 
-        // taken from Matt's original Advection-Diffusion example from old PFASST++
         spacial_type c = this->_nu / spacial_type(this->get_num_dofs());
 
         auto* z = this->_fft.forward(u);

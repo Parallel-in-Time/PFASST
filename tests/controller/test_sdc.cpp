@@ -9,18 +9,17 @@ using pfasst::SDC;
 #include <pfasst/transfer/traits.hpp>
 #include <pfasst/transfer/polynomial.hpp>
 
-#include "sweeper/mocks.hpp"
+#include "controller/mocks.hpp"
 #include "quadrature/mocks.hpp"
+#include "sweeper/mocks.hpp"
 #include "transfer/mocks.hpp"
 
 typedef pfasst::vector_encap_traits<double, double>                     VectorEncapTrait;
 typedef pfasst::encap::Encapsulation<VectorEncapTrait>                  VectorEncapsulation;
 typedef NiceMock<SweeperMock<pfasst::sweeper_traits<VectorEncapTrait>>> SweeperType;
 typedef pfasst::transfer_traits<SweeperType, SweeperType, 1>            TransferTraits;
-typedef TransferMock<TransferTraits>                                    TransferType;
+typedef NiceMock<TransferMock<TransferTraits>>                          TransferType;
 typedef NiceMock<QuadratureMock<double>>                                QuadType;
-
-#include "controller/mocks.hpp"
 
 
 typedef ::testing::Types<SDC<TransferType>> SDCTypes;

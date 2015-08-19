@@ -7,7 +7,6 @@ using namespace std;
 #include <pfasst/sweeper/sweeper.hpp>
 using pfasst::Sweeper;
 
-#include <pfasst/encap/traits.hpp>
 #include <pfasst/encap/vector.hpp>
 typedef pfasst::vector_encap_traits<double, double> VectorEncapTrait;
 typedef pfasst::encap::Encapsulation<VectorEncapTrait> VectorEncapsulation;
@@ -188,13 +187,13 @@ TEST_F(Interface, no_implementation_of_reevaluation)
 
 TEST_F(Interface, no_implementation_of_residual_computation)
 {
-  EXPECT_FALSE(sweeper.converged());
+  EXPECT_THROW(sweeper.converged(), runtime_error);
 
   sweeper.set_abs_residual_tol(1.0);
   EXPECT_THROW(sweeper.converged(), runtime_error);
 
   sweeper.set_abs_residual_tol(0.0);
-  EXPECT_FALSE(sweeper.converged());
+  EXPECT_THROW(sweeper.converged(), runtime_error);
 
   sweeper.set_rel_residual_tol(1.0);
   EXPECT_THROW(sweeper.converged(), runtime_error);

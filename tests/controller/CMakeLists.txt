@@ -10,6 +10,7 @@ set(TESTS
     test_controller
     test_sdc
     test_status
+    test_two_level_mlsdc
 )
 
 foreach(test ${TESTS})
@@ -39,7 +40,6 @@ endforeach(test)
 
 if(${pfasst_WITH_MPI})
     set(MPI_TESTS
-        test_two_level_pfasst
     )
 
     include_directories(${MPI_CXX_INCLUDE_PATH})

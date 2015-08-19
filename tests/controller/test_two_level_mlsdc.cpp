@@ -1,14 +1,12 @@
 #include "fixtures/test_helpers.hpp"
 
-#include <pfasst/controller/two_level_pfasst.hpp>
-using pfasst::TwoLevelPfasst;
+#include <pfasst/controller/two_level_mlsdc.hpp>
+using pfasst::TwoLevelMLSDC;
 
-#include <pfasst/comm/mpi_p2p.hpp>
 #include <pfasst/encap/traits.hpp>
 #include <pfasst/encap/vector.hpp>
 
 #include <pfasst/transfer/traits.hpp>
-#include <pfasst/transfer/polynomial.hpp>
 
 #include "comm/mocks.hpp"
 #include "sweeper/mocks.hpp"
@@ -19,25 +17,25 @@ typedef pfasst::encap::Encapsulation<VectorEncapTrait>                  VectorEn
 typedef NiceMock<SweeperMock<pfasst::sweeper_traits<VectorEncapTrait>>> SweeperType;
 typedef pfasst::transfer_traits<SweeperType, SweeperType, 2>            TransferTraits;
 typedef NiceMock<TransferMock<TransferTraits>>                          TransferType;
-typedef pfasst::comm::MpiP2P                                            CommunicatorType;
+typedef NiceMock<CommMock>                                              CommunicatorType;
 
 
-typedef ::testing::Types<TwoLevelPfasst<TransferType>> ControllerTypes;
-INSTANTIATE_TYPED_TEST_CASE_P(TwoLevelPfasst, Concepts, ControllerTypes);
+typedef ::testing::Types<TwoLevelMLSDC<TransferType>> ControllerTypes;
+INSTANTIATE_TYPED_TEST_CASE_P(TwoLevelMLSDC, Concepts, ControllerTypes);
 
 
 class Interface
   : public ::testing::Test
 {
   protected:
-    shared_ptr<TwoLevelPfasst<TransferType>> controller;
+    shared_ptr<TwoLevelMLSDC<TransferType>> controller;
 
     shared_ptr<pfasst::Status<double>> status;
     shared_ptr<CommunicatorType> comm;
 
     virtual void SetUp()
     {
-      this->controller = make_shared<TwoLevelPfasst<TransferType>>();
+      this->controller = make_shared<TwoLevelMLSDC<TransferType>>();
       this->status = make_shared<pfasst::Status<double>>();
       this->comm = make_shared<CommunicatorType>();
     }
@@ -93,10 +91,9 @@ class Setup
   : public ::testing::Test
 {
   protected:
-    shared_ptr<TwoLevelPfasst<TransferType>> controller;
+    shared_ptr<TwoLevelMLSDC<TransferType>> controller;
 
     shared_ptr<pfasst::Status<double>> status;
-    shared_ptr<CommunicatorType> comm;
     shared_ptr<SweeperType> sweeper1;
     shared_ptr<SweeperType> sweeper2;
     shared_ptr<TransferType> transfer;
@@ -107,11 +104,9 @@ class Setup
 
     virtual void SetUp()
     {
-      this->controller = make_shared<TwoLevelPfasst<TransferType>>();
+      this->controller = make_shared<TwoLevelMLSDC<TransferType>>();
       this->transfer = make_shared<TransferType>();
       this->status = make_shared<pfasst::Status<double>>();
-
-      this->comm = make_shared<CommunicatorType>();
 
       this->sweeper1 = make_shared<SweeperType>();
       this->sweeper2 = make_shared<SweeperType>();
@@ -161,33 +156,57 @@ TEST_F(Setup, adding_finer_level)
 
 TEST_F(Setup, exactly_two_levels_must_be_added)
 {
-  controller->status()->t_end() = 4.2;
+  controller->status() = status;
+  controller->status()->t_end() = 0.1;
   controller->status()->dt() = 0.1;
   controller->status()->max_iterations() = 1;
-  controller->communicator() = comm;
   controller->add_transfer(transfer);
 
+  ASSERT_THAT(controller->get_num_levels(), Eq(0));
   EXPECT_THROW(controller->setup(), logic_error);
 
+  controller = make_shared<TwoLevelMLSDC<TransferType>>();
+  controller->status() = status;
+  controller->status()->t_end() = 0.1;
+  controller->status()->dt() = 0.1;
+  controller->status()->max_iterations() = 1;
+  controller->add_transfer(transfer);
   controller->add_sweeper(sweeper1, true);
+  ASSERT_THAT(controller->get_num_levels(), Eq(1));
   EXPECT_THROW(controller->setup(), logic_error);
 
-  controller->add_sweeper(sweeper1, false);
+  controller = make_shared<TwoLevelMLSDC<TransferType>>();
+  controller->status() = status;
+  controller->status()->t_end() = 0.1;
+  controller->status()->dt() = 0.1;
+  controller->status()->max_iterations() = 1;
+  controller->add_transfer(transfer);
+  controller->add_sweeper(sweeper1, true);
+  controller->add_sweeper(sweeper2, false);
+  EXPECT_CALL(*(sweeper1.get()), status()).Times(AnyNumber()).WillRepeatedly(ReturnRef(status));
+  EXPECT_CALL(*(sweeper2.get()), status()).Times(AnyNumber()).WillRepeatedly(ReturnRef(status));
+  EXPECT_CALL(*(sweeper1.get()), setup()).Times(1);
+  EXPECT_CALL(*(sweeper2.get()), setup()).Times(1);
+  ASSERT_THAT(controller->get_num_levels(), Eq(2));
   controller->setup();
 }
 
 TEST_F(Setup, setup_required_for_running)
 {
-  controller->status()->t_end() = 4.2;
+  controller->status()->t_end() = 0.1;
   controller->status()->dt() = 0.1;
   controller->status()->max_iterations() = 1;
   controller->add_sweeper(sweeper1, true);
   controller->add_sweeper(sweeper1, false);
-  controller->communicator() = comm;
   controller->add_transfer(transfer);
 
   ASSERT_FALSE(controller->is_ready());
   EXPECT_THROW(controller->run(), logic_error);
+
+  EXPECT_CALL(*(sweeper1.get()), status()).Times(AnyNumber()).WillRepeatedly(ReturnRef(status));
+  EXPECT_CALL(*(sweeper2.get()), status()).Times(AnyNumber()).WillRepeatedly(ReturnRef(status));
+  EXPECT_CALL(*(sweeper1.get()), setup()).Times(AnyNumber());
+  EXPECT_CALL(*(sweeper2.get()), setup()).Times(AnyNumber());
 
   controller->setup();
   EXPECT_TRUE(controller->is_ready());
@@ -199,23 +218,22 @@ class Logic
   : public ::testing::Test
 {
   protected:
-    shared_ptr<TwoLevelPfasst<TransferType>> controller;
+    shared_ptr<TwoLevelMLSDC<TransferType>> controller;
 
     shared_ptr<pfasst::Status<double>> status;
-    shared_ptr<CommunicatorType> comm;
     shared_ptr<SweeperType> sweeper1;
     shared_ptr<SweeperType> sweeper2;
     shared_ptr<TransferType> transfer;
 
     virtual void SetUp()
     {
-      this->controller = make_shared<TwoLevelPfasst<TransferType>>();
+      this->controller = make_shared<TwoLevelMLSDC<TransferType>>();
       this->transfer = make_shared<TransferType>();
       this->status = make_shared<pfasst::Status<double>>();
-      this->comm = make_shared<CommunicatorType>();
       this->sweeper1 = make_shared<SweeperType>();
       this->sweeper2 = make_shared<SweeperType>();
-      this->controller->communicator() = this->comm;
+      this->controller->add_sweeper(this->sweeper1, true);
+      this->controller->add_sweeper(this->sweeper2, false);
       this->controller->add_transfer(this->transfer);
     }
 };
@@ -225,9 +243,12 @@ TEST_F(Logic, advance_in_time_with_sufficient_t_end)
   controller->status()->dt() = 0.1;
   controller->status()->time() = 1.0;
   controller->status()->step() = 1;
-  controller->status()->t_end() = 2.0;
+  controller->status()->t_end() = 1.2;
+  
+  EXPECT_CALL(*(sweeper1.get()), advance(1)).Times(1);
+  EXPECT_CALL(*(sweeper2.get()), advance(1)).Times(1);
 
-  EXPECT_TRUE(controller->advance_time());
+  EXPECT_TRUE(controller->advance_time(1));
   EXPECT_THAT(controller->get_status()->get_time(), Eq(1.1));
   EXPECT_THAT(controller->get_status()->get_step(), Eq(2));
 }
@@ -237,7 +258,7 @@ TEST_F(Logic, advance_in_time_with_insufficient_t_end)
   controller->status()->dt() = 0.1;
   controller->status()->time() = 1.0;
   controller->status()->step() = 1;
-  controller->status()->t_end() = 1.0;
+  controller->status()->t_end() = 1.1;
 
   EXPECT_FALSE(controller->advance_time());
   EXPECT_THAT(controller->get_status()->get_time(), Eq(1.0));
@@ -249,7 +270,7 @@ TEST_F(Logic, advance_in_time_multiple_steps_at_once)
   controller->status()->dt() = 0.1;
   controller->status()->time() = 1.0;
   controller->status()->step() = 1;
-  controller->status()->t_end() = 2.0;
+  controller->status()->t_end() = 1.4;
 
   EXPECT_TRUE(controller->advance_time(3));
   EXPECT_THAT(controller->get_status()->get_time(), Eq(1.3));
