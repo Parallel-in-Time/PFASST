@@ -44,6 +44,15 @@ namespace pfasst
       const size_t cols = mat.cols();
       const size_t rows = mat.rows();
 
+      CVLOG(1, "ENCAP") << "x: ";
+      for (auto& xi : x) {
+        CVLOG(1, "ENCAP") << "  " << to_string(xi);
+      }
+      CVLOG(1, "ENCAP") << "y: ";
+      for (auto& yi : y) {
+        CVLOG(1, "ENCAP") << "  " << to_string(yi);
+      }
+
       for (size_t n = 0; n < rows; ++n) {
         for (size_t m = 0; m < cols; ++m) {
           x[n]->scaled_add(a * mat(n, m), y[m]);

@@ -53,12 +53,16 @@ namespace pfasst
       CLOG(ERROR, "TRANS") << "Time interpolation with left time point as a node is still not supported.";
       throw runtime_error("time interpolation with left time point as node");
     }
+    
+    CLOG_IF(fine->get_quadrature()->get_num_nodes() != coarse->get_quadrature()->get_num_nodes(),
+            WARNING, "TRANS") << "interpolation between different number of nodes not tested!";
 
     if (initial) {
       this->interpolate_initial(coarse, fine);
     }
 
     this->setup_tmat(fine->get_quadrature(), coarse->get_quadrature());
+    CVLOG(1, "TRANS") << "tmat: " << this->tmat;
 
     // +1 here for additional value in states
     const size_t num_fine_nodes = fine->get_quadrature()->get_num_nodes() + 1;
@@ -71,17 +75,29 @@ namespace pfasst
     vector<shared_ptr<fine_encap_type>> fine_deltas(num_coarse_nodes);
     generate(fine_deltas.begin(), fine_deltas.end(),
              [fine_factory]() { return fine_factory->create(); });
-    auto coarse_delta = coarse_factory->create();
 
+    auto coarse_delta = coarse_factory->create();
     // u_m^F = u_m^F - interpolate(u_m^C - prev_u_m^C)
     for (size_t m = 1; m < num_coarse_nodes; ++m) {
       coarse_delta->data() = coarse->get_states()[m]->get_data();
       coarse_delta->scaled_add(-1.0, coarse->get_previous_states()[m]);
+      CVLOG(1, "TRANS") << "  cd["<<m<<"]: " << to_string(coarse_delta);
       this->interpolate_data(coarse_delta, fine_deltas[m]);
+      CVLOG(1, "TRANS") << "  fd["<<m<<"]: " << to_string(fine_deltas[m]);
     }
 
+    CVLOG(1, "TRANS") << "fine states and deltas before interpolation:";
+    for (size_t m = 1; m < num_coarse_nodes; ++m) {
+      CVLOG(1, "TRANS") << "  f["<<m<<"]:  " << to_string(fine->get_states()[m]);
+      CVLOG(1, "TRANS") << "  fd["<<m<<"]: " << to_string(fine_deltas[m]);
+    }
     // add coarse level correction onto fine level's states
     encap::mat_apply(fine->states(), 1.0, this->tmat, fine_deltas, false);
+
+    CVLOG(1, "TRANS") << "fine states after interpolation:";
+    for (auto& n : fine->states()) {
+      CVLOG(1, "TRANS") << "  " << to_string(n);
+    }
 
     // update function evaluations on fine level
     fine->reevaluate();

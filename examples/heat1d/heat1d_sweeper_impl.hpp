@@ -105,6 +105,7 @@ namespace pfasst
         const time_type dt = this->get_status()->get_dt();
 
         auto error = this->compute_error(t);
+        auto rel_error = this->compute_relative_error(error, t);
 
         assert(this->get_quadrature() != nullptr);
         auto nodes = this->get_quadrature()->get_nodes();
@@ -115,7 +116,8 @@ namespace pfasst
           CLOG(INFO, this->get_logger_id()) << "t["<<m<<"]=" << LOG_FIXED << (dt * nodes[m])
                              << "      |abs residual| = " << LOG_FLOAT << this->_abs_res_norms[m]
                              << "      |rel residual| = " << LOG_FLOAT << this->_rel_res_norms[m]
-                             << "      |error| = " << LOG_FLOAT << encap::norm0(error[m]);
+                             << "      |abs error| = " << LOG_FLOAT << encap::norm0(error[m])
+                             << "      |rel error| = " << LOG_FLOAT << encap::norm0(rel_error[m]);
         }
 
         return converged;
@@ -156,6 +158,28 @@ namespace pfasst
         }
 
         return error;
+      }
+
+      template<class SweeperTrait, typename Enabled>
+      vector<shared_ptr<typename SweeperTrait::encap_type>>
+      Heat1D<SweeperTrait, Enabled>::compute_relative_error(const vector<shared_ptr<typename SweeperTrait::encap_type>>& error,
+                                                            const typename SweeperTrait::time_type& t)
+      {
+        assert(this->get_quadrature() != nullptr);
+        auto nodes = this->get_quadrature()->get_nodes();
+        const auto num_nodes = this->get_quadrature()->get_num_nodes();
+        nodes.insert(nodes.begin(), time_type(t));
+
+        vector<shared_ptr<encap_type>> rel_error;
+        rel_error.resize(error.size());
+        generate(rel_error.begin(), rel_error.end(),
+                 bind(&encap_type::factory_type::create, this->encap_factory()));
+
+        for (size_t m = 1; m < num_nodes + 1; ++m) {
+          rel_error[m]->scaled_add(1.0 / this->get_states()[m]->norm0(), error[m]);
+        }
+
+        return rel_error;
       }
 
       template<class SweeperTrait, typename Enabled>

@@ -162,7 +162,6 @@ namespace pfasst
           this->get_coarse()->save();
 
           this->predict_coarse();
-          this->get_coarse()->save();
 
           this->cycle_up();
           this->sweep_fine();
@@ -290,7 +289,7 @@ namespace pfasst
   void
   TwoLevelMLSDC<TransferT, CommT>::cycle_down()
   {
-    CVLOG(1, this->get_logger_id()) << "cycle down to coarse level";
+    CLOG(INFO, this->get_logger_id()) << "Restrict onto coarse level";
 
     this->get_transfer()->restrict(this->get_fine(), this->get_coarse(), true);
     this->get_transfer()->fas(this->get_status()->get_dt(), this->get_fine(), this->get_coarse());
@@ -301,7 +300,7 @@ namespace pfasst
   void
   TwoLevelMLSDC<TransferT, CommT>::cycle_up()
   {
-    CVLOG(1, this->get_logger_id()) << "cycle up to fine level";
+    CLOG(INFO, this->get_logger_id()) << "Interpolate onto fine level";
 
     this->get_transfer()->interpolate(this->get_coarse(), this->get_fine(), true);
   }
