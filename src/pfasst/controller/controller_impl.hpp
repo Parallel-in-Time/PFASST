@@ -57,25 +57,32 @@ namespace pfasst
   Controller<TransferT, CommT>::get_num_steps() const
   {
     if (this->get_status()->get_t_end() <= 0) {
-      CLOG(ERROR, this->get_logger_id()) << "Time end point must be non-zero positive."
-        << " NOT " << this->get_status()->get_t_end();
+      CLOG(ERROR, this->get_logger_id()) << "Time end point (" << this->get_status()->get_t_end()
+                                         << ") must be non-zero positive.";
       throw logic_error("time end point must be non-zero positive");
     }
 
     if (this->get_status()->get_dt() <= 0.0) {
-      CLOG(ERROR, this->get_logger_id()) << "Time delta must be non-zero positive."
-        << " NOT " << this->get_status()->get_dt();
+      CLOG(ERROR, this->get_logger_id()) << "Time delta (" << this->get_status()->get_dt()
+                                         << ") must be non-zero positive.";
       throw logic_error("time delta must be non-zero positive");
     }
+    
+    if (this->get_status()->get_time() >= this->get_status()->get_t_end()) {
+      CLOG(ERROR, this->get_logger_id()) << "Time end point (" << this->get_status()->get_t_end()
+                                         << ") must be greater than the current time point ("
+                                         << this->get_status()->get_time() << ").";
+      throw logic_error("time end point must be greater start time point");
+    }
 
-    const auto div = this->get_status()->get_t_end() / this->get_status()->get_dt();
-    CLOG_IF(!almost_equal(div * this->get_status()->get_dt(),
-                          (size_t)div * this->get_status()->get_dt()), WARNING, this->get_logger_id())
-      << "End time point not an integral multiple of time delta: "
-      << this->get_status()->get_t_end() << " / " << this->get_status()->get_dt()
-      << " = " << div << " != " << (size_t)div;
+    const auto num_steps = (this->get_status()->get_t_end() - this->get_status()->get_time()) / this->get_status()->get_dt();
+    CLOG_IF(!almost_equal(num_steps * this->get_status()->get_dt(), lrint(num_steps) * this->get_status()->get_dt()),
+            WARNING, this->get_logger_id())
+      << LOG_FIXED << "End time point not an integral multiple of time delta: "
+      << "(" << this->get_status()->get_t_end() << " - " << this->get_status()->get_time() << ") / " << this->get_status()->get_dt()
+      << " = " << num_steps << " != " << lrint(num_steps);
 
-    return (size_t)(this->get_status()->get_t_end() / this->get_status()->get_dt());
+    return lrint(num_steps);
   }
 
   template<class TransferT, class CommT>
@@ -157,8 +164,8 @@ namespace pfasst
     }
 
     const auto num_steps = this->get_num_steps();
-    if (num_steps * this->get_status()->get_dt() != this->get_status()->get_t_end()) {
-      CLOG(ERROR, this->get_logger_id()) << "End time point not an integral multiple of time delta. "
+    if (!almost_equal(this->get_status()->get_time() + num_steps * this->get_status()->get_dt(), this->get_status()->get_t_end())) {
+      CLOG(ERROR, this->get_logger_id()) << "End time point not an integral multiple of time delta. " << LOG_FIXED
         << " (" << num_steps << " * " << this->get_status()->get_dt()
         << " = " << num_steps * this->get_status()->get_dt() << " != " << this->get_status()->get_t_end() << ")";
       throw logic_error("time end point is not an integral multiple of time delta");
