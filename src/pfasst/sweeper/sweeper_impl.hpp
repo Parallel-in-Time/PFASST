@@ -391,22 +391,22 @@ namespace pfasst
     CVLOG(1, this->get_logger_id()) << "absolute residuals: " << this->_abs_res_norms;
     CVLOG(1, this->get_logger_id()) << "relative residuals: " << this->_rel_res_norms;
 
-    auto max_abs_norm = *(max_element(this->_abs_res_norms.cbegin(), this->_abs_res_norms.cend()));
-    auto max_rel_norm = *(max_element(this->_rel_res_norms.cbegin(), this->_rel_res_norms.cend()));
+    this->status()->abs_res_norm() = *(max_element(this->_abs_res_norms.cbegin(), this->_abs_res_norms.cend()));
+    this->status()->rel_res_norm() = *(max_element(this->_rel_res_norms.cbegin(), this->_rel_res_norms.cend()));
 
-    if (max_abs_norm < this->_abs_residual_tol) {
-      CLOG(INFO, this->get_logger_id()) << "Sweeper has converged w.r.t. absolute residual tolerance: "
-                            << LOG_FLOAT << max_abs_norm << " < " << this->_abs_residual_tol;
-    } else if (max_rel_norm < this->_rel_residual_tol) {
-      CLOG(INFO, this->get_logger_id()) << "Sweeper has converged w.r.t. relative residual tolerance: "
-                            << LOG_FLOAT << max_rel_norm << " < " << this->_rel_residual_tol;
+    if (this->status()->abs_res_norm() < this->_abs_residual_tol) {
+      CLOG(INFO, this->get_logger_id()) << "Sweeper has converged w.r.t. absolute residual tolerance: " << LOG_FLOAT
+                                        << this->status()->abs_res_norm() << " < " << this->_abs_residual_tol;
+    } else if (this->status()->rel_res_norm() < this->_rel_residual_tol) {
+      CLOG(INFO, this->get_logger_id()) << "Sweeper has converged w.r.t. relative residual tolerance: " << LOG_FLOAT
+                                        << this->status()->rel_res_norm() << " < " << this->_rel_residual_tol;
     } else {
       CLOG(INFO, this->get_logger_id()) << "Sweeper has not yet converged to neither residual tolerance.";
     }
 
     if (this->_abs_residual_tol > 0.0 || this->_rel_residual_tol > 0.0) {
-      return (   *(max_element(this->_abs_res_norms.cbegin(), this->_abs_res_norms.cend())) < this->_abs_residual_tol
-              || *(max_element(this->_rel_res_norms.cbegin(), this->_rel_res_norms.cend())) < this->_rel_residual_tol);
+      return (   this->status()->abs_res_norm() < this->_abs_residual_tol
+              || this->status()->rel_res_norm() < this->_rel_residual_tol);
     } else {
       CLOG(WARNING, this->get_logger_id()) << "No residual tolerances set. Thus skipping convergence check.";
       return false;

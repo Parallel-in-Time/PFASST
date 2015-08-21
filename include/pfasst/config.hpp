@@ -258,6 +258,7 @@ namespace pfasst
                                     .allow_unregistered().run();
       options::get_instance().get_unrecognized_args() = po::collect_unrecognized(parsed.options,
                                                                                  po::exclude_positional);
+
       po::store(parsed, options::get_instance().get_variables_map());
       po::notify(options::get_instance().get_variables_map());
 
@@ -280,6 +281,28 @@ namespace pfasst
       }
     }
 
+    static inline vector<string> check_unrecognized_args()
+    {
+      vector<string> log_lines;
+      if (!options::get_instance().get_unrecognized_args().empty()) {
+        vector<string> unrecognized;
+        for (const auto& cmd : options::get_instance().get_unrecognized_args()) {
+          if (cmd == "-v" || cmd == "--verbose" || cmd.find("--v") != string::npos) {
+            // options for easylogging++
+          } else {
+            unrecognized.push_back(cmd);
+          }
+        }
+        if (!unrecognized.empty()) {
+          log_lines.push_back("Some command line parameters could not be interpreted:");
+          for (const auto &cmd : unrecognized) {
+            log_lines.push_back("  '" + cmd + "'");
+          }
+        }
+      }
+      return log_lines;
+    }
+
     /**
      * Initialize options detection and parsing.
      *
@@ -294,7 +317,9 @@ namespace pfasst
      * Global     | `c`,`nocolor` | `bool`
      * Duration   | `dt`          | `double`
      * Duration   | `tend`        | `double`
+     * Duration   | `num_steps`   | `size_t`
      * Duration   | `num_iters`   | `size_t`
+     * Quadrature | `num_nodes`   | `size_t`
      * Tolerances | `abs_res_tol` | `double`
      * Tolerances | `rel_res_tol` | `double`
      */

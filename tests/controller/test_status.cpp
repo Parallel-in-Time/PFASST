@@ -56,12 +56,20 @@ TEST_F(Interface, has_a_state)
   EXPECT_THAT(status.get_state(), Eq(pfasst::State::CONVERGED));
 }
 
-TEST_F(Interface, has_a_residual)
+TEST_F(Interface, has_an_absolute_residual_norm)
 {
-  EXPECT_THAT(status.get_residual(), Eq(0.0));
+  EXPECT_THAT(status.get_abs_res_norm(), Eq(0.0));
 
-  status.residual() = 0.1;
-  EXPECT_THAT(status.get_residual(), Eq(0.1));
+  status.abs_res_norm() = 0.1;
+  EXPECT_THAT(status.get_abs_res_norm(), Eq(0.1));
+}
+
+TEST_F(Interface, has_a_relative_residual_norm)
+{
+  EXPECT_THAT(status.get_rel_res_norm(), Eq(0.0));
+
+  status.rel_res_norm() = 0.1;
+  EXPECT_THAT(status.get_rel_res_norm(), Eq(0.1));
 }
 
 

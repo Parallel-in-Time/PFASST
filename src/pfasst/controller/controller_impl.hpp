@@ -189,6 +189,16 @@ namespace pfasst
   }
 
   template<class TransferT, class CommT>
+  void
+  Controller<TransferT, CommT>::post_run() {
+    CLOG(INFO, this->get_logger_id()) << "Run Finished.";
+    auto status_summary = this->get_status()->summary();
+    for (const auto& line : status_summary) {
+      CLOG(INFO, this->get_logger_id()) << line;
+    }
+  }
+
+  template<class TransferT, class CommT>
   bool
   Controller<TransferT, CommT>::advance_time(const size_t& num_steps)
   {
@@ -196,7 +206,7 @@ namespace pfasst
     const time_type new_time = this->get_status()->get_time() + delta_time;
 
 
-    if (new_time > this->get_status()->get_t_end()) {
+    if (new_time > this->get_status()->get_t_end() && !almost_equal(new_time, this->get_status()->get_t_end())) {
       CLOG(WARNING, this->get_logger_id()) << "Not advancing " << num_steps
                                            << ((num_steps > 1) ? " time steps " : " time step ")
                                            << "with dt=" << this->get_status()->get_dt() << " to t=" << new_time

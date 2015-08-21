@@ -43,6 +43,7 @@ namespace pfasst
       std::abort();
     }
 
+
     template<class DataT>
     void Communicator::send(const DataT* const data, const int count, const int dest_rank, const int tag)
     {
@@ -52,34 +53,78 @@ namespace pfasst
     }
 
     template<class DataT>
+    void Communicator::send_status(const StatusDetail<DataT>* const data, const int count, const int dest_rank, const int tag)
+    {
+      CLOG(ERROR, "COMM") << "blocking send of generic status data not implemented."
+      << " type: " << typeid(data).name();
+      throw runtime_error("send for generic data type");
+    }
+
+
+    template<class DataT>
     void Communicator::isend(const DataT* const data, const int count, const int dest_rank, const int tag)
     {
       CLOG(ERROR, "COMM") << "non-blocking send of generic data types not implemented."
+      << " type: " << typeid(data).name();
+      throw runtime_error("isend for generic data type");
+    }
+
+    template<class DataT>
+    void Communicator::isend_status(const StatusDetail<DataT>* const data, const int count, const int dest_rank, const int tag)
+    {
+      CLOG(ERROR, "COMM") << "non-blocking send of generic status data not implemented."
                           << " type: " << typeid(data).name();
       throw runtime_error("isend for generic data type");
     }
+
 
     template<class DataT>
     void Communicator::recv(DataT* data, const int count, const int dest_rank, const int tag)
     {
       CLOG(ERROR, "COMM") << "blocking receive of generic data types not implemented."
+      << " type: " << typeid(data).name();
+      throw runtime_error("recv for generic data type");
+    }
+
+    template<class DataT>
+    void Communicator::recv_status(StatusDetail<DataT>* data, const int count, const int dest_rank, const int tag)
+    {
+      CLOG(ERROR, "COMM") << "blocking receive of generic status data not implemented."
                           << " type: " << typeid(data).name();
       throw runtime_error("recv for generic data type");
     }
+
 
     template<class DataT>
     void Communicator::irecv(DataT* data, const int count, const int src_rank, const int tag)
     {
       CLOG(ERROR, "COMM") << "non-blocking receive of generic data types not implemented."
+      << " type: " << typeid(data).name();
+      throw runtime_error("irecv for generic data type");
+    }
+
+    template<class DataT>
+    void Communicator::irecv_status(StatusDetail<DataT>* data, const int count, const int src_rank, const int tag)
+    {
+      CLOG(ERROR, "COMM") << "non-blocking receive of generic status data not implemented."
                           << " type: " << typeid(data).name();
       throw runtime_error("irecv for generic data type");
     }
+
 
     template<class DataT>
     void Communicator::bcast(DataT* data, const int count, const int root_rank)
     {
       CLOG(ERROR, "COMM") << "braodcast of generic data types not implemented."
                           << " type: " << typeid(data).name();
+      throw runtime_error("bcast for generic data type");
+    }
+
+    template<class DataT>
+    void Communicator::bcast_status(StatusDetail<DataT>* data, const int count, const int root_rank)
+    {
+      CLOG(ERROR, "COMM") << "braodcast of generic status data not implemented."
+      << " type: " << typeid(data).name();
       throw runtime_error("bcast for generic data type");
     }
   }

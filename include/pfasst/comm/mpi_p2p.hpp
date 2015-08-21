@@ -11,6 +11,7 @@ using namespace std;
 #include <mpi.h>
 
 #include "pfasst/comm/communicator.hpp"
+#include "pfasst/controller/status.hpp"
 
 
 namespace pfasst
@@ -53,20 +54,30 @@ namespace pfasst
 
         virtual void abort(const int& err_code);
 
-        template<class DataT>
+        template<typename DataT>
         void send(const DataT* const data, const int count, const int dest_rank, const int tag);
+        template<typename DataT>
+        void send_status(const StatusDetail<DataT>* const data, const int count, const int dest_rank, const int tag);
 
-        template<class DataT>
+        template<typename DataT>
         void isend(const DataT* const data, const int count, const int dest_rank, const int tag);
+        template<typename DataT>
+        void isend_status(const StatusDetail<DataT>* const data, const int count, const int dest_rank, const int tag);
 
-        template<class DataT>
+        template<typename DataT>
         void recv(DataT* data, const int count, const int dest_rank, const int tag);
+        template<typename DataT>
+        void recv_status(StatusDetail<DataT>* data, const int count, const int dest_rank, const int tag);
 
-        template<class DataT>
+        template<typename DataT>
         void irecv(DataT* data, const int count, const int src_rank, const int tag);
+        template<typename DataT>
+        void irecv_status(StatusDetail<DataT>* data, const int count, const int src_rank, const int tag);
 
-        template<class DataT>
+        template<typename DataT>
         void bcast(DataT* data, const int count, const int root_rank);
+        template<typename DataT>
+        void bcast_status(StatusDetail<DataT>* data, const int count, const int root_rank);
     };
   }  // ::pfasst::comm
 }  // ::pfasst

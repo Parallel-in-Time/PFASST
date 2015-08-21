@@ -95,12 +95,19 @@ namespace pfasst
       this->status()->iteration()++;
 
       this->status()->state() = State::ITERATING;
+      
+      this->get_fine()->converged();
 
       if (!this->get_communicator()->is_last()) {
         CVLOG(1, this->get_logger_id()) << "sending status: " << to_string(this->get_status());
         this->get_status()->send(this->get_communicator(),
                                  this->get_communicator()->get_rank() + 1,
                                  this->compute_tag(1, true), true);
+      }
+
+      if (this->get_status()->get_state() <= State::FAILED) {
+        CLOG(INFO, this->get_logger_id()) << "Already done after prediction.";
+        continue;
       }
 
       // iterate on each time step
@@ -111,11 +118,17 @@ namespace pfasst
         this->status()->state() = State::ITERATING;
 
         if (!this->get_communicator()->is_first()) {
-          CVLOG(1, this->get_logger_id()) << "looking for state of previous process";
-          this->_prev_status->recv(this->get_communicator(),
-                                   this->get_communicator()->get_rank() - 1,
-                                   this->compute_tag(1, true), true);
-          CVLOG(1, this->get_logger_id()) << "Status received: " << to_string(this->_prev_status);
+          CLOG(DEBUG, this->get_logger_id()) << "this status: " << to_string(this->status());
+          CLOG(DEBUG, this->get_logger_id()) << "prev status: " << to_string(this->_prev_status);
+          if (this->_prev_status->get_state() > State::FAILED) {
+            CVLOG(1, this->get_logger_id()) << "looking for state of previous process";
+            this->_prev_status->recv(this->get_communicator(),
+                                     this->get_communicator()->get_rank() - 1,
+                                     this->compute_tag(1, true), true);
+            CLOG(DEBUG, this->get_logger_id()) << "Status received: " << to_string(this->_prev_status);
+          } else {
+            CVLOG(1, this->get_logger_id()) << "previous process has already converged but this one needs another iteration";
+          }
         }
 
         if (this->_prev_status->get_state() == State::FAILED) {
@@ -123,9 +136,8 @@ namespace pfasst
           CLOG(ERROR, this->get_logger_id()) << "We are aborting here. (read: TODO)";
           this->get_communicator()->abort(-1);
         } else if (this->_prev_status->get_state() == State::CONVERGED) {
-          // TODO: do we really need to continue here ?!?
-//          CLOG(WARNING, this->get_logger_id()) << "previous has converged and this needs to be propagated";
-          continue;
+          // TODO: do we really need to do a full sweep here ?!?
+          CLOG(WARNING, this->get_logger_id()) << "previous has converged; propagating that";
         }
 
         this->cycle_down();
@@ -183,12 +195,18 @@ namespace pfasst
     const bool fine_converged = this->get_fine()->converged();
     const bool previous_done = (this->get_communicator()->is_first())
                                ? true : this->_prev_status->get_state() <= State::FAILED;
+    CLOG(DEBUG, this->get_logger_id()) << "this status: " << to_string(this->status());
+    CLOG(DEBUG, this->get_logger_id()) << "prev status: " << to_string(this->_prev_status);
 
     if (previous_done && fine_converged) {
       CLOG(INFO, this->get_logger_id()) << "FINE sweeper has converged as well as previous process.";
       this->status()->state() = State::CONVERGED;
+      this->_prev_status->state() = State::UNKNOWN;
 
     } else {
+      CLOG_IF(previous_done && !fine_converged, INFO, this->get_logger_id())
+        << "previous process has converged but FINE sweeper not yet.";
+
       if (Controller<TransferT, CommT>::advance_iteration()) {
         CLOG(INFO, this->get_logger_id()) << "FINE sweeper has not yet converged and additional iterations to do.";
         this->get_fine()->save();

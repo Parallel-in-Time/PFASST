@@ -30,8 +30,6 @@ namespace pfasst
 
     protected:
       shared_ptr<typename transfer_type::traits::fine_sweeper_type> _sweeper;
-      shared_ptr<void>                                              _coarse_level;
-      shared_ptr<void>                                              _fine_level;
 
       shared_ptr<void>               _transfer;
       shared_ptr<Status<time_type>>  _status;

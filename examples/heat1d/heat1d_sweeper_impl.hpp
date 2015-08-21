@@ -110,10 +110,10 @@ namespace pfasst
         assert(this->get_quadrature() != nullptr);
         auto nodes = this->get_quadrature()->get_nodes();
         const auto num_nodes = this->get_quadrature()->get_num_nodes();
-        nodes.insert(nodes.begin(), time_type(t));
+        nodes.insert(nodes.begin(), time_type(0.0));
 
         for (size_t m = 0; m < num_nodes + 1; ++m) {
-          CLOG(INFO, this->get_logger_id()) << "t["<<m<<"]=" << LOG_FIXED << (dt * nodes[m])
+          CLOG(INFO, this->get_logger_id()) << "t["<<m<<"]=" << LOG_FIXED << (t + dt * nodes[m])
                              << "      |abs residual| = " << LOG_FLOAT << this->_abs_res_norms[m]
                              << "      |rel residual| = " << LOG_FLOAT << this->_rel_res_norms[m]
                              << "      |abs error| = " << LOG_FLOAT << encap::norm0(error[m])
@@ -143,7 +143,7 @@ namespace pfasst
         assert(this->get_quadrature() != nullptr);
         auto nodes = this->get_quadrature()->get_nodes();
         const auto num_nodes = this->get_quadrature()->get_num_nodes();
-        nodes.insert(nodes.begin(), time_type(t));
+        nodes.insert(nodes.begin(), time_type(0.0));
 
         vector<shared_ptr<encap_type>> error;
         error.resize(num_nodes + 1);
@@ -153,8 +153,8 @@ namespace pfasst
         for (size_t m = 1; m < num_nodes + 1; ++m) {
           const time_type ds = dt * (nodes[m] - nodes[0]);
           error[m] = pfasst::encap::axpy(-1.0, this->exact(t + ds), this->get_states()[m]);
-          CVLOG(2, this->get_logger_id()) << LOG_FIXED << "error t=" << t + ds << ": "
-                           << LOG_FLOAT << to_string(error[m]);
+          CVLOG(2, this->get_logger_id()) << LOG_FIXED << "error t=" << (t + ds) << ": "
+                                          << LOG_FLOAT << to_string(error[m]);
         }
 
         return error;
@@ -168,7 +168,7 @@ namespace pfasst
         assert(this->get_quadrature() != nullptr);
         auto nodes = this->get_quadrature()->get_nodes();
         const auto num_nodes = this->get_quadrature()->get_num_nodes();
-        nodes.insert(nodes.begin(), time_type(t));
+        nodes.insert(nodes.begin(), time_type(0.0));
 
         vector<shared_ptr<encap_type>> rel_error;
         rel_error.resize(error.size());

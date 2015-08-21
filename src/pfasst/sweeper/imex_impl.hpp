@@ -398,7 +398,7 @@ namespace pfasst
     CVLOG(2, this->get_logger_id()) << "  ==>";
     for (size_t m = 0; m < num_nodes; ++m) {
       CVLOG(2, this->get_logger_id()) << "    |res["<<m<<"]| = " << LOG_FLOAT << this->get_residuals()[m]->norm0()
-                          << "    res["<<m<<"] = " << to_string(this->get_residuals()[m]);
+                                      << "    res["<<m<<"] = " << to_string(this->get_residuals()[m]);
     }
   }
 
@@ -445,6 +445,8 @@ namespace pfasst
     } else {
       nodes.insert(nodes.begin(), time_type(0.0));
     }
+    
+    CVLOG(1, this->get_logger_id()) << "computing Q_delta matrices for IMEX scheme";
 
     this->_q_delta_expl = Matrix<time_type>::Zero(num_nodes + 1, num_nodes + 1);
     this->_q_delta_impl = Matrix<time_type>::Zero(num_nodes + 1, num_nodes + 1);
@@ -456,7 +458,14 @@ namespace pfasst
       }
     }
 
-    CLOG(DEBUG, this->get_logger_id()) << "QE:" << endl << this->_q_delta_expl;
-    CLOG(DEBUG, this->get_logger_id()) << "QI:" << endl << this->_q_delta_impl;
+    CVLOG(2, this->get_logger_id()) << "QE:";
+    for (size_t row = 0; row < this->_q_delta_expl.rows(); ++row) {
+      CVLOG(2, this->get_logger_id()) << "  " << LOG_FIXED << this->_q_delta_expl.block(row, 0, 1, this->_q_delta_expl.cols());
+    }
+
+    CVLOG(2, this->get_logger_id()) << "QI:";
+    for (size_t row = 0; row < this->_q_delta_impl.rows(); ++row) {
+      CVLOG(2, this->get_logger_id()) << "  " << LOG_FIXED << this->_q_delta_impl.block(row, 0, 1, this->_q_delta_impl.cols());
+    }
   }
 }  // ::pfasst

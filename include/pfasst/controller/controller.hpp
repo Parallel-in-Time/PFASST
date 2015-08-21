@@ -67,6 +67,7 @@ namespace pfasst
 
       virtual void setup();
       virtual void run();
+      virtual void post_run();
 
       virtual bool advance_time(const size_t& num_steps = 1);
       virtual bool advance_iteration();

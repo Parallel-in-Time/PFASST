@@ -24,7 +24,10 @@ namespace pfasst
 
       CLOG(INFO, "QUAD") << LOG_FIXED << "Gauss-Radau (right) on [0.0, 1.0] with " << num_nodes
                          << " nodes at " << this->get_nodes();
-      CLOG(DEBUG, "QUAD") << "Q:" << endl << this->get_q_mat();
+      CVLOG(1, "QUAD") << "Q:";
+      for (size_t row = 0; row < this->get_q_mat().rows(); ++row) {
+        CVLOG(1, "QUAD") << "  " << this->get_q_mat().block(row, 0, 1, this->get_q_mat().cols());
+      }
     }
 
     template<typename precision>
