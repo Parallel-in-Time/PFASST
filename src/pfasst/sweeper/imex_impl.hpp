@@ -147,45 +147,45 @@ namespace pfasst
     nodes.insert(nodes.begin(), time_type(0.0));
     const size_t num_nodes = this->get_quadrature()->get_num_nodes();
 
-    CVLOG(2, this->get_logger_id()) << "initial values for sweeping";
+    CVLOG(4, this->get_logger_id()) << "initial values for sweeping";
     for (size_t m = 0; m <= num_nodes; ++m) {
-      CVLOG(2, this->get_logger_id()) << "  t["<<m<<"]=" << LOG_FIXED << (dt * nodes[m]);
-      CVLOG(2, this->get_logger_id()) << LOG_FLOAT << "       u: " << to_string(this->get_states()[m]);
-      CVLOG(2, this->get_logger_id()) << LOG_FLOAT << "    f_ex: " << to_string(this->_expl_rhs[m]);
-      CVLOG(2, this->get_logger_id()) << LOG_FLOAT << "    f_im: " << to_string(this->_impl_rhs[m]);
+      CVLOG(5, this->get_logger_id()) << "  t["<<m<<"]=" << LOG_FIXED << (dt * nodes[m]);
+      CVLOG(6, this->get_logger_id()) << LOG_FLOAT << "       u: " << to_string(this->get_states()[m]);
+      CVLOG(6, this->get_logger_id()) << LOG_FLOAT << "    f_ex: " << to_string(this->_expl_rhs[m]);
+      CVLOG(6, this->get_logger_id()) << LOG_FLOAT << "    f_im: " << to_string(this->_impl_rhs[m]);
     }
 
-    CVLOG(1, this->get_logger_id()) << "computing integrals";
-    CVLOG(2, this->get_logger_id()) << "  q_int     = dt * Q * f_ex";
+    CVLOG(4, this->get_logger_id()) << "computing integrals";
+    CVLOG(6, this->get_logger_id()) << "  q_int     = dt * Q * f_ex";
     this->_q_integrals = encap::mat_mul_vec(dt, q_mat, this->_expl_rhs);
-    CVLOG(2, this->get_logger_id()) << "           += dt * Q * f_im";
+    CVLOG(6, this->get_logger_id()) << "           += dt * Q * f_im";
     encap::mat_apply(this->_q_integrals, dt, q_mat, this->_impl_rhs, false);
 
-    CVLOG(2, this->get_logger_id()) << "  subtracting function evaluations of previous iteration and adding FAS correction";
+    CVLOG(4, this->get_logger_id()) << "  subtracting function evaluations of previous iteration and adding FAS correction";
 
     // XXX do we need to do that ?! isn't it always zero ?!
-    CVLOG(2, this->get_logger_id()) << LOG_FLOAT << "  q_int[0] += tau[0]                  = " << to_string(this->get_tau()[0]);
+    CVLOG(6, this->get_logger_id()) << LOG_FLOAT << "  q_int[0] += tau[0]                  = " << to_string(this->get_tau()[0]);
 
     for (size_t m = 0; m < num_nodes; ++m) {
       for (size_t n = 0; n < m + 1; ++n) {
-        CVLOG(2, this->get_logger_id()) << LOG_FIXED << "  q_int["<<m<<"] -= dt * QE_{"<<(m+1)<<","<<n<<"} * f_ex["<<n<<"] = "
+        CVLOG(6, this->get_logger_id()) << LOG_FIXED << "  q_int["<<m<<"] -= dt * QE_{"<<(m+1)<<","<<n<<"} * f_ex["<<n<<"] = "
                                          << -dt * this->_q_delta_expl(m + 1, n) << " * "
                                          << LOG_FLOAT << to_string(this->_expl_rhs[n]);
         this->_q_integrals[m + 1]->scaled_add(-dt * this->_q_delta_expl(m + 1, n), this->_expl_rhs[n]);
 
-        CVLOG(2, this->get_logger_id()) << LOG_FIXED << "  q_int["<<(m+1)<<"] -= dt * QI_{"<<(m+1)<<","<<(n+1)<<"} * f_im["<<(n+1)<<"] = "
+        CVLOG(6, this->get_logger_id()) << LOG_FIXED << "  q_int["<<(m+1)<<"] -= dt * QI_{"<<(m+1)<<","<<(n+1)<<"} * f_im["<<(n+1)<<"] = "
                                          << -dt * this->_q_delta_impl(m + 1, n + 1) << " * "
                                          << LOG_FLOAT << to_string(this->_impl_rhs[n+1]);
         this->_q_integrals[m + 1]->scaled_add(-dt * this->_q_delta_impl(m + 1, n + 1), this->_impl_rhs[n + 1]);
       }
 
-      CVLOG(2, this->get_logger_id()) << LOG_FLOAT << "  q_int["<<(m+1)<<"] += tau["<<(m+1)<<"]                  = "
+      CVLOG(6, this->get_logger_id()) << LOG_FLOAT << "  q_int["<<(m+1)<<"] += tau["<<(m+1)<<"]                  = "
                                        << to_string(this->get_tau()[m + 1]);
       this->_q_integrals[m + 1]->scaled_add(1.0, this->get_tau()[m + 1]);
     }
 
     for (size_t m = 0; m < num_nodes + 1; ++m) {
-      CVLOG(1, this->get_logger_id()) << LOG_FLOAT << "  q_int["<<m<<"] = " << to_string(this->_q_integrals[m]);
+      CVLOG(5, this->get_logger_id()) << LOG_FLOAT << "  q_int["<<m<<"] = " << to_string(this->_q_integrals[m]);
     }
   }
 
@@ -215,50 +215,50 @@ namespace pfasst
     time_type tm = t;
     // note: m=0 is initial value and not a quadrature node
     for (size_t m = 0; m < num_nodes; ++m) {
-      CVLOG(1, this->get_logger_id()) << LOG_FIXED << "propagating from t["<<m<<"]=" << (dt * nodes[m])
+      CVLOG(4, this->get_logger_id()) << LOG_FIXED << "propagating from t["<<m<<"]=" << (dt * nodes[m])
                           << " to t["<<(m+1)<<"]=" << (dt * nodes[m+1]);
-      CVLOG(2, this->get_logger_id()) << LOG_FLOAT << "  u["<<m<<"] = " << to_string(this->get_states()[m]);
+      CVLOG(5, this->get_logger_id()) << LOG_FLOAT << "  u["<<m<<"] = " << to_string(this->get_states()[m]);
 
       // compute right hand side for implicit solve (i.e. the explicit part of the propagation)
       shared_ptr<encap_type> rhs = this->get_encap_factory()->create();
       // rhs = u_0
       rhs->data() = this->get_states().front()->get_data();
-      CVLOG(2, this->get_logger_id()) << "  rhs = u[0]                    = " << to_string(rhs);
+      CVLOG(6, this->get_logger_id()) << "  rhs = u[0]                    = " << to_string(rhs);
       // rhs += dt * \sum_{i=0}^m (QI_{m+1,i} fI(u_i^{k+1}) + QE_{m+1,i-1} fE(u_{i-1}^{k+1}) ) + QE_{m+1,m} fE(u_{m}^{k+1})
       for (size_t n = 0; n < m; ++n) {
         rhs->scaled_add(dt * this->_q_delta_impl(m + 1, n), this->_impl_rhs[n]);
-        CVLOG(2, this->get_logger_id()) << "     += dt * QI_{"<<(m+1)<<","<<(n+1)<<"} * f_im["<<(n+1)<<"] = "
+        CVLOG(6, this->get_logger_id()) << "     += dt * QI_{"<<(m+1)<<","<<(n+1)<<"} * f_im["<<(n+1)<<"] = "
                             << LOG_FIXED << dt << " * " << this->_q_delta_impl(m + 1, n + 1) << " * "
                             << LOG_FLOAT << to_string(this->_impl_rhs[n]);
 
         rhs->scaled_add(dt * this->_q_delta_expl(m + 1, n), this->_expl_rhs[n]);
-        CVLOG(2, this->get_logger_id()) << "     += dt * QE_{"<<(m+1)<<","<<n<<"} * f_ex["<<n<<"] = "
+        CVLOG(6, this->get_logger_id()) << "     += dt * QE_{"<<(m+1)<<","<<n<<"} * f_ex["<<n<<"] = "
                             << LOG_FIXED << dt << " * " << this->_q_delta_expl(m + 1, n) << " * "
                             << LOG_FLOAT << to_string(this->_expl_rhs[n]);
       }
       rhs->scaled_add(dt * this->_q_delta_impl(m + 1, m), this->_impl_rhs[m]);
-      CVLOG(2, this->get_logger_id()) << "     += dt * QI_{"<<(m+1)<<","<<m<<"} * f_im["<<m<<"] = "
+      CVLOG(6, this->get_logger_id()) << "     += dt * QI_{"<<(m+1)<<","<<m<<"} * f_im["<<m<<"] = "
                           << LOG_FIXED << dt << " * " << this->_q_delta_impl(m + 1, m) << " * "
                           << LOG_FLOAT << to_string(this->_impl_rhs[m]);
 
       rhs->scaled_add(1.0, this->_q_integrals[m + 1]);
-      CVLOG(2, this->get_logger_id()) << "     += 1.0 * q_int["<<(m+1)<<"]          = " << to_string(this->_q_integrals[m + 1]);
-      CVLOG(2, this->get_logger_id()) << "      = " << to_string(rhs);
+      CVLOG(6, this->get_logger_id()) << "     += 1.0 * q_int["<<(m+1)<<"]          = " << to_string(this->_q_integrals[m + 1]);
+      CVLOG(6, this->get_logger_id()) << "      = " << to_string(rhs);
 
       // solve the implicit part
-      CVLOG(2, this->get_logger_id()) << "  solve(u["<<(m+1)<<"] - dt * QI_{"<<(m+1)<<","<<(m+1)<<"} * f_im["<<(m+1)<<"] = rhs)";
+      CVLOG(4, this->get_logger_id()) << "  solve(u["<<(m+1)<<"] - dt * QI_{"<<(m+1)<<","<<(m+1)<<"} * f_im["<<(m+1)<<"] = rhs)";
       this->implicit_solve(this->_impl_rhs[m + 1], this->states()[m + 1], tm, dt * this->_q_delta_impl(m+1, m+1), rhs);
-      CVLOG(2, this->get_logger_id()) << "  u["<<(m+1)<<"] = " << to_string(this->get_states()[m + 1]);
+      CVLOG(5, this->get_logger_id()) << "  u["<<(m+1)<<"] = " << to_string(this->get_states()[m + 1]);
 
       // reevaluate the explicit part with the new solution value
       tm += dt * this->_q_delta_impl(m+1, m+1);
       this->_expl_rhs[m + 1] = this->evaluate_rhs_expl(tm, this->get_states()[m + 1]);
 
-      CVLOG(1, this->get_logger_id()) << LOG_FIXED << "  ==> values at t["<<(m+1)<<"]=" << (dt * nodes[m+1]);
-      CVLOG(1, this->get_logger_id()) << LOG_FLOAT << "         u["<<m+1<<"]: " << to_string(this->get_states()[m + 1]);
-      CVLOG(2, this->get_logger_id()) << LOG_FLOAT << "      f_ex["<<m+1<<"]: " << to_string(this->_expl_rhs[m + 1]);
-      CVLOG(2, this->get_logger_id()) << LOG_FLOAT << "      f_im["<<m+1<<"]: " << to_string(this->_impl_rhs[m + 1]);
-      CVLOG(1, this->get_logger_id()) << "";
+      CVLOG(4, this->get_logger_id()) << LOG_FIXED << "  ==> values at t["<<(m+1)<<"]=" << (dt * nodes[m+1]);
+      CVLOG(5, this->get_logger_id()) << LOG_FLOAT << "         u["<<m+1<<"]: " << to_string(this->get_states()[m + 1]);
+      CVLOG(6, this->get_logger_id()) << LOG_FLOAT << "      f_ex["<<m+1<<"]: " << to_string(this->_expl_rhs[m + 1]);
+      CVLOG(6, this->get_logger_id()) << LOG_FLOAT << "      f_im["<<m+1<<"]: " << to_string(this->_impl_rhs[m + 1]);
+      CVLOG(4, this->get_logger_id()) << "";
     }
   }
 
@@ -284,8 +284,10 @@ namespace pfasst
   void
   IMEX<SweeperTrait, Enabled>::advance(const size_t& num_steps)
   {
+    UNUSED(num_steps);
+
     assert(this->get_end_state() != nullptr);
-    CLOG(DEBUG, this->get_logger_id()) << "advancing";
+    CVLOG(4, this->get_logger_id()) << "advancing";
 
     this->initial_state()->data() = this->get_end_state()->get_data();
     assert(this->get_quadrature() != nullptr);
@@ -366,7 +368,7 @@ namespace pfasst
   void
   IMEX<SweeperTrait, Enabled>::compute_residuals()
   {
-    CLOG(DEBUG, this->get_logger_id()) << "computing residuals";
+    CVLOG(4, this->get_logger_id()) << "computing residuals";
 
     assert(this->get_status() != nullptr);
     assert(this->get_quadrature() != nullptr);
@@ -395,9 +397,9 @@ namespace pfasst
     CVLOG(5, this->get_logger_id()) << "  res += dt * Q * F_im";
     encap::mat_apply(this->residuals(), dt, this->get_quadrature()->get_q_mat(), this->_impl_rhs, false);
 
-    CVLOG(2, this->get_logger_id()) << "  ==>";
+    CVLOG(5, this->get_logger_id()) << "  ==>";
     for (size_t m = 0; m < num_nodes; ++m) {
-      CVLOG(2, this->get_logger_id()) << "    |res["<<m<<"]| = " << LOG_FLOAT << this->get_residuals()[m]->norm0()
+      CVLOG(5, this->get_logger_id()) << "    |res["<<m<<"]| = " << LOG_FLOAT << this->get_residuals()[m]->norm0()
                                       << "    res["<<m<<"] = " << to_string(this->get_residuals()[m]);
     }
   }
@@ -446,7 +448,7 @@ namespace pfasst
       nodes.insert(nodes.begin(), time_type(0.0));
     }
     
-    CVLOG(1, this->get_logger_id()) << "computing Q_delta matrices for IMEX scheme";
+    CVLOG(4, this->get_logger_id()) << "computing Q_delta matrices for IMEX scheme";
 
     this->_q_delta_expl = Matrix<time_type>::Zero(num_nodes + 1, num_nodes + 1);
     this->_q_delta_impl = Matrix<time_type>::Zero(num_nodes + 1, num_nodes + 1);
@@ -458,14 +460,14 @@ namespace pfasst
       }
     }
 
-    CVLOG(2, this->get_logger_id()) << "QE:";
-    for (size_t row = 0; row < this->_q_delta_expl.rows(); ++row) {
-      CVLOG(2, this->get_logger_id()) << "  " << LOG_FIXED << this->_q_delta_expl.block(row, 0, 1, this->_q_delta_expl.cols());
+    CVLOG(5, this->get_logger_id()) << "QE:";
+    for (int row = 0; row < this->_q_delta_expl.rows(); ++row) {
+      CVLOG(5, this->get_logger_id()) << "  " << LOG_FIXED << this->_q_delta_expl.block(row, 0, 1, this->_q_delta_expl.cols());
     }
 
-    CVLOG(2, this->get_logger_id()) << "QI:";
-    for (size_t row = 0; row < this->_q_delta_impl.rows(); ++row) {
-      CVLOG(2, this->get_logger_id()) << "  " << LOG_FIXED << this->_q_delta_impl.block(row, 0, 1, this->_q_delta_impl.cols());
+    CVLOG(5, this->get_logger_id()) << "QI:";
+    for (int row = 0; row < this->_q_delta_impl.rows(); ++row) {
+      CVLOG(5, this->get_logger_id()) << "  " << LOG_FIXED << this->_q_delta_impl.block(row, 0, 1, this->_q_delta_impl.cols());
     }
   }
 }  // ::pfasst

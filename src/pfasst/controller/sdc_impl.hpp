@@ -102,21 +102,35 @@ namespace pfasst
   {
     Controller<TransferT>::run();
 
-    CLOG(INFO, this->get_logger_id()) << "Initial Value: " << to_string(this->get_sweeper()->get_initial_state());
+    CLOG(INFO, this->get_logger_id()) << "";
+    CLOG(INFO, this->get_logger_id()) << "Sequential SDC";
+    CLOG(INFO, this->get_logger_id()) << "  t0:        " << LOG_FIXED << this->get_status()->get_time();
+    CLOG(INFO, this->get_logger_id()) << "  dt:        " << LOG_FIXED << this->get_status()->get_dt();
+    CLOG(INFO, this->get_logger_id()) << "  T:         " << LOG_FIXED << this->get_status()->get_t_end();
+    CLOG(INFO, this->get_logger_id()) << "  num steps: " << LOG_FIXED << this->get_num_steps();
+    CLOG(INFO, this->get_logger_id()) << "  max iter:  " << LOG_FIXED << this->get_status()->get_max_iterations();
+    CLOG(INFO, this->get_logger_id()) << "  Initial Value: " << to_string(this->get_sweeper()->get_initial_state());
 
     // iterate over time steps
     do {
       const bool do_initial = this->get_status()->get_step() == 0;
+      CLOG(INFO, this->get_logger_id()) << "";
+      CLOG(INFO, this->get_logger_id()) << "Time Step " << (this->get_status()->get_step() + 1)
+                                        << " of " << this->get_num_steps();
 
       // iterate on current time step
       do {
         const bool do_prediction = this->get_status()->get_iteration() == 0;
 
         if (do_prediction) {
+          CLOG(INFO, this->get_logger_id()) << "";
+          CLOG(INFO, this->get_logger_id()) << "SDC Prediction step";
           this->get_sweeper()->pre_predict();
           this->get_sweeper()->predict();
           this->get_sweeper()->post_predict();
         } else {
+          CLOG(INFO, this->get_logger_id()) << "";
+          CLOG(INFO, this->get_logger_id()) << "Iteration " << this->get_status()->get_iteration();
           this->get_sweeper()->pre_sweep();
           this->get_sweeper()->sweep();
           this->get_sweeper()->post_sweep();

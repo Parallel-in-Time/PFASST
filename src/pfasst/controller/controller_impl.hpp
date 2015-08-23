@@ -56,6 +56,8 @@ namespace pfasst
   size_t
   Controller<TransferT, CommT>::get_num_steps() const
   {
+    // BUG: fix this whole stuff here; probably need to save the result after the first call (i.e. in ::setup()) into a
+    //   local variable
     if (this->get_status()->get_t_end() <= 0) {
       CLOG(ERROR, this->get_logger_id()) << "Time end point (" << this->get_status()->get_t_end()
                                          << ") must be non-zero positive.";

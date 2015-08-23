@@ -73,7 +73,7 @@ namespace pfasst
           result->data()[i] = sin(two_pi<spacial_type>() * i * dx) * exp(-t * pow(two_pi<spacial_type>(), 2) * this->_nu);
         }
 
-        CVLOG(2, this->get_logger_id()) << LOG_FIXED << "EXACT t=" << t << ": " << LOG_FLOAT << to_string(result);
+        CVLOG(4, this->get_logger_id()) << LOG_FIXED << "EXACT t=" << t << ": " << LOG_FLOAT << to_string(result);
 
         return result;
       }
@@ -112,13 +112,19 @@ namespace pfasst
         const auto num_nodes = this->get_quadrature()->get_num_nodes();
         nodes.insert(nodes.begin(), time_type(0.0));
 
-        for (size_t m = 0; m < num_nodes + 1; ++m) {
-          CLOG(INFO, this->get_logger_id()) << "t["<<m<<"]=" << LOG_FIXED << (t + dt * nodes[m])
+        CLOG(INFO, this->get_logger_id()) << "Observables after " << ((this->get_status()->get_iteration() == 0) ? string("prediction") : string("iteration ") + to_string(this->get_status()->get_iteration()));
+        for (size_t m = 0; m < num_nodes; ++m) {
+          CVLOG(1, this->get_logger_id()) << "  t["<<m<<"]=" << LOG_FIXED << (t + dt * nodes[m])
                              << "      |abs residual| = " << LOG_FLOAT << this->_abs_res_norms[m]
                              << "      |rel residual| = " << LOG_FLOAT << this->_rel_res_norms[m]
                              << "      |abs error| = " << LOG_FLOAT << encap::norm0(error[m])
                              << "      |rel error| = " << LOG_FLOAT << encap::norm0(rel_error[m]);
         }
+        CLOG(INFO, this->get_logger_id()) << "  t["<<num_nodes<<"]=" << LOG_FIXED << (t + dt * nodes[num_nodes])
+                                        << "      |abs residual| = " << LOG_FLOAT << this->_abs_res_norms[num_nodes]
+                                        << "      |rel residual| = " << LOG_FLOAT << this->_rel_res_norms[num_nodes]
+                                        << "      |abs error| = " << LOG_FLOAT << encap::norm0(error[num_nodes])
+                                        << "      |rel error| = " << LOG_FLOAT << encap::norm0(rel_error[num_nodes]);
 
         return converged;
       }
@@ -135,7 +141,7 @@ namespace pfasst
       vector<shared_ptr<typename SweeperTrait::encap_type>>
       Heat1D<SweeperTrait, Enabled>::compute_error(const typename SweeperTrait::time_type& t)
       {
-        CVLOG(1, this->get_logger_id()) << "computing error";
+        CVLOG(4, this->get_logger_id()) << "computing error";
 
         assert(this->get_status() != nullptr);
         const time_type dt = this->get_status()->get_dt();
@@ -153,7 +159,7 @@ namespace pfasst
         for (size_t m = 1; m < num_nodes + 1; ++m) {
           const time_type ds = dt * (nodes[m] - nodes[0]);
           error[m] = pfasst::encap::axpy(-1.0, this->exact(t + ds), this->get_states()[m]);
-          CVLOG(2, this->get_logger_id()) << LOG_FIXED << "error t=" << (t + ds) << ": "
+          CVLOG(3, this->get_logger_id()) << LOG_FIXED << "error t=" << (t + ds) << ": "
                                           << LOG_FLOAT << to_string(error[m]);
         }
 
@@ -187,7 +193,7 @@ namespace pfasst
       Heat1D<SweeperTrait, Enabled>::evaluate_rhs_expl(const typename SweeperTrait::time_type& t,
                                                        const shared_ptr<typename SweeperTrait::encap_type> u)
       {
-        CVLOG(2, this->get_logger_id()) << LOG_FIXED << "evaluating EXPLICIT part at t=" << t;
+        CVLOG(4, this->get_logger_id()) << LOG_FIXED << "evaluating EXPLICIT part at t=" << t;
         CVLOG(5, this->get_logger_id()) << LOG_FLOAT << "\tu:   " << to_string(u);
 
         auto result = this->get_encap_factory()->create();
@@ -214,7 +220,7 @@ namespace pfasst
       Heat1D<SweeperTrait, Enabled>::evaluate_rhs_impl(const typename SweeperTrait::time_type& t,
                                                        const shared_ptr<typename SweeperTrait::encap_type> u)
       {
-        CVLOG(2, this->get_logger_id()) << LOG_FIXED << "evaluating IMPLICIT part at t=" << t;
+        CVLOG(4, this->get_logger_id()) << LOG_FIXED << "evaluating IMPLICIT part at t=" << t;
         CVLOG(5, this->get_logger_id()) << LOG_FLOAT << "\tu:   " << to_string(u);
 
         spacial_type c = this->_nu / spacial_type(this->get_num_dofs());
@@ -241,7 +247,7 @@ namespace pfasst
                                                     const typename SweeperTrait::time_type& dt,
                                                     const shared_ptr<typename SweeperTrait::encap_type> rhs)
       {
-        CVLOG(2, this->get_logger_id()) << LOG_FIXED << "IMPLICIT spacial SOLVE at t=" << t << " with dt=" << dt;
+        CVLOG(4, this->get_logger_id()) << LOG_FIXED << "IMPLICIT spacial SOLVE at t=" << t << " with dt=" << dt;
         CVLOG(5, this->get_logger_id()) << LOG_FLOAT << "\tf:   " << to_string(f);
         CVLOG(5, this->get_logger_id()) << LOG_FLOAT << "\tu:   " << to_string(u);
         CVLOG(5, this->get_logger_id()) << LOG_FLOAT << "\trhs: " << to_string(rhs);
