@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 2.8.6)
 project(pfasst)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
 list(APPEND CMAKE_MODULE_PATH ${pfasst_SOURCE_DIR}/cmake)
 include(cmake/utility_functions.cmake)
 include(CheckCXXCompilerFlag)
@@ -48,10 +46,16 @@ if(${pfasst_WITH_MPI})
 
     if(pfasst_WITH_SCOREP)
         find_package(ScoreP REQUIRED)
-        # get_filename_component(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER} NAME)
-        # get_filename_component(CMAKE_C_COMPILER ${MPI_C_COMPILER} NAME)
-        set(CMAKE_CXX_COMPILER "${SCOREP_EXECUTABLE} ${CMAKE_CXX_COMPILER}")
-        set(CMAKE_C_COMPILER "${SCOREP_EXECUTABLE} ${CMAKE_C_COMPILER}")
+        configure_file(
+            "${pfasst_SOURCE_DIR}/cmake/scorep-cxx.sh.in"
+            "${CMAKE_BINARY_DIR}/scorep-cxx.sh"
+        )
+        configure_file(
+            "${pfasst_SOURCE_DIR}/cmake/scorep-cc.sh.in"
+            "${CMAKE_BINARY_DIR}/scorep-cc.sh"
+        )
+        set(CMAKE_CXX_COMPILER "${CMAKE_BINARY_DIR}/scorep-cxx.sh")
+        set(CMAKE_C_COMPILER "${CMAKE_BINARY_DIR}/scorep-cc.sh")
     endif()
 endif()
 
