@@ -28,6 +28,9 @@ option(pfasst_WITH_GCC_PROF     "Enable excessive debugging & profiling output w
 cmake_dependent_option(
        enable_LTO               "enable LinkTimeOptimization"                             OFF
            "CMAKE_BUILD_TYPE" Release)
+cmake_dependent_option(
+       pfasst_WITH_SCOREP       "enable scalable instrumentation with Score-P"            OFF
+           "pfasst_WITH_MPI" ON)
 
 set(3rdparty_INCLUDES)
 set(3rdparty_DEPENDEND_LIBS)
@@ -35,6 +38,9 @@ set(pfasst_INCLUDES)
 set(pfasst_DEPENDEND_LIBS)
 set(pfasst_DEPENDEND_TARGETS)
 set(pfasst_TESTS_DEPENDEND_TARGETS)
+option(pfasst_WITH_EXTRA_WRAPPER "Build script to allow to set an additional wrapper via $PREP" OFF)
+
+option(pfasst_WITH_LOGGING      "Enable logging output on console"                        ON)
 
 message(STATUS "********************************************************************************")
 message(STATUS "Further tests on the compiler")
@@ -61,13 +67,19 @@ if(${pfasst_WITH_MPI})
     endif()
     message(STATUS "Using MPI C++ Compiler Wrapper: ${MPI_CXX_COMPILER}")
     add_definitions(-DWITH_MPI)
+endif()
 
-    if(${pfasst_WITH_MPIP})
-        message(STATUS "")
-        message(STATUS "Trying to find and link against mpiP")
-        find_package(MPIP REQUIRED)
-        list(APPEND pfasst_DEPENDEND_LIBS ${MPIP_LIBRARIES})
-    endif()
+if(pfasst_WITH_EXTRA_WRAPPER)
+    configure_file(
+        "${pfasst_SOURCE_DIR}/cmake/cxx_wrapper.sh.in"
+        "${CMAKE_BINARY_DIR}/cxx_wrapper.sh"
+    )
+    configure_file(
+        "${pfasst_SOURCE_DIR}/cmake/cc_wrapper.sh.in"
+        "${CMAKE_BINARY_DIR}/cc_wrapper.sh"
+    )
+    set(CMAKE_CXX_COMPILER "${CMAKE_BINARY_DIR}/cxx_wrapper.sh")
+    set(CMAKE_C_COMPILER "${CMAKE_BINARY_DIR}/cc_wrapper.sh")
 endif()
 
 # Check for C++11 support

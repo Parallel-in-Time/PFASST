@@ -1,0 +1,5 @@
+#!/bin/bash
+
+CXX_COMPILER=@CMAKE_CXX_COMPILER@
+
+$PREP $CXX_COMPILER $@
