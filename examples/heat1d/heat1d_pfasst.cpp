@@ -64,7 +64,7 @@ namespace pfasst
         pfasst.run();
         pfasst.post_run();
       }
-    }  // ::pfasst::examples::advec_diff
+    }  // ::pfasst::examples::heat1d
   } // ::pfasst::examples
 }  // ::pfasst
 

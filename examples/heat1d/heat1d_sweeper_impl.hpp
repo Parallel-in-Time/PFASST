@@ -270,6 +270,6 @@ namespace pfasst
         CVLOG(5, this->get_logger_id()) << "\t  f: " << to_string(f);
         CVLOG(5, this->get_logger_id()) << "\t  u: " << to_string(u);
       }
-    }  // ::pfasst::examples::advec_diff
+    }  // ::pfasst::examples::heat1d
   }  // ::pfasst::examples
 }  // ::pfasst

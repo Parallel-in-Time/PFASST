@@ -26,7 +26,7 @@ namespace pfasst
                         vector<typename SweeperTrait::time_type>,
                         typename SweeperTrait::encap_type::data_type
                       >::value,
-                      "Advection Diffusion Sweeper requires encapsulated vectors");
+                      "Heat1D Sweeper requires encapsulated vectors");
 
         public:
           typedef          SweeperTrait         traits;
