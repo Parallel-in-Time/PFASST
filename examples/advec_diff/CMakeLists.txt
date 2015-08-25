@@ -12,6 +12,7 @@ set(advecdiff_examples
 )
 
 set(advecdiff_mpi_examples
+    advec_diff_pfasst
 )
 
 if(${pfasst_WITH_MPI})
