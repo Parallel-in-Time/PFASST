@@ -16,7 +16,7 @@ set(advecdiff_mpi_examples
 )
 
 if(${pfasst_WITH_MPI})
-    set(all_advecdiff_examples ${advecdiff_examples} ${advecdiff_mpi_examples})
+    set(all_advecdiff_examples ${advecdiff_mpi_examples})
 else()
     set(all_advecdiff_examples ${advecdiff_examples})
 endif()

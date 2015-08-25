@@ -16,7 +16,7 @@ set(heat_mpi_examples
 )
 
 if(${pfasst_WITH_MPI})
-    set(all_heat_examples ${heat_examples} ${heat_mpi_examples})
+    set(all_heat_examples ${heat_mpi_examples})
 else()
     set(all_heat_examples ${heat_examples})
 endif()
