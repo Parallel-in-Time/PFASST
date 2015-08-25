@@ -223,9 +223,9 @@ namespace pfasst
       return false;
 
     } else {
-      CLOG(INFO, this->get_logger_id()) << "Advancing " << num_steps
-                                        << ((num_steps > 1) ? " time steps " : " time step ")
-                                        << "with dt=" << this->get_status()->get_dt() << " to t=" << new_time;
+      CVLOG(1, this->get_logger_id()) << "Advancing " << num_steps
+                                      << ((num_steps > 1) ? " time steps " : " time step ")
+                                      << "with dt=" << this->get_status()->get_dt() << " to t=" << new_time;
 
       this->status()->time() += delta_time;
       this->status()->step() += num_steps;
@@ -248,8 +248,7 @@ namespace pfasst
       return false;
 
     } else {
-      CLOG(INFO, this->get_logger_id()) << "Advancing to next iteration -> "
-                                        << (this->get_status()->get_iteration() + 1);
+      CVLOG(1, this->get_logger_id()) << "Advancing to next iteration -> " << (this->get_status()->get_iteration() + 1);
 
       this->status()->iteration()++;
 

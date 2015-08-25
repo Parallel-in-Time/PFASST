@@ -79,8 +79,17 @@ namespace pfasst
     {
       using vec = Eigen::Array<precision, 1, Eigen::Dynamic>;
       const vec row_sums = this->get_q_mat().rowwise().sum();
-      Eigen::Map<const vec> nodes(this->get_nodes().data(), this->get_nodes().size());
+      auto quad_nodes = this->get_nodes();
+      quad_nodes.insert(quad_nodes.begin(), 0.0);
+      Eigen::Map<const vec> nodes(quad_nodes.data(), this->get_nodes().size() + 1);
       return (row_sums - nodes).maxCoeff();
+    }
+
+    template<typename precision>
+    string
+    IQuadrature<precision>::print_summary() const
+    {
+      return "IQuadrature";
     }
 
     /**

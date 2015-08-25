@@ -215,6 +215,9 @@ namespace pfasst
     if (this->get_quadrature() == nullptr) {
       throw runtime_error("Quadrature not yet set.");
     }
+    CLOG(INFO, this->get_logger_id()) << "using as quadrature: " << this->get_quadrature()->print_summary()
+                                      << " and an expected error of " << LOG_FLOAT << this->get_quadrature()->expected_error();
+
     assert(this->get_encap_factory() != nullptr);
 
     const auto nodes = this->get_quadrature()->get_nodes();
@@ -393,13 +396,13 @@ namespace pfasst
       CVLOG(4, this->get_logger_id()) << "convergence check";
 
       if (this->status()->abs_res_norm() < this->_abs_residual_tol) {
-        CLOG(INFO, this->get_logger_id()) << "Sweeper has converged w.r.t. absolute residual tolerance: " << LOG_FLOAT
-                                          << this->status()->abs_res_norm() << " < " << this->_abs_residual_tol;
+        CVLOG(1, this->get_logger_id()) << "Sweeper has converged w.r.t. absolute residual tolerance: " << LOG_FLOAT
+                                        << this->status()->abs_res_norm() << " < " << this->_abs_residual_tol;
       } else if (this->status()->rel_res_norm() < this->_rel_residual_tol) {
-        CLOG(INFO, this->get_logger_id()) << "Sweeper has converged w.r.t. relative residual tolerance: " << LOG_FLOAT
-                                          << this->status()->rel_res_norm() << " < " << this->_rel_residual_tol;
+        CVLOG(1, this->get_logger_id()) << "Sweeper has converged w.r.t. relative residual tolerance: " << LOG_FLOAT
+                                        << this->status()->rel_res_norm() << " < " << this->_rel_residual_tol;
       } else {
-        CLOG(INFO, this->get_logger_id()) << "Sweeper has not yet converged to neither residual tolerance.";
+        CVLOG(1, this->get_logger_id()) << "Sweeper has not yet converged to neither residual tolerance.";
       }
 
       return (   this->status()->abs_res_norm() < this->_abs_residual_tol

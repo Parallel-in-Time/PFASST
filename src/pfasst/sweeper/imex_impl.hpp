@@ -271,10 +271,6 @@ namespace pfasst
   IMEX<SweeperTrait, Enabled>::post_step()
   {
     Sweeper<SweeperTrait, Enabled>::post_step();
-
-    const time_type t_end = this->get_status()->get_time() + this->get_status()->get_dt();
-    CLOG(INFO, this->get_logger_id()) << LOG_FIXED << "Solution at t_end=" << t_end << ": "
-                          << LOG_FLOAT << to_string(this->get_end_state());
   }
 
   template<class SweeperTrait, typename Enabled>
