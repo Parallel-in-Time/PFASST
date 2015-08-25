@@ -1,5 +1,5 @@
-#ifndef _PFASST__EXAMPLES__HEAD1D__HEAD1D_SWEEPER_HPP_
-#define _PFASST__EXAMPLES__HEAD1D__HEAD1D_SWEEPER_HPP_
+#ifndef _PFASST__EXAMPLES__ADVEC_DIFF__ADVEC_DIFF_SWEEPER_HPP_
+#define _PFASST__EXAMPLES__ADVEC_DIFF__ADVEC_DIFF_SWEEPER_HPP_
 
 #include <memory>
 #include <vector>
@@ -13,20 +13,26 @@ namespace pfasst
 {
   namespace examples
   {
-    namespace heat1d
+    namespace advec_diff
     {
+      template<class SweeperTrait>
+      static const typename SweeperTrait::spacial_type DEFAULT_DIFFUSIVITY = 0.02;
+
+      template<class SweeperTrait>
+      static const typename SweeperTrait::spacial_type DEFAULT_VELOCITY    = 1.0;
+
       template<
         class SweeperTrait,
         typename Enabled = void
       >
-      class Heat1D
+      class AdvecDiff
         : public IMEX<SweeperTrait, Enabled>
       {
         static_assert(is_same<
                         vector<typename SweeperTrait::time_type>,
                         typename SweeperTrait::encap_type::data_type
                       >::value,
-                      "Heat1D Sweeper requires encapsulated vectors");
+                      "Advection Diffusion Sweeper requires encapsulated vectors");
 
         public:
           typedef          SweeperTrait         traits;
@@ -39,8 +45,10 @@ namespace pfasst
         private:
           time_type    _t0;
           spacial_type _nu;
+          spacial_type _v;
 
           pfasst::contrib::FFT<spacial_type> _fft;
+          vector<complex<spacial_type>>      _ddx;
           vector<complex<spacial_type>>      _lap;
 
         protected:
@@ -59,12 +67,13 @@ namespace pfasst
           virtual vector<shared_ptr<typename SweeperTrait::encap_type>> compute_relative_error(const vector<shared_ptr<typename SweeperTrait::encap_type>>& error, const typename SweeperTrait::time_type& t);
 
         public:
-          explicit Heat1D(const size_t& ndofs, const typename SweeperTrait::spacial_type& nu = 0.02);
-          Heat1D(const Heat1D<SweeperTrait, Enabled>& other) = default;
-          Heat1D(Heat1D<SweeperTrait, Enabled>&& other) = default;
-          virtual ~Heat1D() = default;
-          Heat1D<SweeperTrait, Enabled>& operator=(const Heat1D<SweeperTrait, Enabled>& other) = default;
-          Heat1D<SweeperTrait, Enabled>& operator=(Heat1D<SweeperTrait, Enabled>&& other) = default;
+          explicit AdvecDiff(const size_t& ndofs, const typename SweeperTrait::spacial_type& nu = DEFAULT_DIFFUSIVITY<SweeperTrait>,
+                             const typename SweeperTrait::spacial_type& v = DEFAULT_VELOCITY<SweeperTrait>);
+          AdvecDiff(const AdvecDiff<SweeperTrait, Enabled>& other) = default;
+          AdvecDiff(AdvecDiff<SweeperTrait, Enabled>&& other) = default;
+          virtual ~AdvecDiff() = default;
+          AdvecDiff<SweeperTrait, Enabled>& operator=(const AdvecDiff<SweeperTrait, Enabled>& other) = default;
+          AdvecDiff<SweeperTrait, Enabled>& operator=(AdvecDiff<SweeperTrait, Enabled>&& other) = default;
 
           virtual void set_options() override;
 
@@ -76,10 +85,10 @@ namespace pfasst
 
           virtual size_t get_num_dofs() const;
       };
-    }  // ::pfasst::examples::heat1d
+    }  // ::pfasst::examples::advec_diff
   }  // ::pfasst::examples
 }  // ::pfasst
 
-#include "heat1d_sweeper_impl.hpp"
+#include "advec_diff_sweeper_impl.hpp"
 
-#endif  // _PFASST__EXAMPLES__HEAD1D__HEAD1D_SWEEPER_HPP_
+#endif  // _PFASST__EXAMPLES__ADVEC_DIFF__ADVEC_DIFF_SWEEPER_HPP_

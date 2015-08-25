@@ -43,6 +43,10 @@ namespace pfasst
         virtual bool left_is_node() const override;
         virtual bool right_is_node() const override;
         //! @}
+        
+        //! @{
+        virtual string print_summary() const override;
+        //! @}
 
       protected:
         //! @{

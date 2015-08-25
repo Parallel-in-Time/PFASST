@@ -7,7 +7,7 @@ using namespace std;
 #include <pfasst/controller/two_level_mlsdc.hpp>
 #include <pfasst/transfer/spectral_1d.hpp>
 
-#include "heat1d_sweeper.hpp"
+#include "advec_diff_sweeper.hpp"
 
 using pfasst::encap::VectorEncapsulation;
 using pfasst::quadrature::quadrature_factory;
@@ -15,19 +15,19 @@ using pfasst::quadrature::QuadratureType;
 using pfasst::Spectral1DTransfer;
 using pfasst::TwoLevelMLSDC;
 
-using pfasst::examples::heat1d::Heat1D;
+using pfasst::examples::advec_diff::AdvecDiff;
 
-typedef VectorEncapsulation<double, double>                        EncapType;
-typedef Heat1D<pfasst::sweeper_traits<typename EncapType::traits>> SweeperType;
-typedef pfasst::transfer_traits<SweeperType, SweeperType, 2>       TransferTraits;
-typedef Spectral1DTransfer<TransferTraits>                         TransferType;
+typedef VectorEncapsulation<double, double>                           EncapType;
+typedef AdvecDiff<pfasst::sweeper_traits<typename EncapType::traits>> SweeperType;
+typedef pfasst::transfer_traits<SweeperType, SweeperType, 2>          TransferTraits;
+typedef Spectral1DTransfer<TransferTraits>                            TransferType;
 
 
 namespace pfasst
 {
   namespace examples
   {
-    namespace heat1d
+    namespace advec_diff
     {
       void run_mlsdc(const size_t& ndofs, const size_t& coarse_factor, const size_t& nnodes,
                      const QuadratureType& quad_type, const double& t_0, const double& dt,
@@ -60,7 +60,7 @@ namespace pfasst
         mlsdc.run();
         mlsdc.post_run();
       }
-    }  // ::pfasst::examples::heat1d
+    }  // ::pfasst::examples::advec_diff
   } // ::pfasst::examples
 }  // ::pfasst
 
@@ -95,5 +95,5 @@ int main(int argc, char** argv)
   }
   const size_t niter = get_value<size_t>("num_iters", 5);
 
-  pfasst::examples::heat1d::run_mlsdc(ndofs, coarse_factor, nnodes, quad_type, t_0, dt, t_end, niter);
+  pfasst::examples::advec_diff::run_mlsdc(ndofs, coarse_factor, nnodes, quad_type, t_0, dt, t_end, niter);
 }

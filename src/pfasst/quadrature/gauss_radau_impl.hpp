@@ -22,11 +22,11 @@ namespace pfasst
       this->compute_nodes();
       this->compute_weights();
 
-      CLOG(INFO, "QUAD") << LOG_FIXED << "Gauss-Radau (right) on [0.0, 1.0] with " << num_nodes
-                         << " nodes at " << this->get_nodes();
-      CVLOG(1, "QUAD") << "Q:";
+      CVLOG(4, "QUAD") << LOG_FIXED << "Gauss-Radau (right) on [0.0, 1.0] with " << num_nodes
+                       << " nodes at " << this->get_nodes();
+      CVLOG(5, "QUAD") << "Q:";
       for (size_t row = 0; row < this->get_q_mat().rows(); ++row) {
-        CVLOG(1, "QUAD") << "  " << this->get_q_mat().block(row, 0, 1, this->get_q_mat().cols());
+        CVLOG(5, "QUAD") << "  " << this->get_q_mat().block(row, 0, 1, this->get_q_mat().cols());
       }
     }
 
@@ -40,6 +40,13 @@ namespace pfasst
     bool GaussRadau<precision>::right_is_node() const
     {
       return RIGHT_IS_NODE;
+    }
+
+    template<typename precision>
+    string
+    GaussRadau<precision>::print_summary() const
+    {
+      return "Gauss-Radau (right) on [0.0, 1.0] with " + to_string(this->get_num_nodes()) + " nodes";
     }
 
     template<typename precision>

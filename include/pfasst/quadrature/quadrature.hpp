@@ -292,6 +292,8 @@ namespace pfasst
          */
         precision expected_error() const;
 
+        virtual string print_summary() const;
+
       protected:
         //! @{
         /**

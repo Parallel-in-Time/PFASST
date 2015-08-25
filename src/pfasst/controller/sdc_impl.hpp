@@ -161,11 +161,11 @@ namespace pfasst
       CLOG(INFO, this->get_logger_id()) << "Sweeper has converged.";
       return false;
     } else if (Controller<TransferT>::advance_iteration()) {
-      CLOG(INFO, this->get_logger_id()) << "Sweeper has not yet converged and additional iterations to do.";
+      CVLOG(1, this->get_logger_id()) << "Sweeper has not yet converged and additional iterations to do.";
       this->get_sweeper()->save();
       return true;
     } else {
-      CLOG(INFO, this->get_logger_id()) << "Sweeper has not yet converged and no more iterations to do.";
+      CLOG(WARNING, this->get_logger_id()) << "Sweeper has not yet converged and no more iterations to do.";
       return false;
     }
   }

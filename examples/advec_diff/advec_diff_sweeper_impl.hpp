@@ -1,4 +1,4 @@
-#include "heat1d_sweeper.hpp"
+#include "advec_diff_sweeper.hpp"
 
 #include <cmath>
 #include <complex>
@@ -22,22 +22,25 @@ namespace pfasst
 {
   namespace examples
   {
-    namespace heat1d
+    namespace advec_diff
     {
       template<class SweeperTrait, typename Enabled>
       void
-      Heat1D<SweeperTrait, Enabled>::init_opts()
+      AdvecDiff<SweeperTrait, Enabled>::init_opts()
       {
-        config::options::add_option<size_t>("Heat 1D", "num_dofs", "number spacial degrees of freedom on fine level");
-        config::options::add_option<size_t>("Heat 1D", "coarse_factor", "coarsening factor");
-        config::options::add_option<spacial_type>("Heat 1D", "nu", "thermal diffusivity");
+        config::options::add_option<size_t>("Advection-Diffusion", "num_dofs", "number spacial degrees of freedom on fine level");
+        config::options::add_option<size_t>("Advection-Diffusion", "coarse_factor", "coarsening factor");
+        config::options::add_option<spacial_type>("Advection-Diffusion", "nu", "diffusivity");
+        config::options::add_option<spacial_type>("Advection-Diffusion", "vel", "velocity of advection");
       }
 
       template<class SweeperTrait, typename Enabled>
-      Heat1D<SweeperTrait, Enabled>::Heat1D(const size_t& ndofs, const typename SweeperTrait::spacial_type& nu)
+      AdvecDiff<SweeperTrait, Enabled>::AdvecDiff(const size_t& ndofs, const typename SweeperTrait::spacial_type& nu, const typename SweeperTrait::spacial_type& v)
         :   IMEX<SweeperTrait, Enabled>()
-          , _t0(0.0)
+          , _t0(1.0)
           , _nu(nu)
+          , _v(v)
+          , _ddx(ndofs)
           , _lap(ndofs)
       {
         this->encap_factory()->set_size(ndofs);
@@ -46,31 +49,38 @@ namespace pfasst
           spacial_type kx = two_pi<spacial_type>()
                             * ((i <= ndofs / 2) ? spacial_type(i)
                                                 : spacial_type(i) - spacial_type(ndofs));
+          this->_ddx[i] = complex<spacial_type>(0.0, 1.0) * kx;
           this->_lap[i] = pfasst::almost_zero(kx * kx) ? 0.0 : -kx * kx;
         }
       }
 
       template<class SweeperTrait, typename Enabled>
       void
-      Heat1D<SweeperTrait, Enabled>::set_options()
+      AdvecDiff<SweeperTrait, Enabled>::set_options()
       {
         IMEX<SweeperTrait, Enabled>::set_options();
 
-        this->_nu = config::get_value<typename traits::spacial_type>("nu", 0.2);
+        this->_nu = config::get_value<typename traits::spacial_type>("nu", DEFAULT_DIFFUSIVITY<SweeperTrait>);
+        this->_v = config::get_value<typename traits::spacial_type>("vel", DEFAULT_VELOCITY<SweeperTrait>);
       }
 
       template<class SweeperTrait, typename Enabled>
       shared_ptr<typename SweeperTrait::encap_type>
-      Heat1D<SweeperTrait, Enabled>::exact(const typename SweeperTrait::time_type& t)
+      AdvecDiff<SweeperTrait, Enabled>::exact(const typename SweeperTrait::time_type& t)
       {
         auto result = this->get_encap_factory()->create();
 
-        // taken from pySDC
-        //   xvalues = np.array([(i) * self.dx for i in range(self.nvars)])
-        //   me.values = np.sin(2 * np.pi * xvalues) * np.exp(-t * (2 * np.pi)**2 * self.nu)
-        const spacial_type dx = 1.0 / spacial_type(this->get_num_dofs());
+        const spacial_type dx = 1.0 / sqrt(4.0 * pi<spacial_type>() * this->_nu * (t + this->_t0));
+        
         for (size_t i = 0; i < this->get_num_dofs(); ++i) {
-          result->data()[i] = sin(two_pi<spacial_type>() * i * dx) * exp(-t * pow(two_pi<spacial_type>(), 2) * this->_nu);
+          result->data()[i] = 0.0;
+        }
+
+        for (int ii = -2; ii < 3; ++ii) {
+          for (size_t i = 0; i < this->get_num_dofs(); ++i) {
+            spacial_type x = spacial_type(i) / this->get_num_dofs() - 0.5 + ii - t * this->_v;
+            result->data()[i] += dx * exp(-x * x / (4 * this->_nu * (t + this->_t0)));
+          }
         }
 
         CVLOG(4, this->get_logger_id()) << LOG_FIXED << "EXACT t=" << t << ": " << LOG_FLOAT << to_string(result);
@@ -80,7 +90,7 @@ namespace pfasst
 
       template<class SweeperTrait, typename Enabled>
       void
-      Heat1D<SweeperTrait, Enabled>::post_step()
+      AdvecDiff<SweeperTrait, Enabled>::post_step()
       {
         IMEX<SweeperTrait, Enabled>::post_step();
 
@@ -96,7 +106,7 @@ namespace pfasst
 
       template<class SweeperTrait, typename Enabled>
       bool
-      Heat1D<SweeperTrait, Enabled>::converged()
+      AdvecDiff<SweeperTrait, Enabled>::converged()
       {
         const bool converged = IMEX<SweeperTrait, Enabled>::converged();
 
@@ -131,7 +141,7 @@ namespace pfasst
 
       template<class SweeperTrait, typename Enabled>
       size_t
-      Heat1D<SweeperTrait, Enabled>::get_num_dofs() const
+      AdvecDiff<SweeperTrait, Enabled>::get_num_dofs() const
       {
         return this->get_encap_factory()->size();
       }
@@ -139,7 +149,7 @@ namespace pfasst
 
       template<class SweeperTrait, typename Enabled>
       vector<shared_ptr<typename SweeperTrait::encap_type>>
-      Heat1D<SweeperTrait, Enabled>::compute_error(const typename SweeperTrait::time_type& t)
+      AdvecDiff<SweeperTrait, Enabled>::compute_error(const typename SweeperTrait::time_type& t)
       {
         CVLOG(4, this->get_logger_id()) << "computing error";
 
@@ -168,7 +178,7 @@ namespace pfasst
 
       template<class SweeperTrait, typename Enabled>
       vector<shared_ptr<typename SweeperTrait::encap_type>>
-      Heat1D<SweeperTrait, Enabled>::compute_relative_error(const vector<shared_ptr<typename SweeperTrait::encap_type>>& error,
+      AdvecDiff<SweeperTrait, Enabled>::compute_relative_error(const vector<shared_ptr<typename SweeperTrait::encap_type>>& error,
                                                             const typename SweeperTrait::time_type& t)
       {
         assert(this->get_quadrature() != nullptr);
@@ -190,24 +200,21 @@ namespace pfasst
 
       template<class SweeperTrait, typename Enabled>
       shared_ptr<typename SweeperTrait::encap_type>
-      Heat1D<SweeperTrait, Enabled>::evaluate_rhs_expl(const typename SweeperTrait::time_type& t,
+      AdvecDiff<SweeperTrait, Enabled>::evaluate_rhs_expl(const typename SweeperTrait::time_type& t,
                                                        const shared_ptr<typename SweeperTrait::encap_type> u)
       {
         CVLOG(4, this->get_logger_id()) << LOG_FIXED << "evaluating EXPLICIT part at t=" << t;
         CVLOG(5, this->get_logger_id()) << LOG_FLOAT << "\tu:   " << to_string(u);
 
-        auto result = this->get_encap_factory()->create();
+        spacial_type c = - this->_v / spacial_type(this->get_num_dofs());
 
-        // taken form pySDC
-        //   # xvalues = np.array([(i+1)*self.dx for i in range(self.nvars)])
-        //   fexpl.values = np.zeros(self.nvars)  # -np.sin(np.pi * xvalues) * (np.sin(t) - self.nu * np.pi**2 * np.cos(t))
-//         const spacial_type PI = pi<spacial_type>();
-//         const spacial_type PIsqr = pi_sqr<spacial_type>();
-//         const spacial_type dx = 1.0 / (spacial_type(this->get_num_dofs()) + 1);
-//         for (size_t i = 0; i < this->get_num_dofs(); ++i) {
-//           result->data()[i] = -1.0 * sin(PI * (i + 1) * dx) * (sin(t) - this->_nu * PIsqr * cos(t));
-//         }
-        result->zero();
+        auto* z = this->_fft.forward(u);
+        for (size_t i = 0; i < this->get_num_dofs(); ++i) {
+          z[i] *= c * this->_ddx[i];
+        }
+
+        auto result = this->get_encap_factory()->create();
+        this->_fft.backward(result);
 
         this->_num_expl_f_evals++;
 
@@ -217,7 +224,7 @@ namespace pfasst
 
       template<class SweeperTrait, typename Enabled>
       shared_ptr<typename SweeperTrait::encap_type>
-      Heat1D<SweeperTrait, Enabled>::evaluate_rhs_impl(const typename SweeperTrait::time_type& t,
+      AdvecDiff<SweeperTrait, Enabled>::evaluate_rhs_impl(const typename SweeperTrait::time_type& t,
                                                        const shared_ptr<typename SweeperTrait::encap_type> u)
       {
         CVLOG(4, this->get_logger_id()) << LOG_FIXED << "evaluating IMPLICIT part at t=" << t;
@@ -241,7 +248,7 @@ namespace pfasst
 
       template<class SweeperTrait, typename Enabled>
       void
-      Heat1D<SweeperTrait, Enabled>::implicit_solve(shared_ptr<typename SweeperTrait::encap_type> f,
+      AdvecDiff<SweeperTrait, Enabled>::implicit_solve(shared_ptr<typename SweeperTrait::encap_type> f,
                                                     shared_ptr<typename SweeperTrait::encap_type> u,
                                                     const typename SweeperTrait::time_type& t,
                                                     const typename SweeperTrait::time_type& dt,
@@ -270,6 +277,6 @@ namespace pfasst
         CVLOG(5, this->get_logger_id()) << "\t  f: " << to_string(f);
         CVLOG(5, this->get_logger_id()) << "\t  u: " << to_string(u);
       }
-    }  // ::pfasst::examples::heat1d
+    }  // ::pfasst::examples::advec_diff
   }  // ::pfasst::examples
 }  // ::pfasst
