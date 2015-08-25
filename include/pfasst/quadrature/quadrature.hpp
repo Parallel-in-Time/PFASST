@@ -290,7 +290,7 @@ namespace pfasst
         /**
          * Compute a rough estimate of the numerical error... XXX
          */
-        precision expected_error() const;
+        virtual precision expected_error() const;
 
         virtual string print_summary() const;
 
