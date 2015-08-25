@@ -71,21 +71,6 @@ TEST_F(Interface, communicator_can_be_assigned)
   EXPECT_THAT(controller->get_communicator(), Eq(comm));
 }
 
-TEST_F(Interface, computes_number_steps_fails_if_tend_or_dt_not_set)
-{
-  EXPECT_THROW(controller->get_num_steps(), logic_error);
-
-  controller->status()->t_end() = 4.2;
-  EXPECT_THROW(controller->get_num_steps(), logic_error);
-}
-
-TEST_F(Interface, computes_number_steps)
-{
-  controller->status()->t_end() = 4.2;
-  controller->status()->dt() = 0.1;
-  EXPECT_THAT(controller->get_num_steps(), Eq(42));
-}
-
 
 class Setup
   : public ::testing::Test

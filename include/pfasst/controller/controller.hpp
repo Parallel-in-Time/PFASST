@@ -31,6 +31,7 @@ namespace pfasst
       bool                           _ready;
       string                         _logger_id;
 
+      virtual void compute_num_steps();
       virtual bool& ready();
 
     public:
@@ -48,7 +49,6 @@ namespace pfasst
       virtual const shared_ptr<Status<typename TransferT::traits::fine_time_type>>  get_status() const;
 
       virtual size_t get_num_levels() const;
-      virtual size_t get_num_steps() const;
       virtual bool   is_ready() const;
 
       virtual       void  set_logger_id(const string& logger_id);

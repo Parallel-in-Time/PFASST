@@ -143,7 +143,7 @@ namespace pfasst
     do {
       CLOG(INFO, this->get_logger_id()) << "";
       CLOG(INFO, this->get_logger_id()) << "Time Step " << (this->get_status()->get_step() + 1)
-                                        << " of " << this->get_num_steps();
+                                        << " of " << this->get_status()->get_num_steps();
 
       this->status()->state() = State::PREDICTING;
 

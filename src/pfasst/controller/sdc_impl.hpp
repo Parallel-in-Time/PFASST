@@ -107,7 +107,7 @@ namespace pfasst
     CLOG(INFO, this->get_logger_id()) << "  t0:        " << LOG_FIXED << this->get_status()->get_time();
     CLOG(INFO, this->get_logger_id()) << "  dt:        " << LOG_FIXED << this->get_status()->get_dt();
     CLOG(INFO, this->get_logger_id()) << "  T:         " << LOG_FIXED << this->get_status()->get_t_end();
-    CLOG(INFO, this->get_logger_id()) << "  num steps: " << LOG_FIXED << this->get_num_steps();
+    CLOG(INFO, this->get_logger_id()) << "  num steps: " << LOG_FIXED << this->get_status()->get_num_steps();
     CLOG(INFO, this->get_logger_id()) << "  max iter:  " << LOG_FIXED << this->get_status()->get_max_iterations();
     CLOG(INFO, this->get_logger_id()) << "  Initial Value: " << to_string(this->get_sweeper()->get_initial_state());
 
@@ -116,7 +116,7 @@ namespace pfasst
       const bool do_initial = this->get_status()->get_step() == 0;
       CLOG(INFO, this->get_logger_id()) << "";
       CLOG(INFO, this->get_logger_id()) << "Time Step " << (this->get_status()->get_step() + 1)
-                                        << " of " << this->get_num_steps();
+                                        << " of " << this->get_status()->get_num_steps();
 
       // iterate on current time step
       do {

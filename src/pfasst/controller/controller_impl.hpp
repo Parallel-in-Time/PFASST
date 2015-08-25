@@ -53,11 +53,14 @@ namespace pfasst
   }
 
   template<class TransferT, class CommT>
-  size_t
-  Controller<TransferT, CommT>::get_num_steps() const
+  void
+  Controller<TransferT, CommT>::compute_num_steps()
   {
-    // BUG: fix this whole stuff here; probably need to save the result after the first call (i.e. in ::setup()) into a
-    //   local variable
+    if (this->get_status()->get_num_steps() != 0) {
+      CLOG(WARNING, this->get_logger_id()) << "Total number of steps was already computed. Skipping.";
+      return;
+    }
+    
     if (this->get_status()->get_t_end() <= 0) {
       CLOG(ERROR, this->get_logger_id()) << "Time end point (" << this->get_status()->get_t_end()
                                          << ") must be non-zero positive.";
@@ -84,7 +87,7 @@ namespace pfasst
       << "(" << this->get_status()->get_t_end() << " - " << this->get_status()->get_time() << ") / " << this->get_status()->get_dt()
       << " = " << num_steps << " != " << lrint(num_steps);
 
-    return lrint(num_steps);
+    this->status()->num_steps() = lrint(num_steps);
   }
 
   template<class TransferT, class CommT>
@@ -165,7 +168,8 @@ namespace pfasst
       throw logic_error("end time point must be larger zero");
     }
 
-    const auto num_steps = this->get_num_steps();
+    this->compute_num_steps();
+    const auto num_steps = this->get_status()->get_num_steps();
     if (!almost_equal(this->get_status()->get_time() + num_steps * this->get_status()->get_dt(), this->get_status()->get_t_end())) {
       CLOG(ERROR, this->get_logger_id()) << "End time point not an integral multiple of time delta. " << LOG_FIXED
         << " (" << num_steps << " * " << this->get_status()->get_dt()

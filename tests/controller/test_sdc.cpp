@@ -59,24 +59,6 @@ TEST_F(Interface, status_can_be_modified)
   EXPECT_THAT(controller->get_status()->get_time(), Eq(42.0));
 }
 
-TEST_F(Interface, computes_number_steps_fails_if_tend_or_dt_not_set)
-{
-  controller->status() = status;
-  EXPECT_THROW(controller->get_num_steps(), logic_error);
-
-  controller->status() = status;
-  controller->status()->t_end() = 4.2;
-  EXPECT_THROW(controller->get_num_steps(), logic_error);
-}
-
-TEST_F(Interface, computes_number_steps)
-{
-  controller->status() = status;
-  controller->status()->t_end() = 4.2;
-  controller->status()->dt() = 0.1;
-  EXPECT_THAT(controller->get_num_steps(), Eq(42));
-}
-
 
 class Setup
   : public ::testing::Test

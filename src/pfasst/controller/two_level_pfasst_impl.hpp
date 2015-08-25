@@ -65,19 +65,19 @@ namespace pfasst
 
     assert(this->get_communicator() != nullptr);
 
-    if (this->get_num_steps() % this->get_communicator()->get_size() != 0) {
-      CLOG(ERROR, this->get_logger_id()) << "Number of time steps (" << this->get_num_steps()
+    if (this->get_status()->get_num_steps() % this->get_communicator()->get_size() != 0) {
+      CLOG(ERROR, this->get_logger_id()) << "Number of time steps (" << this->get_status()->get_num_steps()
                                          << ") must be a multiple of the number of processors ("
                                          << this->get_communicator()->get_size() << ").";
       throw logic_error("number time steps must be multiple of number processors");
     }
     
-    const size_t num_blocks = this->get_num_steps() / this->get_communicator()->get_size();
+    const size_t num_blocks = this->get_status()->get_num_steps() / this->get_communicator()->get_size();
 
     if (num_blocks == 0) {
       CLOG(ERROR, this->get_logger_id()) << "Invalid Duration: There are more time processes ("
                                          << this->get_communicator()->get_size() << ") than time steps ("
-                                         << this->get_num_steps() << ").";
+                                         << this->get_status()->get_num_steps() << ").";
       throw logic_error("invalid duration: too many time processes for given time steps");
     }
 
@@ -86,7 +86,7 @@ namespace pfasst
 
       CLOG(INFO, this->get_logger_id()) << "";
       CLOG(INFO, this->get_logger_id()) << "Time Step " << (this->get_status()->get_step() + 1)
-      << " of " << this->get_num_steps();
+      << " of " << this->get_status()->get_num_steps();
 
       this->status()->state() = State::PREDICTING;
 

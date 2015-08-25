@@ -50,6 +50,7 @@ namespace pfasst
     State     state          = pfasst::State::UNKNOWN;
 
     size_t    step           = 0;
+    size_t    num_steps      = 0;
     size_t    iteration      = 0;
     size_t    max_iterations = 0;
 
@@ -93,6 +94,9 @@ namespace pfasst
 
       virtual size_t& step();
       virtual size_t  get_step() const;
+
+      virtual size_t& num_steps();
+      virtual size_t  get_num_steps() const;
 
       virtual size_t& iteration();
       virtual size_t  get_iteration() const;

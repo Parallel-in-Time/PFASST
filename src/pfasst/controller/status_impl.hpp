@@ -14,10 +14,11 @@ namespace pfasst
   void
   Status<precision>::create_mpi_datatype()
   {
-    int count = 9;
-    int blocks[9] = {
+    const int COUNT = 10;
+    int blocks[COUNT] = {
       sizeof(State),     // state
       sizeof(size_t),    // step
+      sizeof(size_t),    // num_steps
       sizeof(size_t),    // iteration
       sizeof(size_t),    // max_iterations
       sizeof(precision), // time
@@ -26,9 +27,10 @@ namespace pfasst
       sizeof(precision), // abs_res_norm
       sizeof(precision)  // rel_res_norm
     };
-    MPI_Aint displ[9] = {
+    MPI_Aint displ[COUNT] = {
       offsetof(StatusDetail<precision>, state),
       offsetof(StatusDetail<precision>, step),
+      offsetof(StatusDetail<precision>, num_steps),
       offsetof(StatusDetail<precision>, iteration),
       offsetof(StatusDetail<precision>, max_iterations),
       offsetof(StatusDetail<precision>, time),
@@ -37,7 +39,8 @@ namespace pfasst
       offsetof(StatusDetail<precision>, abs_res_norm),
       offsetof(StatusDetail<precision>, rel_res_norm)
     };
-    MPI_Datatype types[9] = {
+    MPI_Datatype types[COUNT] = {
+      MPI_BYTE,
       MPI_BYTE,
       MPI_BYTE,
       MPI_BYTE,
@@ -50,7 +53,7 @@ namespace pfasst
     };
 
     VLOG(1) << "creating MPI Data Type for Status";
-    int err = MPI_Type_create_struct(count, blocks, displ, types, &(status_data_type));
+    int err = MPI_Type_create_struct(COUNT, blocks, displ, types, &(status_data_type));
     assert(err == MPI_SUCCESS);
     err = MPI_Type_commit(&(status_data_type));
     assert(err == MPI_SUCCESS);
@@ -92,6 +95,20 @@ namespace pfasst
   Status<precision>::step()
   {
     return this->_detail.step;
+  }
+
+  template<typename precision>
+  size_t
+  Status<precision>::get_num_steps() const
+  {
+    return this->_detail.num_steps;
+  }
+
+  template<typename precision>
+  size_t&
+  Status<precision>::num_steps()
+  {
+    return this->_detail.num_steps;
   }
 
   template<typename precision>
@@ -267,6 +284,7 @@ namespace pfasst
        << ", dt=" << this->get_dt()
        << ", t_end=" << this->get_t_end()
        << ", step=" << this->get_step()
+       << ", num_steps=" << this->get_num_steps()
        << ", iter=" << this->get_iteration()
        << ", iter_max=" << this->get_max_iterations()
        << ", state=" << this->get_state()
