@@ -91,8 +91,8 @@ namespace pfasst
 
     time_type tm = t;
     for (size_t m = 0; m < num_nodes; ++m) {
-      CVLOG(1, this->get_logger_id()) << LOG_FIXED << "propagating from t["<<m<<"]=" << (dt * nodes[m])
-                          << " to t["<<(m+1)<<"]=" << (dt * nodes[m+1]);
+      CVLOG(1, this->get_logger_id()) << LOG_FIXED << "propagating from t["<<m<<"]=" << dt << " * " << nodes[m]
+                          << " to t["<<(m+1)<<"]=" << dt << " * " << nodes[m+1];
       CVLOG(2, this->get_logger_id()) << LOG_FLOAT << "  u["<<m<<"] = " << to_string(this->get_states()[m]);
 
       // compute right hand side for implicit solve (i.e. the explicit part of the propagation)
@@ -149,7 +149,7 @@ namespace pfasst
 
     CVLOG(4, this->get_logger_id()) << "initial values for sweeping";
     for (size_t m = 0; m <= num_nodes; ++m) {
-      CVLOG(5, this->get_logger_id()) << "  t["<<m<<"]=" << LOG_FIXED << (dt * nodes[m]);
+      CVLOG(5, this->get_logger_id()) << "  t["<<m<<"]=" << LOG_FIXED << dt << " * " << nodes[m];
       CVLOG(6, this->get_logger_id()) << LOG_FLOAT << "       u: " << to_string(this->get_states()[m]);
       CVLOG(6, this->get_logger_id()) << LOG_FLOAT << "    f_ex: " << to_string(this->_expl_rhs[m]);
       CVLOG(6, this->get_logger_id()) << LOG_FLOAT << "    f_im: " << to_string(this->_impl_rhs[m]);
@@ -169,12 +169,12 @@ namespace pfasst
     for (size_t m = 0; m < num_nodes; ++m) {
       for (size_t n = 0; n < m + 1; ++n) {
         CVLOG(6, this->get_logger_id()) << LOG_FIXED << "  q_int["<<m<<"] -= dt * QE_{"<<(m+1)<<","<<n<<"} * f_ex["<<n<<"] = "
-                                         << -dt * this->_q_delta_expl(m + 1, n) << " * "
+                                         << -dt << " * " << this->_q_delta_expl(m + 1, n) << " * "
                                          << LOG_FLOAT << to_string(this->_expl_rhs[n]);
         this->_q_integrals[m + 1]->scaled_add(-dt * this->_q_delta_expl(m + 1, n), this->_expl_rhs[n]);
 
         CVLOG(6, this->get_logger_id()) << LOG_FIXED << "  q_int["<<(m+1)<<"] -= dt * QI_{"<<(m+1)<<","<<(n+1)<<"} * f_im["<<(n+1)<<"] = "
-                                         << -dt * this->_q_delta_impl(m + 1, n + 1) << " * "
+                                         << -dt << " * " << this->_q_delta_impl(m + 1, n + 1) << " * "
                                          << LOG_FLOAT << to_string(this->_impl_rhs[n+1]);
         this->_q_integrals[m + 1]->scaled_add(-dt * this->_q_delta_impl(m + 1, n + 1), this->_impl_rhs[n + 1]);
       }
@@ -215,8 +215,8 @@ namespace pfasst
     time_type tm = t;
     // note: m=0 is initial value and not a quadrature node
     for (size_t m = 0; m < num_nodes; ++m) {
-      CVLOG(4, this->get_logger_id()) << LOG_FIXED << "propagating from t["<<m<<"]=" << (dt * nodes[m])
-                          << " to t["<<(m+1)<<"]=" << (dt * nodes[m+1]);
+      CVLOG(4, this->get_logger_id()) << LOG_FIXED << "propagating from t["<<m<<"]=" << dt << " * " << nodes[m]
+                          << " to t["<<(m+1)<<"]=" << dt << " * " << nodes[m+1];
       CVLOG(5, this->get_logger_id()) << LOG_FLOAT << "  u["<<m<<"] = " << to_string(this->get_states()[m]);
 
       // compute right hand side for implicit solve (i.e. the explicit part of the propagation)
@@ -224,8 +224,9 @@ namespace pfasst
       // rhs = u_0
       rhs->data() = this->get_states().front()->get_data();
       CVLOG(6, this->get_logger_id()) << "  rhs = u[0]                    = " << to_string(rhs);
+
       // rhs += dt * \sum_{i=0}^m (QI_{m+1,i} fI(u_i^{k+1}) + QE_{m+1,i-1} fE(u_{i-1}^{k+1}) ) + QE_{m+1,m} fE(u_{m}^{k+1})
-      for (size_t n = 0; n < m; ++n) {
+      for (size_t n = 0; n <= m; ++n) {
         rhs->scaled_add(dt * this->_q_delta_impl(m + 1, n), this->_impl_rhs[n]);
         CVLOG(6, this->get_logger_id()) << "     += dt * QI_{"<<(m+1)<<","<<(n+1)<<"} * f_im["<<(n+1)<<"] = "
                             << LOG_FIXED << dt << " * " << this->_q_delta_impl(m + 1, n + 1) << " * "
@@ -236,10 +237,6 @@ namespace pfasst
                             << LOG_FIXED << dt << " * " << this->_q_delta_expl(m + 1, n) << " * "
                             << LOG_FLOAT << to_string(this->_expl_rhs[n]);
       }
-      rhs->scaled_add(dt * this->_q_delta_impl(m + 1, m), this->_impl_rhs[m]);
-      CVLOG(6, this->get_logger_id()) << "     += dt * QI_{"<<(m+1)<<","<<m<<"} * f_im["<<m<<"] = "
-                          << LOG_FIXED << dt << " * " << this->_q_delta_impl(m + 1, m) << " * "
-                          << LOG_FLOAT << to_string(this->_impl_rhs[m]);
 
       rhs->scaled_add(1.0, this->_q_integrals[m + 1]);
       CVLOG(6, this->get_logger_id()) << "     += 1.0 * q_int["<<(m+1)<<"]          = " << to_string(this->_q_integrals[m + 1]);
