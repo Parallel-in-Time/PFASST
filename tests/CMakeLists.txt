@@ -13,7 +13,7 @@ set(TESTS
 set(TESTS_MPI
 )
 
-if(NOT TESTS_MPI)
+if(NOT ${pfasst_WITH_MPI})
     foreach(test ${TESTS})
         message(STATUS "  ${test}")
         add_executable(${test} ${test}.cpp)

@@ -15,7 +15,7 @@ set(heat_mpi_examples
     heat1d_pfasst
 )
 
-if(NOT pfasst_WITH_MPI)
+if(NOT ${pfasst_WITH_MPI})
     foreach(example ${heat_examples})
         add_executable(${example} ${CMAKE_CURRENT_SOURCE_DIR}/${example}.cpp)
         if(NOT FFTW_FOUND)
