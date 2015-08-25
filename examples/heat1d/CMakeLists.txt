@@ -15,6 +15,13 @@ set(heat_mpi_examples
     heat1d_pfasst
 )
 
+if(${pfasst_WITH_MPI})
+    set(all_heat_examples ${heat_examples} ${heat_mpi_examples})
+else()
+    set(all_heat_examples ${heat_examples})
+endif()
+
+
 if(NOT ${pfasst_WITH_MPI})
     foreach(example ${heat_examples})
         add_executable(${example} ${CMAKE_CURRENT_SOURCE_DIR}/${example}.cpp)
