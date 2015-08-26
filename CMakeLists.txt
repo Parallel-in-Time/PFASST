@@ -25,6 +25,11 @@ option(pfasst_WITH_GCC_PROF     "Enable excessive debugging & profiling output w
 cmake_dependent_option(
        enable_LTO               "enable LinkTimeOptimization"                             OFF
            "CMAKE_BUILD_TYPE" Release)
+option(pfasst_WITH_LOGGING      "Enable logging output on console"                        ON)
+
+if(NOT ${pfasst_WITH_LOGGING})
+    add_definitions(-DPFASST_NO_LOGGING)
+endif()
 
 if(${pfasst_WITH_MPI})
     find_package(MPI REQUIRED)
