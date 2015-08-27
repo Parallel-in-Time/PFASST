@@ -71,6 +71,9 @@ endif()
 
 # Check for C++11 support
 if(${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
+    if(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 4.9.0)
+        message(FATAL_ERROR "Due to lack of support for delegating constructors we cannot support GCC prior 4.9.0.")
+    endif()
     check_cxx_compiler_flag(-std=c++11 HAVE_STD11)
     if(HAVE_STD11)
         add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-std=c++11")
