@@ -68,12 +68,15 @@ namespace pfasst
    * std::vector<double> vec{0.0, 0.5, 0.1};
    * join(vec, ", ");  // ==> "[0.0, 0.5, 0.1]"
    * @endcode
+   * 
+   * @note This funtion is a noop when compiling with `PFASST_NO_LOGGING` defined.
    *
    * @ingroup Utilities
    */
   template<typename T>
   static string join(const vector<T>& vec, const string& sep)
   {
+#ifndef PFASST_NO_LOGGING
     stringstream out;
     out << "[" << LOG_FLOAT;
     for (size_t i = 0; i < vec.size() - 1; ++i) {
@@ -82,6 +85,9 @@ namespace pfasst
     out << vec.back();
     out << "]";
     return out.str();
+#else
+    return "";
+#endif
   }
 }  // ::pfasst
 
