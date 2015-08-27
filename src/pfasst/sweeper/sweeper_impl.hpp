@@ -99,7 +99,7 @@ namespace pfasst
   }
 
   template<class SweeperTrait, typename Enabled>
-  const vector<shared_ptr<typename SweeperTrait::encap_type>>
+  const vector<shared_ptr<typename SweeperTrait::encap_type>>&
   Sweeper<SweeperTrait, Enabled>::get_states() const
   {
     return this->_states;
@@ -113,7 +113,7 @@ namespace pfasst
   }
 
   template<class SweeperTrait, typename Enabled>
-  const vector<shared_ptr<typename SweeperTrait::encap_type>>
+  const vector<shared_ptr<typename SweeperTrait::encap_type>>&
   Sweeper<SweeperTrait, Enabled>::get_previous_states() const
   {
     return this->_previous_states;
@@ -141,7 +141,7 @@ namespace pfasst
   }
 
   template<class SweeperTrait, typename Enabled>
-  const vector<shared_ptr<typename SweeperTrait::encap_type>>
+  const vector<shared_ptr<typename SweeperTrait::encap_type>>&
   Sweeper<SweeperTrait, Enabled>::get_tau() const
   {
     return this->_tau;
@@ -155,7 +155,7 @@ namespace pfasst
   }
 
   template<class SweeperTrait, typename Enabled>
-  const vector<shared_ptr<typename SweeperTrait::encap_type>>
+  const vector<shared_ptr<typename SweeperTrait::encap_type>>&
   Sweeper<SweeperTrait, Enabled>::get_residuals() const
   {
     return this->_residuals;
