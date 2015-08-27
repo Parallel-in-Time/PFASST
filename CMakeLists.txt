@@ -15,16 +15,24 @@ set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/3rdparty)
 
 option(pfasst_DISABLE_LIBCXX    "Disable use of LLVM's libc++ when compiling with Clang." ON )
 option(pfasst_BUILD_SHARED_LIBS "Build shared libraries."                                 ON )
+
 option(pfasst_BUILD_EXAMPLES    "Build example programs."                                 ON )
 cmake_dependent_option(
        pfasst_INSTALL_EXAMPLES  "Install example programs."                               ON
-           "pfasst_BUILD_EXAMPLES" OFF)
+            "pfasst_BUILD_EXAMPLES" OFF)
+
 option(pfasst_BUILD_TESTS       "Build test suite for PFASST."                            ON )
+
 option(pfasst_WITH_MPI          "Build with MPI enabled."                                 ON )
+cmake_dependent_option(
+        pfasst_WITH_SCOREP       "enable scalable instrumentation with Score-P"           OFF
+            "pfasst_WITH_MPI" ON)
+
 option(pfasst_WITH_GCC_PROF     "Enable excessive debugging & profiling output with GCC." OFF)
 cmake_dependent_option(
        enable_LTO               "enable LinkTimeOptimization"                             OFF
-           "CMAKE_BUILD_TYPE" Release)
+            "CMAKE_BUILD_TYPE" Release)
+
 option(pfasst_WITH_LOGGING      "Enable logging output on console"                        ON)
 
 if(NOT ${pfasst_WITH_LOGGING})
@@ -45,6 +53,20 @@ if(${pfasst_WITH_MPI})
     message(STATUS "Using MPI C++ Compiler Wrapper: ${MPI_CXX_COMPILER}")
     message(STATUS "USing MPI C Compiler Wrapper: ${MPI_C_COMPILER}")
     add_definitions(-DWITH_MPI)
+
+    if(pfasst_WITH_SCOREP)
+        find_package(ScoreP REQUIRED)
+        configure_file(
+            "${pfasst_SOURCE_DIR}/cmake/scorep-cxx.sh.in"
+            "${CMAKE_BINARY_DIR}/scorep-cxx.sh"
+        )
+        configure_file(
+            "${pfasst_SOURCE_DIR}/cmake/scorep-cc.sh.in"
+            "${CMAKE_BINARY_DIR}/scorep-cc.sh"
+        )
+        set(CMAKE_CXX_COMPILER "${CMAKE_BINARY_DIR}/scorep-cxx.sh")
+        set(CMAKE_C_COMPILER "${CMAKE_BINARY_DIR}/scorep-cc.sh")
+    endif()
 endif()
 
 # Check for C++11 support
