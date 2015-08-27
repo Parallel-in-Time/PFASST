@@ -60,8 +60,8 @@ namespace pfasst
       {
         IMEX<SweeperTrait, Enabled>::set_options();
 
-        this->_nu = config::get_value<typename traits::spacial_type>("nu", DEFAULT_DIFFUSIVITY<SweeperTrait>);
-        this->_v = config::get_value<typename traits::spacial_type>("vel", DEFAULT_VELOCITY<SweeperTrait>);
+        this->_nu = config::get_value<typename traits::spacial_type>("nu", DEFAULT_DIFFUSIVITY);
+        this->_v = config::get_value<typename traits::spacial_type>("vel", DEFAULT_VELOCITY);
       }
 
       template<class SweeperTrait, typename Enabled>

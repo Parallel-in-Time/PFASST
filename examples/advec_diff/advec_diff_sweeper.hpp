@@ -8,6 +8,10 @@ using namespace std;
 #include <pfasst/sweeper/imex.hpp>
 #include <pfasst/contrib/fft.hpp>
 
+// I'd really like to have these as static const variable templates but this is only possible since C++14 ... :-(
+#define DEFAULT_DIFFUSIVITY 0.02
+#define DEFAULT_VELOCITY    1.0
+
 
 namespace pfasst
 {
@@ -15,12 +19,6 @@ namespace pfasst
   {
     namespace advec_diff
     {
-      template<class SweeperTrait>
-      static const typename SweeperTrait::spacial_type DEFAULT_DIFFUSIVITY = 0.02;
-
-      template<class SweeperTrait>
-      static const typename SweeperTrait::spacial_type DEFAULT_VELOCITY    = 1.0;
-
       template<
         class SweeperTrait,
         typename Enabled = void
@@ -67,8 +65,8 @@ namespace pfasst
           virtual vector<shared_ptr<typename SweeperTrait::encap_type>> compute_relative_error(const vector<shared_ptr<typename SweeperTrait::encap_type>>& error, const typename SweeperTrait::time_type& t);
 
         public:
-          explicit AdvecDiff(const size_t& ndofs, const typename SweeperTrait::spacial_type& nu = DEFAULT_DIFFUSIVITY<SweeperTrait>,
-                             const typename SweeperTrait::spacial_type& v = DEFAULT_VELOCITY<SweeperTrait>);
+          explicit AdvecDiff(const size_t& ndofs, const typename SweeperTrait::spacial_type& nu = DEFAULT_DIFFUSIVITY,
+                             const typename SweeperTrait::spacial_type& v = DEFAULT_VELOCITY);
           AdvecDiff(const AdvecDiff<SweeperTrait, Enabled>& other) = default;
           AdvecDiff(AdvecDiff<SweeperTrait, Enabled>&& other) = default;
           virtual ~AdvecDiff() = default;
