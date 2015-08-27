@@ -19,6 +19,15 @@ namespace po = boost::program_options;
 
 #ifdef WITH_MPI
   #include <mpi.h>
+
+  #if MPI_VERSION == 1
+    #error "Do you really want to use this ancient MPI implementation ?!"
+  #elif MPI_VERSION == 2
+    #pragma message "Can you upgrade to a MPI implementation of version 3.x ?"
+    #define NON_CONST_MPI
+  #else
+    // this should be fine
+  #endif
 #endif
 
 
