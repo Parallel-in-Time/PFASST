@@ -71,7 +71,7 @@ namespace pfasst
       Sweeper<SweeperTrait, Enabled>& operator=(Sweeper<SweeperTrait, Enabled>&& other) = default;
 
       virtual       shared_ptr<IQuadrature<typename SweeperTrait::time_type>>& quadrature();
-      virtual const shared_ptr<IQuadrature<typename SweeperTrait::time_type>>  get_quadrature() const;
+      virtual const shared_ptr<IQuadrature<typename SweeperTrait::time_type>> get_quadrature() const;
 
       virtual       shared_ptr<Status<typename SweeperTrait::time_type>>& status();
       virtual const shared_ptr<Status<typename SweeperTrait::time_type>>  get_status() const;
@@ -84,11 +84,11 @@ namespace pfasst
       virtual       vector<shared_ptr<typename SweeperTrait::encap_type>>& tau();
 
       virtual const shared_ptr<typename SweeperTrait::encap_type>          get_initial_state() const;
-      virtual const vector<shared_ptr<typename SweeperTrait::encap_type>>  get_states() const;
-      virtual const vector<shared_ptr<typename SweeperTrait::encap_type>>  get_previous_states() const;
+      virtual const vector<shared_ptr<typename SweeperTrait::encap_type>>& get_states() const;
+      virtual const vector<shared_ptr<typename SweeperTrait::encap_type>>& get_previous_states() const;
       virtual const shared_ptr<typename SweeperTrait::encap_type>          get_end_state() const;
-      virtual const vector<shared_ptr<typename SweeperTrait::encap_type>>  get_tau() const;
-      virtual const vector<shared_ptr<typename SweeperTrait::encap_type>>  get_residuals() const;
+      virtual const vector<shared_ptr<typename SweeperTrait::encap_type>>& get_tau() const;
+      virtual const vector<shared_ptr<typename SweeperTrait::encap_type>>& get_residuals() const;
 
       virtual       void  set_logger_id(const string& logger_id);
       virtual const char* get_logger_id() const;
