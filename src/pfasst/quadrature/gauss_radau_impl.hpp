@@ -4,6 +4,7 @@
 #include <vector>
 using namespace std;
 
+#include "pfasst/logging.hpp"
 #include "pfasst/quadrature/polynomial.hpp"
 
 
@@ -20,6 +21,13 @@ namespace pfasst
       }
       this->compute_nodes();
       this->compute_weights();
+
+      CVLOG(4, "QUAD") << LOG_FIXED << "Gauss-Radau (right) on [0.0, 1.0] with " << num_nodes
+                       << " nodes at " << this->get_nodes();
+      CVLOG(5, "QUAD") << "Q:";
+      for (size_t row = 0; row < (size_t)this->get_q_mat().rows(); ++row) {
+        CVLOG(5, "QUAD") << "  " << this->get_q_mat().block(row, 0, 1, this->get_q_mat().cols());
+      }
     }
 
     template<typename precision>
@@ -32,6 +40,13 @@ namespace pfasst
     bool GaussRadau<precision>::right_is_node() const
     {
       return RIGHT_IS_NODE;
+    }
+
+    template<typename precision>
+    string
+    GaussRadau<precision>::print_summary() const
+    {
+      return "Gauss-Radau (right) on [0.0, 1.0] with " + to_string(this->get_num_nodes()) + " nodes";
     }
 
     template<typename precision>
@@ -49,6 +64,25 @@ namespace pfasst
         this->nodes[j - 1] = 0.5 * (1.0 - roots[this->num_nodes - j]);
       }
       this->nodes.back() = 1.0;
+    }
+
+    template<typename precision>
+    void GaussRadau<precision>::compute_weights()
+    {
+      const size_t n = this->get_num_nodes();
+
+      this->q_mat = Matrix<precision>::Zero(n + 1, n + 1);
+      this->q_mat.block(1, 1, n, n) << compute_q_matrix(this->get_nodes());
+
+      this->s_mat = compute_s_matrix(this->get_q_mat());
+
+      this->q_vec = compute_q_vec(this->get_nodes());
+      this->q_vec.insert(this->q_vec.begin(), precision(0.0));
+
+      this->b_mat = Matrix<precision>(1, n + 1);
+      for (size_t i = 0; i < n + 1; i++) {
+        this->b_mat(0, i) = this->q_vec[i];
+      }
     }
   }  // ::pfasst::quadrature
 }  // ::pfasst

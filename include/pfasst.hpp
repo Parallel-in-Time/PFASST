@@ -20,6 +20,12 @@ namespace pfasst
     config::init();
     config::read_commandline(argc, argv);
     log::start_log(argc, argv);
+    auto to_log = config::check_unrecognized_args();
+    if (!to_log.empty()) {
+      for (const auto& l : to_log) {
+        LOG(WARNING) << l;
+      }
+    }
     if (logs) {
       logs();
     }

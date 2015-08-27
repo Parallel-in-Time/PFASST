@@ -9,15 +9,23 @@
 #ifndef NDEBUG
   #include <iostream>  // used by pfasst::log::test_logging_levels()
 #endif
+#include <memory>
 #include <string>
+#include <sstream>
 using namespace std;
 
 #ifdef WITH_MPI
   #include <sstream>
+  #include <leathers/push>
+  #include <leathers/all>
   #include <mpi.h>
+  #include <leathers/pop>
 #endif
 
+#include <leathers/push>
+#include <leathers/all>
 #include <boost/algorithm/string.hpp>
+#include <leathers/pop>
 
 #include "pfasst/site_config.hpp"
 #include "pfasst/config.hpp"
@@ -67,6 +75,9 @@ const string OUT::reset = "\033[0m";
 
 // enable easy logging of STL containers
 #define ELPP_STL_LOGGING
+#define ELPP_LOG_STD_ARRAY
+#define ELPP_LOG_UNORDERED_MAP
+#define ELPP_LOG_UNORDERED_SET
 // disable creation of default log file
 #define ELPP_NO_DEFAULT_LOG_FILE
 // enable passing `--logging-flags` via command line
@@ -81,7 +92,10 @@ const string OUT::reset = "\033[0m";
   #define ELPP_DISABLE_LOGS
 #endif
 
+#include <leathers/push>
+#include <leathers/all>
 #include <pfasst/easylogging++.h>
+#include <leathers/pop>
 
 
 #ifndef PFASST_LOGGER_INITIALIZED
@@ -146,6 +160,9 @@ const string OUT::reset = "\033[0m";
  * @see pfasst::log::add_custom_logger()
  */
 #define LOGGER_ID_LENGTH 10
+
+#define LOG_FLOAT std::scientific << std::setprecision(LOG_PRECISION)
+#define LOG_FIXED std::fixed << std::setprecision(LOG_PRECISION)
 
 
 namespace pfasst
@@ -220,9 +237,15 @@ namespace pfasst
      *
      * @ingroup Internals
      */
-    inline string get_log_file_name()
+    inline string get_log_file_name(const string& prefix="")
     {
-      string log_name = config::get_value<string>("log_prefix", "");
+      string log_name;
+      if (prefix.empty()) {
+        log_name = config::get_value<string>("log_prefix", "");
+      } else {
+        log_name = prefix;
+      }
+
 #ifdef WITH_MPI
       if (log_name.size() > 0) {
         log_name += "_";
@@ -260,6 +283,7 @@ namespace pfasst
                                                             .count("quiet")) ? "false" : "true";
       }
 
+      conf->setGlobally(el::ConfigurationType::MillisecondsWidth, milliseconds_width);
       conf->setGlobally(el::ConfigurationType::ToStandardOutput, to_stdout);
       conf->setGlobally(el::ConfigurationType::Filename, get_log_file_name());
     }
@@ -300,24 +324,24 @@ namespace pfasst
       bool colorize = pfasst::config::options::get_instance().get_variables_map()
                                                              .count("nocolor") ? false : true;
 
-      const string INFO_COLOR = (colorize) ? OUT::blue : "";
-      const string DEBG_COLOR = (colorize) ? "" : "";
-      const string WARN_COLOR = (colorize) ? OUT::magenta : "";
-      const string ERRO_COLOR = (colorize) ? OUT::red : "";
-      const string FATA_COLOR = (colorize) ? OUT::red + OUT::bold : "";
-      const string VERB_COLOR = (colorize) ? OUT::white : "";
-      const string TIMESTAMP_COLOR = (colorize) ? OUT::white : "";
-      const string RESET = (colorize) ? OUT::reset : "";
+      const string INFO_COLOR      = (colorize) ? OUT::blue            : "";
+      const string DEBG_COLOR      = (colorize) ? ""                   : "";
+      const string WARN_COLOR      = (colorize) ? OUT::magenta         : "";
+      const string ERRO_COLOR      = (colorize) ? OUT::red             : "";
+      const string FATA_COLOR      = (colorize) ? OUT::red + OUT::bold : "";
+      const string VERB_COLOR      = (colorize) ? OUT::white           : "";
+      const string TIMESTAMP_COLOR = (colorize) ? OUT::white           : "";
+      const string RESTET_COLOR    = (colorize) ? OUT::reset           : "";
 
-      const string TIMESTAMP = TIMESTAMP_COLOR + "%datetime{%H:%m:%s,%g}" + RESET + " ";
-      const string LEVEL = "%level";
-      const string VLEVEL = "VERB%vlevel";
-      const string POSITION = "%fbase:%line";
-      const string MESSAGE = "%msg";
+      const string TIMESTAMP = RESTET_COLOR + TIMESTAMP_COLOR + "%datetime{%H:%m:%s,%g}" + RESTET_COLOR + " ";
+      const string LEVEL     = "%level";
+      const string VLEVEL    = "VERB%vlevel";
+      const string POSITION  = "%fbase:%line";
+      const string MESSAGE   = "%msg";
 #ifdef WITH_MPI
-      const string MPI_RANK = ", MPI " + format_mpi_rank();
+      const string MPI_RANK  = ", MPI " + format_mpi_rank();
 #else
-      const string MPI_RANK = "";
+      const string MPI_RANK  = "";
 #endif
 
       const size_t id_length = id.size();
@@ -336,17 +360,23 @@ namespace pfasst
       set_global_logging_options(conf, default_conf);
 
       conf->set(el::Level::Info, el::ConfigurationType::Format,
-                TIMESTAMP + INFO_COLOR + "[" + id2print + ", " + LEVEL  + MPI_RANK + "] " + MESSAGE + RESET);
+                TIMESTAMP + INFO_COLOR + "[" + id2print + ", " + LEVEL  + MPI_RANK + "] " + MESSAGE + RESTET_COLOR);
+
       conf->set(el::Level::Debug, el::ConfigurationType::Format,
-                TIMESTAMP + DEBG_COLOR + "[" + id2print + ", " + LEVEL  + MPI_RANK + "] " + POSITION + " " + MESSAGE + RESET);
+                TIMESTAMP + DEBG_COLOR + "[" + id2print + ", " + LEVEL  + MPI_RANK + "] " + POSITION + " " + MESSAGE + RESTET_COLOR);
+
       conf->set(el::Level::Warning, el::ConfigurationType::Format,
-                TIMESTAMP + WARN_COLOR + "[" + id2print + ", " + LEVEL  + MPI_RANK + "] " + MESSAGE + RESET);
+                TIMESTAMP + WARN_COLOR + "[" + id2print + ", " + LEVEL  + MPI_RANK + "] " + MESSAGE + RESTET_COLOR);
+
       conf->set(el::Level::Error, el::ConfigurationType::Format,
-                TIMESTAMP + ERRO_COLOR + "[" + id2print + ", " + LEVEL  + MPI_RANK + "] " + MESSAGE + RESET);
+                TIMESTAMP + ERRO_COLOR + "[" + id2print + ", " + LEVEL  + MPI_RANK + "] " + MESSAGE + RESTET_COLOR);
+
       conf->set(el::Level::Fatal, el::ConfigurationType::Format,
-                TIMESTAMP + FATA_COLOR + "[" + id2print + ", " + LEVEL  + MPI_RANK + "] " + POSITION + " " + MESSAGE + RESET);
+                TIMESTAMP + FATA_COLOR + "[" + id2print + ", " + LEVEL  + MPI_RANK + "] " + POSITION + " " + MESSAGE + RESTET_COLOR);
+
       conf->set(el::Level::Verbose, el::ConfigurationType::Format,
-                TIMESTAMP + VERB_COLOR + "[" + id2print + ", " + VLEVEL + MPI_RANK + "] " + MESSAGE + RESET);
+                TIMESTAMP + VERB_COLOR + "[" + id2print + ", " + VLEVEL + MPI_RANK + "] " + MESSAGE + RESTET_COLOR);
+
       el::Loggers::reconfigureLogger(logger, *conf);
     }
 
@@ -357,23 +387,29 @@ namespace pfasst
      *
      * @ingroup Internals
      */
-    inline static void load_default_config()
+    inline static void load_default_config(const bool no_custom_loggers=false)
     {
-      el::Configurations defaultConf;
-      defaultConf.setToDefault();
+      if (!pfasst::log::initialized) {
+        el::Configurations defaultConf;
+        defaultConf.setToDefault();
 
-      set_global_logging_options(&defaultConf);
+        set_global_logging_options(&defaultConf);
 
-      el::Loggers::setDefaultConfigurations(defaultConf, true);
+        el::Loggers::setDefaultConfigurations(defaultConf, true);
 
-      add_custom_logger("default");
-      pfasst::log::initialized = true;
-      add_custom_logger("Controller");
-      add_custom_logger("Communicator");
-      add_custom_logger("Sweeper");
-      add_custom_logger("Encap");
-      add_custom_logger("Quadrature");
-      add_custom_logger("User");
+        add_custom_logger("default");
+        pfasst::log::initialized = true;
+      }
+
+      if (!no_custom_loggers) {
+        add_custom_logger("CONTROL");
+        add_custom_logger("COMM");
+        add_custom_logger("SWEEPER");
+        add_custom_logger("TRANS");
+        add_custom_logger("ENCAP");
+        add_custom_logger("QUAD");
+        add_custom_logger("USER");
+      }
     }
 
     /**
@@ -402,7 +438,13 @@ namespace pfasst
 #ifdef NO_COLOR
       el::Loggers::removeFlag(el::LoggingFlag::ColoredTerminalOutput);
 #else
-      el::Loggers::addFlag(el::LoggingFlag::ColoredTerminalOutput);
+      bool colorize = pfasst::config::options::get_instance().get_variables_map()
+                                                             .count("nocolor") ? false : true;
+      if (colorize) {
+        el::Loggers::addFlag(el::LoggingFlag::ColoredTerminalOutput);
+      } else {
+        el::Loggers::removeFlag(el::LoggingFlag::ColoredTerminalOutput);
+      }
 #endif
       el::Loggers::addFlag(el::LoggingFlag::MultiLoggerSupport);
       el::Loggers::addFlag(el::LoggingFlag::CreateLoggerAutomatically);
@@ -453,15 +495,28 @@ namespace pfasst
      *
      * @ingroup Internals
      */
-    inline static void start_log(int argc, char** argv)
+    inline static void start_log(int argc, char** argv, const bool no_custom_loggers=false)
     {
       START_EASYLOGGINGPP(argc, argv);
       set_logging_flags();
-      load_default_config();
+      load_default_config(no_custom_loggers);
       pfasst::log::stack_position = 0;
       CLOG(INFO, "default") << "PFASST++ version " << pfasst::VERSION;
     }
   }  // ::pfasst::log
 }  // ::pfasst
+
+
+template<
+  class T
+>
+string to_string(const shared_ptr<T>& sp)
+{
+  stringstream out;
+  out << "<" << sp.get() << ">";
+  sp->log(out);
+  return out.str();
+}
+
 
 #endif  // _PFASST__LOGGING_HPP_

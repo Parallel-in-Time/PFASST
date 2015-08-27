@@ -5,7 +5,7 @@
 #ifndef _PFASST__QUADRATURE__GAUSS_RADAU_HPP_
 #define _PFASST__QUADRATURE__GAUSS_RADAU_HPP_
 
-#include "pfasst/quadrature/interface.hpp"
+#include "pfasst/quadrature/quadrature.hpp"
 
 
 namespace pfasst
@@ -43,10 +43,15 @@ namespace pfasst
         virtual bool left_is_node() const override;
         virtual bool right_is_node() const override;
         //! @}
+        
+        //! @{
+        virtual string print_summary() const override;
+        //! @}
 
       protected:
         //! @{
         virtual void compute_nodes() override;
+        virtual void compute_weights() override;
         //! @}
     };
   }  // ::pfasst::quadrature

@@ -800,7 +800,11 @@ RECURSIVE              = YES
 # Note that relative paths are relative to the directory from which doxygen is
 # run.
 
-EXCLUDE                = include/pfasst/easylogging++.h
+EXCLUDE                = include/pfasst/easylogging++.h \
+                         include/pfasst_old \
+                         src/pfasst_old \
+                         tests/examples \
+                         examples
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded

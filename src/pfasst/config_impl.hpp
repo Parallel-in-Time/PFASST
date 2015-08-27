@@ -35,8 +35,7 @@ namespace pfasst
     }
 
     /**
-     * @todo Make config::options::add_option() fail when called called after
-     *   config::options::init().
+     * @todo Make config::options::add_option() fail when called called after config::options::init().
      */
     void options::add_option(const string& group, const string& option, const string& help)
     {
@@ -50,8 +49,7 @@ namespace pfasst
     }
 
     /**
-     * @todo Make config::options::add_option() fail when called called after
-     *   config::options::init().
+     * @todo Make config::options::add_option() fail when called called after config::options::init().
      */
     template<typename T>
     void options::add_option(const string& group, const string& option, const string& help)

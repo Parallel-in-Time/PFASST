@@ -5,7 +5,7 @@
 #ifndef _PFASST__QUADRATURE__GAUSS_LEGENDRE_HPP_
 #define _PFASST__QUADRATURE__GAUSS_LEGENDRE_HPP_
 
-#include "pfasst/quadrature/interface.hpp"
+#include "pfasst/quadrature/quadrature.hpp"
 
 
 namespace pfasst

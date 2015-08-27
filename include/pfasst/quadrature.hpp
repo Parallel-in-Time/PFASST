@@ -10,24 +10,24 @@
 #include <vector>
 using namespace std;
 
+#include <leathers/push>
+#include <leathers/all>
 #include <Eigen/Dense>
-template<typename scalar>
-using Matrix = Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+template<typename precision>
+using Matrix = Eigen::Matrix<precision, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
 #include <boost/math/constants/constants.hpp>
+#include <leathers/pop>
 
 #include "pfasst/config.hpp"
-#include "pfasst/interfaces.hpp"
+#include "pfasst/util.hpp"
 #include "pfasst/quadrature/polynomial.hpp"
-#include "pfasst/quadrature/interface.hpp"
+#include "pfasst/quadrature/quadrature.hpp"
 #include "pfasst/quadrature/gauss_lobatto.hpp"
 #include "pfasst/quadrature/gauss_legendre.hpp"
 #include "pfasst/quadrature/gauss_radau.hpp"
 #include "pfasst/quadrature/clenshaw_curtis.hpp"
 #include "pfasst/quadrature/uniform.hpp"
-
-template<typename scalar>
-using Matrix = Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
 
 namespace pfasst
@@ -47,9 +47,9 @@ namespace pfasst
      * @param[in] qtype type descriptor of the quadrature
      * @returns instance of pfasst::quadrature::IQuadrature of specified type with desired number
      *   of nodes
-     * @throws pfasst::ValueError if @p qtype is not a valid quadrature type descriptor
+     * @throws invalid_argument if @p qtype is not a valid quadrature type descriptor
      */
-    template<typename precision = pfasst::time_precision>
+    template<typename precision>
     shared_ptr<IQuadrature<precision>> quadrature_factory(const size_t nnodes,
                                                           const QuadratureType qtype)
     {
@@ -64,7 +64,7 @@ namespace pfasst
       } else if (qtype == QuadratureType::Uniform) {
         return make_shared<Uniform<precision>>(nnodes);
       } else {
-        throw ValueError("invalid node type passed to compute_nodes.");
+        throw invalid_argument("invalid node type passed to compute_nodes.");
         return nullptr;
       }
     }
@@ -80,22 +80,26 @@ namespace pfasst
      * @see pfasst::quadrature::QuadratureType for valid types
      * @see pfasst::quadrature::quadrature_factory for further details
      */
-    template<typename precision = pfasst::time_precision>
+    template<typename precision>
     vector<precision> compute_nodes(size_t nnodes, QuadratureType qtype)
     {
       return quadrature_factory<precision>(nnodes, qtype)->get_nodes();
     }
 
     /**
-     * @todo write documentation
+     * Computes interpolation matrix.
+     *
+     * Returns the interpolation matrix \\( M \\in \\mathbb{R}^{m\\times n} \\) for interpolation
+     * from nodes @p x to nodes @p y with \\( m_{i,j} = l_j(y_i) \\) with \\( l_j(y_i) \\) being the
+     * \\( j \\)-th Lagrange polynomial evaluated at the \\( i \\)-th entry of @p y .
      *
      * @tparam precision numerical type of the interpolation (e.g. `double`)
      */
-    template<typename precision = time_precision>
-    Matrix<precision> compute_interp(vector<precision> dst, vector<precision> src)
+    template<typename precision>
+    Matrix<precision> compute_interp(const vector<precision>& x, const vector<precision>& y)
     {
-      const size_t ndst = dst.size();
-      const size_t nsrc = src.size();
+      const size_t ndst = y.size();
+      const size_t nsrc = x.size();
 
       Matrix<precision> mat(ndst, nsrc);
 
@@ -106,11 +110,11 @@ namespace pfasst
 
           for (size_t k = 0; k < nsrc; k++) {
             if (k == j) { continue; }
-            den *= src[j] - src[k];
-            num *= dst[i] - src[k];
+            num *= y[i] - x[k];
+            den *= x[j] - x[k];
           }
 
-          if (abs(num) > 1e-32) {
+          if (!almost_zero(num)) {
             mat(i, j) = num / den;
           } else {
             mat(i, j) = 0.0;

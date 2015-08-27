@@ -1,49 +1,173 @@
 #include "pfasst/controller/sdc.hpp"
 
+#include <stdexcept>
+using namespace std;
+
+#include "pfasst/util.hpp"
+#include "pfasst/config.hpp"
+#include "pfasst/logging.hpp"
+
 
 namespace pfasst
 {
-  /**
-   * For each time step at most a total of Controller::get_max_iterations() iterations will be done
-   * on the configured sweeper (which happens to be the only in Controller::levels).
-   *
-   * On the first iteration on a time step, ISweeper::predict() will get called and
-   * ISweeper::sweep() on all subsequent iterations on the same time step.
-   * After each ISweeper::post_predict() or ISweeper::post_sweep() call ISweeper::converged() will
-   * get checked to shortcut the iterations.
-   * The next iteration is introduced by Controller::advance_iteration().
-   *
-   * Once the maximum number of iterations is reached (or the sweeper has converged before) that,
-   * the ISweeper::post_step() hook is triggered followed by ISweeper::advance() to complete the
-   * time step and advance to the next via Controller::advance_time() until Controller::get_time()
-   * is equal or greater Controller::get_end_time().
-   */
-  template<typename time>
-  void SDC<time>::run()
+  template<class TransferT>
+  SDC<TransferT>::SDC()
+    : Controller<TransferT>()
   {
-    auto sweeper = this->get_level(0);
+    SDC<TransferT>::init_loggers();
+    this->set_logger_id("SDC");
+  }
 
-    for (; this->get_time() < this->get_end_time(); this->advance_time()) {
-      bool initial = this->get_step() == 0;
-      for (this->set_iteration(0);
-           this->get_iteration() < this->get_max_iterations();
-           this->advance_iteration()) {
-        bool predict = this->get_iteration() == 0;
-        if (predict) {
-          sweeper->predict(initial);
-          sweeper->post_predict();
+  template<class TransferT>
+  void
+  SDC<TransferT>::init_loggers()
+  {
+    log::add_custom_logger("SDC");
+  }
+
+  template<class TransferT>
+  size_t
+  SDC<TransferT>::get_num_levels() const
+  {
+    return ((this->_sweeper != nullptr) ? 1 : 0);
+  }
+
+  template<class TransferT>
+  template<class SweeperT>
+  void
+  SDC<TransferT>::add_sweeper(shared_ptr<SweeperT> sweeper, const bool as_coarse)
+  {
+    UNUSED(as_coarse);
+    this->add_sweeper(sweeper);
+  }
+
+  template<class TransferT>
+  template<class SweeperT>
+  void
+  SDC<TransferT>::add_sweeper(shared_ptr<SweeperT> sweeper)
+  {
+    static_assert(is_same<SweeperT, typename TransferT::traits::fine_sweeper_type>::value,
+                  "Sweeper must be a Fine Sweeper Type.");
+
+    this->_sweeper = sweeper;
+  }
+
+  template<class TransferT>
+  void
+  SDC<TransferT>::add_transfer(shared_ptr<TransferT> transfer)
+  {
+    UNUSED(transfer);
+    CLOG(WARNING, this->get_logger_id()) << "SDC Controller does not require a transfer operator.";
+  }
+
+  template<class TransferT>
+  const shared_ptr<typename TransferT::traits::fine_sweeper_type>
+  SDC<TransferT>::get_sweeper() const
+  {
+    return this->_sweeper;
+  }
+
+  template<class TransferT>
+  shared_ptr<typename TransferT::traits::fine_sweeper_type>
+  SDC<TransferT>::get_sweeper()
+  {
+    return this->_sweeper;
+  }
+
+  template<class TransferT>
+  void
+  SDC<TransferT>::set_options()
+  {
+    Controller<TransferT>::set_options();
+
+    this->get_sweeper()->set_options();
+  }
+
+  template<class TransferT>
+  void
+  SDC<TransferT>::setup()
+  {
+    Controller<TransferT>::setup();
+
+    if (this->get_num_levels() != 1) {
+      CLOG(ERROR, this->get_logger_id()) << "One level (Sweeper) must have been added for SDC.";
+      throw logic_error("SDC requires one level");
+    }
+
+    this->get_sweeper()->status() = this->get_status();
+    this->get_sweeper()->setup();
+  }
+
+  template<class TransferT>
+  void
+  SDC<TransferT>::run()
+  {
+    Controller<TransferT>::run();
+
+    CLOG(INFO, this->get_logger_id()) << "";
+    CLOG(INFO, this->get_logger_id()) << "Sequential SDC";
+    CLOG(INFO, this->get_logger_id()) << "  t0:        " << LOG_FIXED << this->get_status()->get_time();
+    CLOG(INFO, this->get_logger_id()) << "  dt:        " << LOG_FIXED << this->get_status()->get_dt();
+    CLOG(INFO, this->get_logger_id()) << "  T:         " << LOG_FIXED << this->get_status()->get_t_end();
+    CLOG(INFO, this->get_logger_id()) << "  num steps: " << LOG_FIXED << this->get_status()->get_num_steps();
+    CLOG(INFO, this->get_logger_id()) << "  max iter:  " << LOG_FIXED << this->get_status()->get_max_iterations();
+    CLOG(INFO, this->get_logger_id()) << "  Initial Value: " << to_string(this->get_sweeper()->get_initial_state());
+
+    // iterate over time steps
+    do {
+      CLOG(INFO, this->get_logger_id()) << "";
+      CLOG(INFO, this->get_logger_id()) << "Time Step " << (this->get_status()->get_step() + 1)
+                                        << " of " << this->get_status()->get_num_steps();
+
+      // iterate on current time step
+      do {
+        const bool do_prediction = this->get_status()->get_iteration() == 0;
+
+        if (do_prediction) {
+          CLOG(INFO, this->get_logger_id()) << "";
+          CLOG(INFO, this->get_logger_id()) << "SDC Prediction step";
+          this->get_sweeper()->pre_predict();
+          this->get_sweeper()->predict();
+          this->get_sweeper()->post_predict();
         } else {
-          sweeper->sweep();
-          sweeper->post_sweep();
+          CLOG(INFO, this->get_logger_id()) << "";
+          CLOG(INFO, this->get_logger_id()) << "Iteration " << this->get_status()->get_iteration();
+          this->get_sweeper()->pre_sweep();
+          this->get_sweeper()->sweep();
+          this->get_sweeper()->post_sweep();
         }
-        if (sweeper->converged()) {
-          break;
-        }
-      }
-      sweeper->post_step();
-      if (this->get_time() + this->get_time_step() < this->get_end_time()) {
-        sweeper->advance();
-      }
+      } while(this->advance_iteration());
+    } while(this->advance_time());
+  }
+
+  template<class TransferT>
+  bool
+  SDC<TransferT>::advance_time(const size_t& num_steps)
+  {
+    this->get_sweeper()->post_step();
+
+    if (Controller<TransferT>::advance_time(num_steps)) {
+      this->get_sweeper()->advance(num_steps);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  template<class TransferT>
+  bool
+  SDC<TransferT>::advance_iteration()
+  {
+    if (this->get_sweeper()->converged()) {
+      CLOG(INFO, this->get_logger_id()) << "Sweeper has converged.";
+      return false;
+    } else if (Controller<TransferT>::advance_iteration()) {
+      CVLOG(1, this->get_logger_id()) << "Sweeper has not yet converged and additional iterations to do.";
+      this->get_sweeper()->save();
+      return true;
+    } else {
+      CLOG(WARNING, this->get_logger_id()) << "Sweeper has not yet converged and no more iterations to do.";
+      return false;
     }
   }
 }  // ::pfasst
