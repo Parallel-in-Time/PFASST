@@ -5,7 +5,6 @@
 using namespace std;
 
 #include "pfasst/logging.hpp"
-#include "pfasst/controller/status.hpp"
 
 
 MAKE_LOGGABLE(MPI_Status, mpi_status, os)
@@ -113,15 +112,6 @@ namespace pfasst
     }
 
 
-    template<typename DataT>
-    void MpiP2P::send(const DataT* const data, const int count, const int dest_rank, const int tag)
-    {
-      CLOG(ERROR, "COMM_P2P") << "blocking send of generic data types not implemented."
-      << " type: " << typeid(data).name();
-      throw runtime_error("blocking send for generic data type");
-    }
-
-    template<>
     void MpiP2P::send(const double* const data, const int count, const int dest_rank, const int tag)
     {
       CLOG(DEBUG, "COMM_P2P") << "sending " << count << " double values with tag=" << tag << " to " << dest_rank;
@@ -133,8 +123,7 @@ namespace pfasst
       check_mpi_error(err);
     }
 
-    template<typename DataT>
-    void MpiP2P::send_status(const StatusDetail<DataT>* const data, const int count, const int dest_rank, const int tag)
+    void MpiP2P::send_status(const StatusDetail<double>* const data, const int count, const int dest_rank, const int tag)
     {
       assert(pfasst::status_data_type != MPI_DATATYPE_NULL);
 
@@ -148,15 +137,6 @@ namespace pfasst
     }
 
 
-    template<typename DataT>
-    void MpiP2P::isend(const DataT* const data, const int count, const int dest_rank, const int tag)
-    {
-      CLOG(ERROR, "COMM_P2P") << "non-blocking send of generic data types not implemented."
-      << " type: " << typeid(data).name();
-      throw runtime_error("non-blocking send for generic data type");
-    }
-
-    template<>
     void MpiP2P::isend(const double* const data, const int count, const int dest_rank, const int tag)
     {
       CLOG(DEBUG, "COMM_P2P") << "non-blocking send of " << count << " double values with tag=" << tag << " to " << dest_rank;
@@ -184,8 +164,7 @@ namespace pfasst
       check_mpi_error(err);
     }
 
-    template<typename DataT>
-    void MpiP2P::isend_status(const StatusDetail<DataT>* const data, const int count, const int dest_rank, const int tag)
+    void MpiP2P::isend_status(const StatusDetail<double>* const data, const int count, const int dest_rank, const int tag)
     {
       assert(pfasst::status_data_type != MPI_DATATYPE_NULL);
 
@@ -215,15 +194,6 @@ namespace pfasst
     }
 
 
-    template<typename DataT>
-    void MpiP2P::recv(DataT* data, const int count, const int dest_rank, const int tag)
-    {
-      CLOG(ERROR, "COMM_P2P") << "blocking receive of generic data types not implemented."
-      << " type: " << typeid(data).name();
-      throw runtime_error(" blocking recv for generic data type");
-    }
-
-    template<>
     void MpiP2P::recv(double* data, const int count, const int dest_rank, const int tag)
     {
       this->_stati.push_back(MPI_Status_factory());
@@ -237,8 +207,7 @@ namespace pfasst
       CVLOG(1, "COMM_P2P") << "--> status: " << this->_stati.back();
     }
 
-    template<typename DataT>
-    void MpiP2P::recv_status(StatusDetail<DataT>* data, const int count, const int dest_rank, const int tag)
+    void MpiP2P::recv_status(StatusDetail<double>* data, const int count, const int dest_rank, const int tag)
     {
       assert(pfasst::status_data_type != MPI_DATATYPE_NULL);
 
@@ -254,15 +223,6 @@ namespace pfasst
     }
 
 
-    template<typename DataT>
-    void MpiP2P::irecv(DataT* data, const int count, const int src_rank, const int tag)
-    {
-      CLOG(ERROR, "COMM_P2P") << "non-blocking receive of generic data types not implemented."
-      << " type: " << typeid(data).name();
-      throw runtime_error("non-blocking receive for generic data type");
-    }
-
-    template<>
     void MpiP2P::irecv(double* data, const int count, const int src_rank, const int tag)
     {
       CLOG(DEBUG, "COMM_P2P") << "non-blocking receive of " << count << " double values with tag=" << tag << " from " << src_rank;
@@ -290,8 +250,7 @@ namespace pfasst
       check_mpi_error(err);
     }
 
-    template<typename DataT>
-    void MpiP2P::irecv_status(StatusDetail<DataT>* data, const int count, const int src_rank, const int tag)
+    void MpiP2P::irecv_status(StatusDetail<double>* data, const int count, const int src_rank, const int tag)
     {
       assert(pfasst::status_data_type != MPI_DATATYPE_NULL);
 
@@ -321,15 +280,6 @@ namespace pfasst
     }
 
 
-    template<typename DataT>
-    void MpiP2P::bcast(DataT* data, const int count, const int root_rank)
-    {
-      CLOG(ERROR, "COMM_P2P") << "braodcast of generic data types not implemented."
-      << " type: " << typeid(data).name();
-      throw runtime_error("broadcast for generic data type");
-    }
-
-    template<>
     void MpiP2P::bcast(double* data, const int count, const int root_rank)
     {
       CLOG(DEBUG, "COMM_P2P") << "braodcasting " << count << " double values from root " << root_rank;

@@ -100,9 +100,5 @@ TEST_F(Communication, can_be_received) {
   status->recv(comm, 1, 0, false);
 }
 
-TEST_F(Communication, can_be_broadcasted) {
-  status->bcast(comm, 0);
-}
-
 
 TEST_MAIN()

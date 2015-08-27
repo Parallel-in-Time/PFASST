@@ -16,58 +16,17 @@ class CommMock
     MOCK_CONST_METHOD0(is_first, bool());
     MOCK_CONST_METHOD0(is_last, bool());
 
-    template<typename DataT>
-    void send(const DataT* const data, const int count, const int dest_rank, const int tag)
-    {
-      LOG(WARNING) << "TODO: mock blocking send";
-    }
-    template<typename DataT>
-    void send_status(const pfasst::StatusDetail<DataT>* const data, const int count, const int dest_rank, const int tag)
-    {
-      LOG(WARNING) << "TODO: mock blocking send";
-    }
+    MOCK_METHOD4(send, void(const double* const data, const int count, const int dest_rank, const int tag));
+    MOCK_METHOD4(send_status, void(const pfasst::StatusDetail<double>* const data, const int count, const int dest_rank, const int tag));
 
-    template<typename DataT>
-    void isend(const DataT* const data, const int count, const int dest_rank, const int tag)
-    {
-      LOG(WARNING) << "TODO: mock non-blocking send";
-    }
-    template<typename DataT>
-    void isend_status(const pfasst::StatusDetail<DataT>* const data, const int count, const int dest_rank, const int tag)
-    {
-      LOG(WARNING) << "TODO: mock non-blocking send";
-    }
+    MOCK_METHOD4(isend, void(const double* const data, const int count, const int dest_rank, const int tag));
+    MOCK_METHOD4(isend_status, void(const pfasst::StatusDetail<double>* const data, const int count, const int dest_rank, const int tag));
 
-    template<typename DataT>
-    void recv(DataT* data, const int count, const int dest_rank, const int tag)
-    {
-      LOG(WARNING) << "TODO: mock blocking receive";
-    }
-    template<typename DataT>
-    void recv_status(pfasst::StatusDetail<DataT>* data, const int count, const int dest_rank, const int tag)
-    {
-      LOG(WARNING) << "TODO: mock blocking receive";
-    }
+    MOCK_METHOD4(recv, void(double* data, const int count, const int dest_rank, const int tag));
+    MOCK_METHOD4(recv_status, void(pfasst::StatusDetail<double>* data, const int count, const int dest_rank, const int tag));
 
-    template<typename DataT>
-    void irecv(DataT* data, const int count, const int src_rank, const int tag)
-    {
-      LOG(WARNING) << "TODO: mock non-blocking receive";
-    }
-    template<typename DataT>
-    void irecv_status(pfasst::StatusDetail<DataT>* data, const int count, const int src_rank, const int tag)
-    {
-      LOG(WARNING) << "TODO: mock non-blocking receive";
-    }
+    MOCK_METHOD4(irecv, void(double* data, const int count, const int src_rank, const int tag));
+    MOCK_METHOD4(irecv_status, void(pfasst::StatusDetail<double>* data, const int count, const int src_rank, const int tag));
 
-    template<typename DataT>
-    void bcast(DataT* data, const int count, const int root_rank)
-    {
-      LOG(WARNING) << "TODO: mock broadcast";
-    }
-    template<typename DataT>
-    void bcast_status(pfasst::StatusDetail<DataT>* data, const int count, const int root_rank)
-    {
-      LOG(WARNING) << "TODO: mock broadcast";
-    }
+    MOCK_METHOD3(bcast, void(double* data, const int count, const int root_rank));
 };

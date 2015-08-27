@@ -1,6 +1,10 @@
 #ifndef _PFASST__COMM__MPI_P2P_HPP_
 #define _PFASST__COMM__MPI_P2P_HPP_
 
+#ifndef WITH_MPI
+  #error "You need MPI enabled for using the MPI P2P communicator"
+#endif
+
 #include <list>
 #include <map>
 #include <memory>
@@ -8,7 +12,10 @@
 #include <utility>
 using namespace std;
 
+#include <leathers/push>
+#include <leathers/all>
 #include <mpi.h>
+#include <leathers/pop>
 
 #include "pfasst/comm/communicator.hpp"
 #include "pfasst/controller/status.hpp"
@@ -54,30 +61,19 @@ namespace pfasst
 
         virtual void abort(const int& err_code);
 
-        template<typename DataT>
-        void send(const DataT* const data, const int count, const int dest_rank, const int tag);
-        template<typename DataT>
-        void send_status(const StatusDetail<DataT>* const data, const int count, const int dest_rank, const int tag);
+        virtual void send(const double* const data, const int count, const int dest_rank, const int tag) override;
+        virtual void send_status(const StatusDetail<double>* const data, const int count, const int dest_rank, const int tag) override;
 
-        template<typename DataT>
-        void isend(const DataT* const data, const int count, const int dest_rank, const int tag);
-        template<typename DataT>
-        void isend_status(const StatusDetail<DataT>* const data, const int count, const int dest_rank, const int tag);
+        virtual void isend(const double* const data, const int count, const int dest_rank, const int tag) override;
+        virtual void isend_status(const StatusDetail<double>* const data, const int count, const int dest_rank, const int tag) override;
 
-        template<typename DataT>
-        void recv(DataT* data, const int count, const int dest_rank, const int tag);
-        template<typename DataT>
-        void recv_status(StatusDetail<DataT>* data, const int count, const int dest_rank, const int tag);
+        virtual void recv(double* data, const int count, const int dest_rank, const int tag) override;
+        virtual void recv_status(StatusDetail<double>* data, const int count, const int dest_rank, const int tag) override;
 
-        template<typename DataT>
-        void irecv(DataT* data, const int count, const int src_rank, const int tag);
-        template<typename DataT>
-        void irecv_status(StatusDetail<DataT>* data, const int count, const int src_rank, const int tag);
+        virtual void irecv(double* data, const int count, const int src_rank, const int tag) override;
+        virtual void irecv_status(StatusDetail<double>* data, const int count, const int src_rank, const int tag) override;
 
-        template<typename DataT>
-        void bcast(DataT* data, const int count, const int root_rank);
-        template<typename DataT>
-        void bcast_status(StatusDetail<DataT>* data, const int count, const int root_rank);
+        virtual void bcast(double* data, const int count, const int root_rank) override;
     };
   }  // ::pfasst::comm
 }  // ::pfasst

@@ -7,7 +7,10 @@
 using namespace std;
 
 #ifdef WITH_MPI
+  #include <leathers/push>
+  #include <leathers/all>
   #include <mpi.h>
+  #include <leathers/pop>
 #endif
 
 #include "pfasst/logging.hpp"
@@ -127,9 +130,6 @@ namespace pfasst
 
       template<class CommT>
       void recv(shared_ptr<CommT> comm, const int src_rank, const int tag, const bool blocking);
-
-      template<class CommT>
-      void bcast(shared_ptr<CommT> comm, const int root_rank);
 
       virtual vector<string> summary() const;
       virtual void log(el::base::type::ostream_t& os) const;

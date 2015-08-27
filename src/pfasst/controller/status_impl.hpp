@@ -249,14 +249,6 @@ namespace pfasst
   }
 
   template<typename precision>
-  template<typename CommT>
-  void
-  Status<precision>::bcast(shared_ptr<CommT> comm, const int root_rank)
-  {
-    comm->bcast_status(&(this->_detail), 1, root_rank);
-  }
-
-  template<typename precision>
   vector<string>
   Status<precision>::summary() const
   {

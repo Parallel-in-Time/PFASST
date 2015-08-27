@@ -29,34 +29,22 @@ namespace pfasst
 
         virtual bool is_first() const;
         virtual bool is_last() const;
-        
+
         virtual void abort(const int& err_code);
 
-        // TODO: refactor communication of StatusDetail objects as purely templated overloads
-        template<typename DataT>
-        void send(const DataT* const data, const int count, const int dest_rank, const int tag);
-        template<typename DataT>
-        void send_status(const StatusDetail<DataT>* const data, const int count, const int dest_rank, const int tag);
+        virtual void send(const double* const data, const int count, const int dest_rank, const int tag);
+        virtual void send_status(const StatusDetail<double>* const data, const int count, const int dest_rank, const int tag);
 
-        template<typename DataT>
-        void isend(const DataT* const data, const int count, const int dest_rank, const int tag);
-        template<typename DataT>
-        void isend_status(const StatusDetail<DataT>* const data, const int count, const int dest_rank, const int tag);
+        virtual void isend(const double* const data, const int count, const int dest_rank, const int tag);
+        virtual void isend_status(const StatusDetail<double>* const data, const int count, const int dest_rank, const int tag);
 
-        template<typename DataT>
-        void recv(DataT* data, const int count, const int dest_rank, const int tag);
-        template<typename DataT>
-        void recv_status(StatusDetail<DataT>* data, const int count, const int dest_rank, const int tag);
+        virtual void recv(double* data, const int count, const int src_rank, const int tag);
+        virtual void recv_status(StatusDetail<double>* data, const int count, const int src_rank, const int tag);
 
-        template<typename DataT>
-        void irecv(DataT* data, const int count, const int src_rank, const int tag);
-        template<typename DataT>
-        void irecv_status(StatusDetail<DataT>* data, const int count, const int src_rank, const int tag);
+        virtual void irecv(double* data, const int count, const int src_rank, const int tag);
+        virtual void irecv_status(StatusDetail<double>* data, const int count, const int src_rank, const int tag);
 
-        template<typename DataT>
-        void bcast(DataT* data, const int count, const int root_rank);
-        template<typename DataT>
-        void bcast_status(StatusDetail<DataT>* data, const int count, const int root_rank);
+        virtual void bcast(double* data, const int count, const int root_rank);
     };
   }  // ::pfasst::comm
 }  // ::pfasst
