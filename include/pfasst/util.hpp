@@ -86,6 +86,7 @@ namespace pfasst
     out << "]";
     return out.str();
 #else
+    UNUSED(vec); UNUSED(sep);
     return "";
 #endif
   }

@@ -130,7 +130,9 @@ namespace pfasst
   template<class SweeperT>
   void
   Controller<TransferT, CommT>::add_sweeper(shared_ptr<SweeperT> sweeper, const bool as_coarse)
-  {}
+  {
+    UNUSED(sweeper); UNUSED(as_coarse);
+  }
 
   template<class TransferT, class CommT>
   void

@@ -25,7 +25,7 @@ namespace pfasst
       CVLOG(4, "QUAD") << LOG_FIXED << "Gauss-Radau (right) on [0.0, 1.0] with " << num_nodes
                        << " nodes at " << this->get_nodes();
       CVLOG(5, "QUAD") << "Q:";
-      for (size_t row = 0; row < this->get_q_mat().rows(); ++row) {
+      for (size_t row = 0; row < (size_t)this->get_q_mat().rows(); ++row) {
         CVLOG(5, "QUAD") << "  " << this->get_q_mat().block(row, 0, 1, this->get_q_mat().cols());
       }
     }

@@ -171,6 +171,8 @@ namespace pfasst
       Heat1D<SweeperTrait, Enabled>::compute_relative_error(const vector<shared_ptr<typename SweeperTrait::encap_type>>& error,
                                                             const typename SweeperTrait::time_type& t)
       {
+        UNUSED(t);
+
         assert(this->get_quadrature() != nullptr);
         auto nodes = this->get_quadrature()->get_nodes();
         const auto num_nodes = this->get_quadrature()->get_num_nodes();

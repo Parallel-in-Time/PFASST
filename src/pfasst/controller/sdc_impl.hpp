@@ -37,6 +37,7 @@ namespace pfasst
   void
   SDC<TransferT>::add_sweeper(shared_ptr<SweeperT> sweeper, const bool as_coarse)
   {
+    UNUSED(as_coarse);
     this->add_sweeper(sweeper);
   }
 
@@ -55,6 +56,7 @@ namespace pfasst
   void
   SDC<TransferT>::add_transfer(shared_ptr<TransferT> transfer)
   {
+    UNUSED(transfer);
     CLOG(WARNING, this->get_logger_id()) << "SDC Controller does not require a transfer operator.";
   }
 
@@ -113,7 +115,6 @@ namespace pfasst
 
     // iterate over time steps
     do {
-      const bool do_initial = this->get_status()->get_step() == 0;
       CLOG(INFO, this->get_logger_id()) << "";
       CLOG(INFO, this->get_logger_id()) << "Time Step " << (this->get_status()->get_step() + 1)
                                         << " of " << this->get_status()->get_num_steps();

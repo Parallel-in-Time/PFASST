@@ -58,7 +58,6 @@ namespace pfasst
                 const vector<shared_ptr<Encapsulation<EncapsulationTrait>>>& x)
     {
       assert((size_t)mat.cols() == x.size());
-      const size_t cols = mat.cols();
       const size_t rows = mat.rows();
 
       // initialize result vector of encaps

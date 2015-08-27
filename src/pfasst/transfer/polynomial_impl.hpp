@@ -65,7 +65,6 @@ namespace pfasst
     CVLOG(1, "TRANS") << "tmat: " << this->tmat;
 
     // +1 here for additional value in states
-    const size_t num_fine_nodes = fine->get_quadrature()->get_num_nodes() + 1;
     const size_t num_coarse_nodes = coarse->get_quadrature()->get_num_nodes() + 1;
 
     auto coarse_factory = coarse->get_encap_factory();
@@ -144,7 +143,6 @@ namespace pfasst
     const auto coarse_nodes = coarse->get_quadrature()->get_nodes();
     const auto fine_nodes = fine->get_quadrature()->get_nodes();
     const size_t num_coarse_nodes = coarse->get_quadrature()->get_num_nodes() + 1;
-    const size_t num_fine_nodes = fine->get_quadrature()->get_num_nodes() + 1;
 
     // this commented out stuff is probably required for non-equal sets of time nodes
 //     const int factor = ((int)num_fine_nodes - 1) / ((int)num_coarse_nodes - 1);
