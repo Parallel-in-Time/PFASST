@@ -41,8 +41,8 @@ namespace pfasst
         this->fs_expl_start = this->get_factory()->create(pfasst::encap::function);
       }
 
-      size_t nsteps = this->get_controller()->get_end_time() / this->get_controller()->get_time_step();
-      size_t digit_step = (this->get_controller()->get_time_step() > 0) ? 
+      size_t nsteps = this->get_controller()->get_end_time() / this->get_controller()->get_step_size();
+      size_t digit_step = (this->get_controller()->get_step_size() > 0) ? 
                             to_string(nsteps + 1).length() : 3;
       size_t digit_iter = (this->get_controller()->get_max_iterations() > 0) ? 
                             to_string(this->get_controller()->get_max_iterations() - 1).length() : 3;
@@ -63,7 +63,7 @@ namespace pfasst
       if (this->quadrature->right_is_node()) {
         this->end_state->copy(this->state.back());
       } else {
-        this->integrate_end_state(this->get_controller()->get_time_step());
+        this->integrate_end_state(this->get_controller()->get_step_size());
       }
     }
 
@@ -79,7 +79,7 @@ namespace pfasst
       if (this->quadrature->right_is_node()) {
         this->end_state->copy(this->state.back());
       } else {
-        this->integrate_end_state(this->get_controller()->get_time_step());
+        this->integrate_end_state(this->get_controller()->get_step_size());
       }
     }
 
@@ -98,7 +98,7 @@ namespace pfasst
     void IMEXSweeper<time>::reevaluate(bool initial_only)
     {
       time t0 = this->get_controller()->get_time();
-      time dt = this->get_controller()->get_time_step();
+      time dt = this->get_controller()->get_step_size();
       if (initial_only) {
         if (this->quadrature->left_is_node()) {
           this->f_expl_eval(this->fs_expl[0], this->state[0], t0);
@@ -173,7 +173,7 @@ namespace pfasst
     template<typename time>
     void IMEXSweeper<time>::predict_with_left(bool initial)
     {
-      time dt = this->get_controller()->get_time_step();
+      time dt = this->get_controller()->get_step_size();
       time t  = this->get_controller()->get_time();
       CVLOG(1, "Sweeper") << "predicting step " << this->get_controller()->get_step() + 1
                           << " (t=" << t << ", dt=" << dt << ")";
@@ -203,7 +203,7 @@ namespace pfasst
     void IMEXSweeper<time>::predict_without_left(bool initial)
     {
       UNUSED(initial);
-      time dt = this->get_controller()->get_time_step();
+      time dt = this->get_controller()->get_step_size();
       time t  = this->get_controller()->get_time();
       CVLOG(1, "Sweeper") << "predicting step " << this->get_controller()->get_step() + 1
                           << " (t=" << t << ", dt=" << dt << ")";
@@ -236,7 +236,7 @@ namespace pfasst
     void IMEXSweeper<time>::sweep_with_left()
     {
       auto const nodes = this->quadrature->get_nodes();
-      auto const dt    = this->get_controller()->get_time_step();
+      auto const dt    = this->get_controller()->get_step_size();
       auto const s_mat = this->quadrature->get_s_mat().block(1, 0, nodes.size()-1, nodes.size());
       CVLOG(1, "Sweeper") << "sweeping on step " << this->get_controller()->get_step() + 1
                           << " in iteration " << this->get_controller()->get_iteration() << " (dt=" << dt << ")";
@@ -274,7 +274,7 @@ namespace pfasst
     void IMEXSweeper<time>::sweep_without_left()
     {
       auto const nodes = this->quadrature->get_nodes();
-      auto const dt    = this->get_controller()->get_time_step();
+      auto const dt    = this->get_controller()->get_step_size();
       auto const s_mat = this->quadrature->get_s_mat();
       CVLOG(1, "Sweeper") << "sweeping on step " << this->get_controller()->get_step() + 1
                           << " in iteration " << this->get_controller()->get_iteration() << " (dt=" << dt << ")";

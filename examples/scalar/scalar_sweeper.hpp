@@ -127,7 +127,7 @@ namespace pfasst
           void post_predict() override
           {
             time t  = this->get_controller()->get_time();
-            time dt = this->get_controller()->get_time_step();
+            time dt = this->get_controller()->get_step_size();
             this->echo_error(t + dt);
           }
 
@@ -137,7 +137,7 @@ namespace pfasst
           void post_sweep() override
           {
             time t  = this->get_controller()->get_time();
-            time dt = this->get_controller()->get_time_step();
+            time dt = this->get_controller()->get_step_size();
             this->echo_error(t + dt);
           }
 

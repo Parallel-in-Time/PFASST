@@ -44,14 +44,14 @@ namespace pfasst
       return;
     }
 
-    int nblocks = int(this->get_end_time() / this->get_time_step()) / comm->size();
+    int nblocks = int(this->get_end_time() / this->get_step_size()) / comm->size();
 
     if (nblocks == 0) {
       CLOG(INFO, "Controller") << "invalid duration: there are more time processors than time steps";
       throw ValueError("invalid duration: there are more time processors than time steps");
     }
 
-    if (nblocks * comm->size() * this->get_time_step() < this->get_end_time()) {
+    if (nblocks * comm->size() * this->get_step_size() < this->get_end_time()) {
       CLOG(INFO, "Controller") << "invalid duration: mismatch between number of time processors and time steps";
       throw ValueError("invalid duration: mismatch between number of time processors and time steps");
     }
@@ -102,7 +102,7 @@ namespace pfasst
 
     fine->send(comm, tag(l), false);
     trns->restrict(crse, fine, true);
-    trns->fas(this->get_time_step(), crse, fine);
+    trns->fas(this->get_step_size(), crse, fine);
     crse->save();
 
     return l - 1;

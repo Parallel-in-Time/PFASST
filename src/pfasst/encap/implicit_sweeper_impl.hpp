@@ -83,7 +83,7 @@ namespace pfasst
       } else {
         vector<shared_ptr<Encapsulation<time>>> dst = { this->end_state };
         dst[0]->copy(this->start_state);
-        dst[0]->mat_apply(dst, this->get_controller()->get_time_step(), this->quadrature->get_b_mat(), this->fs_impl, false);
+        dst[0]->mat_apply(dst, this->get_controller()->get_step_size(), this->quadrature->get_b_mat(), this->fs_impl, false);
       }
     }
 
@@ -123,7 +123,7 @@ namespace pfasst
     {
       UNUSED(initial);
 
-      auto const dt = this->get_controller()->get_time_step();
+      auto const dt = this->get_controller()->get_step_size();
       auto const t  = this->get_controller()->get_time();
 
       CLOG(INFO, "Sweeper") << "predicting step " << this->get_controller()->get_step() + 1
@@ -141,7 +141,7 @@ namespace pfasst
     template<typename time>
     void ImplicitSweeper<time>::sweep()
     {
-      auto const dt = this->get_controller()->get_time_step();
+      auto const dt = this->get_controller()->get_step_size();
       auto const t  = this->get_controller()->get_time();
 
       CLOG(INFO, "Sweeper") << "sweeping on step " << this->get_controller()->get_step() + 1
@@ -189,7 +189,7 @@ namespace pfasst
       if (initial_only) {
         return;
       }
-      auto const dt = this->get_controller()->get_time_step();
+      auto const dt = this->get_controller()->get_step_size();
       auto const t0 = this->get_controller()->get_time();
       auto const nodes = this->quadrature->get_nodes();
       for (size_t m = 0; m < nodes.size(); m++) {
