@@ -33,6 +33,7 @@ foreach(example ${all_advec_examples})
         add_dependencies(${example} ${pfasst_DEPENDEND_TARGETS})
     endif()
     target_link_libraries(${example}
+        ${pfasst_DEPENDEND_LIBS}
         ${3rdparty_DEPENDEND_LIBS}
         ${FFTW_LIBRARIES}
     )
