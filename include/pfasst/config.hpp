@@ -208,8 +208,8 @@ namespace pfasst
      * # Duration
      * dt=0.015625
      * num_steps=2
-     * num_iter=10
-     * 
+     * num_iters=10
+     *
      * # Tolerances
      * rel_res_tol=1e-10
      *
@@ -306,7 +306,7 @@ namespace pfasst
       options::add_option<double>("Duration", "dt", "time step size");
       options::add_option<double>("Duration", "tend", "final time of simulation");
       options::add_option<size_t>("Duration", "num_steps", "number time steps");
-      options::add_option<size_t>("Duration", "num_iter", "number of iterations");
+      options::add_option<size_t>("Duration", "num_iters", "number of iterations");
 
       options::add_option<size_t>("Quadrature", "num_nodes", "number of quadrature nodes");
 
