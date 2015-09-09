@@ -100,7 +100,7 @@ if(pfasst_BUILD_EXAMPLES)
           PURPOSE "fast Fourier transformation"
     )
 
-    if(NOT FFTW_FOUND)
+    if(NOT FFTW_FOUND OR NOT FFTW_LIBRARIES)
         set(FFTW3_SOURCE_URL "http://fftw.org/fftw-3.3.4.tar.gz")
         set(FFTW3_SOURCE_MD5 "2edab8c06b24feeb3b82bbb3ebf3e7b3")
 

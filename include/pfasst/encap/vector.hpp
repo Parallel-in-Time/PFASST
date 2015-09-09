@@ -61,7 +61,7 @@ namespace pfasst
          */
         VectorEncapsulation(Encapsulation<time>&& other);
 
-        virtual ~VectorEncapsulation() = default;
+        virtual ~VectorEncapsulation();
         //! @}
 
         //! @{
