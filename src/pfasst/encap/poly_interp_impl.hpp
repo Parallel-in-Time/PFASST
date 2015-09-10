@@ -115,6 +115,7 @@ namespace pfasst
 
       for (size_t m = 0; m < num_crse; m++) {
         if (crse_nodes[m] != fine_nodes[m * trat]) {
+          CLOG(FATAL, "Controller") << "coarse nodes must be nested";
           throw NotImplementedYet("coarse nodes must be nested");
         }
         this->restrict(crse.get_state(m), fine.get_state(m * trat));

@@ -163,7 +163,7 @@
 #   define ELPP_INTERNAL_INFO(lvl, msg)
 #endif  // (defined(ELPP_DEBUG_INFO))
 #if defined(ELPP_STACKTRACE_ON_CRASH)
-#   if (ELPP_COMPILER_GCC && !ELPP_MINGW)
+#   if (ELPP_COMPILER_GCC && !ELPP_MINGW && !ELPP_CYGWIN)
 #      define ELPP_STACKTRACE 1
 #   else
 #      if ELPP_COMPILER_MSVC

@@ -59,12 +59,9 @@ namespace pfasst
     for (int nblock = 0; nblock < nblocks; nblock++) {
       this->set_step(nblock * comm->size() + comm->rank());
 
-      if (this->comm->size() == 1) {
-        predict = true;
-      } else {
-        predictor();
-      }
+      predictor();
 
+      CLOG(DEBUG, "Controller") << "iterating on step " << this->get_step() << " (0/" << this->get_max_iterations() << ")";
       for (this->set_iteration(0);
            this->get_iteration() < this->get_max_iterations() && this->comm->status->keep_iterating();
            this->advance_iteration()) {
@@ -74,6 +71,7 @@ namespace pfasst
         }
         cycle_v(this->finest());
       }
+      CLOG(DEBUG, "Controller") << "done iterating on step " << this->get_step() << " (" << this->get_iteration() << "/" << this->get_max_iterations() << ")";
 
       for (auto l = this->finest(); l >= this->coarsest(); --l) {
         l.current()->post_step();
