@@ -79,7 +79,7 @@ namespace pfasst
         l.current()->post_step();
       }
 
-      if (this->get_time() + this->get_time_step() < this->get_end_time()) {
+      if (this->get_time() + this->get_step_size() < this->get_end_time()) {
         this->get_finest()->advance();
       }
     }
@@ -111,7 +111,7 @@ namespace pfasst
 
     CVLOG(1, "Controller") << "Cycle down onto level " << level_iter.level << "/" << this->nlevels();
     trns->restrict(crse, fine, initial);
-    trns->fas(this->get_time_step(), crse, fine);
+    trns->fas(this->get_step_size(), crse, fine);
     crse->save();
 
     return level_iter - 1;

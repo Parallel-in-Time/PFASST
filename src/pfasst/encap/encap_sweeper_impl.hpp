@@ -223,7 +223,7 @@ namespace pfasst
             this->residuals.push_back(this->get_factory()->create(pfasst::encap::solution));
           }
         }
-        this->residual(this->get_controller()->get_time_step(), this->residuals);
+        this->residual(this->get_controller()->get_step_size(), this->residuals);
         vector<time> anorms, rnorms;
         for (size_t m = 0; m < this->get_nodes().size(); m++) {
           anorms.push_back(this->residuals[m]->norm0());

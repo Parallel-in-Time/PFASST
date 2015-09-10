@@ -177,7 +177,7 @@ namespace pfasst
             for (size_t m = 0; m < this->get_nodes().size(); m++) {
                 residuals.push_back(this->get_factory()->create(pfasst::encap::solution));
             }
-            this->residual(this->get_controller()->get_time_step(), residuals);
+            this->residual(this->get_controller()->get_step_size(), residuals);
 
             vector<time> rnorms;
             for (auto r: residuals) {
@@ -213,7 +213,7 @@ namespace pfasst
           void post_predict() override
           {
             time t  = this->get_controller()->get_time();
-            time dt = this->get_controller()->get_time_step();
+            time dt = this->get_controller()->get_step_size();
             this->echo_error(t + dt, true);
             this->echo_residual();
           }
@@ -224,7 +224,7 @@ namespace pfasst
           void post_sweep() override
           {
             time t  = this->get_controller()->get_time();
-            time dt = this->get_controller()->get_time_step();
+            time dt = this->get_controller()->get_step_size();
             this->echo_error(t + dt);
             this->echo_residual();
           }

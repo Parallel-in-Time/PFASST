@@ -41,7 +41,7 @@ namespace pfasst
         }
       }
       sweeper->post_step();
-      if (this->get_time() + this->get_time_step() < this->get_end_time()) {
+      if (this->get_time() + this->get_step_size() < this->get_end_time()) {
         sweeper->advance();
       }
     }

@@ -102,7 +102,7 @@ namespace pfasst
   }
 
   template<typename time>
-  time Controller<time>::get_time_step()
+  time Controller<time>::get_step_size()
   {
     return dt;
   }

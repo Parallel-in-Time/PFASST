@@ -25,9 +25,6 @@ namespace pfasst
    *
    * @since v0.1.0
    *
-   * @todo Consider renaming `get_time_step`.
-   *   See [#161](https://github.com/Parallel-in-Time/PFASST/issues/161).
-   *
    * @ingroup Controllers
    */
   template<typename time = time_precision>
@@ -223,7 +220,14 @@ namespace pfasst
        *
        * @returns \\( \\Delta t \\) of current time step
        */
-      virtual time   get_time_step();
+      virtual time   get_step_size();
+
+      /**
+       * Get width of current time step (alias for get_step_size).
+       *
+       * @returns \\( \\Delta t \\) of current time step
+       */
+      time get_dt() { return this->get_step_size(); }
 
       /**
        * Get start time point of current time step.
@@ -231,6 +235,13 @@ namespace pfasst
        * @returns \\( t_0 \\) of current time step
        */
       virtual time   get_time();
+
+      /**
+       * Get start time point of current time step (alias for get_time).
+       *
+       * @returns \\( t_0 \\) of current time step
+       */
+      time get_t() { return this->get_time(); }
 
       /**
        * Advance to a following time step

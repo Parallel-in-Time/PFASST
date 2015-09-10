@@ -125,7 +125,7 @@ namespace pfasst
         BCVLOG(8) << "computing max residual";
         this->log_indent->increment(8);
 
-        this->residual(this->get_controller()->get_time_step(), this->residuals);
+        this->residual(this->get_controller()->get_step_size(), this->residuals);
 
         scalar max_residual = scalar(0.0);
 
@@ -352,7 +352,7 @@ namespace pfasst
                  omega_e = this->impl_solver->omega_e(),
                  omega_b = this->impl_solver->omega_b(),
                  epsilon = this->impl_solver->epsilon();
-          time dt = this->get_controller()->get_time_step();
+          time dt = this->get_controller()->get_step_size();
 
           C omega_tilde = sqrt(-2.0 * epsilon) * omega_e;
           q.positions()[2] = (z0 * cos(omega_tilde * (scalar)(dt)) 
@@ -523,7 +523,7 @@ namespace pfasst
           this->st_mat.row(i) = this->qt_mat.row(i) - this->qt_mat.row(i - 1);
         }
 
-        size_t nsteps = this->get_controller()->get_end_time() / this->get_controller()->get_time_step();
+        size_t nsteps = this->get_controller()->get_end_time() / this->get_controller()->get_step_size();
         size_t digit_step = to_string(nsteps + 1).length();
         size_t digit_iter = to_string(this->get_controller()->get_max_iterations() - 1).length();
         this->FORMAT_STR = "step: %|" + to_string(digit_step) + "|      iter: %|" + to_string(digit_iter) + "| (%-6s)"
@@ -632,7 +632,7 @@ namespace pfasst
       template<typename scalar, typename time>
       void BorisSweeper<scalar, time>::evaluate(size_t m)
       {
-        time t = this->get_controller()->get_time() + this->get_controller()->get_time_step() * this->delta_nodes[m];
+        time t = this->get_controller()->get_time() + this->get_controller()->get_step_size() * this->delta_nodes[m];
         BCVLOG(2) << "computing forces at node " << m << " (t=" << t << ")";
         this->log_indent->increment(2);
 
@@ -685,7 +685,7 @@ namespace pfasst
         const size_t nnodes = nodes.size();
         assert(nnodes >= 1);
         time t  = this->get_controller()->get_time();
-        time dt = this->get_controller()->get_time_step();
+        time dt = this->get_controller()->get_step_size();
         BCVLOG(1) << "sweeping for t=" << t << " and dt=" << dt;
         this->log_indent->increment(1);
         BCVLOG(2) << "with nodes: " << nodes;
@@ -821,7 +821,7 @@ namespace pfasst
       void BorisSweeper<scalar, time>::post_sweep()
       {
         time t  = this->get_controller()->get_time();
-        time dt = this->get_controller()->get_time_step();
+        time dt = this->get_controller()->get_step_size();
         this->echo_error(t + dt);
       }
 
@@ -829,7 +829,7 @@ namespace pfasst
       void BorisSweeper<scalar, time>::post_predict()
       {
         time t  = this->get_controller()->get_time();
-        time dt = this->get_controller()->get_time_step();
+        time dt = this->get_controller()->get_step_size();
         this->echo_error(t + dt);
       }
 
