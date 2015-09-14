@@ -159,6 +159,10 @@ latest release from [GitHub][github_releases].
 There are a few tweaks and special care require to get up and running on supercomputers.
 We have compiled a few working walk-throughs at \subpage page_supercomputers .
 
+### Score-P and other compiler wrappers
+
+It is possible to use extra compiler wrappers like Score-P when compiling. See \subpage page_scorep.
+
 ## Building with vanilla make
 
 A sample `Makefile` is included in the `advection_diffusion` example.  This may be of particular
