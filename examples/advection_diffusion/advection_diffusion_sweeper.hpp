@@ -151,7 +151,7 @@ namespace pfasst
             }
           }
 
-          void echo_error(time t, bool predict = false)
+          void echo_error(time t)
           {
             auto& qend = as_vector<double, time>(this->get_end_state());
             DVectorT qex(qend.size());
@@ -214,7 +214,7 @@ namespace pfasst
           {
             time t  = this->get_controller()->get_time();
             time dt = this->get_controller()->get_step_size();
-            this->echo_error(t + dt, true);
+            this->echo_error(t + dt);
             this->echo_residual();
           }
 
