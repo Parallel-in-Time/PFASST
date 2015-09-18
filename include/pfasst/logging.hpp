@@ -19,7 +19,6 @@ using namespace std;
 
 #include <boost/algorithm/string.hpp>
 
-#include "pfasst/site_config.hpp"
 #include "pfasst/config.hpp"
 
 

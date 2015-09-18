@@ -21,6 +21,8 @@ namespace po = boost::program_options;
 
 namespace pfasst
 {
+  static constexpr const char* VERSION = "v0.4.0-88-g9a8c5fb-dirty";
+
   /**
    * @since v0.3.0
    */
