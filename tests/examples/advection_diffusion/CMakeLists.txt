@@ -47,6 +47,7 @@ endif()
 
 set(TESTS
     test_advection_diffusion
+    test_advection_diffusion_conv
 )
 
 foreach(test ${TESTS})
