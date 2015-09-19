@@ -9,6 +9,7 @@ include_directories(
 if(${pfasst_WITH_MPI})
     set(MPI_TESTS
         test_mpi_advection_diffusion
+        test_mpi_advection_diffusion_conv
     )
 
     include_directories(${MPI_CXX_INCLUDE_PATH})
