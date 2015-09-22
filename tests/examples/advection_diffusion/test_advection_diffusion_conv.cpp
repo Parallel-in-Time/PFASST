@@ -83,8 +83,8 @@ class ConvergenceTest
 
       // compute convergence rates
       for (size_t i = 0; i < this->nsteps.size() - 1; ++i) {
-        this->convrate.push_back(log10(this->err[i+1] / this->err[i]) /
-                                 log10(double(this->nsteps[i]) / double(this->nsteps[i + 1])));
+        this->convrate.push_back(log10(this->err.at(i+1) / this->err.at(i)) /
+                                 log10(double(this->nsteps.at(i)) / double(this->nsteps.at(i + 1))));
       }
     }
 };
@@ -95,8 +95,8 @@ class ConvergenceTest
  */
 TEST_P(ConvergenceTest, AllNodes)
 {
-  int order;
   string quad;
+  int order = 1;
   double fudge = 1.0;
 
   switch (this->nodetype)
@@ -143,8 +143,6 @@ TEST_P(ConvergenceTest, AllNodes)
 INSTANTIATE_TEST_CASE_P(AdvectionDiffusionPFASST, ConvergenceTest,
                         Combine(Range<size_t>(5, 6),
                                 Values(pfasst::quadrature::QuadratureType::GaussLobatto,
-                                       //                                       pfasst::quadrature::QuadratureType::GaussLegendre,
-                                       //                                       pfasst::quadrature::QuadratureType::GaussRadau,
                                        pfasst::quadrature::QuadratureType::ClenshawCurtis,
                                        pfasst::quadrature::QuadratureType::Uniform))
 );

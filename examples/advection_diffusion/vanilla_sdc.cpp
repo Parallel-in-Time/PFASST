@@ -58,8 +58,6 @@ namespace pfasst
 
         sdc.run();
 
-        fftw_cleanup();
-
         return sweeper->get_errors();
       }
     }  // ::pfasst::examples::advection_diffusion
@@ -74,5 +72,6 @@ int main(int argc, char** argv)
                pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_opts,
                pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_logs);
   pfasst::examples::advection_diffusion::run_vanilla_sdc(0.0);
+  fftw_cleanup();
 }
 #endif

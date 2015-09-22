@@ -101,8 +101,6 @@ namespace pfasst
         mlsdc.set_options();
         mlsdc.run();
 
-        fftw_cleanup();
-
         tuple<error_map, residual_map> rinfo;
         get<0>(rinfo) = mlsdc.get_finest<AdvectionDiffusionSweeper<>>()->get_errors();
         for (auto l = mlsdc.coarsest(); l <= mlsdc.finest(); ++l) {
@@ -121,5 +119,6 @@ int main(int argc, char** argv)
                pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_opts,
                pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_logs);
   pfasst::examples::advection_diffusion::run_serial_mlsdc(3);
+  fftw_cleanup();
 }
 #endif
