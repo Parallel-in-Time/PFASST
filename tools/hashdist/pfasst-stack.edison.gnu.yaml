@@ -1,0 +1,51 @@
+
+extends:
+- name: hashstack
+  urls: ['https://github.com/hashdist/hashstack.git']
+  key: 'git:b890c0af8fe63255c9653ab3bf350bd1f7d1c373'
+  file: config.yaml
+
+parameters:
+  machine: CrayXC30
+  platform: linux
+  fortran: true
+  edison: true
+  PATH: /usr/bin:/bin
+  HOST_MPICC: cc
+  HOST_MPICXX: CC
+  HOST_MPIF77: ftn
+  HOST_MPIF90: ftn
+  HOST_MPIEXEC: aprun
+  HOST_CMAKE: /usr/bin/cmake
+  HOST_PYTHON: /usr/bin/python
+  PROLOGUE: >
+    source /etc/bash.bashrc.local;
+    module purge;
+    module load craype-ivybridge;
+    module load craype-network-aries;
+    module load PrgEnv-gnu;
+    export CC=gcc;
+    export CXX=g++;
+    export FC=gfortran;
+    export F77=gfortran;
+    export F90=gfortran;
+    export CPP=cpp;
+  DYNAMIC_EXE_LINKER_FLAGS: -dynamic
+
+packages:
+  mpi:
+    use: host-mpi
+  fftw:
+    use: fftw-nompi
+  eigen:
+  gtest:
+  gmock:
+  boost:
+    toolset: gcc
+    address_model: 64
+  cmake:
+  blas:
+    use: host-blas
+
+package_dirs:
+- .
