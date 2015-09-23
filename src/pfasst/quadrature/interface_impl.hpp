@@ -1,3 +1,5 @@
+
+
 #include "pfasst/quadrature/interface.hpp"
 
 namespace pfasst
@@ -77,9 +79,9 @@ namespace pfasst
     template<typename precision>
     precision IQuadrature<precision>::expected_error() const
     {
-      using vec = Eigen::Array<precision, 1, Eigen::Dynamic>;
-      const vec row_sums = this->get_q_mat().rowwise().sum();
-      Eigen::Map<const vec> nodes(this->get_nodes().data(), this->get_nodes().size());
+      using cvec = Eigen::Array<precision, Eigen::Dynamic, 1>;
+      const cvec row_sums = this->get_q_mat().rowwise().sum();
+      Eigen::Map<const cvec> nodes(this->get_nodes().data(), this->get_nodes().size());
       return (row_sums - nodes).maxCoeff();
     }
 
