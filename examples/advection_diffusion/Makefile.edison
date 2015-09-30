@@ -1,0 +1,32 @@
+#
+# Simple Makefile for Edison.
+#
+# Make sure the following modules have been loaded: fftw, eigen3,
+# boost.
+#
+# This has been tested with the PrgEnv-gnu module.
+#
+
+PFASST   := $(abspath ../..)
+CXX      := CC
+
+CXXFLAGS ?= -std=c++11 
+CXXFLAGS += -I$(PFASST)/include -I$(PFASST)/src
+CXXFLAGS += -I$(EIGEN3_DIR)/include/eigen3
+CXXFLAGS += -I$(FFTW_INC)
+CXXFLAGS += -I$(BOOST_ROOT)/include
+
+LDFLAGS  += -L$(FFTW_DIR)
+LDFLAGS  += -L$(BOOST_ROOT)/lib
+LDFLAGS  += -lboost_program_options -lfftw3
+
+all: vanilla_sdc mpi_pfasst serial_mlsdc
+
+vanilla_sdc: vanilla_sdc.cpp
+	$(CXX) -o $@ $(CXXFLAGS) $^ $(LDFLAGS)
+
+serial_mlsdc: serial_mlsdc.cpp
+	$(CXX) -o $@ $(CXXFLAGS) $^ $(LDFLAGS)
+
+mpi_pfasst: mpi_pfasst.cpp
+	$(CXX) -o $@ $(CXXFLAGS) $^ $(LDFLAGS)

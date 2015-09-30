@@ -12,6 +12,7 @@ endif(Eigen3_INCLUDE_PATH)
 find_path(Eigen3_INCLUDE_PATH
     signature_of_eigen3_matrix_library
     PATH_SUFFIXES eigen3 Eigen3 Eigen
+    HINTS $ENV{EIGEN3_DIR}/include/eigen3 # Edison
 )
 
 # handle the QUIETLY and REQUIRED arguments and set FFTW_FOUND to TRUE if

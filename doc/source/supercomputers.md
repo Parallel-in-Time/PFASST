@@ -67,3 +67,34 @@ There are a few steps one has to complete before using _PFASST++_ on _JUQUEEN_.
        runjob --np 32 --ranks-per-node 32 : \
          <PATH_TO_BUILD_DIR>/examples/advection_diffusion/mpi_pfasst \
          -q --tend 0.64 --dt 0.01 --num_iter 8
+
+## Edison
+
+There are a few steps one has to complete before using _PFASST++_ on
+_Edison_.  These steps have been tested with the GNU programming
+environment (that is, with the `PrgEnv-gnu` module).
+
+1. Load the following modules:
+
+       module load cmake python fftw eigen3 boost
+
+2. Go to the sources of _PFASST++_, create a `build` folder and step into it:
+
+       cd PFASST
+       mkdir build
+       cd build
+
+3. Run _CMake_
+
+       cmake -Dpfasst_BUILD_TESTS=OFF -Dpfasst_BUILD_SHARED_LIBS=OFF ..
+
+4. Run _make_
+
+       make -j 4
+
+5. Run an example in an interactive job:
+
+       qsub -I -q debug -l mppwidth=4
+       cd PFASST/build/examples/advection_diffusion
+       aprun -n 4 ./mpi_pfasst -c
+

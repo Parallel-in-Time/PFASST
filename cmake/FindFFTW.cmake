@@ -16,6 +16,7 @@ find_path(FFTW_INCLUDE_PATH fftw3.h
         ${FFTW3_ROOT}/include
         $ENV{FFTW3_INCLUDE}
         $ENV{FFTW3_INC}
+        $ENV{FFTW_INC} # Edison
         $ENV{FFTW3_ROOT}/include
 )
 
@@ -24,6 +25,7 @@ find_library(FFTW_LIBRARIES NAMES fftw3 fftw3l fftw3_mpi fftw3l_mpi fftw3_omp ff
         ${FFTW3_ROOT}/lib64
         ${FFTW3_ROOT}/lib
         $ENV{FFTW3_LIB}
+        $ENV{FFTW_DIR} # Edison
         $ENV{FFTW3_ROOT}/lib64
         $ENV{FFTW3_ROOT}/lib
 )
