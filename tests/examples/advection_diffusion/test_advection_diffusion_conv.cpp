@@ -1,5 +1,5 @@
 /*
- * Tests for the scalar example solving the test equation
+ * Convergence tests for the advection-diffusion examples.
  */
 #include <cmath>
 using namespace std;
@@ -11,9 +11,9 @@ using namespace ::testing;
 #include <pfasst/quadrature.hpp>
 
 #define PFASST_UNIT_TESTING
-#include "../examples/scalar/scalar_sdc.cpp"
+#include "../examples/advection_diffusion/serial_mlsdc.cpp"
 #undef PFASST_UNIT_TESTING
-using namespace pfasst::examples::scalar;
+using namespace pfasst::examples::advection_diffusion;
 
 /*
  * parameterized test fixture with number of nodes as parameter
@@ -24,11 +24,10 @@ class ConvergenceTest
   protected:
     size_t nnodes;
     size_t niters;
-    double end_time;
+    size_t nlevs = 3;
     vector<size_t> nsteps;
     vector<double> err;
     vector<double> convrate;
-    complex<double> lambda;
     pfasst::quadrature::QuadratureType nodetype;
 
   public:
@@ -41,37 +40,23 @@ class ConvergenceTest
       {
         case pfasst::quadrature::QuadratureType::GaussLobatto:
           this->niters = 2 * this->nnodes - 2;
-          this->end_time = 4.0;
-          this->lambda = complex<double>(-1.0, 1.0);
-          this->nsteps = { 2, 5, 10, 15 };
+          this->nsteps = { 4, 8, 16, 32 };
+          nlevs = 2;
           break;
 
         case pfasst::quadrature::QuadratureType::GaussLegendre:
           this->niters = 2 * this->nnodes;
-          this->end_time = 6.0;
-          this->lambda = complex<double>(-1.0, 2.0);
-          this->nsteps = { 2, 4, 6, 8, 10 };
-          break;
-
-        case pfasst::quadrature::QuadratureType::GaussRadau:
-          this->niters = 2 * this->nnodes;
-          this->end_time = 5.0;
-          this->lambda = complex<double>(-1.0, 2.0);
-          this->nsteps = { 4, 6, 8, 10, 12 };
+          this->nsteps = { 4, 8, 16, 32 };
           break;
 
         case pfasst::quadrature::QuadratureType::ClenshawCurtis:
-          this->niters = this->nnodes + 1;
-          this->end_time = 1.0;
-          this->lambda = complex<double>(-1.0, 1.0);
-          this->nsteps = { 7, 9, 11, 13 };
+          this->niters = this->nnodes;
+          this->nsteps = { 4, 8, 16, 32 };
           break;
 
         case pfasst::quadrature::QuadratureType::Uniform:
           this->niters = this->nnodes;
-          this->end_time = 5.0;
-          this->lambda = complex<double>(-1.0, 1.0);
-          this->nsteps = { 9, 11, 13, 15 };
+          this->nsteps = { 4, 8, 16, 32 };
           break;
 
         default:
@@ -80,35 +65,46 @@ class ConvergenceTest
 
       // run to compute errors
       for (size_t i = 0; i < this->nsteps.size(); ++i) {
-        auto dt = this->end_time / double(this->nsteps[i]);
-        this->err.push_back(run_scalar_sdc(this->nsteps[i], dt, this->nnodes,
-                                           this->niters, this->lambda, this->nodetype));
+        auto dt = 0.5 / double(this->nsteps[i]);
+
+        auto errors_and_residuals = run_serial_mlsdc(
+          nlevs,                // nlevs
+          this->nsteps[i],      // nsteps
+          dt,                   // dt
+          this->niters,         // niters
+          this->nnodes,         // nnodes
+          128                   // ndofs
+                                     );
+
+        auto errors = get<0>(errors_and_residuals);
+        auto last_error = pfasst::examples::advection_diffusion::ktype(this->nsteps[i]-1, this->niters-1);
+        this->err.push_back(errors.at(last_error));
       }
 
       // compute convergence rates
       for (size_t i = 0; i < this->nsteps.size() - 1; ++i) {
-        this->convrate.push_back(log10(this->err[i+1] / this->err[i]) /
-                                 log10(double(this->nsteps[i]) / double(this->nsteps[i + 1])));
+        this->convrate.push_back(log10(this->err.at(i+1) / this->err.at(i)) /
+                                 log10(double(this->nsteps.at(i)) / double(this->nsteps.at(i + 1))));
       }
     }
-
 };
 
 /*
- * The test below verifies that the code approximately (up to a safety factor) reproduces
- * the theoretically expected rate of convergence
+ * The test below verifies that the code reproduces the theoretically expected rate of convergence
+ * (or better).
  */
 TEST_P(ConvergenceTest, AllNodes)
 {
-  int order;
   string quad;
-  double fudge = 0.9;
+  int order = 1;
+  double fudge = 1.0;
 
   switch (this->nodetype)
   {
   case pfasst::quadrature::QuadratureType::GaussLobatto:
     order = 2 * this->nnodes - 2;
     quad = "Gauss-Lobatto";
+    fudge = 0.9;
     break;
 
   case pfasst::quadrature::QuadratureType::GaussLegendre:
@@ -117,7 +113,7 @@ TEST_P(ConvergenceTest, AllNodes)
     break;
 
   case pfasst::quadrature::QuadratureType::GaussRadau:
-    order = 2 * this->nnodes;
+    order = 2 * this->nnodes - 1;
     quad = "Gauss-Radau";
     break;
 
@@ -128,7 +124,6 @@ TEST_P(ConvergenceTest, AllNodes)
 
   case pfasst::quadrature::QuadratureType::Uniform:
     order = this->nnodes;
-    fudge = 0.8;
     quad = "Uniform";
     break;
 
@@ -145,11 +140,9 @@ TEST_P(ConvergenceTest, AllNodes)
   }
 }
 
-INSTANTIATE_TEST_CASE_P(ScalarSDC, ConvergenceTest,
-                        Combine(Range<size_t>(3, 7),
+INSTANTIATE_TEST_CASE_P(AdvectionDiffusionPFASST, ConvergenceTest,
+                        Combine(Range<size_t>(5, 6),
                                 Values(pfasst::quadrature::QuadratureType::GaussLobatto,
-                                       pfasst::quadrature::QuadratureType::GaussLegendre,
-                                       pfasst::quadrature::QuadratureType::GaussRadau,
                                        pfasst::quadrature::QuadratureType::ClenshawCurtis,
                                        pfasst::quadrature::QuadratureType::Uniform))
 );
@@ -157,5 +150,8 @@ INSTANTIATE_TEST_CASE_P(ScalarSDC, ConvergenceTest,
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  pfasst::init(argc, argv,
+               pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_opts,
+               pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_logs);
+  return  RUN_ALL_TESTS();
 }

@@ -34,18 +34,23 @@ namespace pfasst
        *
        * @ingroup AdvectionDiffusion
        */
-      tuple<error_map, residual_map> run_serial_mlsdc(size_t nlevs)
+      tuple<error_map, residual_map> run_serial_mlsdc(size_t nlevs,
+                                                      size_t nsteps_in=4,
+                                                      double step_size_in=0.01,
+                                                      size_t num_iter_in=8,
+                                                      size_t nnodes_in=5,
+                                                      size_t ndofs_in=128)
       {
         MLSDC<> mlsdc;
 
-        const size_t nsteps = config::get_value<size_t>("num_steps", 4);
-        const double dt     = config::get_value<double>("delta_step", 0.01);
-        const size_t niters = config::get_value<size_t>("num_iter", 8);
+        const size_t nsteps = config::get_value<size_t>("num_steps", nsteps_in);
+        const double dt     = config::get_value<double>("step_size", step_size_in);
+        const size_t niters = config::get_value<size_t>("num_iter", num_iter_in);
         const int    xrat   = 2;
         const int    trat   = 2;
 
-        size_t nnodes = config::get_value<size_t>("num_nodes", 5);
-        size_t ndofs  = config::get_value<size_t>("spatial_dofs", 128);
+        size_t nnodes = config::get_value<size_t>("num_nodes", nnodes_in);
+        size_t ndofs  = config::get_value<size_t>("spatial_dofs", ndofs_in);
 
         const double abs_res_tol = pfasst::config::get_value<double>("abs_res_tol", 0.0);
         const double rel_res_tol = pfasst::config::get_value<double>("rel_res_tol", 0.0);
@@ -96,8 +101,6 @@ namespace pfasst
         mlsdc.set_options();
         mlsdc.run();
 
-        fftw_cleanup();
-
         tuple<error_map, residual_map> rinfo;
         get<0>(rinfo) = mlsdc.get_finest<AdvectionDiffusionSweeper<>>()->get_errors();
         for (auto l = mlsdc.coarsest(); l <= mlsdc.finest(); ++l) {
@@ -116,5 +119,6 @@ int main(int argc, char** argv)
                pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_opts,
                pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_logs);
   pfasst::examples::advection_diffusion::run_serial_mlsdc(3);
+  fftw_cleanup();
 }
 #endif
