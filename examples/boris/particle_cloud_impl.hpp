@@ -10,7 +10,7 @@ using namespace std;
 #include <boost/format.hpp>
 
 #include <pfasst/globals.hpp>
-#include <pfasst/site_config.hpp>
+#include <pfasst/config.hpp>
 #include <pfasst/logging.hpp>
 #ifdef WITH_MPI
   #include <mpi.h>
