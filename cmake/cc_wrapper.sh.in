@@ -1,0 +1,5 @@
+#!/bin/bash
+
+C_COMPILER=@CMAKE_C_COMPILER@
+
+$PREP $C_COMPILER $@
