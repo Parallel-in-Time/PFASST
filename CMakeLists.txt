@@ -195,6 +195,7 @@ message(STATUS "")
 
 message(STATUS "********************************************************************************")
 message(STATUS "Configuring sources")
+update_site_config()
 
 if(NOT PYTHON_EXECUTABLE)
     find_package(PythonInterp 2.7)
