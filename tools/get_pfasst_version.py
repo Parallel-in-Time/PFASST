@@ -39,6 +39,6 @@ new_config = re.sub('VERSION = "[^"]*"', 'VERSION = "{version}"'.format(version=
 if config != new_config:
     with open(config_name, 'w') as f:
         f.write(new_config)
-    print("PFASST++ version set in to: %s" % (version,))
+    print("PFASST++ version set to: %s" % (version,))
 else:
     print("PFASST++ version did not change (still %s)" % (version,))

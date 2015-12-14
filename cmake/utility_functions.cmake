@@ -30,9 +30,6 @@ endmacro(msg_not_installed)
 
 macro(update_site_config)
     set(WARNING_COMMENT "/*\n * DO NOT ALTER THIS FILE\n *\n * It will get rewritten on CMake's next run\n */")
-    if(pfasst_RANDOM_SEED)
-        add_definitions(-DPFASST_DEFAULT_RANDOM_SEED)
-    endif()
     execute_process(COMMAND git describe --dirty
                     OUTPUT_VARIABLE pfasst_VERSION
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
