@@ -175,8 +175,8 @@ namespace pfasst
     {
       time dt = this->get_controller()->get_step_size();
       time t  = this->get_controller()->get_time();
-      CVLOG(1, "Sweeper") << "predicting step " << this->get_controller()->get_step() + 1
-                          << " (t=" << t << ", dt=" << dt << ")";
+      ML_CVLOG(1, "Sweeper", "predicting step " << this->get_controller()->get_step() + 1
+                             << " (t=" << t << ", dt=" << dt << ")");
 
       if (initial) {
         this->state[0]->copy(this->start_state);
@@ -205,8 +205,8 @@ namespace pfasst
       UNUSED(initial);
       time dt = this->get_controller()->get_step_size();
       time t  = this->get_controller()->get_time();
-      CVLOG(1, "Sweeper") << "predicting step " << this->get_controller()->get_step() + 1
-                          << " (t=" << t << ", dt=" << dt << ")";
+      ML_CVLOG(1, "Sweeper", "predicting step " << this->get_controller()->get_step() + 1
+                             << " (t=" << t << ", dt=" << dt << ")");
       time ds;
 
       shared_ptr<Encapsulation<time>> rhs = this->get_factory()->create(pfasst::encap::solution);
@@ -238,8 +238,9 @@ namespace pfasst
       auto const nodes = this->quadrature->get_nodes();
       auto const dt    = this->get_controller()->get_step_size();
       auto const s_mat = this->quadrature->get_s_mat().block(1, 0, nodes.size()-1, nodes.size());
-      CVLOG(1, "Sweeper") << "sweeping on step " << this->get_controller()->get_step() + 1
-                          << " in iteration " << this->get_controller()->get_iteration() << " (dt=" << dt << ")";
+      ML_CVLOG(1, "Sweeper", "sweeping on step " << this->get_controller()->get_step() + 1
+                             << " in iteration " << this->get_controller()->get_iteration()
+                             << " (dt=" << dt << ")");
       time ds;
 
       this->s_integrals[0]->mat_apply(this->s_integrals, dt, s_mat, this->fs_expl, true);
@@ -276,8 +277,9 @@ namespace pfasst
       auto const nodes = this->quadrature->get_nodes();
       auto const dt    = this->get_controller()->get_step_size();
       auto const s_mat = this->quadrature->get_s_mat();
-      CVLOG(1, "Sweeper") << "sweeping on step " << this->get_controller()->get_step() + 1
-                          << " in iteration " << this->get_controller()->get_iteration() << " (dt=" << dt << ")";
+      ML_CVLOG(1, "Sweeper", "sweeping on step " << this->get_controller()->get_step() + 1
+                             << " in iteration " << this->get_controller()->get_iteration()
+                             << " (dt=" << dt << ")");
       time ds;
 
       this->s_integrals[0]->mat_apply(this->s_integrals, dt, s_mat, this->fs_expl, true);

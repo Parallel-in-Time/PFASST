@@ -85,8 +85,8 @@ namespace pfasst
 
     void MPIStatus::set_converged(bool converged)
     {
-      CLOG(DEBUG, "Controller") << "set converged for rank " << this->comm->rank() << " to "
-                                << "'" << boolalpha << converged << "'";
+      ML_CLOG(DEBUG, "Controller", "set converged for rank " << this->comm->rank() << " to "
+                                   << "'" << boolalpha << converged << "'");
       this->converged.at(this->comm->rank()) = converged;
       assert(this->converged.at(this->comm->rank()) == converged);
     }
@@ -111,12 +111,12 @@ namespace pfasst
       int iconverged = converged.at(mpi->rank()) ? IStatus::CONVERGED : IStatus::NOT_CONVERGED;
       int dest_rank = (mpi->rank() + 1) % mpi->size();
 
-      CLOG(DEBUG, "Controller") << "sending converged status to rank " << dest_rank
-                                << " with tag " << tag << ": "
-                                << boolalpha << ((bool)iconverged == IStatus::CONVERGED);
+      ML_CLOG(DEBUG, "Controller", "sending converged status to rank " << dest_rank
+                                   << " with tag " << tag << ": "
+                                   << boolalpha << ((bool)iconverged == IStatus::CONVERGED));
       int err = MPI_Send(&iconverged, 1, MPI_INT, dest_rank, tag, mpi->comm);
       check_mpi_error(err);
-      CLOG(DEBUG, "Controller") << "sent converged status";
+      ML_CLOG(DEBUG, "Controller", "sent converged status");
     }
 
     void MPIStatus::recv(int tag)
@@ -126,19 +126,20 @@ namespace pfasst
       if (mpi->rank() == 0) { return; }
 
       if (get_converged(mpi->rank() - 1)) {
-        CLOG(DEBUG, "Controller") << "skipping status recieve as previous is stored as converged";
+        ML_CLOG(DEBUG, "Controller", "skipping status recieve as previous is stored as converged");
         return;
       }
 
       MPI_Status stat = MPI_Status_factory();
       int iconverged = IStatus::NOT_CONVERGED;
       int src_rank = (mpi->rank() - 1) % mpi->size();
-      CLOG(DEBUG, "Controller") << "receiving converged status from rank " << src_rank << " with tag '1'";
+      ML_CLOG(DEBUG, "Controller", "receiving converged status from rank " << src_rank
+                                   << " with tag '1'");
       int err = MPI_Recv(&iconverged, 1, MPI_INT, src_rank, tag, mpi->comm, &stat);
       check_mpi_error(err);
-      CLOG(DEBUG, "Controller") << "received converged status from rank " << src_rank
-                                << " with tag "<< tag << ": "
-                                << boolalpha << ((bool)iconverged == IStatus::CONVERGED);
+      ML_CLOG(DEBUG, "Controller", "received converged status from rank " << src_rank
+                                   << " with tag "<< tag << ": "
+                                   << boolalpha << ((bool)iconverged == IStatus::CONVERGED));
 
       converged.at(mpi->rank() - 1) = (iconverged == IStatus::CONVERGED) ? true : false;
     }
