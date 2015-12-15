@@ -45,13 +45,13 @@ namespace pfasst
                                const size_t ndofs_f, const size_t ndofs_c,
                                const size_t nnodes_f, const size_t nnodes_c)
       {
-        CLOG(INFO, "Advec") << "abs_res_tol: " << abs_res_tol << ", "
-                            << "rel_res_tol: " << rel_res_tol << ", "
-                            << "niter: " << niters << ", "
-                            << "nsteps: " << nsteps << ", "
-                            << "dt: " << dt << ", "
-                            << "ndofs (f-c): " << ndofs_f << "-" << ndofs_c << ", "
-                            << "nnodes (f-c): " << nnodes_f << "-" << nnodes_c;
+        ML_CLOG(INFO, "Advec", "abs_res_tol: " << abs_res_tol << ", "
+                               << "rel_res_tol: " << rel_res_tol << ", "
+                               << "niter: " << niters << ", "
+                               << "nsteps: " << nsteps << ", "
+                               << "dt: " << dt << ", "
+                               << "ndofs (f-c): " << ndofs_f << "-" << ndofs_c << ", "
+                               << "nnodes (f-c): " << nnodes_f << "-" << nnodes_c);
 
         MPICommunicator comm(MPI_COMM_WORLD);
         PFASST<> pf;
@@ -74,8 +74,8 @@ namespace pfasst
         sweeper_f->set_factory(factory_f);
         sweeper_f->set_residual_tolerances(abs_res_tol, rel_res_tol);
 
-        LOG(INFO) << "expected quadrature error: " << quad_c->expected_error() << " (" << nnodes_c << ")";
-        LOG(INFO) << "expected quadrature error: " << quad_f->expected_error() << " (" << nnodes_f << ")";
+        ML_LOG(INFO, "expected quadrature error: " << quad_c->expected_error() << " (" << nnodes_c << ")");
+        ML_LOG(INFO, "expected quadrature error: " << quad_f->expected_error() << " (" << nnodes_f << ")");
 
         pf.add_level(sweeper_f, transfer_f);
         pf.add_level(sweeper_c, transfer_c);

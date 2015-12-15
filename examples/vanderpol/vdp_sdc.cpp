@@ -67,7 +67,7 @@ int main(int argc, char** argv)
   const pfasst::quadrature::QuadratureType nodetype = pfasst::quadrature::QuadratureType::GaussLegendre;
 
   pfasst::init(argc, argv);
-  LOG(INFO) << "Used timestep:" << dt;
+  ML_LOG(INFO, "Used timestep:" << dt);
 
   pfasst::examples::vdp::run_vdp_sdc(nsteps, dt, nnodes, niters, nu, x0, y0, nodetype);
 }

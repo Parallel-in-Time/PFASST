@@ -90,10 +90,10 @@ namespace pfasst
            */
           virtual ~ScalarSweeper()
           {
-            LOG(INFO) << "Final error:                   " << this->error;
-            LOG(INFO) << "Number of explicit evaluations:" << this->n_f_expl_eval;
-            LOG(INFO) << "Number of implicit evaluations:" << this->n_f_impl_eval;
-            LOG(INFO) << "Number of implicit solves:     " << this->n_impl_solve;
+            ML_LOG(INFO, "Final error:                   " << this->error);
+            ML_LOG(INFO, "Number of explicit evaluations:" << this->n_f_expl_eval);
+            ML_LOG(INFO, "Number of implicit evaluations:" << this->n_f_impl_eval);
+            ML_LOG(INFO, "Number of implicit solves:     " << this->n_impl_solve);
           }
 
           /**
@@ -109,7 +109,7 @@ namespace pfasst
 
             this->exact(qex, t);
             double max_err = abs(qend[0] - qex[0]) / abs(qex[0]);
-            LOG(INFO) << "err:" << max_err;
+            ML_LOG(INFO, "err:" << max_err);
             this->error = max_err;
           }
 

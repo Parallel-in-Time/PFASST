@@ -77,8 +77,8 @@ namespace pfasst
         shared_ptr<ParticleCloud<double>> q0 = \
           dynamic_pointer_cast<ParticleCloud<double>>(fine_sweeper->get_start_state());
         q0->distribute_around_center(center);
-        CLOG(INFO, "Boris") << "Initial Particle (fine) : "
-                            << *(dynamic_pointer_cast<ParticleCloud<double>>(fine_sweeper->get_start_state()));
+        ML_CLOG(INFO, "Boris", "Initial Particle (fine) : "
+                               << *(dynamic_pointer_cast<ParticleCloud<double>>(fine_sweeper->get_start_state())));
         fine_sweeper->set_initial_energy();
 
         controller.run();
@@ -105,13 +105,13 @@ int main(int argc, char** argv)
   const double abs_res_tol = pfasst::config::get_value<double>("abs_res_tol", 0.0);
   const double rel_res_tol = pfasst::config::get_value<double>("rel_res_tol", 0.0);
 
-  CLOG(INFO, "Boris") << "nsteps=" << nsteps << ", "
-                      << "dt=" << dt << ", "
-                      << "nnodes=" << nnodes << ", "
-                      << "nparticles=" << nparticles << ", "
-                      << "niter=" << niters << ", "
-                      << "abs res=" << abs_res_tol << ", "
-                      << "rel res=" << rel_res_tol;
+  ML_CLOG(INFO, "Boris", "nsteps=" << nsteps << ", "
+                         << "dt=" << dt << ", "
+                         << "nnodes=" << nnodes << ", "
+                         << "nparticles=" << nparticles << ", "
+                         << "niter=" << niters << ", "
+                         << "abs res=" << abs_res_tol << ", "
+                         << "rel res=" << rel_res_tol);
 
   pfasst::examples::boris::run_boris_pfasst<double>(nsteps, dt, nnodes, nparticles, niters, abs_res_tol, rel_res_tol);
   MPI_Finalize();

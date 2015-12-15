@@ -109,8 +109,8 @@ namespace pfasst
            */
           virtual ~VdpSweeper()
           {
-            LOG(INFO) << "Number of implicit evaluations:" << this->n_f_impl_eval;
-            LOG(INFO) << "Number of implicit solves:     " << this->n_impl_solve;
+            ML_LOG(INFO, "Number of implicit evaluations:" << this->n_f_impl_eval);
+            ML_LOG(INFO, "Number of implicit solves:     " << this->n_impl_solve);
             this->output_file.close();
           }
 
@@ -132,7 +132,7 @@ namespace pfasst
             if (this->nu==0)
             {
               double max_err = max(abs(qend[0] - qex[0])/abs(qex[0]) , abs(qend[1]-qex[1])/abs(qex[1]) );
-              LOG(INFO) << "error:" << max_err;
+              ML_LOG(INFO, "error:" << max_err);
               this->error = max_err;
             }
             this->output_file << qend[0] << "    " << qend[1] << endl;
