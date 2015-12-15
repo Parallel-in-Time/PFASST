@@ -111,7 +111,7 @@ namespace pfasst
         ParticleCloudComponent<scalar>
         WrapperSimplePhysicsSolver<scalar, time>::external_e_field_evaluate(const particle_cloud_type& particles, const time t)
         {
-          CVLOG(6, "SolverBinding") << "evaluating external E-Field at t=" << t;
+          ML_CVLOG(6, "SolverBinding", "evaluating external E-Field at t=" << t);
           size_t num_particles = particles->size();
           assert(DIM == particles->dim());
 
@@ -138,7 +138,7 @@ namespace pfasst
         ParticleCloudComponent<scalar>
         WrapperSimplePhysicsSolver<scalar, time>::e_field_evaluate(const particle_cloud_type& particles, const time t)
         {
-          CVLOG(6, "SolverBinding") << "evaluating complete E-Field at t=" << t;
+          ML_CVLOG(6, "SolverBinding", "evaluating complete E-Field at t=" << t);
           size_t num_particles = particles->size();
           assert(DIM == particles->dim());
 
@@ -165,7 +165,7 @@ namespace pfasst
         ParticleCloudComponent<scalar>
         WrapperSimplePhysicsSolver<scalar, time>::b_field_evaluate(const particle_cloud_type& particles, const time t)
         {
-          CVLOG(6, "SolverBinding") << "evaluating B-Field at t=" << t;
+          ML_CVLOG(6, "SolverBinding", "evaluating B-Field at t=" << t);
           size_t num_particles = particles->size();
           assert(DIM == particles->dim());
 
@@ -204,7 +204,7 @@ namespace pfasst
         ParticleCloudComponent<scalar>
         WrapperSimplePhysicsSolver<scalar, time>::force_evaluate(const particle_cloud_type& particles, const time t)
         {
-          CVLOG(6, "SolverBinding") << "compute total force at t=" << t;
+          ML_CVLOG(6, "SolverBinding", "compute total force at t=" << t);
           auto e_force = this->e_field_evaluate(particles, t);
           auto b_force = this->b_field_evaluate(particles, t);
           return e_force + b_force;
@@ -214,7 +214,7 @@ namespace pfasst
         scalar
         WrapperSimplePhysicsSolver<scalar, time>::energy(const particle_cloud_type& particles, const time t)
         {
-          CVLOG(6, "SolverBinding") << "computing system's total energy at t=" << t;
+          ML_CVLOG(6, "SolverBinding", "computing system's total energy at t=" << t);
           size_t num_particles = particles->size();
           assert(DIM == particles->dim());
 
