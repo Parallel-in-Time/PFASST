@@ -1,6 +1,23 @@
 /**
  * @file pfasst/logging.hpp
  * @since v0.3.0
+ * 
+ * @section logging_macros Logging Macros
+ *
+ * The most important and most frequently used logging macros provided by easylogging++ are wrapped
+ * in the `ML_*` macros to avoid the evaluation of string conversion operations when logging is
+ * disabled.
+ *
+ * Without these wrappers, using the easylogging++ logging macros will lead to evaluation of string
+ * operations even with logging disabled at compile time.
+ *
+ * Instead of using
+ *
+ *     LOG(INFO) << "This is a logging line with string conversion " << my_variable;
+ *
+ * one should now use
+ *
+ *     ML_LOG(INFO, "This is a logging line with string conversion " << my_variable);
  */
 #ifndef _PFASST__LOGGING_HPP_
 #define _PFASST__LOGGING_HPP_
@@ -78,15 +95,42 @@ const string OUT::reset = "\033[0m";
 
 #ifdef PFASST_NO_LOGGING
   #define ELPP_DISABLE_LOGS
+  #define ML_NOLOG
 #endif
 
 #include <pfasst/easylogging++.h>
 
+//! @{
 #ifndef ML_NOLOG
+  /**
+   * same as `LOG(level, x)` from easylogging++
+   * 
+   * @see @ref logging_macros
+   */
   #define ML_LOG(level, x) LOG(level) << x
+  /**
+   * same as `CLOG(level, logger, x)` from easylogging++
+   *
+   * @see @ref logging_macros
+   */
   #define ML_CLOG(level, logger_id, x) CLOG(level, logger_id) << x
+  /**
+   * same as `CLOG_IF(condition, level, logger, x)` from easylogging++
+   *
+   * @see @ref logging_macros
+   */
   #define ML_CLOG_IF(condition, level, logger_id, x) CLOG_IF(condition, level, logger_id) <<  x
+  /**
+   * same as `CVLOG(verbosity, logger, x)` from easylogging++
+   *
+   * @see @ref logging_macros
+   */
   #define ML_CVLOG(verbose_level, logger_id, x) CVLOG(verbose_level, logger_id) << x
+  /**
+   * same as `CVLOG_IF(condition, verbosity, logger, x)` from easylogging++
+   *
+   * @see @ref logging_macros
+   */
   #define ML_CVLOG_IF(condition, verbose_level, logger_id, x) CVLOG_IF(condition, verbose_level, logger_id) << x
 #else
   #define ML_LOG(level, x)
@@ -95,6 +139,7 @@ const string OUT::reset = "\033[0m";
   #define ML_CVLOG(verbose_level, logger_id, x)
   #define ML_CVLOG_IF(condition, verbose_level, logger_id, x)
 #endif
+//! @}
 
 
 #ifndef PFASST_LOGGER_INITIALIZED
