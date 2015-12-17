@@ -1,0 +1,47 @@
+sudo: false
+dist: precise
+
+language:
+  - cpp
+
+cache:
+  - apt
+  - ccache
+
+addons:
+  apt:
+    sources:
+      - boost-latest
+      - ubuntu-toolchain-r-test
+    packages:
+      - doxygen
+      - gcc-5
+      - g++-5
+      - libfftw3-3
+      - libfftw3-dev
+      - libeigen3-dev
+      - libboost1.55-dev
+      - libboost-math1.55-dev
+      - libboost-program-options1.55-dev
+
+env:
+  matrix:
+    - CMAKE_BUILD_TYPE="Release"
+    - CMAKE_BUILD_TYPE="Debug"
+
+compiler:
+  - gcc
+
+before_script:
+  - if [ "${CXX}" == "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
+
+script:
+  - mkdir build
+  - cd build
+  - cmake -DCMAKE_INSTALL_PREFIX=$HOME -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -Dpfasst_WITH_MPI=OFF -Dpfasst_BUILD_TESTS=ON -Dpfasst_BUILD_EXAMPLES=ON -DCMAKE_VERBOSE_MAKEFILE=ON ..
+  - make
+  - make test
+
+after_success:
+  - cd ..
+  - doxygen
