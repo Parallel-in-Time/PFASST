@@ -1,0 +1,47 @@
+language:
+  - cpp
+
+cache:
+  - apt
+  - ccache
+
+notifications:
+  email:
+    on_success: change  # default: change
+    on_failure: always  # default: always
+
+# why does Travis not allow for multi-dimensional build matrices?!?
+#  -> https://github.com/travis-ci/travis-ci/issues/1519
+env:
+  matrix:
+    - CMAKE_BUILD_TYPE="Release" WITH_MPI=OFF
+    - CMAKE_BUILD_TYPE="Release" WITH_MPI=ON
+    - CMAKE_BUILD_TYPE="Debug" WITH_MPI=OFF
+    - CMAKE_BUILD_TYPE="Debug" WITH_MPI=ON
+
+compiler:
+  - gcc
+  - clang
+
+before_install:
+  # gcc-5
+  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test --yes
+  - sudo apt-get update
+
+install:
+  - sudo apt-get install g++-5
+  - sudo apt-get install libfftw3-3 libfftw3-dev
+  - sudo apt-get install libboost-dev libboost-program-options-dev libboost-math-dev
+  - if [ "${WITH_MPI}" == "ON" ]; then sudo apt-get -qq install mpich2 libmpich2-dev; fi
+
+before_script:
+  # update compilers
+  - if [ "${CXX}" == "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
+
+script:
+  - mkdir build
+  - cd build
+  - cmake -DCMAKE_INSTALL_PREFIX=$HOME -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -Dpfasst_WITH_MPI=${WITH_MPI} -Dpfasst_DISABLE_LIBCXX=ON -Dpfasst_BUILD_TESTS=ON -Dpfasst_BUILD_EXAMPLES=ON -DCMAKE_VERBOSE_MAKEFILE=ON ..
+  - make ARGS="-V"
+  - make test ARGS="-V"
+  - make install
