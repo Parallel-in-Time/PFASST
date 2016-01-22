@@ -78,3 +78,19 @@ script:
       make -j2;
       make test;
     fi
+
+after_success:
+  - if [ "${BUILD_DOXYGEN}" == "true" && "${TRAVIS_BRANCH}" == "master" && "${TRAVIS_PULL_REQUEST}" == "false"]; then
+      openssl aes-256-cbc -K $encrypted_5c8922bb07ee_key -iv $encrypted_5c8922bb07ee_iv -in travis_deploy_rsa.enc -out travis_deploy_rsa -d;
+      chmod 0600 travis_deploy_rsa;
+      eval "$(ssh-agent -s)";
+      ssh-add travis_deploy_rsa;
+      git config --global user.email "travis+pfasst@parallel-in-time.github.io";
+      git config --global user.name "Travis CI Deployment";
+      git checkout gh-pages;
+      git rm -r d[0-9a-f] search *.html *.png *.js *.css *.map *.md5 *.svg;
+      mv doc/build/html/* .;
+      git add -A;
+      git commit -m"docu generated $(date)" -m"commit ${TRAVIS_COMMIT}\njob ${TRAVIS_JOB_NUMBER}" --allow-empty;
+      git push origin gh-pages;
+    fi
