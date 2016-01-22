@@ -12,7 +12,9 @@ addons:
     sources:
       - boost-latest
       - ubuntu-toolchain-r-test
+      - llvm-toolchain-precise-3.6
     packages:
+      - clang-3.6
       - doxygen
       - gcc-5
       - g++-5
@@ -26,6 +28,7 @@ addons:
 
 compiler:
   - gcc
+  - clang
 
 env:
   global: 
@@ -41,6 +44,8 @@ matrix:
 install:
   - if [ "${CXX}" == "g++" ]; then
       echo "Using GCC 5" && export CXX="g++-5" CC="gcc-5";
+    else
+      echo "Using Clang 3.6" && export CXX="clang-3.6" CC="clang-3.6";
     fi
 
 before_script:
