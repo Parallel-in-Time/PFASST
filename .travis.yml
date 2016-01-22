@@ -35,7 +35,7 @@ compiler:
 
 env:
   global: 
-    - BUILD_DOXYGEN=false
+    - BUILD_TASK=cmake
     - WITH_MPI=OFF
   matrix:
     - CMAKE_BUILD_TYPE=Release
@@ -43,24 +43,26 @@ env:
 
 matrix:
   include:
-    - env: BUILD_DOXYGEN=true
     - compiler: gcc
       env: WITH_MPI=ON CMAKE_BUILD_TYPE=Debug
+    - env: BUILD_TASK=docu
 
 install:
   - if [ "${CXX}" == "g++" ]; then
-      echo "Using GCC 5" && export CXX="g++-5" CC="gcc-5";
+      echo "Using GCC 5" &&
+        export CXX="g++-5" CC="gcc-5";
     else
-      echo "Using Clang 3.6" && export CXX="clang-3.6" CC="clang-3.6";
+      echo "Using Clang 3.6" &&
+        export CXX="clang-3.6" CC="clang-3.6";
     fi
   - if [ "${WITH_MPI}" == "ON" ]; then
       echo "Using OpenMPI" &&
-      mkdir -p $HOME/bin &&
-      ln -s /usr/bin/g++-5 $HOME/bin/g++ &&
-      ln -s /usr/bin/gcc-5 $HOME/bin/gcc &&
-      ln -s $HOME/bin/g++ $HOME/bin/c++ &&
-      ln -s $HOME/bin/gcc $HOME/bin/cc &&
-      export CXX="mpicxx" CC="mpicc";
+        mkdir -p $HOME/bin &&
+        ln -s /usr/bin/g++-5 $HOME/bin/g++ &&
+        ln -s /usr/bin/gcc-5 $HOME/bin/gcc &&
+        ln -s $HOME/bin/g++ $HOME/bin/c++ &&
+        ln -s $HOME/bin/gcc $HOME/bin/cc &&
+        export CXX="mpicxx" CC="mpicc";
     fi
 
 before_script:
@@ -69,18 +71,20 @@ before_script:
   - which ${CC}
 
 script:
-  - if [ "${BUILD_DOXYGEN}" == "true" ]; then
-      doxygen --version;
-      doxygen;
-    else
-      mkdir build && cd build;
-      cmake -DCMAKE_INSTALL_PREFIX=${HOME} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -Dpfasst_WITH_MPI=${WITH_MPI} -Dpfasst_BUILD_TESTS=ON -Dpfasst_BUILD_EXAMPLES=ON -DCMAKE_VERBOSE_MAKEFILE=ON ..;
-      make -j2;
-      make test;
-    fi
+  - case "${BUILD_TASK}" in
+      "docu" )
+        doxygen --version && doxygen
+        ;;
+      "build" )
+        mkdir build && cd build &&
+          cmake -DCMAKE_INSTALL_PREFIX=${HOME} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -Dpfasst_WITH_MPI=${WITH_MPI} -Dpfasst_BUILD_TESTS=ON -Dpfasst_BUILD_EXAMPLES=ON -DCMAKE_VERBOSE_MAKEFILE=ON .. &&
+          make -j2 &&
+          make test
+        ;;
+    esac
 
 after_success:
-  - if [ "${BUILD_DOXYGEN}" == "true" && "${TRAVIS_BRANCH}" == "master" && "${TRAVIS_PULL_REQUEST}" == "false"]; then
+  - if [ "${BUILD_TASK}" == "docu" && "${TRAVIS_BRANCH}" == "master" && "${TRAVIS_PULL_REQUEST}" == "false"]; then
       openssl aes-256-cbc -K $encrypted_5c8922bb07ee_key -iv $encrypted_5c8922bb07ee_iv -in travis_deploy_rsa.enc -out travis_deploy_rsa -d;
       chmod 0600 travis_deploy_rsa;
       eval "$(ssh-agent -s)";
