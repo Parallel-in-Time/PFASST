@@ -1,0 +1,12 @@
+<map id="main" name="main">
+<area shape="rect" id="node2" href="$de/d8c/group__Internals.html#ga73cf933834ba5e5141119310aee971b9" title="Starts easylogging++ with given arguments and loads configuration. " alt="" coords="104,46,247,73"/>
+<area shape="rect" id="node3" href="$de/d8c/group__Internals.html#gaabd9df9fe7db34deb4ec893d6b0b7fa2" title="Sets some default flags for easylogging++. " alt="" coords="297,5,459,47"/>
+<area shape="rect" id="node4" href="$de/d8c/group__Internals.html#ga94bc88666f61bcc6d85072e6dfdd21f4" title="Sets default configuration for default loggers. " alt="" coords="295,71,461,112"/>
+<area shape="rect" id="node5" href="$de/d8c/group__Internals.html#ga2f4ba84c8482c3fb5c86e599804f832a" title="Sets global logging options. " alt="" coords="724,41,879,83"/>
+<area shape="rect" id="node11" href="$da/d50/namespacepfasst_1_1log.html#a8502afef42b4e98a12249d5fa1fed092" title="Provides convenient way of adding additional named loggers. " alt="" coords="509,100,676,141"/>
+<area shape="rect" id="node6" href="$da/d27/classpfasst_1_1config_1_1options.html#a4f130f9b500d6f3dee7df20894233608" title="Accessor to the singleton instance. " alt="" coords="927,81,1079,123"/>
+<area shape="rect" id="node7" href="$da/d27/classpfasst_1_1config_1_1options.html#a9ad40d67da1066f5053e47e278b3b154" title="pfasst::config::options\l::get_variables_map" alt="" coords="927,147,1079,188"/>
+<area shape="rect" id="node8" href="$de/d8c/group__Internals.html#ga74a6cd18764de8c81da478a7eb33ee4a" title="Composes the log file name for the local rank. " alt="" coords="934,16,1071,57"/>
+<area shape="rect" id="node9" href="$de/d8c/group__Internals.html#ga2fbecb551eda65e49c93122c05142aec" title="Formats the local MPI world rank as a string. " alt="" coords="1127,111,1256,152"/>
+<area shape="rect" id="node10" href="$d3/d91/namespacepfasst_1_1config.html#a69bf5d072b24805ad0004d40bcd2744e" title="Get MPI rank during initialization. " alt="" coords="1304,118,1465,145"/>
+</map>

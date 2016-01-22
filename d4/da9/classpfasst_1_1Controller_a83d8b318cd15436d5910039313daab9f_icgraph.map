@@ -1,0 +1,12 @@
+<map id="pfasst::Controller::setup" name="pfasst::Controller::setup">
+<area shape="rect" id="node2" href="$d1/d6e/group__Scalar.html#ga2e2a4c57c66ad0f2716d59ee2f4f457a" title="Scalar test equation example using an encapsulated IMEX sweeper. " alt="" coords="187,78,356,119"/>
+<area shape="rect" id="node6" href="$d9/d85/group__AdvectionDiffusion.html#ga5a89fd6a8787527e482f6c853d0eec57" title="Advection/diffusion example using an encapsulated IMEX sweeper. " alt="" coords="176,187,367,229"/>
+<area shape="rect" id="node9" href="$dd/d53/group__VanDerPol.html#gaa51c826dc921007c0e95faf30a4510d5" title="pfasst::examples::vdp\l::run_vdp_sdc" alt="" coords="194,267,349,309"/>
+<area shape="rect" id="node3" href="$d2/daf/scalar__sdc_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627" title="main" alt="" coords="477,5,528,32"/>
+<area shape="rect" id="node4" href="$d3/d6a/classConvergenceTest.html#a18a32024b87b7ee689df7e0375ea8ede" title="ConvergenceTest::SetUp" alt="" coords="415,56,591,83"/>
+<area shape="rect" id="node5" href="$d1/dee/classHighPrecisionTest.html#a1d448fa5c3fe1a3f2f60cd1fb77dba08" title="HighPrecisionTest::\lSetUp" alt="" coords="432,107,573,149"/>
+<area shape="rect" id="node7" href="$d4/df0/vanilla__sdc_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627" title="main" alt="" coords="477,173,528,200"/>
+<area shape="rect" id="node8" href="$df/df8/test__advection__diffusion_8cpp.html#aa11b7a5c6a1ab75dcaf86ed3e74c7a3f" title="TEST" alt="" coords="473,224,532,251"/>
+<area shape="rect" id="node10" href="$df/de7/vdp__sdc_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627" title="main" alt="" coords="477,275,528,301"/>
+<area shape="rect" id="node11" href="$d8/d13/classVdPConvergenceTest.html#a08c22d8d5be8f9796e0866f3fe3277bb" title="VdPConvergenceTest\l::SetUp" alt="" coords="423,326,582,367"/>
+</map>

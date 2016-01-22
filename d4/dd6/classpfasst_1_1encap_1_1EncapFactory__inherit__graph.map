@@ -1,0 +1,5 @@
+<map id="pfasst::encap::EncapFactory&lt; time &gt;" name="pfasst::encap::EncapFactory&lt; time &gt;">
+<area shape="rect" id="node2" href="$d9/d1b/classpfasst_1_1encap_1_1VectorFactory.html" title="{pfasst::encap::VectorFactory\l\&lt; time \&gt;\n|# size\l|+ VectorFactory()\l+ create()\l+ dofs()\l}" alt="" coords="5,160,200,281"/>
+<area shape="rect" id="node3" href="$d0/d51/classpfasst_1_1encap_1_1EncapFactory.html" title="{pfasst::encap::EncapFactory\l\&lt; precision \&gt;\n||+ create()\l}" alt="" coords="224,175,416,267"/>
+<area shape="rect" id="node4" href="$df/d69/classpfasst_1_1examples_1_1boris_1_1ParticleCloudFactory.html" title="{pfasst::examples::boris\l::ParticleCloudFactory\l\&lt; precision \&gt;\n|&#45; _num_particles\l&#45; _dim\l&#45; _default_charge\l&#45; _default_mass\l|+ ParticleCloudFactory()\l+ num_particles()\l+ dim()\l+ create()\l}" alt="" coords="236,331,404,525"/>
+</map>

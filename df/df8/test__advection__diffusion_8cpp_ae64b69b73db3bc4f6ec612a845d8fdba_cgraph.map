@@ -1,0 +1,9 @@
+<map id="TEST" name="TEST">
+<area shape="rect" id="node2" href="$d9/d85/group__AdvectionDiffusion.html#ga5a89fd6a8787527e482f6c853d0eec57" title="Advection/diffusion example using an encapsulated IMEX sweeper. " alt="" coords="112,169,303,211"/>
+<area shape="rect" id="node3" href="$de/d84/namespacepfasst_1_1quadrature.html#ac4700c0b6dc90b32b3f8af4070d0e62d" title="Instantiates quadrature handler for given number of nodes and type descriptor. " alt="" coords="351,5,493,47"/>
+<area shape="rect" id="node4" href="$d4/da9/classpfasst_1_1Controller.html#a8f4f8f025572e57fc5975902a4118fa9" title="Adding a level to the controller. " alt="" coords="361,71,483,112"/>
+<area shape="rect" id="node5" href="$d4/da9/classpfasst_1_1Controller.html#af31a86d9ccd9db325532c5ae3a5764f0" title="Set basic time scope of the Controller. " alt="" coords="361,136,483,177"/>
+<area shape="rect" id="node6" href="$d4/da9/classpfasst_1_1Controller.html#a6dba360b0794fb0cdde418d3ab1a160d" title="Set options from command line etc. " alt="" coords="361,201,483,243"/>
+<area shape="rect" id="node7" href="$d4/da9/classpfasst_1_1Controller.html#a83d8b318cd15436d5910039313daab9f" title="Basic setup routine for this controller. " alt="" coords="361,267,483,308"/>
+<area shape="rect" id="node8" href="$db/d4c/classpfasst_1_1SDC.html#abaf353cbe65d6c3545cbd5f4540cb74b" title="Run vanilla SDC. " alt="" coords="362,333,482,359"/>
+</map>

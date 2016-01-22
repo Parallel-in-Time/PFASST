@@ -1,0 +1,26 @@
+<map id="examples/advection_diffusion/serial_mlsdc.cpp" name="examples/advection_diffusion/serial_mlsdc.cpp">
+<area shape="rect" id="node5" href="$d0/da9/logging_8hpp.html" title="pfasst/logging.hpp" alt="" coords="2275,691,2405,717"/>
+<area shape="rect" id="node10" href="$d8/dfd/config_8hpp.html" title="pfasst/config.hpp" alt="" coords="1882,765,2003,792"/>
+<area shape="rect" id="node18" href="$da/d27/mlsdc_8hpp.html" title="pfasst/controller/mlsdc.hpp" alt="" coords="1698,355,1878,382"/>
+<area shape="rect" id="node31" href="$da/d16/vector_8hpp.html" title="pfasst/encap/vector.hpp" alt="" coords="888,355,1051,382"/>
+<area shape="rect" id="node36" href="$dc/d7d/advection__diffusion__sweeper_8hpp.html" title="advection_diffusion\l_sweeper.hpp" alt="" coords="2107,169,2245,211"/>
+<area shape="rect" id="node48" href="$d0/dbe/spectral__transfer__1d_8hpp.html" title="spectral_transfer_1d.hpp" alt="" coords="886,95,1053,121"/>
+<area shape="rect" id="node14" href="$d5/d84/config__impl_8hpp.html" title="pfasst/config_impl.hpp" alt="" coords="1867,840,2019,867"/>
+<area shape="rect" id="node20" href="$d7/d5c/controller_2interface_8hpp.html" title="pfasst/controller/interface.hpp" alt="" coords="1691,445,1885,471"/>
+<area shape="rect" id="node29" href="$d5/d0a/mlsdc__impl_8hpp.html" title="pfasst/controller/mlsdc\l_impl.hpp" alt="" coords="2125,437,2281,479"/>
+<area shape="rect" id="node24" href="$d1/d1b/interfaces_8hpp.html" title="interfaces for SDC/MLSDC/PFASST algorithms. " alt="" coords="439,534,582,561"/>
+<area shape="rect" id="node28" href="$d2/dbc/controller_2interface__impl_8hpp.html" title="pfasst/controller/interface\l_impl.hpp" alt="" coords="1908,527,2079,568"/>
+<area shape="rect" id="node26" href="$d8/dc4/interfaces__impl_8hpp.html" title="pfasst/interfaces_impl.hpp" alt="" coords="877,616,1051,643"/>
+<area shape="rect" id="node27" href="$d5/d82/globals_8hpp.html" title="pfasst/globals.hpp" alt="" coords="1509,691,1638,717"/>
+<area shape="rect" id="node32" href="$d8/d85/encapsulation_8hpp.html" title="pfasst/encap/encapsulation.hpp" alt="" coords="675,445,885,471"/>
+<area shape="rect" id="node35" href="$de/d7a/vector__impl_8hpp.html" title="pfasst/encap/vector\l_impl.hpp" alt="" coords="1427,437,1565,479"/>
+<area shape="rect" id="node34" href="$d1/d99/encapsulation__impl_8hpp.html" title="pfasst/encap/encapsulation\l_impl.hpp" alt="" coords="885,527,1070,568"/>
+<area shape="rect" id="node40" href="$d1/d6f/imex__sweeper_8hpp.html" title="pfasst/encap/imex_sweeper.hpp" alt="" coords="1401,266,1615,293"/>
+<area shape="rect" id="node46" href="$db/d53/fft_8hpp.html" title="fft.hpp" alt="" coords="1131,266,1186,293"/>
+<area shape="rect" id="node41" href="$de/deb/encap__sweeper_8hpp.html" title="pfasst/encap/encap\l_sweeper.hpp" alt="" coords="675,348,813,389"/>
+<area shape="rect" id="node45" href="$d7/d0a/imex__sweeper__impl_8hpp.html" title="pfasst/encap/imex_sweeper\l_impl.hpp" alt="" coords="1910,437,2101,479"/>
+<area shape="rect" id="node42" href="$d6/dbe/quadrature_8hpp.html" title="pfasst/quadrature.hpp" alt="" coords="449,445,599,471"/>
+<area shape="rect" id="node44" href="$d9/d05/encap__sweeper__impl_8hpp.html" title="pfasst/encap/encap\l_sweeper_impl.hpp" alt="" coords="1264,437,1403,479"/>
+<area shape="rect" id="node49" href="$d0/d45/poly__interp_8hpp.html" title="pfasst/encap/poly_interp.hpp" alt="" coords="613,177,803,203"/>
+<area shape="rect" id="node50" href="$d9/d3c/poly__interp__impl_8hpp.html" title="pfasst/encap/poly_interp\l_impl.hpp" alt="" coords="625,259,791,300"/>
+</map>

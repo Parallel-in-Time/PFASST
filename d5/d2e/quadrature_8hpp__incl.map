@@ -1,0 +1,22 @@
+<map id="include/pfasst/quadrature.hpp" name="include/pfasst/quadrature.hpp">
+<area shape="rect" id="node7" href="$d8/dfd/config_8hpp.html" title="pfasst/config.hpp" alt="" coords="1770,512,1891,539"/>
+<area shape="rect" id="node16" href="$d1/d1b/interfaces_8hpp.html" title="interfaces for SDC/MLSDC/PFASST algorithms. " alt="" coords="1422,266,1565,293"/>
+<area shape="rect" id="node26" href="$d0/d3e/polynomial_8hpp.html" title="pfasst/quadrature/polynomial.hpp" alt="" coords="144,266,363,293"/>
+<area shape="rect" id="node30" href="$df/dea/quadrature_2interface_8hpp.html" title="pfasst/quadrature/interface.hpp" alt="" coords="827,177,1032,203"/>
+<area shape="rect" id="node32" href="$d7/d77/gauss__lobatto_8hpp.html" title="pfasst/quadrature/gauss\l_lobatto.hpp" alt="" coords="553,80,719,121"/>
+<area shape="rect" id="node34" href="$de/d36/gauss__legendre_8hpp.html" title="pfasst/quadrature/gauss\l_legendre.hpp" alt="" coords="171,80,338,121"/>
+<area shape="rect" id="node36" href="$d5/d98/gauss__radau_8hpp.html" title="pfasst/quadrature/gauss\l_radau.hpp" alt="" coords="362,80,529,121"/>
+<area shape="rect" id="node38" href="$de/d84/clenshaw__curtis_8hpp.html" title="pfasst/quadrature/clenshaw\l_curtis.hpp" alt="" coords="1161,80,1348,121"/>
+<area shape="rect" id="node40" href="$d6/dbd/uniform_8hpp.html" title="pfasst/quadrature/uniform.hpp" alt="" coords="744,87,941,114"/>
+<area shape="rect" id="node13" href="$d5/d84/config__impl_8hpp.html" title="pfasst/config_impl.hpp" alt="" coords="1997,587,2149,613"/>
+<area shape="rect" id="node19" href="$d8/dc4/interfaces__impl_8hpp.html" title="pfasst/interfaces_impl.hpp" alt="" coords="1363,355,1538,382"/>
+<area shape="rect" id="node21" href="$d5/d82/globals_8hpp.html" title="pfasst/globals.hpp" alt="" coords="1094,437,1223,464"/>
+<area shape="rect" id="node22" href="$d0/da9/logging_8hpp.html" title="pfasst/logging.hpp" alt="" coords="1387,437,1517,464"/>
+<area shape="rect" id="node27" href="$dc/de8/polynomial__impl_8hpp.html" title="pfasst/quadrature/polynomial\l_impl.hpp" alt="" coords="156,348,351,389"/>
+<area shape="rect" id="node31" href="$de/da5/quadrature_2interface__impl_8hpp.html" title="pfasst/quadrature/interface\l_impl.hpp" alt="" coords="888,259,1069,300"/>
+<area shape="rect" id="node33" href="$d7/d04/gauss__lobatto__impl_8hpp.html" title="pfasst/quadrature/gauss\l_lobatto_impl.hpp" alt="" coords="553,169,719,211"/>
+<area shape="rect" id="node35" href="$d5/d09/gauss__legendre__impl_8hpp.html" title="pfasst/quadrature/gauss\l_legendre_impl.hpp" alt="" coords="171,169,338,211"/>
+<area shape="rect" id="node37" href="$da/d39/gauss__radau__impl_8hpp.html" title="pfasst/quadrature/gauss\l_radau_impl.hpp" alt="" coords="362,169,529,211"/>
+<area shape="rect" id="node39" href="$d7/d56/clenshaw__curtis__impl_8hpp.html" title="pfasst/quadrature/clenshaw\l_curtis_impl.hpp" alt="" coords="1161,169,1348,211"/>
+<area shape="rect" id="node41" href="$dc/da0/uniform__impl_8hpp.html" title="pfasst/quadrature/uniform\l_impl.hpp" alt="" coords="589,259,763,300"/>
+</map>

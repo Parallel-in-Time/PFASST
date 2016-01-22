@@ -1,0 +1,28 @@
+var classpfasst_1_1examples_1_1advection__diffusion_1_1AdvectionDiffusionSweeper =
+[
+    [ "AdvectionDiffusionSweeper", "d2/dfe/classpfasst_1_1examples_1_1advection__diffusion_1_1AdvectionDiffusionSweeper.html#a42806dbfc0a1db29bd0d4362b5c2b549", null ],
+    [ "AdvectionDiffusionSweeper", "d2/dfe/classpfasst_1_1examples_1_1advection__diffusion_1_1AdvectionDiffusionSweeper.html#a7e691cbff9a70ab4c562d8dd2e8b2add", null ],
+    [ "~AdvectionDiffusionSweeper", "d2/dfe/classpfasst_1_1examples_1_1advection__diffusion_1_1AdvectionDiffusionSweeper.html#af3d1b63272f1e4d55c4e0cb068794a67", null ],
+    [ "echo_error", "d2/dfe/classpfasst_1_1examples_1_1advection__diffusion_1_1AdvectionDiffusionSweeper.html#a876343efb6009847f154e4650cd31302", null ],
+    [ "echo_residual", "d2/dfe/classpfasst_1_1examples_1_1advection__diffusion_1_1AdvectionDiffusionSweeper.html#a9cc630036eb3d4e7bf6df1b34724f2e4", null ],
+    [ "exact", "d2/dfe/classpfasst_1_1examples_1_1advection__diffusion_1_1AdvectionDiffusionSweeper.html#ad1389f103a35c3aa00a2b9dc117c3ac4", null ],
+    [ "exact", "d2/dfe/classpfasst_1_1examples_1_1advection__diffusion_1_1AdvectionDiffusionSweeper.html#ad4a19ee70b2573a730853b60bc9556b2", null ],
+    [ "f_expl_eval", "d2/dfe/classpfasst_1_1examples_1_1advection__diffusion_1_1AdvectionDiffusionSweeper.html#ae43c31298bcca2157d62ce5c7ec99d25", null ],
+    [ "f_impl_eval", "d2/dfe/classpfasst_1_1examples_1_1advection__diffusion_1_1AdvectionDiffusionSweeper.html#a4936c0d6e33c5d62dabb243568cbd240", null ],
+    [ "get_errors", "d2/dfe/classpfasst_1_1examples_1_1advection__diffusion_1_1AdvectionDiffusionSweeper.html#a7a3337385f19d68dda91c3d9c5d068a3", null ],
+    [ "get_residuals", "d2/dfe/classpfasst_1_1examples_1_1advection__diffusion_1_1AdvectionDiffusionSweeper.html#a7701e8680d88a3e6d153a77db28b53d7", null ],
+    [ "impl_solve", "d2/dfe/classpfasst_1_1examples_1_1advection__diffusion_1_1AdvectionDiffusionSweeper.html#aa3548a134f2b338c595ca52bed8e2db5", null ],
+    [ "init_logs", "d2/dfe/classpfasst_1_1examples_1_1advection__diffusion_1_1AdvectionDiffusionSweeper.html#aeadc517097ebebd2eb14398271d6d576", null ],
+    [ "init_opts", "d2/dfe/classpfasst_1_1examples_1_1advection__diffusion_1_1AdvectionDiffusionSweeper.html#a1eecbcfe0155f40407a94f0269378334", null ],
+    [ "post_predict", "d2/dfe/classpfasst_1_1examples_1_1advection__diffusion_1_1AdvectionDiffusionSweeper.html#a4657ff8e792c90dc1f977bb566752c10", null ],
+    [ "post_sweep", "d2/dfe/classpfasst_1_1examples_1_1advection__diffusion_1_1AdvectionDiffusionSweeper.html#ac6d28ed195d495a6b06c754e8b8c781f", null ],
+    [ "ddx", "d2/dfe/classpfasst_1_1examples_1_1advection__diffusion_1_1AdvectionDiffusionSweeper.html#a347573111f4ad97fc895435b8578336e", null ],
+    [ "errors", "d2/dfe/classpfasst_1_1examples_1_1advection__diffusion_1_1AdvectionDiffusionSweeper.html#af3a3ef1bd1d6ecfcb881017056534b8e", null ],
+    [ "fft", "d2/dfe/classpfasst_1_1examples_1_1advection__diffusion_1_1AdvectionDiffusionSweeper.html#ae2b43ef3d8eceb4083cd864ef215e4d3", null ],
+    [ "lap", "d2/dfe/classpfasst_1_1examples_1_1advection__diffusion_1_1AdvectionDiffusionSweeper.html#ab2d753f35a6d342e25eaa5f095ca7175", null ],
+    [ "nf1evals", "d2/dfe/classpfasst_1_1examples_1_1advection__diffusion_1_1AdvectionDiffusionSweeper.html#ad9b016e6cac6ad787ed3b10cb5539a22", null ],
+    [ "nu", "d2/dfe/classpfasst_1_1examples_1_1advection__diffusion_1_1AdvectionDiffusionSweeper.html#aacef52ec9317561c25280dcd70cab9ae", null ],
+    [ "residuals", "d2/dfe/classpfasst_1_1examples_1_1advection__diffusion_1_1AdvectionDiffusionSweeper.html#af54cebb01c12e514299f6b0e55531a21", null ],
+    [ "t0", "d2/dfe/classpfasst_1_1examples_1_1advection__diffusion_1_1AdvectionDiffusionSweeper.html#a90804dfd134c567d734379f35959f4f8", null ],
+    [ "v", "d2/dfe/classpfasst_1_1examples_1_1advection__diffusion_1_1AdvectionDiffusionSweeper.html#a5527bd6caf709f883655524e9b6aa5f5", null ]
+];

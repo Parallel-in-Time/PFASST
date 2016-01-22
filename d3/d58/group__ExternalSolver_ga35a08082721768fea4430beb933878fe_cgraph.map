@@ -1,0 +1,5 @@
+<map id="simple_physics_solver::compute_energy" name="simple_physics_solver::compute_energy">
+<area shape="rect" id="node2" href="$d3/d58/group__ExternalSolver.html#gaa7b26227dd0c6353a2a7a668a04cdee9" title="simple_physics_solver\l::evaluate_internal_e_field" alt="" coords="211,5,389,47"/>
+<area shape="rect" id="node3" href="$d0/d8f/namespacesimple__physics__solver_1_1internal.html#ae4d484ba5bbd03569aef4c3dd364eb4a" title="simple_physics_solver\l::internal::scalar_prod" alt="" coords="221,71,379,112"/>
+<area shape="rect" id="node4" href="$d0/d8f/namespacesimple__physics__solver_1_1internal.html#a62af8164189043e45b614c913eda3b94" title="simple_physics_solver\l::internal::scale_mat\l_mul_vec" alt="" coords="221,135,379,191"/>
+</map>

@@ -1,0 +1,6 @@
+<map id="pfasst::examples::boris::BorisSweeper::boris_solve" name="pfasst::examples::boris::BorisSweeper::boris_solve">
+<area shape="rect" id="node2" href="$d3/d59/group__BorisUtilities.html#ga5bd520899d3f16df3752ffeeaf9c97bc" title="pfasst::examples::boris\l::cmp_wise_div" alt="" coords="245,5,407,47"/>
+<area shape="rect" id="node3" href="$d3/d59/group__BorisUtilities.html#ga3d236097a2c286345616e49913b60ffe" title="pfasst::examples::boris\l::cross_prod" alt="" coords="245,71,407,112"/>
+<area shape="rect" id="node4" href="$d3/d59/group__BorisUtilities.html#ga6c5176afd5e7ef5c59c2e002660aceda" title="pfasst::examples::boris\l::kronecker" alt="" coords="245,136,407,177"/>
+<area shape="rect" id="node5" href="$d3/d59/group__BorisUtilities.html#ga5374e5957f0d8485f418456e191c4650" title="pfasst::examples::boris\l::norm_sq_npart" alt="" coords="245,201,407,243"/>
+</map>

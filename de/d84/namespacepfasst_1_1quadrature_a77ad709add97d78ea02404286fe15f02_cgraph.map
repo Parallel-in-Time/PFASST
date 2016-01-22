@@ -1,0 +1,5 @@
+<map id="pfasst::quadrature::compute_q_vec" name="pfasst::quadrature::compute_q_vec">
+<area shape="rect" id="node2" href="$de/d84/namespacepfasst_1_1quadrature.html#a37425ec75a53d150c06f1b47dc8bc047" title="pfasst::quadrature\l::build_polynomial" alt="" coords="197,5,328,47"/>
+<area shape="rect" id="node3" href="$d6/dd0/classpfasst_1_1quadrature_1_1Polynomial.html#ab6ca606fac17e7b963a60ee34271090e" title="Evaluate polynomial for given value. " alt="" coords="184,71,341,112"/>
+<area shape="rect" id="node4" href="$d6/dd0/classpfasst_1_1quadrature_1_1Polynomial.html#a52bf17679c1a86638be7e7564bb6c78d" title="Integrates this polynomial. " alt="" coords="184,136,341,177"/>
+</map>

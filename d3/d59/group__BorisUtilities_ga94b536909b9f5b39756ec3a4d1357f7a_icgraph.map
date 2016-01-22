@@ -1,0 +1,7 @@
+<map id="pfasst::examples::boris::zero" name="pfasst::examples::boris::zero">
+<area shape="rect" id="node2" href="$d5/d79/classpfasst_1_1examples_1_1boris_1_1InjectiveTransfer.html#a8edb899e253e687e270fcf7cb8a06840" title="Compute FAS correction between the coarse and fine sweepers. " alt="" coords="221,5,383,47"/>
+<area shape="rect" id="node3" href="$dc/d0f/classpfasst_1_1examples_1_1boris_1_1BorisSweeper.html#aad345265c84d65b1c0023d9d4f7b4248" title="pfasst::examples::boris\l::BorisSweeper::integrate" alt="" coords="215,71,389,112"/>
+<area shape="rect" id="node4" href="$dc/d0f/classpfasst_1_1examples_1_1boris_1_1BorisSweeper.html#abe5be9b789c74c2836aa80b135c91089" title="Compute residual at each SDC node (including FAS corrections). " alt="" coords="217,136,387,177"/>
+<area shape="rect" id="node5" href="$dc/d0f/classpfasst_1_1examples_1_1boris_1_1BorisSweeper.html#aad721417c20f81397004358db6e434b8" title="Perform one SDC sweep/iteration. " alt="" coords="221,201,383,243"/>
+<area shape="rect" id="node6" href="$dc/d0f/classpfasst_1_1examples_1_1boris_1_1BorisSweeper.html#a9c034223d9bc09280121b7b0bf13a425" title="pfasst::examples::boris\l::BorisSweeper::update\l_velocity" alt="" coords="220,266,384,322"/>
+</map>

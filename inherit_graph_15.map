@@ -1,0 +1,8 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$dc/ddd/classpfasst_1_1encap_1_1Encapsulation.html" title="pfasst::encap::Encapsulation\l\&lt; precision \&gt;" alt="" coords="5,5,199,47"/>
+<area shape="rect" id="node2" href="$d2/dd0/classpfasst_1_1examples_1_1boris_1_1ParticleCloud.html" title="pfasst::examples::boris\l::ParticleCloud\&lt; precision \&gt;" alt="" coords="247,5,437,47"/>
+<area shape="rect" id="node4" href="$dd/d6e/classpfasst_1_1examples_1_1boris_1_1bindings_1_1WrapperInterface.html" title="pfasst::examples::boris\l::bindings::WrapperInterface\l\&lt; scalar, time \&gt;" alt="" coords="247,70,437,126"/>
+<area shape="rect" id="node6" href="$da/da7/classpfasst_1_1examples_1_1boris_1_1Particle.html" title="pfasst::examples::boris\l::Particle\&lt; precision \&gt;" alt="" coords="261,149,423,191"/>
+<area shape="rect" id="node7" href="$d3/d9a/classpfasst_1_1examples_1_1boris_1_1ParticleError.html" title="pfasst::examples::boris\l::ParticleError\&lt; scalar \&gt;" alt="" coords="260,215,424,256"/>
+<area shape="rect" id="node5" href="$d0/d84/classpfasst_1_1examples_1_1boris_1_1bindings_1_1WrapperSimplePhysicsSolver.html" title="pfasst::examples::boris\l::bindings::WrapperSimplePhysics\lSolver\&lt; scalar, time \&gt;" alt="" coords="485,70,712,126"/>
+</map>

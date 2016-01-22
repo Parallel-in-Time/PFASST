@@ -1,0 +1,15 @@
+<map id="pfasst::init" name="pfasst::init">
+<area shape="rect" id="node2" href="$d3/d91/namespacepfasst_1_1config.html#a5eaff8155eff1d5f8fe5cf2034b12422" title="Read and parse command line parameters. " alt="" coords="137,89,275,131"/>
+<area shape="rect" id="node6" href="$de/d8c/group__Internals.html#ga73cf933834ba5e5141119310aee971b9" title="Starts easylogging++ with given arguments and loads configuration. " alt="" coords="135,181,277,207"/>
+<area shape="rect" id="node3" href="$d3/d91/namespacepfasst_1_1config.html#a717f3272ec67e59af97e711397beeb29" title="Read config parameters from file. " alt="" coords="340,5,477,47"/>
+<area shape="rect" id="node4" href="$d3/d91/namespacepfasst_1_1config.html#a69bf5d072b24805ad0004d40bcd2744e" title="Get MPI rank during initialization. " alt="" coords="1335,105,1496,131"/>
+<area shape="rect" id="node5" href="$d3/d91/namespacepfasst_1_1config.html#ad40fd72bbe8905d32032195b313b7d06" title="Compile basic help and usage information. " alt="" coords="326,122,491,149"/>
+<area shape="rect" id="node7" href="$de/d8c/group__Internals.html#ga94bc88666f61bcc6d85072e6dfdd21f4" title="Sets default configuration for default loggers. " alt="" coords="325,239,492,280"/>
+<area shape="rect" id="node14" href="$de/d8c/group__Internals.html#gaabd9df9fe7db34deb4ec893d6b0b7fa2" title="Sets some default flags for easylogging++. " alt="" coords="327,173,490,215"/>
+<area shape="rect" id="node8" href="$da/d50/namespacepfasst_1_1log.html#a8502afef42b4e98a12249d5fa1fed092" title="Provides convenient way of adding additional named loggers. " alt="" coords="540,239,707,280"/>
+<area shape="rect" id="node12" href="$de/d8c/group__Internals.html#ga2f4ba84c8482c3fb5c86e599804f832a" title="Sets global logging options. " alt="" coords="755,159,909,200"/>
+<area shape="rect" id="node9" href="$da/d27/classpfasst_1_1config_1_1options.html#a4f130f9b500d6f3dee7df20894233608" title="Accessor to the singleton instance. " alt="" coords="957,195,1109,236"/>
+<area shape="rect" id="node10" href="$da/d27/classpfasst_1_1config_1_1options.html#a9ad40d67da1066f5053e47e278b3b154" title="pfasst::config::options\l::get_variables_map" alt="" coords="957,260,1109,301"/>
+<area shape="rect" id="node11" href="$de/d8c/group__Internals.html#ga2fbecb551eda65e49c93122c05142aec" title="Formats the local MPI world rank as a string. " alt="" coords="1157,129,1287,171"/>
+<area shape="rect" id="node13" href="$de/d8c/group__Internals.html#ga74a6cd18764de8c81da478a7eb33ee4a" title="Composes the log file name for the local rank. " alt="" coords="965,129,1102,171"/>
+</map>

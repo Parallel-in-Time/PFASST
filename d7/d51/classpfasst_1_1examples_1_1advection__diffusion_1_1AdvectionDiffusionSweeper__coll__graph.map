@@ -1,0 +1,11 @@
+<map id="pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper&lt; time &gt;" name="pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper&lt; time &gt;">
+<area shape="rect" id="node2" href="$da/db1/classpfasst_1_1encap_1_1IMEXSweeper.html" title="Semi&#45;implicit IMEX sweeper. " alt="" coords="426,2197,621,2715"/>
+<area shape="rect" id="node3" href="$d7/d9e/classpfasst_1_1encap_1_1EncapSweeper.html" title="Host based encapsulated base sweeper. " alt="" coords="423,1056,624,2043"/>
+<area shape="rect" id="node4" href="$d6/d78/classpfasst_1_1ISweeper.html" title="Abstract SDC sweeper. " alt="" coords="401,329,572,949"/>
+<area shape="rect" id="node6" title="STL class. " alt="" coords="486,153,604,230"/>
+<area shape="rect" id="node11" title="STL class. " alt="" coords="85,601,210,678"/>
+<area shape="rect" id="node8" title="STL class. " alt="" coords="297,601,377,678"/>
+<area shape="rect" id="node9" title="STL class. " alt="" coords="304,145,431,237"/>
+<area shape="rect" id="node15" title="STL class. " alt="" coords="840,5,938,83"/>
+<area shape="rect" id="node16" href="$d8/d6f/classpfasst_1_1examples_1_1advection__diffusion_1_1FFT.html" title="FFT helper class. " alt="" coords="206,2388,396,2524"/>
+</map>

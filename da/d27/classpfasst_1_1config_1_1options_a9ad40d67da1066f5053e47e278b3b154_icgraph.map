@@ -1,0 +1,11 @@
+<map id="pfasst::config::options::get_variables_map" name="pfasst::config::options::get_variables_map">
+<area shape="rect" id="node2" href="$da/d50/namespacepfasst_1_1log.html#a8502afef42b4e98a12249d5fa1fed092" title="Provides convenient way of adding additional named loggers. " alt="" coords="408,124,575,165"/>
+<area shape="rect" id="node10" href="$de/d8c/group__Internals.html#ga2f4ba84c8482c3fb5c86e599804f832a" title="Sets global logging options. " alt="" coords="205,183,360,224"/>
+<area shape="rect" id="node3" href="$d2/dfe/classpfasst_1_1examples_1_1advection__diffusion_1_1AdvectionDiffusionSweeper.html#aeadc517097ebebd2eb14398271d6d576" title="pfasst::examples::advection\l_diffusion::AdvectionDiffusionSweeper\l::init_logs" alt="" coords="623,45,873,101"/>
+<area shape="rect" id="node4" href="$da/d74/namespacepfasst_1_1examples_1_1boris.html#a87ab9b1f4a83b4f932e9a3cd588cbbad" title="pfasst::examples::boris\l::init_logs" alt="" coords="667,124,829,165"/>
+<area shape="rect" id="node5" href="$de/d8c/group__Internals.html#ga94bc88666f61bcc6d85072e6dfdd21f4" title="Sets default configuration for default loggers. " alt="" coords="665,189,831,231"/>
+<area shape="rect" id="node9" href="$df/df8/test__advection__diffusion_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627" title="main" alt="" coords="1127,70,1178,97"/>
+<area shape="rect" id="node6" href="$de/d8c/group__Internals.html#ga73cf933834ba5e5141119310aee971b9" title="Starts easylogging++ with given arguments and loads configuration. " alt="" coords="921,158,1064,185"/>
+<area shape="rect" id="node7" href="$dc/d57/namespacepfasst.html#a2ad4b6987b5c66b90166f77fc4230e92" title="pfasst::init" alt="" coords="1112,158,1193,185"/>
+<area shape="rect" id="node8" href="$d1/d49/mpi__pfasst_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627" title="main" alt="" coords="1241,158,1292,185"/>
+</map>

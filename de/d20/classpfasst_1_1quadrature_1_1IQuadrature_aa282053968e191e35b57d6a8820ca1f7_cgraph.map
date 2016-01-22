@@ -1,0 +1,8 @@
+<map id="pfasst::quadrature::IQuadrature::compute_weights" name="pfasst::quadrature::IQuadrature::compute_weights">
+<area shape="rect" id="node2" href="$de/d84/namespacepfasst_1_1quadrature.html#a1a124b78f225d13b253ff8e2fb799aa5" title="Compute quadrature matrix \( Q \) between two sets of nodes. " alt="" coords="212,103,351,144"/>
+<area shape="rect" id="node6" href="$de/d84/namespacepfasst_1_1quadrature.html#a77ad709add97d78ea02404286fe15f02" title="Compute vector \( q \) for integration from \( 0 \) to \( 1 \) for given set of nodes. " alt="" coords="216,37,347,79"/>
+<area shape="rect" id="node7" href="$de/d84/namespacepfasst_1_1quadrature.html#a106e6af4f4fa7f33ae6c68ea391dc6e0" title="Compute node&#45;to&#45;node quadrature matrix \( S \) from a given quadrature matrix \( Q \)..." alt="" coords="212,168,351,209"/>
+<area shape="rect" id="node3" href="$de/d84/namespacepfasst_1_1quadrature.html#a37425ec75a53d150c06f1b47dc8bc047" title="pfasst::quadrature\l::build_polynomial" alt="" coords="412,5,543,47"/>
+<area shape="rect" id="node4" href="$d6/dd0/classpfasst_1_1quadrature_1_1Polynomial.html#ab6ca606fac17e7b963a60ee34271090e" title="Evaluate polynomial for given value. " alt="" coords="399,71,556,112"/>
+<area shape="rect" id="node5" href="$d6/dd0/classpfasst_1_1quadrature_1_1Polynomial.html#a52bf17679c1a86638be7e7564bb6c78d" title="Integrates this polynomial. " alt="" coords="399,136,556,177"/>
+</map>

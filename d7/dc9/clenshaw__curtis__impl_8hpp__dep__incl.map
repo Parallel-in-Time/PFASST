@@ -1,0 +1,33 @@
+<map id="src/pfasst/quadrature/clenshaw_curtis_impl.hpp" name="src/pfasst/quadrature/clenshaw_curtis_impl.hpp">
+<area shape="rect" id="node2" href="$de/d84/clenshaw__curtis_8hpp.html" title="include/pfasst/quadrature\l/clenshaw_curtis.hpp" alt="" coords="1222,95,1395,136"/>
+<area shape="rect" id="node3" href="$d6/dbe/quadrature_8hpp.html" title="include/pfasst/quadrature.hpp" alt="" coords="1210,184,1407,211"/>
+<area shape="rect" id="node4" href="$de/deb/encap__sweeper_8hpp.html" title="include/pfasst/encap\l/encap_sweeper.hpp" alt="" coords="739,266,886,307"/>
+<area shape="rect" id="node18" href="$d9/d3c/poly__interp__impl_8hpp.html" title="src/pfasst/encap/poly\l_interp_impl.hpp" alt="" coords="150,363,299,404"/>
+<area shape="rect" id="node27" href="$dc/d0d/test__advection__diffusion__conv_8cpp.html" title="tests/examples/advection\l_diffusion/test_advection\l_diffusion_conv.cpp" alt="" coords="910,259,1086,315"/>
+<area shape="rect" id="node28" href="$d4/d85/test__mpi__advection__diffusion__conv_8cpp.html" title="tests/examples/advection\l_diffusion/test_mpi_advection\l_diffusion_conv.cpp" alt="" coords="1110,259,1307,315"/>
+<area shape="rect" id="node29" href="$d3/d06/test__scalar__conv_8cpp.html" title="tests/examples/scalar\l/test_scalar_conv.cpp" alt="" coords="1331,266,1486,307"/>
+<area shape="rect" id="node30" href="$d7/d57/test__scalar__highprec_8cpp.html" title="tests/examples/scalar\l/test_scalar_highprec.cpp" alt="" coords="1510,266,1683,307"/>
+<area shape="rect" id="node31" href="$d8/d19/test__vdp__zeronu__conv_8cpp.html" title="tests/examples/vanderpol\l/test_vdp_zeronu_conv.cpp" alt="" coords="1707,266,1891,307"/>
+<area shape="rect" id="node32" href="$da/d82/test__quadrature_8cpp.html" title="tests/test_quadrature.cpp" alt="" coords="1915,273,2086,300"/>
+<area shape="rect" id="node5" href="$d1/d6f/imex__sweeper_8hpp.html" title="include/pfasst/encap\l/imex_sweeper.hpp" alt="" coords="811,452,956,493"/>
+<area shape="rect" id="node13" href="$d7/daf/implicit__sweeper_8hpp.html" title="include/pfasst/encap\l/implicit_sweeper.hpp" alt="" coords="938,363,1087,404"/>
+<area shape="rect" id="node17" href="$d9/d05/encap__sweeper__impl_8hpp.html" title="src/pfasst/encap/encap\l_sweeper_impl.hpp" alt="" coords="1112,363,1273,404"/>
+<area shape="rect" id="node21" href="$db/dfd/boris__sweeper_8hpp.html" title="examples/boris/boris\l_sweeper.hpp" alt="" coords="469,363,615,404"/>
+<area shape="rect" id="node23" href="$db/d9a/boris__sweeper__impl_8hpp.html" title="examples/boris/boris\l_sweeper_impl.hpp" alt="" coords="639,452,786,493"/>
+<area shape="rect" id="node6" href="$d7/d0a/imex__sweeper__impl_8hpp.html" title="src/pfasst/encap/imex\l_sweeper_impl.hpp" alt="" coords="805,549,959,590"/>
+<area shape="rect" id="node7" href="$dc/d7d/advection__diffusion__sweeper_8hpp.html" title="examples/advection\l_diffusion/advection\l_diffusion_sweeper.hpp" alt="" coords="523,541,684,597"/>
+<area shape="rect" id="node11" href="$d8/d93/scalar__sweeper_8hpp.html" title="examples/scalar/scalar\l_sweeper.hpp" alt="" coords="983,549,1146,590"/>
+<area shape="rect" id="node8" href="$d1/d49/mpi__pfasst_8cpp.html" title="Advection&#45;Diffusion with MPI&#45;enabled PFASST. " alt="" coords="29,645,199,687"/>
+<area shape="rect" id="node9" href="$d9/d86/serial__mlsdc_8cpp.html" title="Advection&#45;Diffusion with serial MLSDC. " alt="" coords="280,645,463,687"/>
+<area shape="rect" id="node10" href="$d4/df0/vanilla__sdc_8cpp.html" title="Advection&#45;Diffusion with vanilla SDC. " alt="" coords="516,645,691,687"/>
+<area shape="rect" id="node12" href="$d2/daf/scalar__sdc_8cpp.html" title="Scalar test equation example using an encapsulated IMEX sweeper. " alt="" coords="983,645,1146,687"/>
+<area shape="rect" id="node14" href="$dd/d8c/implicit__sweeper__impl_8hpp.html" title="src/pfasst/encap/implicit\l_sweeper_impl.hpp" alt="" coords="980,452,1144,493"/>
+<area shape="rect" id="node15" href="$d6/d93/vdp__sweeper_8hpp.html" title="examples/vanderpol\l/vdp_sweeper.hpp" alt="" coords="1169,452,1315,493"/>
+<area shape="rect" id="node16" href="$df/de7/vdp__sdc_8cpp.html" title="examples/vanderpol\l/vdp_sdc.cpp" alt="" coords="1171,549,1316,590"/>
+<area shape="rect" id="node19" href="$d0/d45/poly__interp_8hpp.html" title="include/pfasst/encap\l/poly_interp.hpp" alt="" coords="5,452,151,493"/>
+<area shape="rect" id="node20" href="$d0/dbe/spectral__transfer__1d_8hpp.html" title="examples/advection\l_diffusion/spectral\l_transfer_1d.hpp" alt="" coords="13,541,157,597"/>
+<area shape="rect" id="node22" href="$d7/d31/boris__mlsdc_8cpp.html" title="examples/boris/boris\l_mlsdc.cpp" alt="" coords="181,549,327,590"/>
+<area shape="rect" id="node24" href="$d2/dc5/injective__transfer_8hpp.html" title="examples/boris/injective\l_transfer.hpp" alt="" coords="227,452,393,493"/>
+<area shape="rect" id="node25" href="$d2/d1e/boris__pfasst_8cpp.html" title="examples/boris/boris\l_pfasst.cpp" alt="" coords="351,549,498,590"/>
+<area shape="rect" id="node26" href="$d3/d93/boris__sdc_8cpp.html" title="examples/boris/boris\l_sdc.cpp" alt="" coords="469,452,615,493"/>
+</map>

@@ -1,0 +1,11 @@
+<map id="pfasst::examples::boris::run_boris_pfasst" name="pfasst::examples::boris::run_boris_pfasst">
+<area shape="rect" id="node2" href="$d4/da9/classpfasst_1_1Controller.html#a8f4f8f025572e57fc5975902a4118fa9" title="Adding a level to the controller. " alt="" coords="248,5,371,47"/>
+<area shape="rect" id="node3" href="$d4/da9/classpfasst_1_1Controller.html#a842fcbd63bdcf3a38b562ef0200bf42c" title="Get coarsest level. " alt="" coords="248,71,371,112"/>
+<area shape="rect" id="node4" href="$d4/deb/classpfasst_1_1PFASST.html#aa3303053b9e0a111a2161eb9642538d7" title="Solve ODE using PFASST. " alt="" coords="237,137,382,163"/>
+<area shape="rect" id="node6" href="$d4/deb/classpfasst_1_1PFASST.html#afed61a9d76fd45681fdd3aea0e14f078" title="Set communicator. " alt="" coords="215,187,404,214"/>
+<area shape="rect" id="node7" href="$d4/da9/classpfasst_1_1Controller.html#af31a86d9ccd9db325532c5ae3a5764f0" title="Set basic time scope of the Controller. " alt="" coords="248,239,371,280"/>
+<area shape="rect" id="node8" href="$d4/da9/classpfasst_1_1Controller.html#a6dba360b0794fb0cdde418d3ab1a160d" title="Set options from command line etc. " alt="" coords="248,304,371,345"/>
+<area shape="rect" id="node9" href="$db/d56/classpfasst_1_1MLSDC.html#ac6e9d00fcb9b7363239e98c3798a3025" title="Basic setup routine for this controller. " alt="" coords="233,370,385,397"/>
+<area shape="rect" id="node10" href="$d0/d55/group__BorisBindings.html#gae493784efa9e8cc4b8a3cb23fdfd0e84" title="pfasst::examples::boris\l::bindings::setup" alt="" coords="229,421,390,463"/>
+<area shape="rect" id="node5" href="$db/d56/classpfasst_1_1MLSDC.html#a698768ef6d03e6432beea8c0c574c05b" title="Solve ODE using MLSDC. " alt="" coords="452,137,591,163"/>
+</map>

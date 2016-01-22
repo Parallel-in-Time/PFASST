@@ -1,0 +1,8 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$de/d20/classpfasst_1_1quadrature_1_1IQuadrature.html" title="Interface for quadrature handlers. " alt="" coords="5,136,184,177"/>
+<area shape="rect" id="node2" href="$d7/d70/classpfasst_1_1quadrature_1_1ClenshawCurtis.html" title="Quadrature handler for Clenshaw&#45;Curtis quadrature. " alt="" coords="234,5,437,47"/>
+<area shape="rect" id="node3" href="$df/d99/classpfasst_1_1quadrature_1_1GaussLegendre.html" title="Quadrature handler for Gauss&#45;Legendre quadrature. " alt="" coords="232,71,439,112"/>
+<area shape="rect" id="node4" href="$de/d23/classpfasst_1_1quadrature_1_1GaussLobatto.html" title="Quadrature handler for Gauss&#45;Lobatto quadrature. " alt="" coords="239,136,431,177"/>
+<area shape="rect" id="node5" href="$d1/da0/classpfasst_1_1quadrature_1_1GaussRadau.html" title="Quadrature handler for Gauss&#45;Radau quadrature. " alt="" coords="241,201,429,243"/>
+<area shape="rect" id="node6" href="$d9/d7b/classpfasst_1_1quadrature_1_1Uniform.html" title="Quadrature handler for uniform distributed nodes. " alt="" coords="259,267,412,308"/>
+</map>

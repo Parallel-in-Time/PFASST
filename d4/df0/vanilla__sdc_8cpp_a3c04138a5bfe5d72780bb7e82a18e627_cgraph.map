@@ -1,0 +1,23 @@
+<map id="main" name="main">
+<area shape="rect" id="node2" href="$dc/d57/namespacepfasst.html#a2ad4b6987b5c66b90166f77fc4230e92" title="pfasst::init" alt="" coords="159,181,240,207"/>
+<area shape="rect" id="node16" href="$d9/d85/group__AdvectionDiffusion.html#ga5a89fd6a8787527e482f6c853d0eec57" title="Advection/diffusion example using an encapsulated IMEX sweeper. " alt="" coords="104,363,295,404"/>
+<area shape="rect" id="node3" href="$d3/d91/namespacepfasst_1_1config.html#a5eaff8155eff1d5f8fe5cf2034b12422" title="Read and parse command line parameters. " alt="" coords="345,89,483,131"/>
+<area shape="rect" id="node7" href="$de/d8c/group__Internals.html#ga73cf933834ba5e5141119310aee971b9" title="Starts easylogging++ with given arguments and loads configuration. " alt="" coords="343,181,485,207"/>
+<area shape="rect" id="node4" href="$d3/d91/namespacepfasst_1_1config.html#a717f3272ec67e59af97e711397beeb29" title="Read config parameters from file. " alt="" coords="548,5,685,47"/>
+<area shape="rect" id="node5" href="$d3/d91/namespacepfasst_1_1config.html#a69bf5d072b24805ad0004d40bcd2744e" title="Get MPI rank during initialization. " alt="" coords="1543,105,1704,131"/>
+<area shape="rect" id="node6" href="$d3/d91/namespacepfasst_1_1config.html#ad40fd72bbe8905d32032195b313b7d06" title="Compile basic help and usage information. " alt="" coords="534,122,699,149"/>
+<area shape="rect" id="node8" href="$de/d8c/group__Internals.html#gaabd9df9fe7db34deb4ec893d6b0b7fa2" title="Sets some default flags for easylogging++. " alt="" coords="535,173,698,215"/>
+<area shape="rect" id="node9" href="$de/d8c/group__Internals.html#ga94bc88666f61bcc6d85072e6dfdd21f4" title="Sets default configuration for default loggers. " alt="" coords="533,239,700,280"/>
+<area shape="rect" id="node10" href="$de/d8c/group__Internals.html#ga2f4ba84c8482c3fb5c86e599804f832a" title="Sets global logging options. " alt="" coords="963,159,1117,200"/>
+<area shape="rect" id="node15" href="$da/d50/namespacepfasst_1_1log.html#a8502afef42b4e98a12249d5fa1fed092" title="Provides convenient way of adding additional named loggers. " alt="" coords="748,239,915,280"/>
+<area shape="rect" id="node11" href="$da/d27/classpfasst_1_1config_1_1options.html#a4f130f9b500d6f3dee7df20894233608" title="Accessor to the singleton instance. " alt="" coords="1165,195,1317,236"/>
+<area shape="rect" id="node12" href="$da/d27/classpfasst_1_1config_1_1options.html#a9ad40d67da1066f5053e47e278b3b154" title="pfasst::config::options\l::get_variables_map" alt="" coords="1165,260,1317,301"/>
+<area shape="rect" id="node13" href="$de/d8c/group__Internals.html#ga74a6cd18764de8c81da478a7eb33ee4a" title="Composes the log file name for the local rank. " alt="" coords="1173,129,1310,171"/>
+<area shape="rect" id="node14" href="$de/d8c/group__Internals.html#ga2fbecb551eda65e49c93122c05142aec" title="Formats the local MPI world rank as a string. " alt="" coords="1365,129,1495,171"/>
+<area shape="rect" id="node17" href="$de/d84/namespacepfasst_1_1quadrature.html#ac4700c0b6dc90b32b3f8af4070d0e62d" title="Instantiates quadrature handler for given number of nodes and type descriptor. " alt="" coords="343,232,485,273"/>
+<area shape="rect" id="node18" href="$d4/da9/classpfasst_1_1Controller.html#a8f4f8f025572e57fc5975902a4118fa9" title="Adding a level to the controller. " alt="" coords="353,297,475,339"/>
+<area shape="rect" id="node19" href="$d4/da9/classpfasst_1_1Controller.html#af31a86d9ccd9db325532c5ae3a5764f0" title="Set basic time scope of the Controller. " alt="" coords="353,363,475,404"/>
+<area shape="rect" id="node20" href="$d4/da9/classpfasst_1_1Controller.html#a6dba360b0794fb0cdde418d3ab1a160d" title="Set options from command line etc. " alt="" coords="353,428,475,469"/>
+<area shape="rect" id="node21" href="$d4/da9/classpfasst_1_1Controller.html#a83d8b318cd15436d5910039313daab9f" title="Basic setup routine for this controller. " alt="" coords="353,493,475,535"/>
+<area shape="rect" id="node22" href="$db/d4c/classpfasst_1_1SDC.html#abaf353cbe65d6c3545cbd5f4540cb74b" title="Run vanilla SDC. " alt="" coords="354,559,474,586"/>
+</map>

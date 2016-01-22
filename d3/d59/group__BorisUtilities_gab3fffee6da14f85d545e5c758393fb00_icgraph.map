@@ -1,0 +1,7 @@
+<map id="pfasst::examples::boris::max" name="pfasst::examples::boris::max">
+<area shape="rect" id="node2" href="$dc/d0f/classpfasst_1_1examples_1_1boris_1_1BorisSweeper.html#a73f1805ffadc107995c4d081bcaa2b8e" title="pfasst::examples::boris\l::BorisSweeper::compute\l_residual_max" alt="" coords="286,5,461,61"/>
+<area shape="rect" id="node3" href="$d2/dd0/classpfasst_1_1examples_1_1boris_1_1ParticleCloud.html#af821fa50b541e050b02b649e5088adb4" title="pfasst::examples::boris\l::ParticleCloud::distribute\l_around_center" alt="" coords="287,85,459,141"/>
+<area shape="rect" id="node4" href="$d5/d3f/classpfasst_1_1examples_1_1vdp_1_1VdpSweeper.html#a408ba7701bca5db3abb44f2744d69d98" title="computes and prints out error, which is meaningful only for \( \nu=0 \). " alt="" coords="283,165,464,206"/>
+<area shape="rect" id="node5" href="$d2/dfe/classpfasst_1_1examples_1_1advection__diffusion_1_1AdvectionDiffusionSweeper.html#a876343efb6009847f154e4650cd31302" title="pfasst::examples::advection\l_diffusion::AdvectionDiffusionSweeper\l::echo_error" alt="" coords="248,229,499,285"/>
+<area shape="rect" id="node6" href="$d2/dd0/classpfasst_1_1examples_1_1boris_1_1ParticleCloud.html#a4b7fcb048548af82696fb3bd72322fe2" title="Computes the \( 0 \)&#45;norm of the data structure&#39;s values. " alt="" coords="293,309,454,350"/>
+</map>

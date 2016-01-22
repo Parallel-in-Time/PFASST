@@ -1,0 +1,9 @@
+<map id="pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper::init_logs" name="pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper::init_logs">
+<area shape="rect" id="node2" href="$da/d50/namespacepfasst_1_1log.html#a8502afef42b4e98a12249d5fa1fed092" title="Provides convenient way of adding additional named loggers. " alt="" coords="304,104,471,145"/>
+<area shape="rect" id="node3" href="$da/d27/classpfasst_1_1config_1_1options.html#a4f130f9b500d6f3dee7df20894233608" title="Accessor to the singleton instance. " alt="" coords="721,5,873,47"/>
+<area shape="rect" id="node4" href="$da/d27/classpfasst_1_1config_1_1options.html#a9ad40d67da1066f5053e47e278b3b154" title="pfasst::config::options\l::get_variables_map" alt="" coords="721,136,873,177"/>
+<area shape="rect" id="node5" href="$de/d8c/group__Internals.html#ga2fbecb551eda65e49c93122c05142aec" title="Formats the local MPI world rank as a string. " alt="" coords="921,133,1051,175"/>
+<area shape="rect" id="node7" href="$de/d8c/group__Internals.html#ga2f4ba84c8482c3fb5c86e599804f832a" title="Sets global logging options. " alt="" coords="519,73,673,115"/>
+<area shape="rect" id="node6" href="$d3/d91/namespacepfasst_1_1config.html#a69bf5d072b24805ad0004d40bcd2744e" title="Get MPI rank during initialization. " alt="" coords="1099,141,1260,167"/>
+<area shape="rect" id="node8" href="$de/d8c/group__Internals.html#ga74a6cd18764de8c81da478a7eb33ee4a" title="Composes the log file name for the local rank. " alt="" coords="729,71,866,112"/>
+</map>

@@ -1,0 +1,8 @@
+<map id="ConvergenceTest::SetUp" name="ConvergenceTest::SetUp">
+<area shape="rect" id="node2" href="$d1/d6e/group__Scalar.html#ga2e2a4c57c66ad0f2716d59ee2f4f457a" title="Scalar test equation example using an encapsulated IMEX sweeper. " alt="" coords="229,129,399,171"/>
+<area shape="rect" id="node3" href="$d4/da9/classpfasst_1_1Controller.html#a8f4f8f025572e57fc5975902a4118fa9" title="Adding a level to the controller. " alt="" coords="457,5,579,47"/>
+<area shape="rect" id="node4" href="$de/d84/namespacepfasst_1_1quadrature.html#ac4700c0b6dc90b32b3f8af4070d0e62d" title="Instantiates quadrature handler for given number of nodes and type descriptor. " alt="" coords="447,71,589,112"/>
+<area shape="rect" id="node5" href="$db/d4c/classpfasst_1_1SDC.html#abaf353cbe65d6c3545cbd5f4540cb74b" title="Run vanilla SDC. " alt="" coords="458,137,578,163"/>
+<area shape="rect" id="node6" href="$d4/da9/classpfasst_1_1Controller.html#af31a86d9ccd9db325532c5ae3a5764f0" title="Set basic time scope of the Controller. " alt="" coords="457,188,579,229"/>
+<area shape="rect" id="node7" href="$d4/da9/classpfasst_1_1Controller.html#a83d8b318cd15436d5910039313daab9f" title="Basic setup routine for this controller. " alt="" coords="457,253,579,295"/>
+</map>

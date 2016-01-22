@@ -1,0 +1,7 @@
+<map id="pfasst::log::set_global_logging_options" name="pfasst::log::set_global_logging_options">
+<area shape="rect" id="node2" href="$da/d27/classpfasst_1_1config_1_1options.html#a4f130f9b500d6f3dee7df20894233608" title="Accessor to the singleton instance. " alt="" coords="208,5,360,47"/>
+<area shape="rect" id="node3" href="$de/d8c/group__Internals.html#ga74a6cd18764de8c81da478a7eb33ee4a" title="Composes the log file name for the local rank. " alt="" coords="215,71,353,112"/>
+<area shape="rect" id="node6" href="$da/d27/classpfasst_1_1config_1_1options.html#a9ad40d67da1066f5053e47e278b3b154" title="pfasst::config::options\l::get_variables_map" alt="" coords="208,136,360,177"/>
+<area shape="rect" id="node4" href="$de/d8c/group__Internals.html#ga2fbecb551eda65e49c93122c05142aec" title="Formats the local MPI world rank as a string. " alt="" coords="408,71,537,112"/>
+<area shape="rect" id="node5" href="$d3/d91/namespacepfasst_1_1config.html#a69bf5d072b24805ad0004d40bcd2744e" title="Get MPI rank during initialization. " alt="" coords="585,78,747,105"/>
+</map>

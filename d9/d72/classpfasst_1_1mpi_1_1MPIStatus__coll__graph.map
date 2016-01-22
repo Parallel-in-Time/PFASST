@@ -1,0 +1,8 @@
+<map id="pfasst::mpi::MPIStatus" name="pfasst::mpi::MPIStatus">
+<area shape="rect" id="node2" href="$da/da9/classpfasst_1_1IStatus.html" title="Abstract interface for the current status of the algorithm. " alt="" coords="5,329,169,685"/>
+<area shape="rect" id="node3" href="$d5/d14/classpfasst_1_1ICommunicator.html" title="Abstract interface for communicators. " alt="" coords="59,160,214,267"/>
+<area shape="rect" id="node4" href="$de/dd3/classpfasst_1_1mpi_1_1MPICommunicator.html" title="{pfasst::mpi::MPICommunicator\n|+ comm\l&#45; _rank\l&#45; _size\l|+ MPICommunicator()\l+ MPICommunicator()\l+ set_comm()\l+ size()\l+ rank()\l+ name()\l* _rank\l* _size\l* comm\l* MPICommunicator()\l* MPICommunicator()\l* set_comm()\l* size()\l* rank()\l* name()\l}" alt="" coords="193,351,397,663"/>
+<area shape="rect" id="node5" title="STL class. " alt="" coords="255,175,335,252"/>
+<area shape="rect" id="node6" title="STL class. " alt="" coords="232,5,359,97"/>
+<area shape="rect" id="node8" title="STL class. " alt="" coords="429,175,548,252"/>
+</map>

@@ -1,0 +1,11 @@
+<map id="pfasst::quadrature::GaussRadau::GaussRadau" name="pfasst::quadrature::GaussRadau::GaussRadau">
+<area shape="rect" id="node2" href="$d1/da0/classpfasst_1_1quadrature_1_1GaussRadau.html#ae7702d1a873e0bddf51641d12ba62ec3" title="pfasst::quadrature\l::GaussRadau::compute_nodes" alt="" coords="252,20,467,61"/>
+<area shape="rect" id="node4" href="$de/d20/classpfasst_1_1quadrature_1_1IQuadrature.html#aa282053968e191e35b57d6a8820ca1f7" title="pfasst::quadrature\l::IQuadrature::compute\l_weights" alt="" coords="280,114,439,170"/>
+<area shape="rect" id="node3" href="$d6/dd0/classpfasst_1_1quadrature_1_1Polynomial.html#a9658a586f822aaafe057120cd258ad73" title="Computes the Legendre polynomial of given order. " alt="" coords="515,5,673,47"/>
+<area shape="rect" id="node5" href="$de/d84/namespacepfasst_1_1quadrature.html#a1a124b78f225d13b253ff8e2fb799aa5" title="Compute quadrature matrix \( Q \) between two sets of nodes. " alt="" coords="525,71,663,112"/>
+<area shape="rect" id="node9" href="$de/d84/namespacepfasst_1_1quadrature.html#a106e6af4f4fa7f33ae6c68ea391dc6e0" title="Compute node&#45;to&#45;node quadrature matrix \( S \) from a given quadrature matrix \( Q \)..." alt="" coords="525,201,663,243"/>
+<area shape="rect" id="node10" href="$de/d84/namespacepfasst_1_1quadrature.html#a77ad709add97d78ea02404286fe15f02" title="Compute vector \( q \) for integration from \( 0 \) to \( 1 \) for given set of nodes. " alt="" coords="529,136,659,177"/>
+<area shape="rect" id="node6" href="$de/d84/namespacepfasst_1_1quadrature.html#a37425ec75a53d150c06f1b47dc8bc047" title="pfasst::quadrature\l::build_polynomial" alt="" coords="735,39,865,80"/>
+<area shape="rect" id="node7" href="$d6/dd0/classpfasst_1_1quadrature_1_1Polynomial.html#ab6ca606fac17e7b963a60ee34271090e" title="Evaluate polynomial for given value. " alt="" coords="721,104,879,145"/>
+<area shape="rect" id="node8" href="$d6/dd0/classpfasst_1_1quadrature_1_1Polynomial.html#a52bf17679c1a86638be7e7564bb6c78d" title="Integrates this polynomial. " alt="" coords="721,169,879,211"/>
+</map>

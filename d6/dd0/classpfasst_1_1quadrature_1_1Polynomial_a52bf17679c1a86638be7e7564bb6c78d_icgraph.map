@@ -1,0 +1,10 @@
+<map id="pfasst::quadrature::Polynomial::integrate" name="pfasst::quadrature::Polynomial::integrate">
+<area shape="rect" id="node2" href="$de/d84/namespacepfasst_1_1quadrature.html#a1a124b78f225d13b253ff8e2fb799aa5" title="Compute quadrature matrix \( Q \) between two sets of nodes. " alt="" coords="211,117,349,158"/>
+<area shape="rect" id="node9" href="$de/d84/namespacepfasst_1_1quadrature.html#a77ad709add97d78ea02404286fe15f02" title="Compute vector \( q \) for integration from \( 0 \) to \( 1 \) for given set of nodes. " alt="" coords="215,182,345,223"/>
+<area shape="rect" id="node3" href="$de/d20/classpfasst_1_1quadrature_1_1IQuadrature.html#aa282053968e191e35b57d6a8820ca1f7" title="pfasst::quadrature\l::IQuadrature::compute\l_weights" alt="" coords="397,143,556,199"/>
+<area shape="rect" id="node4" href="$d7/d70/classpfasst_1_1quadrature_1_1ClenshawCurtis.html#ae9392d76d3273e528e712a82eb18234e" title="pfasst::quadrature\l::ClenshawCurtis::Clenshaw\lCurtis" alt="" coords="625,5,817,61"/>
+<area shape="rect" id="node5" href="$df/d99/classpfasst_1_1quadrature_1_1GaussLegendre.html#a22e5a186dac303f94b3518f97d2d3580" title="pfasst::quadrature\l::GaussLegendre::GaussLegendre" alt="" coords="604,85,839,126"/>
+<area shape="rect" id="node6" href="$de/d23/classpfasst_1_1quadrature_1_1GaussLobatto.html#a64bab00188c1e1144d21af2f14827fba" title="pfasst::quadrature\l::GaussLobatto::GaussLobatto" alt="" coords="618,150,825,191"/>
+<area shape="rect" id="node7" href="$d1/da0/classpfasst_1_1quadrature_1_1GaussRadau.html#a894209ec241ce9ecf6023317f072f745" title="pfasst::quadrature\l::GaussRadau::GaussRadau" alt="" coords="622,215,821,257"/>
+<area shape="rect" id="node8" href="$d9/d7b/classpfasst_1_1quadrature_1_1Uniform.html#a05919b8af8b1f9cf05fbc4fcf7822717" title="pfasst::quadrature\l::Uniform::Uniform" alt="" coords="656,281,787,322"/>
+</map>

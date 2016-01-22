@@ -1,0 +1,5 @@
+<map id="pfasst::ITransfer&lt; time &gt;" name="pfasst::ITransfer&lt; time &gt;">
+<area shape="rect" id="node2" href="$d9/d19/classpfasst_1_1encap_1_1PolyInterpMixin.html" title="Polynomial time interpolation mixin. " alt="" coords="22,307,191,663"/>
+<area shape="rect" id="node4" href="$d5/d79/classpfasst_1_1examples_1_1boris_1_1InjectiveTransfer.html" title="{pfasst::examples::boris\l::InjectiveTransfer\&lt; time \&gt;\n||+ ~InjectiveTransfer()\l+ interpolate_initial()\l+ interpolate()\l+ interpolate()\l+ interpolate()\l+ restrict_initial()\l+ restrict()\l+ restrict()\l+ restrict()\l+ fas()\l}" alt="" coords="216,373,395,597"/>
+<area shape="rect" id="node3" href="$d1/d89/classpfasst_1_1examples_1_1advection__diffusion_1_1SpectralTransfer1D.html" title="Spectral (FFT) transfer routines. " alt="" coords="5,711,208,832"/>
+</map>

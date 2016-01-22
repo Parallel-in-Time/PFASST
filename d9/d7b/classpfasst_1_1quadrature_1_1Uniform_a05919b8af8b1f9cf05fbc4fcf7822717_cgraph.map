@@ -1,0 +1,10 @@
+<map id="pfasst::quadrature::Uniform::Uniform" name="pfasst::quadrature::Uniform::Uniform">
+<area shape="rect" id="node2" href="$d9/d7b/classpfasst_1_1quadrature_1_1Uniform.html#ab2b18c6e2acd1b6039a2b7ec19ebbc9b" title="pfasst::quadrature\l::Uniform::compute_nodes" alt="" coords="184,31,363,72"/>
+<area shape="rect" id="node3" href="$de/d20/classpfasst_1_1quadrature_1_1IQuadrature.html#aa282053968e191e35b57d6a8820ca1f7" title="pfasst::quadrature\l::IQuadrature::compute\l_weights" alt="" coords="194,95,353,151"/>
+<area shape="rect" id="node4" href="$de/d84/namespacepfasst_1_1quadrature.html#a1a124b78f225d13b253ff8e2fb799aa5" title="Compute quadrature matrix \( Q \) between two sets of nodes. " alt="" coords="411,103,549,144"/>
+<area shape="rect" id="node8" href="$de/d84/namespacepfasst_1_1quadrature.html#a77ad709add97d78ea02404286fe15f02" title="Compute vector \( q \) for integration from \( 0 \) to \( 1 \) for given set of nodes. " alt="" coords="415,37,545,79"/>
+<area shape="rect" id="node9" href="$de/d84/namespacepfasst_1_1quadrature.html#a106e6af4f4fa7f33ae6c68ea391dc6e0" title="Compute node&#45;to&#45;node quadrature matrix \( S \) from a given quadrature matrix \( Q \)..." alt="" coords="411,168,549,209"/>
+<area shape="rect" id="node5" href="$de/d84/namespacepfasst_1_1quadrature.html#a37425ec75a53d150c06f1b47dc8bc047" title="pfasst::quadrature\l::build_polynomial" alt="" coords="611,5,741,47"/>
+<area shape="rect" id="node6" href="$d6/dd0/classpfasst_1_1quadrature_1_1Polynomial.html#ab6ca606fac17e7b963a60ee34271090e" title="Evaluate polynomial for given value. " alt="" coords="597,71,755,112"/>
+<area shape="rect" id="node7" href="$d6/dd0/classpfasst_1_1quadrature_1_1Polynomial.html#a52bf17679c1a86638be7e7564bb6c78d" title="Integrates this polynomial. " alt="" coords="597,136,755,177"/>
+</map>

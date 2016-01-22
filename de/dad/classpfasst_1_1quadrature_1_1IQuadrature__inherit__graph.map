@@ -1,0 +1,7 @@
+<map id="pfasst::quadrature::IQuadrature&lt; precision &gt;" name="pfasst::quadrature::IQuadrature&lt; precision &gt;">
+<area shape="rect" id="node2" href="$d7/d70/classpfasst_1_1quadrature_1_1ClenshawCurtis.html" title="Quadrature handler for Clenshaw&#45;Curtis quadrature. " alt="" coords="5,644,208,941"/>
+<area shape="rect" id="node3" href="$df/d99/classpfasst_1_1quadrature_1_1GaussLegendre.html" title="Quadrature handler for Gauss&#45;Legendre quadrature. " alt="" coords="233,644,439,941"/>
+<area shape="rect" id="node4" href="$de/d23/classpfasst_1_1quadrature_1_1GaussLobatto.html" title="Quadrature handler for Gauss&#45;Lobatto quadrature. " alt="" coords="464,644,656,941"/>
+<area shape="rect" id="node5" href="$d1/da0/classpfasst_1_1quadrature_1_1GaussRadau.html" title="Quadrature handler for Gauss&#45;Radau quadrature. " alt="" coords="681,644,869,941"/>
+<area shape="rect" id="node6" href="$d9/d7b/classpfasst_1_1quadrature_1_1Uniform.html" title="Quadrature handler for uniform distributed nodes. " alt="" coords="893,644,1046,941"/>
+</map>

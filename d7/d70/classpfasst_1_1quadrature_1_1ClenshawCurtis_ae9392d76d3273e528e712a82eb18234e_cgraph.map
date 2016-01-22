@@ -1,0 +1,11 @@
+<map id="pfasst::quadrature::ClenshawCurtis::ClenshawCurtis" name="pfasst::quadrature::ClenshawCurtis::ClenshawCurtis">
+<area shape="rect" id="node2" href="$d7/d70/classpfasst_1_1quadrature_1_1ClenshawCurtis.html#a75d7ed838396512b722679535b97739d" title="pfasst::quadrature\l::ClenshawCurtis::compute_nodes" alt="" coords="245,20,473,61"/>
+<area shape="rect" id="node4" href="$de/d20/classpfasst_1_1quadrature_1_1IQuadrature.html#aa282053968e191e35b57d6a8820ca1f7" title="pfasst::quadrature\l::IQuadrature::compute\l_weights" alt="" coords="280,114,439,170"/>
+<area shape="rect" id="node3" href="$d6/dd0/classpfasst_1_1quadrature_1_1Polynomial.html#a9658a586f822aaafe057120cd258ad73" title="Computes the Legendre polynomial of given order. " alt="" coords="521,5,680,47"/>
+<area shape="rect" id="node5" href="$de/d84/namespacepfasst_1_1quadrature.html#a1a124b78f225d13b253ff8e2fb799aa5" title="Compute quadrature matrix \( Q \) between two sets of nodes. " alt="" coords="531,71,670,112"/>
+<area shape="rect" id="node9" href="$de/d84/namespacepfasst_1_1quadrature.html#a106e6af4f4fa7f33ae6c68ea391dc6e0" title="Compute node&#45;to&#45;node quadrature matrix \( S \) from a given quadrature matrix \( Q \)..." alt="" coords="531,201,670,243"/>
+<area shape="rect" id="node10" href="$de/d84/namespacepfasst_1_1quadrature.html#a77ad709add97d78ea02404286fe15f02" title="Compute vector \( q \) for integration from \( 0 \) to \( 1 \) for given set of nodes. " alt="" coords="535,136,666,177"/>
+<area shape="rect" id="node6" href="$de/d84/namespacepfasst_1_1quadrature.html#a37425ec75a53d150c06f1b47dc8bc047" title="pfasst::quadrature\l::build_polynomial" alt="" coords="741,39,872,80"/>
+<area shape="rect" id="node7" href="$d6/dd0/classpfasst_1_1quadrature_1_1Polynomial.html#ab6ca606fac17e7b963a60ee34271090e" title="Evaluate polynomial for given value. " alt="" coords="728,104,885,145"/>
+<area shape="rect" id="node8" href="$d6/dd0/classpfasst_1_1quadrature_1_1Polynomial.html#a52bf17679c1a86638be7e7564bb6c78d" title="Integrates this polynomial. " alt="" coords="728,169,885,211"/>
+</map>

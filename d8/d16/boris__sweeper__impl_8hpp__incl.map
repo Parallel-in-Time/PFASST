@@ -1,0 +1,25 @@
+<map id="examples/boris/boris_sweeper_impl.hpp" name="examples/boris/boris_sweeper_impl.hpp">
+<area shape="rect" id="node2" href="$db/dfd/boris__sweeper_8hpp.html" title="boris_sweeper.hpp" alt="" coords="3081,95,3215,121"/>
+<area shape="rect" id="node16" href="$d8/dfd/config_8hpp.html" title="pfasst/config.hpp" alt="" coords="2715,736,2837,763"/>
+<area shape="rect" id="node23" href="$d0/da9/logging_8hpp.html" title="pfasst/logging.hpp" alt="" coords="2809,661,2940,688"/>
+<area shape="rect" id="node27" href="$de/deb/encap__sweeper_8hpp.html" title="pfasst/encap/encap\l_sweeper.hpp" alt="" coords="1556,169,1695,211"/>
+<area shape="rect" id="node44" href="$d4/dec/particle_8hpp.html" title="particle.hpp" alt="" coords="2193,355,2282,382"/>
+<area shape="rect" id="node46" href="$db/de5/particle__util_8hpp.html" title="particle_util.hpp" alt="" coords="2268,512,2380,539"/>
+<area shape="rect" id="node48" href="$d8/d52/particle__cloud_8hpp.html" title="particle_cloud.hpp" alt="" coords="2499,266,2629,293"/>
+<area shape="rect" id="node50" href="$d9/dd9/wrapper__interface_8hpp.html" title="bindings/wrapper_interface.hpp" alt="" coords="2839,177,3046,203"/>
+<area shape="rect" id="node20" href="$d5/d84/config__impl_8hpp.html" title="pfasst/config_impl.hpp" alt="" coords="2911,811,3063,837"/>
+<area shape="rect" id="node29" href="$d1/d1b/interfaces_8hpp.html" title="interfaces for SDC/MLSDC/PFASST algorithms. " alt="" coords="850,512,993,539"/>
+<area shape="rect" id="node32" href="$d6/dbe/quadrature_8hpp.html" title="pfasst/quadrature.hpp" alt="" coords="1235,266,1386,293"/>
+<area shape="rect" id="node42" href="$d8/d85/encapsulation_8hpp.html" title="pfasst/encap/encapsulation.hpp" alt="" coords="1639,437,1849,464"/>
+<area shape="rect" id="node43" href="$d9/d05/encap__sweeper__impl_8hpp.html" title="pfasst/encap/encap\l_sweeper_impl.hpp" alt="" coords="971,259,1109,300"/>
+<area shape="rect" id="node31" href="$d8/dc4/interfaces__impl_8hpp.html" title="pfasst/interfaces_impl.hpp" alt="" coords="1287,587,1462,613"/>
+<area shape="rect" id="node36" href="$d0/d3e/polynomial_8hpp.html" title="pfasst/quadrature/polynomial.hpp" alt="" coords="1119,512,1337,539"/>
+<area shape="rect" id="node37" href="$df/dea/quadrature_2interface_8hpp.html" title="pfasst/quadrature/interface.hpp" alt="" coords="1068,437,1273,464"/>
+<area shape="rect" id="node38" href="$d7/d77/gauss__lobatto_8hpp.html" title="pfasst/quadrature/gauss\l_lobatto.hpp" alt="" coords="734,348,901,389"/>
+<area shape="rect" id="node39" href="$de/d36/gauss__legendre_8hpp.html" title="pfasst/quadrature/gauss\l_legendre.hpp" alt="" coords="977,348,1143,389"/>
+<area shape="rect" id="node40" href="$d5/d98/gauss__radau_8hpp.html" title="pfasst/quadrature/gauss\l_radau.hpp" alt="" coords="1167,348,1334,389"/>
+<area shape="rect" id="node41" href="$de/d84/clenshaw__curtis_8hpp.html" title="pfasst/quadrature/clenshaw\l_curtis.hpp" alt="" coords="245,348,432,389"/>
+<area shape="rect" id="node45" href="$d3/d35/particle__impl_8hpp.html" title="particle_impl.hpp" alt="" coords="2177,437,2297,464"/>
+<area shape="rect" id="node47" href="$d0/d00/particle__util__impl_8hpp.html" title="particle_util_impl.hpp" alt="" coords="2269,587,2411,613"/>
+<area shape="rect" id="node49" href="$d6/d1f/particle__cloud__impl_8hpp.html" title="particle_cloud_impl.hpp" alt="" coords="2524,437,2684,464"/>
+</map>

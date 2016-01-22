@@ -1,0 +1,6 @@
+<map id="pfasst::examples::boris::InjectiveTransfer::restrict_initial" name="pfasst::examples::boris::InjectiveTransfer::restrict_initial">
+<area shape="rect" id="node2" href="$d5/d79/classpfasst_1_1examples_1_1boris_1_1InjectiveTransfer.html#ac36c0a3826da5ba7c00b8b7ca337ef1e" title="Restrict, in time and space, from the fine sweeper to the coarse sweeper. " alt="" coords="231,71,408,112"/>
+<area shape="rect" id="node3" href="$d5/d79/classpfasst_1_1examples_1_1boris_1_1InjectiveTransfer.html#a8edb899e253e687e270fcf7cb8a06840" title="Compute FAS correction between the coarse and fine sweepers. " alt="" coords="475,5,637,47"/>
+<area shape="rect" id="node4" href="$d5/d79/classpfasst_1_1examples_1_1boris_1_1InjectiveTransfer.html#af5ac516fbf6f5712892ca2eea935bbed" title="Interpolate, in time and space, from the coarse sweeper to the fine sweeper. " alt="" coords="456,71,656,112"/>
+<area shape="rect" id="node5" href="$d5/d79/classpfasst_1_1examples_1_1boris_1_1InjectiveTransfer.html#a688d44d4da970e5f8be64576fc1c72b5" title="Interpolate initial condition from the coarse sweeper to the fine sweeper. " alt="" coords="704,63,904,119"/>
+</map>

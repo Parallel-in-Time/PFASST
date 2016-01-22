@@ -1,0 +1,4 @@
+<map id="pfasst::examples::boris::ParticleCloud&lt; precision &gt;" name="pfasst::examples::boris::ParticleCloud&lt; precision &gt;">
+<area shape="rect" id="node2" href="$dc/ddd/classpfasst_1_1encap_1_1Encapsulation.html" title="{pfasst::encap::Encapsulation\l\&lt; precision \&gt;\n||+ ~Encapsulation()\l+ zero()\l+ copy()\l+ norm0()\l+ saxpy()\l+ mat_apply()\l+ post()\l+ send()\l+ recv()\l+ broadcast()\l* ~Encapsulation()\l* zero()\l* copy()\l* norm0()\l* saxpy()\l* mat_apply()\l* post()\l* send()\l* recv()\l* broadcast()\l}" alt="" coords="5,439,199,809"/>
+<area shape="rect" id="node3" href="$dc/ddd/classpfasst_1_1encap_1_1Encapsulation.html" title="Data/solution encapsulation. " alt="" coords="5,5,199,376"/>
+</map>

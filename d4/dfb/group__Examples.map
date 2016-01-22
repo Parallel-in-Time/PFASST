@@ -1,0 +1,6 @@
+<map id="Examples" name="Examples">
+<area shape="rect" id="node1" href="$d0/d70/group__Boris.html" title="This directory contains an implementations of a modification to the Boris method to solve second orde..." alt="" coords="185,5,239,32"/>
+<area shape="rect" id="node2" href="$d9/d85/group__AdvectionDiffusion.html" title="Advection&#45;Diffusion example. " alt="" coords="143,56,281,83"/>
+<area shape="rect" id="node4" href="$d1/d6e/group__Scalar.html" title="This directory contains a simple implementations of scalar ODE solver using the PFASST framework..." alt="" coords="181,107,243,133"/>
+<area shape="rect" id="node5" href="$dd/d53/group__VanDerPol.html" title="This directory contains an implementations of solver for the Van&#45;der&#45;Pol oscillator using the PFASST ..." alt="" coords="135,157,289,184"/>
+</map>
