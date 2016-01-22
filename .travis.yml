@@ -25,6 +25,9 @@ addons:
       - libboost1.55-dev
       - libboost-math1.55-dev
       - libboost-program-options1.55-dev
+      - libopenmpi-dev
+      - openmpi-bin
+      - openmpi-common
 
 compiler:
   - gcc
@@ -33,6 +36,7 @@ compiler:
 env:
   global: 
     - BUILD_DOXYGEN=false
+    - WITH_MPI=OFF
   matrix:
     - CMAKE_BUILD_TYPE=Release
     - CMAKE_BUILD_TYPE=Debug
@@ -40,12 +44,23 @@ env:
 matrix:
   include:
     - env: BUILD_DOXYGEN=true
+    - compiler: gcc
+      env: WITH_MPI=ON CMAKE_BUILD_TYPE=Debug
 
 install:
   - if [ "${CXX}" == "g++" ]; then
       echo "Using GCC 5" && export CXX="g++-5" CC="gcc-5";
     else
       echo "Using Clang 3.6" && export CXX="clang-3.6" CC="clang-3.6";
+    fi
+  - if [ "${WITH_MPI}" == "ON" ]; then
+      echo "Using OpenMPI" &&
+      mkdir -p $HOME/bin &&
+      ln -s /usr/bin/g++-5 $HOME/bin/g++ &&
+      ln -s /usr/bin/gcc-5 $HOME/bin/gcc &&
+      ln -s $HOME/bin/g++ $HOME/bin/c++ &&
+      ln -s $HOME/bin/gcc $HOME/bin/cc &&
+      export CXX="mpicxx" CC="mpicc";
     fi
 
 before_script:
@@ -59,7 +74,7 @@ script:
       doxygen;
     else
       mkdir build && cd build;
-      cmake -DCMAKE_INSTALL_PREFIX=${HOME} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -Dpfasst_WITH_MPI=OFF -Dpfasst_BUILD_TESTS=ON -Dpfasst_BUILD_EXAMPLES=ON -DCMAKE_VERBOSE_MAKEFILE=ON ..;
+      cmake -DCMAKE_INSTALL_PREFIX=${HOME} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -Dpfasst_WITH_MPI=${WITH_MPI} -Dpfasst_BUILD_TESTS=ON -Dpfasst_BUILD_EXAMPLES=ON -DCMAKE_VERBOSE_MAKEFILE=ON ..;
       make -j2;
       make test;
     fi
