@@ -6,7 +6,6 @@ language:
 
 cache:
   - apt
-  - ccache
 
 addons:
   apt:
@@ -17,6 +16,7 @@ addons:
       - doxygen
       - gcc-5
       - g++-5
+      - graphviz
       - libfftw3-3
       - libfftw3-dev
       - libeigen3-dev
@@ -24,24 +24,37 @@ addons:
       - libboost-math1.55-dev
       - libboost-program-options1.55-dev
 
-env:
-  matrix:
-    - CMAKE_BUILD_TYPE="Release"
-    - CMAKE_BUILD_TYPE="Debug"
-
 compiler:
   - gcc
 
+env:
+  global: 
+    - BUILD_DOXYGEN=false
+  matrix:
+    - CMAKE_BUILD_TYPE=Release
+    - CMAKE_BUILD_TYPE=Debug
+
+matrix:
+  include:
+    - env: BUILD_DOXYGEN=true
+
+install:
+  - if [ "${CXX}" == "g++" ]; then
+      echo "Using GCC 5" && export CXX="g++-5" CC="gcc-5";
+    fi
+
 before_script:
-  - if [ "${CXX}" == "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
+  - printenv | sort -u
+  - which ${CXX}
+  - which ${CC}
 
 script:
-  - mkdir build
-  - cd build
-  - cmake -DCMAKE_INSTALL_PREFIX=$HOME -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -Dpfasst_WITH_MPI=OFF -Dpfasst_BUILD_TESTS=ON -Dpfasst_BUILD_EXAMPLES=ON -DCMAKE_VERBOSE_MAKEFILE=ON ..
-  - make
-  - make test
-
-after_success:
-  - cd ..
-  - doxygen
+  - if [ "${BUILD_DOXYGEN}" == "true" ]; then
+      doxygen --version;
+      doxygen;
+    else
+      mkdir build && cd build;
+      cmake -DCMAKE_INSTALL_PREFIX=${HOME} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -Dpfasst_WITH_MPI=OFF -Dpfasst_BUILD_TESTS=ON -Dpfasst_BUILD_EXAMPLES=ON -DCMAKE_VERBOSE_MAKEFILE=ON ..;
+      make -j2;
+      make test;
+    fi
