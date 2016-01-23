@@ -4,6 +4,9 @@
 /coverage
 *.info
 /include/pfasst/site_config.hpp
+travis_deploy_rsa
+d[0-9a-f]/
+search/
 
 .python-version
 __pycache__
