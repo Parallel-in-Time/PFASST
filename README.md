@@ -50,7 +50,7 @@ Currently, it features the following content:
 * \subpage #page_style_guide
 * \subpage #page_troubleshooting
 
-[documentation]: https://parallel-in-time.github.io/pfasst
+[documentation]: https://parallel-in-time.github.io/PFASST/
 
 
 Releases
