@@ -124,7 +124,7 @@ namespace pfasst
 
           virtual ~AdvectionDiffusionSweeper()
           {
-            CLOG(INFO, "Advec") << "number of f1 evals: " << this->nf1evals;
+            ML_CLOG(INFO, "Advec", "number of f1 evals: " << this->nf1evals);
           }
           //! @}
 
@@ -190,7 +190,7 @@ namespace pfasst
 
             auto err = this->errors[ktype(n, k)];
 
-            CLOG(INFO, "Advec") << boost::format(this->FORMAT_STR) % (n+1) % k % this->get_nodes().size() % as_vector<double, time>(this->state[0]).size() % rmax % err;
+            ML_CLOG(INFO, "Advec", (boost::format(this->FORMAT_STR) % (n+1) % k % this->get_nodes().size() % as_vector<double, time>(this->state[0]).size() % rmax % err));
 
             this->residuals[ktype(n, k)] = rmax;
           }

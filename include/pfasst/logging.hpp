@@ -1,6 +1,23 @@
 /**
  * @file pfasst/logging.hpp
  * @since v0.3.0
+ * 
+ * @section logging_macros Logging Macros
+ *
+ * The most important and most frequently used logging macros provided by easylogging++ are wrapped
+ * in the `ML_*` macros to avoid the evaluation of string conversion operations when logging is
+ * disabled.
+ *
+ * Without these wrappers, using the easylogging++ logging macros will lead to evaluation of string
+ * operations even with logging disabled at compile time.
+ *
+ * Instead of using
+ *
+ *     LOG(INFO) << "This is a logging line with string conversion " << my_variable;
+ *
+ * one should now use
+ *
+ *     ML_LOG(INFO, "This is a logging line with string conversion " << my_variable);
  */
 #ifndef _PFASST__LOGGING_HPP_
 #define _PFASST__LOGGING_HPP_
@@ -78,9 +95,55 @@ const string OUT::reset = "\033[0m";
 
 #ifdef PFASST_NO_LOGGING
   #define ELPP_DISABLE_LOGS
+  #define ML_NOLOG
 #endif
 
 #include <pfasst/easylogging++.h>
+
+//! @{
+#ifndef ML_NOLOG
+  /**
+   * same as `LOG(level, x)` from easylogging++
+   * 
+   * @see @ref logging_macros
+   */
+  #define ML_LOG(level, x) LOG(level) << x
+
+  /**
+   * same as `CLOG(level, logger, x)` from easylogging++
+   *
+   * @see @ref logging_macros
+   */
+  #define ML_CLOG(level, logger_id, x) CLOG(level, logger_id) << x
+
+  /**
+   * same as `CLOG_IF(condition, level, logger, x)` from easylogging++
+   *
+   * @see @ref logging_macros
+   */
+  #define ML_CLOG_IF(condition, level, logger_id, x) CLOG_IF(condition, level, logger_id) <<  x
+
+  /**
+   * same as `CVLOG(verbosity, logger, x)` from easylogging++
+   *
+   * @see @ref logging_macros
+   */
+  #define ML_CVLOG(verbose_level, logger_id, x) CVLOG(verbose_level, logger_id) << x
+
+  /**
+   * same as `CVLOG_IF(condition, verbosity, logger, x)` from easylogging++
+   *
+   * @see @ref logging_macros
+   */
+  #define ML_CVLOG_IF(condition, verbose_level, logger_id, x) CVLOG_IF(condition, verbose_level, logger_id) << x
+#else
+  #define ML_LOG(level, x)
+  #define ML_CLOG(level, logger_id, x)
+  #define ML_CLOG_IF(condition, level, logger_id, x)
+  #define ML_CVLOG(verbose_level, logger_id, x)
+  #define ML_CVLOG_IF(condition, verbose_level, logger_id, x)
+#endif
+//! @}
 
 
 #ifndef PFASST_LOGGER_INITIALIZED
@@ -323,7 +386,7 @@ namespace pfasst
       string id2print = id.substr(0, LOGGER_ID_LENGTH);
       boost::to_upper(id2print);
       if (initialized) {
-        CLOG(DEBUG, "default") << "initializing custom logger '" << id << "' as '" << id2print << "'";
+        ML_CLOG(DEBUG, "default", "initializing custom logger '" << id << "' as '" << id2print << "'");
       }
       if (id_length < LOGGER_ID_LENGTH) {
         id2print.append(LOGGER_ID_LENGTH - id_length, ' ');
@@ -424,14 +487,14 @@ namespace pfasst
     inline static void test_logging_levels()
     {
       cout << "### Example of different Logging Levels:" << endl;
-      LOG(INFO) << "info";
-      LOG(DEBUG) << "debug";
-      LOG(WARNING) << "warning";
-      LOG(ERROR) << "error";
-      LOG(FATAL) << "fatal error";
-      LOG(TRACE) << "trace";
+      ML_LOG(INFO, "info");
+      ML_LOG(DEBUG, "debug");
+      ML_LOG(WARNING, "warning");
+      ML_LOG(ERROR, "error");
+      ML_LOG(FATAL, "fatal error");
+      ML_LOG(TRACE, "trace");
       for (size_t level = 0; level <= 9; ++level) {
-        VLOG(level) << "verbosity level " << level;
+        ML_CVLOG(level, "default", "verbosity level " << level);
       }
       cout << "### End Example Logging Levels" << endl << endl;
     }
@@ -458,7 +521,7 @@ namespace pfasst
       set_logging_flags();
       load_default_config();
       pfasst::log::stack_position = 0;
-      CLOG(INFO, "default") << "PFASST++ version " << pfasst::VERSION;
+      ML_CLOG(INFO, "default", "PFASST++ version " << pfasst::VERSION);
     }
   }  // ::pfasst::log
 }  // ::pfasst

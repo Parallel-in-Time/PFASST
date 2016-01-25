@@ -47,12 +47,12 @@ namespace pfasst
     int nblocks = int(this->get_end_time() / this->get_step_size()) / comm->size();
 
     if (nblocks == 0) {
-      CLOG(INFO, "Controller") << "invalid duration: there are more time processors than time steps";
+      ML_CLOG(INFO, "Controller", "invalid duration: there are more time processors than time steps");
       throw ValueError("invalid duration: there are more time processors than time steps");
     }
 
     if (nblocks * comm->size() * this->get_step_size() < this->get_end_time()) {
-      CLOG(INFO, "Controller") << "invalid duration: mismatch between number of time processors and time steps";
+      ML_CLOG(INFO, "Controller", "invalid duration: mismatch between number of time processors and time steps");
       throw ValueError("invalid duration: mismatch between number of time processors and time steps");
     }
 
@@ -61,7 +61,8 @@ namespace pfasst
 
       predictor();
 
-      CLOG(DEBUG, "Controller") << "iterating on step " << this->get_step() << " (0/" << this->get_max_iterations() << ")";
+      ML_CLOG(DEBUG, "Controller", "iterating on step " << this->get_step()
+                                   << " (0/" << this->get_max_iterations() << ")");
       for (this->set_iteration(0);
            this->get_iteration() < this->get_max_iterations() && this->comm->status->keep_iterating();
            this->advance_iteration()) {
@@ -71,7 +72,9 @@ namespace pfasst
         }
         cycle_v(this->finest());
       }
-      CLOG(DEBUG, "Controller") << "done iterating on step " << this->get_step() << " (" << this->get_iteration() << "/" << this->get_max_iterations() << ")";
+      ML_CLOG(DEBUG, "Controller", "done iterating on step " << this->get_step()
+                                   << " (" << this->get_iteration() << "/"
+                                   << this->get_max_iterations() << ")");
 
       for (auto l = this->finest(); l >= this->coarsest(); --l) {
         l.current()->post_step();

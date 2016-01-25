@@ -80,9 +80,9 @@ namespace pfasst
       return !this->get_converged(0);
     }
     bool keep_iterating = !this->get_converged(this->comm->rank() - 1) || !this->get_converged(this->comm->rank());
-    CLOG(DEBUG, "Controller") << "previous converged: " << boolalpha << this->get_converged(this->comm->rank() - 1)
-                              << "; this converged: " << boolalpha << this->get_converged(this->comm->rank())
-                              << " --> keep iterating: " << boolalpha << keep_iterating;
+    ML_CLOG(DEBUG, "Controller", "previous converged: " << boolalpha << this->get_converged(this->comm->rank() - 1)
+                                 << "; this converged: " << boolalpha << this->get_converged(this->comm->rank())
+                                 << " --> keep iterating: " << boolalpha << keep_iterating);
     return keep_iterating;
   }
 

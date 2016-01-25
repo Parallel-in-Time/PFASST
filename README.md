@@ -1,10 +1,16 @@
 PFASST                                                                                   {#mainpage}
 ======
 
+master: ![travis_master_img][]
+development: ![travis_dev_img][]
+
 The PFASST project is a C++ implementation of the *parallel full approximation scheme in space and
 time* (PFASST) algorithm, which in turn is a time-parallel algorithm for solving ODEs and PDEs.  It
 also contains basic implementations of the *spectral deferred correction* (SDC) and *multi-level
 spectral deferred correction* (MLSDC) algorithms.
+
+[travis_master_img]: https://travis-ci.org/Parallel-in-Time/PFASST.svg?branch=master
+[travis_dev_img]: https://travis-ci.org/Parallel-in-Time/PFASST.svg?branch=development
 
 
 News
@@ -35,7 +41,7 @@ See \subpage #citelist .
 Documentation
 -------------
 
-Doxygen generated documentation can be found [on the PinT server][documentation].
+Doxygen generated documentation can be found [on _GitHub_ pages][documentation].
 Currently, it features the following content:
 
 * \subpage #page_building_installing
@@ -44,7 +50,7 @@ Currently, it features the following content:
 * \subpage #page_style_guide
 * \subpage #page_troubleshooting
 
-[documentation]: https://pint.fz-juelich.de/ci/view/PFASST/job/PFASST_LATEST_STABLE_DOCU/doxygen
+[documentation]: https://parallel-in-time.github.io/PFASST/
 
 
 Releases
@@ -93,23 +99,3 @@ Release tags will be signed by one of the following PGP keys:
 
     1024D/9950EF2E 2001-11-22 Matthew Emmett <matt@emmett.ca>
     Fingerprint B09C 1425 1C47 B58E B3AC 2E74 6F22 8460 9950 EF2E
-
-
-Build status
-------------
-
-| Branch      | Status                 | Details                           |
-|-------------|------------------------|-----------------------------------|
-| Master      | ![master-status-img][] | [Jenkins Job][master-status-link] |
-| Development | ![dev-status-img][]    | [Jenkins Job][dev-status-link]    |
-
-Results of static code analysis such as test coverage or SLOCcount metrics can be found at
-[this Jenkins job][coverage-job].
-Further metrics can be found on [Open Hub aka Ohloh][openhub].
-
-[master-status-img]:  https://pint.fz-juelich.de/ci/view/PFASST/job/PFASST_LATEST_STABLE/badge/icon
-[master-status-link]: https://pint.fz-juelich.de/ci/view/PFASST/job/PFASST_LATEST_STABLE
-[dev-status-img]:     https://pint.fz-juelich.de/ci/view/PFASST/job/PFASST_DEVELOPMENT/badge/icon
-[dev-status-link]:    https://pint.fz-juelich.de/ci/view/PFASST/job/PFASST_DEVELOPMENT
-[coverage-job]:       https://pint.fz-juelich.de/ci/view/PFASST/job/PFASST_LATEST_STABLE_ANALYSIS/
-[openhub]:            https://www.openhub.net/p/PFASST

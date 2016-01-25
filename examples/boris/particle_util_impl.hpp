@@ -199,8 +199,8 @@ namespace pfasst
         } else {
           // try other way round
           // ATTENTION! recursion
-          LOG(WARNING) << "Commutativity of addition primaly implemented other way round."
-                       << " You should switch to avoid unneccessary function calls.";
+          ML_LOG(WARNING, "Commutativity of addition primaly implemented other way round."
+                          << " You should switch to avoid unneccessary function calls.");
           dest = second + first;
         }
         return dest;
@@ -219,8 +219,8 @@ namespace pfasst
       inline vector<precision> operator+(const ValueT& value, const vector<precision>& vec)
       {
         static_assert(is_arithmetic<ValueT>::value, "");
-        LOG(WARNING) << "Commutativity of addition primaly implemented other way round."
-                     << " You should switch to avoid unneccessary function calls.";
+        ML_LOG(WARNING, "Commutativity of addition primaly implemented other way round."
+                        << " You should switch to avoid unneccessary function calls.");
         return vec + value;
       }
       // OPERATORS: ADD
@@ -343,8 +343,8 @@ namespace pfasst
       inline vector<precision> operator*(const ValueT& value, const vector<precision>& vec)
       {
         static_assert(is_arithmetic<ValueT>::value, "");
-        LOG(WARNING) << "Commutativity of multiplication primaly implemented other way round."
-                     << " You should switch to avoid unneccessary function calls.";
+        ML_LOG(WARNING, "Commutativity of multiplication primaly implemented other way round."
+                        << " You should switch to avoid unneccessary function calls.");
         return vec * value;
       }
 
