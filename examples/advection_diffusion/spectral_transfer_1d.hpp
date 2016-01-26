@@ -14,7 +14,7 @@ using namespace std;
 #include <pfasst/encap/vector.hpp>
 #include <pfasst/encap/poly_interp.hpp>
 
-#include "fft.hpp"
+#include "fftw_manager.hpp"
 
 
 namespace pfasst
@@ -34,7 +34,7 @@ namespace pfasst
       {
           typedef encap::Encapsulation<double> Encapsulation;
 
-          FFT fft;
+          FFTWManager& _fft = FFTWManager::get_instance();
 
         public:
           void interpolate(shared_ptr<Encapsulation> dst, shared_ptr<const Encapsulation> src) override
@@ -42,8 +42,8 @@ namespace pfasst
             auto& fine = encap::as_vector<double, time>(dst);
             auto& crse = encap::as_vector<double, time>(src);
 
-            auto* crse_z = this->fft.forward(crse);
-            auto* fine_z = this->fft.get_workspace(fine.size())->z;
+            auto* crse_z = this->_fft.get_workspace(crse.size())->forward(crse);
+            auto* fine_z = this->_fft.get_workspace(fine.size())->z_ptr();
 
             for (size_t i = 0; i < fine.size(); i++) {
               fine_z[i] = 0.0;
@@ -59,7 +59,7 @@ namespace pfasst
               fine_z[fine.size() - crse.size() / 2 + i] = c * crse_z[crse.size() / 2 + i];
             }
 
-            this->fft.backward(fine);
+            this->_fft.get_workspace(fine.size())->backward(fine);
           }
 
           void restrict(shared_ptr<Encapsulation> dst, shared_ptr<const Encapsulation> src) override

@@ -24,7 +24,7 @@ using namespace std;
 using pfasst::encap::Encapsulation;
 using pfasst::encap::as_vector;
 
-#include "fft.hpp"
+#include "fftw_manager.hpp"
 
 #ifndef PI
 #define PI 3.1415926535897932385
@@ -44,8 +44,9 @@ namespace pfasst
      * This directory contains several implementations of an advection/diffusion solver using the
      * PFASST framework.
      *
-     * All of the solvers use the SDC sweeper defined in `advection_diffusion_sweeper.hpp`, and the FFT
-     * routines in `fft.hpp`.
+     * All of the solvers use the SDC sweeper defined in `advection_diffusion_sweeper.hpp`.
+     *
+     * The FFT parts can can be found in `fftw_manager.hpp` and `fftw_workspace.hpp`.
      *
      * The implementations are, in order of complexity:
      *
@@ -91,7 +92,7 @@ namespace pfasst
 
         private:
           //! @{
-          FFT fft;
+          FFTWManager& _fft = FFTWManager::get_instance();
           vector<complex<double>> ddx, lap;
           //! @}
 
@@ -244,11 +245,11 @@ namespace pfasst
 
             double c = -v / double(u.size());
 
-            auto* z = this->fft.forward(u);
+            auto* z = this->_fft.get_workspace(u.size())->forward(u);
             for (size_t i = 0; i < u.size(); i++) {
               z[i] *= c * this->ddx[i];
             }
-            this->fft.backward(f_expl);
+            this->_fft.get_workspace(f_expl.size())->backward(f_expl);
 
             this->nf1evals++;
           }
@@ -266,11 +267,11 @@ namespace pfasst
 
             double c = nu / double(u.size());
 
-            auto* z = this->fft.forward(u);
+            auto* z = this->_fft.get_workspace(u.size())->forward(u);
             for (size_t i = 0; i < u.size(); i++) {
               z[i] *= c * this->lap[i];
             }
-            this->fft.backward(f_impl);
+            this->_fft.get_workspace(f_impl.size())->backward(f_impl);
           }
 
           /**
@@ -288,11 +289,11 @@ namespace pfasst
 
             double c = nu * double(dt);
 
-            auto* z = this->fft.forward(rhs);
+            auto* z = this->_fft.get_workspace(rhs.size())->forward(rhs);
             for (size_t i = 0; i < u.size(); i++) {
               z[i] /= (1.0 - c * this->lap[i]) * double(u.size());
             }
-            this->fft.backward(u);
+            this->_fft.get_workspace(u.size())->backward(u);
 
             for (size_t i = 0; i < u.size(); i++) {
               f_impl[i] = (u[i] - rhs[i]) / double(dt);
