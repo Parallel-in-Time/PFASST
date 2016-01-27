@@ -8,11 +8,7 @@
 #include <cstdlib>
 #include <memory>
 
-#include <fftw3.h>
-
 #include <pfasst.hpp>
-#include <pfasst/logging.hpp>
-#include <pfasst/config.hpp>
 #include <pfasst/controller/sdc.hpp>
 #include <pfasst/encap/vector.hpp>
 

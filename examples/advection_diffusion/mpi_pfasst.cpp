@@ -13,7 +13,6 @@
 using namespace std;
 
 #include <mpi.h>
-#include <fftw3.h>
 
 #include <pfasst.hpp>
 #include <pfasst/logging.hpp>
