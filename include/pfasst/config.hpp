@@ -19,10 +19,15 @@ namespace po = boost::program_options;
 #endif
 
 
+#ifdef PFASST_USE_LOCAL_CONFIG
+  #include "pfasst/site_config.hpp"
+#else
+  #include "pfasst/version.hpp"
+#endif
+
+
 namespace pfasst
 {
-  static constexpr const char* VERSION = "v0.5.0-rc1-48-g4da93b0-dirty";
-
   /**
    * @since v0.3.0
    */
