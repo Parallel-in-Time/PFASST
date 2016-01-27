@@ -1,6 +1,6 @@
 /**
  * @ingroup AdvectionDiffusionFiles
- * @file examples/advection_diffusion/fftw_workspace_impl.hpp
+ * @file examples/advection_diffusion/fftw_workspace_dft1d_impl.hpp
  * @since v0.6.0
  */
 #include "fftw_workspace_dft1d.hpp"
@@ -22,7 +22,7 @@ namespace pfasst
           , _z_ptr(reinterpret_cast<complex<double>*>(_wk_ptr))
       {
         this->_ffft = fftw_plan_dft_1d(ndofs, this->_wk_ptr, this->_wk_ptr, FFTW_FORWARD, FFTW_ESTIMATE);
-        this->_ifft =fftw_plan_dft_1d(ndofs, this->_wk_ptr, this->_wk_ptr, FFTW_BACKWARD, FFTW_ESTIMATE);
+        this->_ifft = fftw_plan_dft_1d(ndofs, this->_wk_ptr, this->_wk_ptr, FFTW_BACKWARD, FFTW_ESTIMATE);
       }
 
       FFTWWorkspaceDFT1D::~FFTWWorkspaceDFT1D()
