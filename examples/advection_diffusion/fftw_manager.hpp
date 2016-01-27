@@ -11,7 +11,7 @@
 using std::map;
 using std::shared_ptr;
 
-#include "fftw_workspace.hpp"
+#include "fftw_workspace_dft1d.hpp"
 
 
 namespace pfasst
@@ -20,8 +20,12 @@ namespace pfasst
   {
     namespace advection_diffusion
     {
+      template<class WorkspaceT>
       class FFTWManager
       {
+        public:
+          using workspace_t = WorkspaceT;
+
         private:
           FFTWManager();
           FFTWManager(const FFTWManager&) = delete;
@@ -30,14 +34,14 @@ namespace pfasst
           FFTWManager& operator=(FFTWManager&&) = delete;
 
         protected:
-          map<size_t, shared_ptr<FFTWWorkspace>> _workspaces;
+          map<size_t, shared_ptr<workspace_t>> _workspaces;
 
         public:
           virtual ~FFTWManager();
 
           static FFTWManager& get_instance();
 
-          shared_ptr<FFTWWorkspace> get_workspace(const size_t ndofs);
+          shared_ptr<WorkspaceT> get_workspace(const size_t ndofs);
       };
     }  // ::pfasst::examples::advection_diffusion
   }  // ::pfasst::examples

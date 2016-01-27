@@ -92,7 +92,7 @@ namespace pfasst
 
         private:
           //! @{
-          FFTWManager& _fft = FFTWManager::get_instance();
+          FFTWManager<FFTWWorkspaceDFT1D>& _fft = FFTWManager<FFTWWorkspaceDFT1D>::get_instance();
           vector<complex<double>> ddx, lap;
           //! @}
 

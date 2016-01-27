@@ -21,7 +21,7 @@ namespace pfasst
   {
     namespace advection_diffusion
     {
-      class FFTWWorkspace
+      class FFTWWorkspaceDFT1D
       {
         protected:
           size_t           _size;
@@ -31,13 +31,13 @@ namespace pfasst
           complex<double>* _z_ptr;
 
         public:
-          explicit FFTWWorkspace(const size_t ndofs);
-          FFTWWorkspace(const FFTWWorkspace& other) = delete;
-          FFTWWorkspace(FFTWWorkspace&& other) = delete;
-          virtual ~FFTWWorkspace();
+          explicit FFTWWorkspaceDFT1D(const size_t ndofs);
+          FFTWWorkspaceDFT1D(const FFTWWorkspaceDFT1D& other) = delete;
+          FFTWWorkspaceDFT1D(FFTWWorkspaceDFT1D&& other) = delete;
+          virtual ~FFTWWorkspaceDFT1D();
 
-          FFTWWorkspace& operator=(const FFTWWorkspace& other) = delete;
-          FFTWWorkspace& operator=(FFTWWorkspace&& other) = delete;
+          FFTWWorkspaceDFT1D& operator=(const FFTWWorkspaceDFT1D& other) = delete;
+          FFTWWorkspaceDFT1D& operator=(FFTWWorkspaceDFT1D&& other) = delete;
 
           size_t size() const;
           complex<double>* z_ptr();
@@ -49,6 +49,6 @@ namespace pfasst
   }  // ::pfasst::examples
 }  // ::pfasst
 
-#include "fftw_workspace_impl.hpp"
+#include "fftw_workspace_dft1d_impl.hpp"
 
 #endif  // _EXAMPLES__ADVEC_DIFF__FFTW_WORKSPACE_HPP_

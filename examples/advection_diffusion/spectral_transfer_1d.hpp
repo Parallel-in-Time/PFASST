@@ -34,7 +34,7 @@ namespace pfasst
       {
           typedef encap::Encapsulation<double> Encapsulation;
 
-          FFTWManager& _fft = FFTWManager::get_instance();
+          FFTWManager<FFTWWorkspaceDFT1D>& _fft = FFTWManager<FFTWWorkspaceDFT1D>::get_instance();
 
         public:
           void interpolate(shared_ptr<Encapsulation> dst, shared_ptr<const Encapsulation> src) override

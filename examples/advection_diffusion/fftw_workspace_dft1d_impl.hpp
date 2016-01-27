@@ -3,7 +3,7 @@
  * @file examples/advection_diffusion/fftw_workspace_impl.hpp
  * @since v0.6.0
  */
-#include "fftw_workspace.hpp"
+#include "fftw_workspace_dft1d.hpp"
 
 #include <cassert>
 #include <complex>
@@ -16,7 +16,7 @@ namespace pfasst
   {
     namespace advection_diffusion
     {
-      FFTWWorkspace::FFTWWorkspace(const size_t ndofs)
+      FFTWWorkspaceDFT1D::FFTWWorkspaceDFT1D(const size_t ndofs)
         :   _size(ndofs)
           , _wk_ptr(fftw_alloc_complex(ndofs))
           , _z_ptr(reinterpret_cast<complex<double>*>(_wk_ptr))
@@ -25,7 +25,7 @@ namespace pfasst
         this->_ifft =fftw_plan_dft_1d(ndofs, this->_wk_ptr, this->_wk_ptr, FFTW_BACKWARD, FFTW_ESTIMATE);
       }
 
-      FFTWWorkspace::~FFTWWorkspace()
+      FFTWWorkspaceDFT1D::~FFTWWorkspaceDFT1D()
       {
         fftw_free(this->_wk_ptr);
         fftw_destroy_plan(this->_ffft);
@@ -33,17 +33,17 @@ namespace pfasst
         this->_z_ptr = nullptr;
       }
 
-      size_t FFTWWorkspace::size() const
+      size_t FFTWWorkspaceDFT1D::size() const
       {
         return this->_size;
       }
 
-      complex<double>* FFTWWorkspace::z_ptr()
+      complex<double>* FFTWWorkspaceDFT1D::z_ptr()
       {
         return this->_z_ptr;
       }
 
-      complex<double>* FFTWWorkspace::forward(const DVectorT& x)
+      complex<double>* FFTWWorkspaceDFT1D::forward(const DVectorT& x)
       {
         assert(this->size() == x.size());
 
@@ -56,7 +56,7 @@ namespace pfasst
         return this->_z_ptr;
       }
 
-      void FFTWWorkspace::backward(DVectorT & x)
+      void FFTWWorkspaceDFT1D::backward(DVectorT & x)
       {
         assert(this->size() == x.size());
 

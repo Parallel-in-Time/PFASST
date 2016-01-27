@@ -17,25 +17,29 @@ namespace pfasst
   {
     namespace advection_diffusion
     {
-      FFTWManager::FFTWManager()
+      template<class WorkspaceT>
+      FFTWManager<WorkspaceT>::FFTWManager()
       {}
 
-      FFTWManager::~FFTWManager()
+      template<class WorkspaceT>
+      FFTWManager<WorkspaceT>::~FFTWManager()
       {
         fftw_cleanup();
       }
 
-      FFTWManager& FFTWManager::get_instance()
+      template<class WorkspaceT>
+      FFTWManager<WorkspaceT>& FFTWManager<WorkspaceT>::get_instance()
       {
-        static FFTWManager instance;
+        static FFTWManager<WorkspaceT> instance;
         return instance;
       }
 
-      shared_ptr<FFTWWorkspace> FFTWManager::get_workspace(const size_t ndofs)
+      template<class WorkspaceT>
+      shared_ptr<WorkspaceT> FFTWManager<WorkspaceT>::get_workspace(const size_t ndofs)
       {
         if (this->_workspaces.find(ndofs) == this->_workspaces.end()) {
-          auto ws = make_shared<FFTWWorkspace>(ndofs);
-          this->_workspaces.insert(pair<size_t, shared_ptr<FFTWWorkspace>>(ndofs, ws));
+          auto ws = make_shared<WorkspaceT>(ndofs);
+          this->_workspaces.insert(pair<size_t, shared_ptr<WorkspaceT>>(ndofs, ws));
         }
 
         return this->_workspaces[ndofs];
