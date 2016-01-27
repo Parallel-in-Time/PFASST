@@ -1,14 +1,12 @@
 /**
  * @ingroup AdvectionDiffusionFiles
- * @file examples/advection_diffusion/fftw_manager_impl.hpp
+ * @file examples/advection_diffusion/fft_manager_impl.hpp
  * @since v0.6.0
  */
-#include "fftw_manager.hpp"
+#include "fft_manager.hpp"
 
 #include <utility>
 using std::pair;
-
-#include <fftw3.h>
 
 
 namespace pfasst
@@ -18,24 +16,25 @@ namespace pfasst
     namespace advection_diffusion
     {
       template<class WorkspaceT>
-      FFTWManager<WorkspaceT>::FFTWManager()
+      FFTManager<WorkspaceT>::FFTManager()
       {}
 
       template<class WorkspaceT>
-      FFTWManager<WorkspaceT>::~FFTWManager()
+      FFTManager<WorkspaceT>::~FFTManager()
       {
-        fftw_cleanup();
+        this->_workspaces.clear();
+        WorkspaceT::finalize_cleanup();
       }
 
       template<class WorkspaceT>
-      FFTWManager<WorkspaceT>& FFTWManager<WorkspaceT>::get_instance()
+      FFTManager<WorkspaceT>& FFTManager<WorkspaceT>::get_instance()
       {
-        static FFTWManager<WorkspaceT> instance;
+        static FFTManager<WorkspaceT> instance;
         return instance;
       }
 
       template<class WorkspaceT>
-      shared_ptr<WorkspaceT> FFTWManager<WorkspaceT>::get_workspace(const size_t ndofs)
+      shared_ptr<WorkspaceT> FFTManager<WorkspaceT>::get_workspace(const size_t ndofs)
       {
         if (this->_workspaces.find(ndofs) == this->_workspaces.end()) {
           auto ws = make_shared<WorkspaceT>(ndofs);

@@ -26,7 +26,8 @@ using pfasst::encap::as_vector;
 
 #include <pfasst/encap/vector.hpp>
 
-#include "fftw_manager.hpp"
+#include "fft_manager.hpp"
+#include "fftw_workspace_dft1d.hpp"
 
 #ifndef PI
 #define PI 3.1415926535897932385
@@ -96,8 +97,8 @@ namespace pfasst
 
         private:
           //! @{
-          FFTWManager<FFTWWorkspaceDFT1D<data_type>>& _fft =
-            FFTWManager<FFTWWorkspaceDFT1D<data_type>>::get_instance();
+          FFTManager<FFTWWorkspaceDFT1D<data_type>>& _fft =
+            FFTManager<FFTWWorkspaceDFT1D<data_type>>::get_instance();
           vector<complex<double>> ddx, lap;
           //! @}
 

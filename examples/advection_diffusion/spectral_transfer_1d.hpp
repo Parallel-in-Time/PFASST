@@ -14,7 +14,8 @@ using namespace std;
 #include <pfasst/encap/vector.hpp>
 #include <pfasst/encap/poly_interp.hpp>
 
-#include "fftw_manager.hpp"
+#include "fft_manager.hpp"
+#include "fftw_workspace_dft1d.hpp"
 
 
 namespace pfasst
@@ -34,8 +35,8 @@ namespace pfasst
       {
           using Encapsulation = encap::Encapsulation<double>;
 
-          FFTWManager<FFTWWorkspaceDFT1D<encap::VectorEncapsulation<double>>>& _fft =
-            FFTWManager<FFTWWorkspaceDFT1D<encap::VectorEncapsulation<double>>>::get_instance();
+          FFTManager<FFTWWorkspaceDFT1D<encap::VectorEncapsulation<double>>>& _fft =
+            FFTManager<FFTWWorkspaceDFT1D<encap::VectorEncapsulation<double>>>::get_instance();
 
         public:
           void interpolate(shared_ptr<Encapsulation> dst,

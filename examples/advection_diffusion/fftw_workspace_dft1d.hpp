@@ -60,6 +60,13 @@ namespace pfasst
 
           //! @{
           /**
+           * Calls final cleanup routine of FFTW.
+           */
+          static void finalize_cleanup();
+          //! @}
+
+          //! @{
+          /**
            * Get number of DOFs
            *
            * @return number of degrees of freedom

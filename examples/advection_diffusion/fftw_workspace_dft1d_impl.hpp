@@ -38,6 +38,12 @@ namespace pfasst
       }
 
       template<class DataT>
+      void FFTWWorkspaceDFT1D<DataT>::finalize_cleanup()
+      {
+        fftw_cleanup();
+      }
+
+      template<class DataT>
       size_t FFTWWorkspaceDFT1D<DataT>::size() const
       {
         return this->_size;

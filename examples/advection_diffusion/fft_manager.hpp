@@ -1,17 +1,15 @@
 /**
  * @ingroup AdvectionDiffusionFiles
- * @file examples/advection_diffusion/fftw_manager.hpp
+ * @file examples/advection_diffusion/fft_manager.hpp
  * @since v0.6.0
  */
-#ifndef _EXAMPLES__ADVEC_DIFF__FFTW_MANAGER_HPP_
-#define _EXAMPLES__ADVEC_DIFF__FFTW_MANAGER_HPP_
+#ifndef _EXAMPLES__ADVEC_DIFF__FFT_MANAGER_HPP_
+#define _EXAMPLES__ADVEC_DIFF__FFT_MANAGER_HPP_
 
 #include <map>
 #include <memory>
 using std::map;
 using std::shared_ptr;
-
-#include "fftw_workspace_dft1d.hpp"
 
 
 namespace pfasst
@@ -23,13 +21,15 @@ namespace pfasst
       /**
        * Singleton to hold and query for FFTW workspaces.
        *
-       * The @ref FFTWManager holds all instances of @ref FFTWWorkspace once queried through
-       * FFTWManager::get_workspace().
+       * The @ref FFTManager holds all instances of @ref FFTWorkspace once queried through
+       * FFTManager::get_workspace().
        *
-       * @tparam WorkspaceT type of the @ref FFTWWorkspace the manager instance is for
+       * On destruction a static cleanup routine on FFTWorkspace is called.
+       *
+       * @tparam WorkspaceT type of the @ref FFTWorkspace the manager instance is for
        */
       template<class WorkspaceT>
-      class FFTWManager
+      class FFTManager
       {
         public:
           //! @{
@@ -38,11 +38,11 @@ namespace pfasst
 
         private:
           //! @{
-          FFTWManager();
-          FFTWManager(const FFTWManager&) = delete;
-          FFTWManager(FFTWManager&&) = delete;
-          FFTWManager& operator=(const FFTWManager&) = delete;
-          FFTWManager& operator=(FFTWManager&&) = delete;
+          FFTManager();
+          FFTManager(const FFTManager&) = delete;
+          FFTManager(FFTManager&&) = delete;
+          FFTManager& operator=(const FFTManager&) = delete;
+          FFTManager& operator=(FFTManager&&) = delete;
           //! @}
 
         protected:
@@ -53,7 +53,7 @@ namespace pfasst
 
         public:
           //! @{
-          virtual ~FFTWManager();
+          virtual ~FFTManager();
           //! @}
 
           //! @{
@@ -62,12 +62,12 @@ namespace pfasst
            *
            * @return the one and only manager instance
            */
-          static FFTWManager& get_instance();
+          static FFTManager& get_instance();
           //! @}
 
           //! @{
           /**
-           * Get the one @ref FFTWWorkspace for given number of DOFs
+           * Get the one @ref FFTWorkspace for given number of DOFs
            *
            * @param[in] ndofs number of degrees of freedom of FFTW workspace
            * @return shared pointer to the only workspace with given number of DOFs
@@ -77,30 +77,30 @@ namespace pfasst
       };
 
       /**
-       * @class pfasst::examples::advection_diffusion::FFTWWorkspace
+       * @class pfasst::examples::advection_diffusion::FFTWorkspace
        * @brief Concept of a FFTW workspace
        *
-       * A FFTW workspace, manageable by @ref FFTWManager, provides a wrapper around calls to FFTW
+       * A FFTW workspace, manageable by @ref FFTManager, provides a wrapper around calls to FFTW
        * and persists variables and memory between calls to FFTW.
        *
-       * A @ref FFTWWorkspace is expected to conform to the RAII principle.
+       * A @ref FFTWorkspace is expected to conform to the RAII principle.
        *
        * Usually, the initial setup of FFTW for a given number of degrees of freedom is done on
-       * construction of a @ref FFTWWorkspace, e.g. allocating memory for transformed values and
+       * construction of a @ref FFTWorkspace, e.g. allocating memory for transformed values and
        * creating _plans_.
        *
        * Cleanup and freeing of this setup should be done on destruction.
        *
-       * A FFTWWorkspace has the following member functions implemented:
+       * A FFTWorkspace has the following member functions implemented:
        *
-       * * `complex<DataT::value_type>* FFTWWorkspace::forward(const DataT&)`
+       * * `complex<DataT::value_type>* FFTWorkspace::forward(const DataT&)`
        *
        *   Transforms given data encapsulation to Fourier space and returns pointer to transformed
        *   values.
        *   `DataT` is the encapsulation type, e.g. pfasst::encap::VectorEncapsulation<double>,
        *   and `DataT::value_type` the type of the data at a single point in space, e.g. `double`.
        *
-       * * `void FFTWWorkspace::backward(DataT&)`
+       * * `void FFTWorkspace::backward(DataT&)`
        *
        *   Transformed values in Fourier space stored in `z_ptr()` back to problem space and stores
        *   them in given `DataT` object, overwriting existing data.
@@ -114,6 +114,12 @@ namespace pfasst
        *
        *   Returns a pointer to the values in Fourier space for computations in Fourier space.
        *
+       * * `static void finalize_cleanup()`
+       *
+       *   Routine to do static cleanup after freeing all other workspaces.
+       *   Some FFT implementations require to call a cleanup function before program exit, e.g.
+       *   `fftw_cleanup()`.
+       *
        * @note This is only the specification of a concept and not available as code.
        * @ingroup Concepts
        */
@@ -121,6 +127,6 @@ namespace pfasst
   }  // ::pfasst::examples
 }  // ::pfasst
 
-#include "fftw_manager_impl.hpp"
+#include "fft_manager_impl.hpp"
 
-#endif // _EXAMPLES__ADVEC_DIFF__FFTW_MANAGER_HPP_
+#endif // _EXAMPLES__ADVEC_DIFF__FFT_MANAGER_HPP_
