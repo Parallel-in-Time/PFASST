@@ -11,9 +11,6 @@ using std::complex;
 
 #include <fftw3.h>
 
-#include <pfasst/encap/vector.hpp>
-typedef pfasst::encap::VectorEncapsulation<double> DVectorT;
-
 
 namespace pfasst
 {
@@ -24,17 +21,25 @@ namespace pfasst
       /**
        * Workspace for DFT in 1D
        *
+       * @tparam DataT type of the encapsulation in the problem space; must provide public member
+       *               `value_type` providing the type of single data points, public member
+       *               function `size()` returning number of elements and public member subscript
+       *               operator.
        * @implements FFTWWorkspace
        */
+      template<class DataT>
       class FFTWWorkspaceDFT1D
       {
+        public:
+          using data_type = DataT;
+
         protected:
           //! @{
-          size_t           _size;
-          fftw_plan        _ffft;
-          fftw_plan        _ifft;
-          fftw_complex*    _wk_ptr;
-          complex<double>* _z_ptr;
+          size_t                                   _size;
+          fftw_plan                                _ffft;
+          fftw_plan                                _ifft;
+          fftw_complex*                            _wk_ptr;
+          complex<typename data_type::value_type>* _z_ptr;
           //! @}
 
         public:
@@ -43,14 +48,14 @@ namespace pfasst
            * @param[in] ndofs number of DOFs of this FFTWWorkspace
            */
           explicit FFTWWorkspaceDFT1D(const size_t ndofs);
-          FFTWWorkspaceDFT1D(const FFTWWorkspaceDFT1D& other) = delete;
-          FFTWWorkspaceDFT1D(FFTWWorkspaceDFT1D&& other) = delete;
+          FFTWWorkspaceDFT1D(const FFTWWorkspaceDFT1D<DataT>& other) = delete;
+          FFTWWorkspaceDFT1D(FFTWWorkspaceDFT1D<DataT>&& other) = delete;
           virtual ~FFTWWorkspaceDFT1D();
           //! @}
 
           //! @{
-          FFTWWorkspaceDFT1D& operator=(const FFTWWorkspaceDFT1D& other) = delete;
-          FFTWWorkspaceDFT1D& operator=(FFTWWorkspaceDFT1D&& other) = delete;
+          FFTWWorkspaceDFT1D& operator=(const FFTWWorkspaceDFT1D<DataT>& other) = delete;
+          FFTWWorkspaceDFT1D& operator=(FFTWWorkspaceDFT1D<DataT>&& other) = delete;
           //! @}
 
           //! @{
@@ -66,7 +71,7 @@ namespace pfasst
            *
            * @return pointer to values in Fourier space
            */
-          complex<double>* z_ptr();
+          complex<typename DataT::value_type>* z_ptr();
           //! @}
 
           //! @{
@@ -76,7 +81,7 @@ namespace pfasst
            * @param[in] x encapsulation holding data in problem space
            * @return pointer to values in Fourier space
            */
-          complex<double>* forward(const DVectorT& x);
+          complex<typename DataT::value_type>* forward(const DataT& x);
 
           /**
            * Back-transforms Fourier space data (z_ptr()) into problem space
@@ -84,7 +89,7 @@ namespace pfasst
            * @param[in,out] x encapsulation to hold back-transformed data; existing data will get
            *                  overwritten
            */
-          void backward(DVectorT& x);
+          void backward(DataT& x);
           //! @}
       };
     }  // ::pfasst::examples::advection_diffusion

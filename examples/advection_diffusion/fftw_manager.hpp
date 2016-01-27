@@ -93,12 +93,12 @@ namespace pfasst
        *
        * A FFTWWorkspace has the following member functions implemented:
        *
-       * * `complex<DataT::element_t>* FFTWWorkspace::forward(const DataT&)`
+       * * `complex<DataT::value_type>* FFTWWorkspace::forward(const DataT&)`
        *
        *   Transforms given data encapsulation to Fourier space and returns pointer to transformed
        *   values.
        *   `DataT` is the encapsulation type, e.g. pfasst::encap::VectorEncapsulation<double>,
-       *   and `DataT::element_t` the type of the data at a single point in space, e.g. `double`.
+       *   and `DataT::value_type` the type of the data at a single point in space, e.g. `double`.
        *
        * * `void FFTWWorkspace::backward(DataT&)`
        *
@@ -110,7 +110,7 @@ namespace pfasst
        *
        *   Returns number of degrees of freedom of this workspace.
        *
-       * * `complex<DataT::element_t>* z_ptr()`
+       * * `complex<DataT::value_type>* z_ptr()`
        *
        *   Returns a pointer to the values in Fourier space for computations in Fourier space.
        *

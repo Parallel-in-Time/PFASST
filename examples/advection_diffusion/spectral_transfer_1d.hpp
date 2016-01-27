@@ -32,12 +32,14 @@ namespace pfasst
       class SpectralTransfer1D
         : public encap::PolyInterpMixin<time>
       {
-          typedef encap::Encapsulation<double> Encapsulation;
+          using Encapsulation = encap::Encapsulation<double>;
 
-          FFTWManager<FFTWWorkspaceDFT1D>& _fft = FFTWManager<FFTWWorkspaceDFT1D>::get_instance();
+          FFTWManager<FFTWWorkspaceDFT1D<encap::VectorEncapsulation<double>>>& _fft =
+            FFTWManager<FFTWWorkspaceDFT1D<encap::VectorEncapsulation<double>>>::get_instance();
 
         public:
-          void interpolate(shared_ptr<Encapsulation> dst, shared_ptr<const Encapsulation> src) override
+          void interpolate(shared_ptr<Encapsulation> dst,
+                           shared_ptr<const Encapsulation> src) override
           {
             auto& fine = encap::as_vector<double, time>(dst);
             auto& crse = encap::as_vector<double, time>(src);
@@ -62,7 +64,8 @@ namespace pfasst
             this->_fft.get_workspace(fine.size())->backward(fine);
           }
 
-          void restrict(shared_ptr<Encapsulation> dst, shared_ptr<const Encapsulation> src) override
+          void restrict(shared_ptr<Encapsulation> dst,
+                        shared_ptr<const Encapsulation> src) override
           {
             auto& fine = encap::as_vector<double, time>(src);
             auto& crse = encap::as_vector<double, time>(dst);

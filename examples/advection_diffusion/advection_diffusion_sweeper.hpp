@@ -24,6 +24,8 @@ using namespace std;
 using pfasst::encap::Encapsulation;
 using pfasst::encap::as_vector;
 
+#include <pfasst/encap/vector.hpp>
+
 #include "fftw_manager.hpp"
 
 #ifndef PI
@@ -90,9 +92,12 @@ namespace pfasst
             pfasst::log::add_custom_logger("Advec");
           }
 
+          using data_type = pfasst::encap::VectorEncapsulation<double>;
+
         private:
           //! @{
-          FFTWManager<FFTWWorkspaceDFT1D>& _fft = FFTWManager<FFTWWorkspaceDFT1D>::get_instance();
+          FFTWManager<FFTWWorkspaceDFT1D<data_type>>& _fft =
+            FFTWManager<FFTWWorkspaceDFT1D<data_type>>::get_instance();
           vector<complex<double>> ddx, lap;
           //! @}
 
@@ -135,7 +140,7 @@ namespace pfasst
             this->exact(as_vector<double, time>(q), t);
           }
 
-          void exact(DVectorT& q, time t)
+          void exact(data_type& q, time t)
           {
             size_t n = q.size();
             double a = 1.0 / sqrt(4 * PI * nu * (t + t0));
@@ -155,7 +160,7 @@ namespace pfasst
           void echo_error(time t)
           {
             auto& qend = as_vector<double, time>(this->get_end_state());
-            DVectorT qex(qend.size());
+            data_type qex(qend.size());
 
             this->exact(qex, t);
 

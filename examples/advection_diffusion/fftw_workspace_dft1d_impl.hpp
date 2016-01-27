@@ -16,16 +16,20 @@ namespace pfasst
   {
     namespace advection_diffusion
     {
-      FFTWWorkspaceDFT1D::FFTWWorkspaceDFT1D(const size_t ndofs)
+      template<class DataT>
+      FFTWWorkspaceDFT1D<DataT>::FFTWWorkspaceDFT1D(const size_t ndofs)
         :   _size(ndofs)
           , _wk_ptr(fftw_alloc_complex(ndofs))
-          , _z_ptr(reinterpret_cast<complex<double>*>(_wk_ptr))
+          , _z_ptr(reinterpret_cast<complex<typename DataT::value_type>*>(_wk_ptr))
       {
-        this->_ffft = fftw_plan_dft_1d(ndofs, this->_wk_ptr, this->_wk_ptr, FFTW_FORWARD, FFTW_ESTIMATE);
-        this->_ifft = fftw_plan_dft_1d(ndofs, this->_wk_ptr, this->_wk_ptr, FFTW_BACKWARD, FFTW_ESTIMATE);
+        this->_ffft = fftw_plan_dft_1d(ndofs, this->_wk_ptr, this->_wk_ptr,
+                                       FFTW_FORWARD, FFTW_ESTIMATE);
+        this->_ifft = fftw_plan_dft_1d(ndofs, this->_wk_ptr, this->_wk_ptr,
+                                       FFTW_BACKWARD, FFTW_ESTIMATE);
       }
 
-      FFTWWorkspaceDFT1D::~FFTWWorkspaceDFT1D()
+      template<class DataT>
+      FFTWWorkspaceDFT1D<DataT>::~FFTWWorkspaceDFT1D()
       {
         fftw_free(this->_wk_ptr);
         fftw_destroy_plan(this->_ffft);
@@ -33,17 +37,20 @@ namespace pfasst
         this->_z_ptr = nullptr;
       }
 
-      size_t FFTWWorkspaceDFT1D::size() const
+      template<class DataT>
+      size_t FFTWWorkspaceDFT1D<DataT>::size() const
       {
         return this->_size;
       }
 
-      complex<double>* FFTWWorkspaceDFT1D::z_ptr()
+      template<class DataT>
+      complex<typename DataT::value_type>* FFTWWorkspaceDFT1D<DataT>::z_ptr()
       {
         return this->_z_ptr;
       }
 
-      complex<double>* FFTWWorkspaceDFT1D::forward(const DVectorT& x)
+      template<class DataT>
+      complex<typename DataT::value_type>* FFTWWorkspaceDFT1D<DataT>::forward(const DataT& x)
       {
         assert(this->size() == x.size());
 
@@ -56,7 +63,8 @@ namespace pfasst
         return this->_z_ptr;
       }
 
-      void FFTWWorkspaceDFT1D::backward(DVectorT & x)
+      template<class DataT>
+      void FFTWWorkspaceDFT1D<DataT>::backward(DataT& x)
       {
         assert(this->size() == x.size());
 
