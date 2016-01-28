@@ -97,8 +97,7 @@ namespace pfasst
 
         private:
           //! @{
-          FFTManager<FFTWWorkspaceDFT1D<data_type>>& _fft =
-            FFTManager<FFTWWorkspaceDFT1D<data_type>>::get_instance();
+          FFTManager<FFTWWorkspaceDFT1D<data_type>> _fft;
           vector<complex<double>> ddx, lap;
           //! @}
 

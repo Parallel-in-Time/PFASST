@@ -35,8 +35,7 @@ namespace pfasst
       {
           using Encapsulation = encap::Encapsulation<double>;
 
-          FFTManager<FFTWWorkspaceDFT1D<encap::VectorEncapsulation<double>>>& _fft =
-            FFTManager<FFTWWorkspaceDFT1D<encap::VectorEncapsulation<double>>>::get_instance();
+          FFTManager<FFTWWorkspaceDFT1D<encap::VectorEncapsulation<double>>> _fft;
 
         public:
           void interpolate(shared_ptr<Encapsulation> dst,

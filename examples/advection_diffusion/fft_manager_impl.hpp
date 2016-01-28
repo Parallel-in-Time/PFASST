@@ -16,24 +16,6 @@ namespace pfasst
     namespace advection_diffusion
     {
       template<class WorkspaceT>
-      FFTManager<WorkspaceT>::FFTManager()
-      {}
-
-      template<class WorkspaceT>
-      FFTManager<WorkspaceT>::~FFTManager()
-      {
-        this->_workspaces.clear();
-        WorkspaceT::finalize_cleanup();
-      }
-
-      template<class WorkspaceT>
-      FFTManager<WorkspaceT>& FFTManager<WorkspaceT>::get_instance()
-      {
-        static FFTManager<WorkspaceT> instance;
-        return instance;
-      }
-
-      template<class WorkspaceT>
       shared_ptr<WorkspaceT> FFTManager<WorkspaceT>::get_workspace(const size_t ndofs)
       {
         if (this->_workspaces.find(ndofs) == this->_workspaces.end()) {
@@ -42,6 +24,12 @@ namespace pfasst
         }
 
         return this->_workspaces[ndofs];
+      }
+
+      template<class WorkspaceT>
+      void FFTManager<WorkspaceT>::finalize_cleanup()
+      {
+        WorkspaceT::finalize_cleanup();
       }
     }  // ::pfasst::examples::advection_diffusion
   }  // ::pfasst::examples
