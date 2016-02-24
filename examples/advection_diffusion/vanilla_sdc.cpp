@@ -8,11 +8,7 @@
 #include <cstdlib>
 #include <memory>
 
-#include <fftw3.h>
-
 #include <pfasst.hpp>
-#include <pfasst/logging.hpp>
-#include <pfasst/config.hpp>
 #include <pfasst/controller/sdc.hpp>
 #include <pfasst/encap/vector.hpp>
 
@@ -72,6 +68,5 @@ int main(int argc, char** argv)
                pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_opts,
                pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_logs);
   pfasst::examples::advection_diffusion::run_vanilla_sdc(0.0);
-  fftw_cleanup();
 }
 #endif

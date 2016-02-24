@@ -8,11 +8,7 @@
 #include <memory>
 using namespace std;
 
-#include <fftw3.h>
-
 #include <pfasst.hpp>
-#include <pfasst/logging.hpp>
-#include <pfasst/config.hpp>
 #include <pfasst/controller/mlsdc.hpp>
 #include <pfasst/encap/vector.hpp>
 using namespace pfasst::encap;
@@ -119,6 +115,5 @@ int main(int argc, char** argv)
                pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_opts,
                pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_logs);
   pfasst::examples::advection_diffusion::run_serial_mlsdc(3);
-  fftw_cleanup();
 }
 #endif

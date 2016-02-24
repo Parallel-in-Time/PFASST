@@ -14,7 +14,8 @@ using namespace std;
 #include <pfasst/encap/vector.hpp>
 #include <pfasst/encap/poly_interp.hpp>
 
-#include "fft.hpp"
+#include "fft_manager.hpp"
+#include "fftw_workspace_dft1d.hpp"
 
 
 namespace pfasst
@@ -32,18 +33,19 @@ namespace pfasst
       class SpectralTransfer1D
         : public encap::PolyInterpMixin<time>
       {
-          typedef encap::Encapsulation<double> Encapsulation;
+          using Encapsulation = encap::Encapsulation<double>;
 
-          FFT fft;
+          FFTManager<FFTWWorkspaceDFT1D<encap::VectorEncapsulation<double>>> _fft;
 
         public:
-          void interpolate(shared_ptr<Encapsulation> dst, shared_ptr<const Encapsulation> src) override
+          void interpolate(shared_ptr<Encapsulation> dst,
+                           shared_ptr<const Encapsulation> src) override
           {
             auto& fine = encap::as_vector<double, time>(dst);
             auto& crse = encap::as_vector<double, time>(src);
 
-            auto* crse_z = this->fft.forward(crse);
-            auto* fine_z = this->fft.get_workspace(fine.size())->z;
+            auto* crse_z = this->_fft.get_workspace(crse.size())->forward(crse);
+            auto* fine_z = this->_fft.get_workspace(fine.size())->z_ptr();
 
             for (size_t i = 0; i < fine.size(); i++) {
               fine_z[i] = 0.0;
@@ -59,10 +61,11 @@ namespace pfasst
               fine_z[fine.size() - crse.size() / 2 + i] = c * crse_z[crse.size() / 2 + i];
             }
 
-            this->fft.backward(fine);
+            this->_fft.get_workspace(fine.size())->backward(fine);
           }
 
-          void restrict(shared_ptr<Encapsulation> dst, shared_ptr<const Encapsulation> src) override
+          void restrict(shared_ptr<Encapsulation> dst,
+                        shared_ptr<const Encapsulation> src) override
           {
             auto& fine = encap::as_vector<double, time>(src);
             auto& crse = encap::as_vector<double, time>(dst);

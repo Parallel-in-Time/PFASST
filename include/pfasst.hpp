@@ -41,6 +41,10 @@ namespace pfasst
  *
  * @defgroup Examples Examples
  *   A few different examples demonstrating the use and functionality of PFASST++.
+ *
+ * @defgroup Concepts Concepts
+ *   Basic concept specifications not necessarily available as source code, though implemented
+ *   through specializations.
  */
 
 /**

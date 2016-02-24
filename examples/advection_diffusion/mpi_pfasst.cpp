@@ -13,7 +13,6 @@
 using namespace std;
 
 #include <mpi.h>
-#include <fftw3.h>
 
 #include <pfasst.hpp>
 #include <pfasst/logging.hpp>
@@ -122,7 +121,6 @@ int main(int argc, char** argv)
   pfasst::examples::advection_diffusion::run_mpi_pfasst(abs_res_tol, rel_res_tol,
                                                         niters, nsteps, dt,
                                                         ndofs_f, ndofs_c, nnodes_f, nnodes_c);
-  fftw_cleanup();
   MPI_Finalize();
 }
 #endif
