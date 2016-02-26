@@ -6,18 +6,16 @@
 #define _PFASST__CONFIG_HPP_
 
 #include <fstream>
+#include <sstream>
 #include <iostream>
 #include <string>
 #include <map>
+#include <vector>
 using namespace std;
-
-#include <boost/program_options.hpp>
-namespace po = boost::program_options;
 
 #ifdef WITH_MPI
   #include <mpi.h>
 #endif
-
 
 namespace pfasst
 {
@@ -26,6 +24,17 @@ namespace pfasst
    */
   namespace config
   {
+
+    template<typename T>
+    T string_as(const std::string s)
+    {
+      // XXX: use boost lexical_cast instead?
+      T v;
+      std::istringstream stream(s);
+      stream >> v;
+      return v;
+    }
+
     /**
      * Get MPI rank during initialization.
      *
@@ -39,7 +48,6 @@ namespace pfasst
     {
 #ifdef WITH_MPI
       int initialized = 0, rank = 0;
-      // if we're not running under "mpirun/mpiexec", just assume rank 0.
       MPI_Initialized(&initialized);
       if (initialized) {
         MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -67,11 +75,13 @@ namespace pfasst
         static const size_t LINE_WIDTH = 100;
 
       private:
-        po::options_description all_options;
-        map<string, po::options_description> option_groups;
-        po::variables_map variables_map;
-        vector<string> unrecognized_args;
         bool initialized = false;
+
+        typedef map<string, string> option_values_map;
+        typedef map<string, int> option_names_map;
+
+        option_values_map option_values;
+        option_names_map option_names;
 
         //! @{
         options();
@@ -87,42 +97,24 @@ namespace pfasst
          * @returns singleton config::options instance
          */
         static options& get_instance();
-        po::variables_map& get_variables_map();
-        po::options_description& get_all_options();
-        vector<string>& get_unrecognized_args();
         //! @}
+
+        option_values_map& get_option_values() { return this->option_values; }
+        option_names_map& get_option_names() { return this->option_names; }
 
         //! @{
         /**
-         * Adds a new boolean flag.
+         * Adds a new option.
          *
-         * @param[in] group string identifying the parameter group
+         * @param[in] group Name of the parameter group.
          * @param[in] option Name of the command line parameter.
-         *   It is possible to specify a long and optional short option name by comma-separation.
-         *   Short option names are identified by being only a single character.
-         *   They are automatically parsed as '`-[SHORT]`' by `boost::program_options` in contrast
-         *   to '`--[LONG]`'.
-         * @param[in] help help text to be displayed in the help and usage information
+         * @param[in] help Help message to be displayed in help and usage information.
+         * @param[in] boolean True if option is boolean.
          */
-        static void add_option(const string& group, const string& option, const string& help);
-
-        /**
-         * Adds a new parameter with an expected value of type @p T.
-         *
-         * @tparam T type of the specified parameter
-         * @param[in] group string identifying the parameter group
-         * @param[in] option Name of the command line parameter.
-         *   It is possible to specify a long and optional short option name by comma-separation.
-         *   Short option names are identified by being only a single character.
-         *   They are automatically parsed as '`-[SHORT]`' by `boost::program_options` in contrast
-         *   to '`--[LONG]`'.
-         * @param[in] help help text to be displayed in the help and usage information
-         *
-         * @overload
-         */
-        template<typename T>
-        static void add_option(const string& group, const string& option, const string& help);
-        //! @}
+        static void add_option(const string& group, const string& option, const string& help, bool boolean=false) {
+          auto& names = options::get_instance().get_option_names();
+          names.emplace(string(option), boolean);
+        }
 
         /**
          * Initialize program options.
@@ -133,7 +125,7 @@ namespace pfasst
     };
 
     /**
-     * get value of specific type @p T
+     * Get value of specific type @p T
      *
      * @tparam T type of the retreived value
      * @param[in] name Name of the (long) option as defined with @p option in options::add_option()
@@ -147,7 +139,8 @@ namespace pfasst
     template<typename T>
     inline T get_value(const string& name)
     {
-      return options::get_instance().get_variables_map()[name].as<T>();
+      auto& opts = options::get_instance().get_option_values();
+      return string_as<T>(opts.at(name));
     }
 
     /**
@@ -160,8 +153,8 @@ namespace pfasst
     template<typename T>
     inline T get_value(const string& name, const T& default_val)
     {
-      return options::get_instance().get_variables_map().count(name)
-              ? options::get_instance().get_variables_map()[name].as<T>() : default_val;
+      auto& opts = options::get_instance().get_option_values();
+      return opts.count(name) > 0 ? string_as<T>(opts.at(name)) : default_val;
     }
 
     /**
@@ -178,63 +171,22 @@ namespace pfasst
      */
     static string print_help(bool if_no_params = false)
     {
-      bool no_params_given = options::get_instance().get_variables_map().empty();
+      // bool no_params_given = options::get_instance().get_variables_map().empty();
 
-      if (!if_no_params || (if_no_params && no_params_given)) {
-        stringstream s;
-        s << options::get_instance().get_all_options() << endl;
-        s << "Logging options:" << endl
-          << "  -v [ --verbose ]       activates maximum verbosity" << endl
-          << "  --v=arg                activates verbosity upto verbose level `arg`" << endl
-          << "                         (valid range: 0-9)" << endl
-          << "  -vmodule=arg           actives verbose logging for specific module" << endl
-          << "                         (see [1] for details)" << endl << endl
-          << "[1]: https://github.com/easylogging/easyloggingpp#vmodule" << endl;
-        return s.str();
-      } else {
+      //      if (!if_no_params || (if_no_params && no_params_given)) {
+        // stringstream s;
+        // // s << options::get_instance().get_all_options() << endl;
+        // s << "Logging options:" << endl
+        //   << "  -v [ --verbose ]       activates maximum verbosity" << endl
+        //   << "  --v=arg                activates verbosity upto verbose level `arg`" << endl
+        //   << "                         (valid range: 0-9)" << endl
+        //   << "  -vmodule=arg           actives verbose logging for specific module" << endl
+        //   << "                         (see [1] for details)" << endl << endl
+        //   << "[1]: https://github.com/easylogging/easyloggingpp#vmodule" << endl;
+        // return s.str();
+      //      } else {
         return string();
-      }
-    }
-
-    /**
-     * Read config parameters from file.
-     *
-     * A potential INI file might look like the following:
-     *
-     * @code
-     * # Global
-     * quiet=yes
-     *
-     * # Duration
-     * dt=0.015625
-     * num_steps=2
-     * num_iters=10
-     *
-     * # Tolerances
-     * rel_res_tol=1e-10
-     *
-     * # PFASST
-     * num_blocks=1
-     * @endcode
-     *
-     * @param[in] file_name name of the INI-like file containing config parameters;
-     *   path/name may be relative
-     * @throws invalid_argument if the given file could not be opened
-     *
-     * @see
-     *   [Boost Program Options Documentation on supported INI-like file format]
-     *   (http://www.boost.org/doc/libs/1_57_0/doc/html/program_options/overview.html#idp343292240)
-     */
-    static inline void read_config_file(const string& file_name)
-    {
-      ifstream ifs(file_name.c_str(), ios_base::in);
-      if (!ifs) {
-        throw invalid_argument("Config file '" + file_name + "' not found.");
-      } else {
-        po::store(po::parse_config_file(ifs, options::get_instance().get_all_options()),
-                  options::get_instance().get_variables_map());
-        po::notify(options::get_instance().get_variables_map());
-      }
+        //      }
     }
 
     /**
@@ -250,19 +202,31 @@ namespace pfasst
      */
     static inline void read_commandline(int argc, char* argv[], bool exit_on_help = true)
     {
-      po::parsed_options parsed = po::command_line_parser(argc, argv)
-                                    .options(options::get_instance().get_all_options())
-                                    .allow_unregistered().run();
-      options::get_instance().get_unrecognized_args() = po::collect_unrecognized(parsed.options,
-                                                                                 po::exclude_positional);
-      po::store(parsed, options::get_instance().get_variables_map());
-      po::notify(options::get_instance().get_variables_map());
+      int i = 1;
 
-      if (options::get_instance().get_variables_map().count("input")) {
-        string input_file = config::get_value<string>("input");
-        read_config_file(input_file);
+      auto& names  = options::get_instance().get_option_names();
+      auto& values = options::get_instance().get_option_values();
+
+      while (i < argc) {
+        string name = string(argv[i]);
+        if (names.count(name)) {
+          auto boolean = names.at(name);
+          if (boolean) {
+            values.emplace(name, "true");
+            i += 1;
+          } else {
+            string value = string(argv[i+1]);
+            values.emplace(name, value);
+            i += 2;
+          }
+        } else {
+          i += 1;
+        }
       }
 
+      /* XXX: handle "help"... */
+
+      /*
       if (options::get_instance().get_variables_map().count("help")) {
         if (get_rank() == 0) {
           cout << print_help() << endl;
@@ -275,43 +239,27 @@ namespace pfasst
           exit(0);
         }
       }
+       */
     }
 
     /**
      * Initialize options detection and parsing.
-     *
-     * Prepopulates following groups and parameters:
-     *
-     * Group      | Parameter     | Type
-     * -----------|---------------|---------
-     * Global     | `h`, `help`   | `bool`
-     * Global     | `q`, `quiet`  | `bool`
-     * Global     | `input`       | `string`
-     * Global     | `log_prefix`  | `string`
-     * Global     | `c`,`nocolor` | `bool`
-     * Duration   | `dt`          | `double`
-     * Duration   | `tend`        | `double`
-     * Duration   | `num_iters`   | `size_t`
-     * Tolerances | `abs_res_tol` | `double`
-     * Tolerances | `rel_res_tol` | `double`
      */
     static inline void init()
     {
-      options::add_option        ("Global", "help,h", "display this help message");
-      options::add_option        ("Global", "quiet,q", "don't log to stdout");
-      options::add_option<string>("Global", "input", "INI file with configuration options");
-      options::add_option<string>("Global", "log_prefix", "a prefix for the log files");
-      options::add_option        ("Global", "nocolor,c", "disable colorful logging");
+      options::add_option("Global", "help", "display this help message", true);
+      options::add_option("Global", "quiet", "don't log to stdout", true);
+      options::add_option("Global", "nocolor", "disable colorful logging", true);
 
-      options::add_option<double>("Duration", "dt", "time step size");
-      options::add_option<double>("Duration", "tend", "final time of simulation");
-      options::add_option<size_t>("Duration", "num_steps", "number time steps");
-      options::add_option<size_t>("Duration", "num_iters", "number of iterations");
+      options::add_option("Duration", "dt", "time step size");
+      options::add_option("Duration", "tend", "final time of simulation");
+      options::add_option("Duration", "num_steps", "number time steps");
+      options::add_option("Duration", "num_iters", "number of iterations");
 
-      options::add_option<size_t>("Quadrature", "num_nodes", "number of quadrature nodes");
+      options::add_option("Quadrature", "num_nodes", "number of quadrature nodes");
 
-      options::add_option<double>("Tolerances", "abs_res_tol", "absolute residual tolerance");
-      options::add_option<double>("Tolerances", "rel_res_tol", "relative residual tolerance");
+      options::add_option("Tolerances", "abs_res_tol", "absolute residual tolerance");
+      options::add_option("Tolerances", "rel_res_tol", "relative residual tolerance");
 
       options::get_instance().init();
     }

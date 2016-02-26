@@ -7,6 +7,7 @@
  */
 #include <cstdlib>
 #include <memory>
+#include <iostream>
 
 #include <fftw3.h>
 
@@ -37,10 +38,10 @@ namespace pfasst
 
         auto const nnodes = config::get_value<size_t>("num_nodes", 3);
         auto const ndofs  = config::get_value<size_t>("spatial_dofs", 64);
-        auto const quad_type = \
-          config::get_value<quadrature::QuadratureType>("nodes_type", quadrature::QuadratureType::GaussLegendre);
+        // auto const quad_type = \
+        //   config::get_value<quadrature::QuadratureType>("nodes_type", quadrature::QuadratureType::GaussLegendre);
 
-        auto quad    = quadrature::quadrature_factory(nnodes, quad_type);
+        auto quad    = quadrature::quadrature_factory(nnodes, quadrature::QuadratureType::GaussLegendre);
         auto factory = make_shared<encap::VectorFactory<double>>(ndofs);
         auto sweeper = make_shared<AdvectionDiffusionSweeper<>>(ndofs);
 

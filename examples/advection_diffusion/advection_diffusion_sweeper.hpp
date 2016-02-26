@@ -13,6 +13,7 @@
 #include <cstdlib>
 #include <map>
 #include <ostream>
+#include <iomanip>
 #include <vector>
 #include <utility>
 using namespace std;
@@ -81,7 +82,7 @@ namespace pfasst
         public:
           static void init_opts()
           {
-            pfasst::config::options::add_option<size_t>("Adv/Diff Sweeper", "spatial_dofs", "Number of spatial degrees of freedom");
+            pfasst::config::options::add_option("Adv/Diff Sweeper", "spatial_dofs", "Number of spatial degrees of freedom");
           }
 
           static void init_logs()
@@ -166,6 +167,14 @@ namespace pfasst
 
             auto n = this->get_controller()->get_step();
             auto k = this->get_controller()->get_iteration();
+
+            //CLOG(INFO, "Advec")
+            // cout 
+            //   << "step: " << setw(4) << n
+            //   << ", iter: " << setw(2) << k
+            //   << ", nodes: " << setw(2) << this->get_nodes().size()
+            //   << ", dofs: " << setw(4) << qex.size()
+            //   << ", error: " << max << endl;
 
             this->errors.insert(vtype(ktype(n, k), max));
           }

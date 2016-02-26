@@ -256,8 +256,12 @@ namespace pfasst
                                          el::ConfigurationType::ToStandardOutput)->value();
       } else {
         milliseconds_width = PFASST_LOGGER_DEFAULT_GLOBAL_MILLISECOND_WIDTH;
-        to_stdout = (pfasst::config::options::get_instance().get_variables_map()
-                                                            .count("quiet")) ? "false" : "true";
+        auto bool_to_stdout = config::get_value<bool>("quiet", true);
+        if (bool_to_stdout) {
+          to_stdout = "true";
+        } else {
+          to_stdout = "false";
+        }
       }
 
       conf->setGlobally(el::ConfigurationType::ToStandardOutput, to_stdout);
@@ -297,8 +301,7 @@ namespace pfasst
      */
     inline static void add_custom_logger(const string& id)
     {
-      bool colorize = pfasst::config::options::get_instance().get_variables_map()
-                                                             .count("nocolor") ? false : true;
+      bool colorize = config::get_value<bool>("nocolor", true);
 
       const string INFO_COLOR = (colorize) ? OUT::blue : "";
       const string DEBG_COLOR = (colorize) ? "" : "";
