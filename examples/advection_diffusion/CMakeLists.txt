@@ -3,8 +3,8 @@ set(examples_to_install ${examples_to_install})
 message(STATUS "  advection_diffusion")
 include_directories(
     ${3rdparty_INCLUDES}
-    ${FFTW_INCLUDE_PATH}
     ${pfasst_INCLUDES}
+    ${FFTW3_INCLUDE_PATH}
 )
 
 set(advec_examples
@@ -25,16 +25,11 @@ endif()
 
 foreach(example ${all_advec_examples})
     add_executable(${example} ${CMAKE_CURRENT_SOURCE_DIR}/${example}.cpp)
-    if(NOT FFTW_FOUND)
-        add_dependencies(${example} fftw3)
-    endif()
-    if(${pfasst_NUM_DEPENDEND_TARGETS} GREATER 0)
-        add_dependencies(${example} ${pfasst_DEPENDEND_TARGETS})
-    endif()
+    add_dependencies(${example} ${pfasst_DEPENDEND_TARGETS})
     target_link_libraries(${example}
         ${pfasst_DEPENDEND_LIBS}
         ${3rdparty_DEPENDEND_LIBS}
-        ${FFTW_LIBRARIES}
+        ${FFTW3_LIBRARIES}
     )
     if(pfasst_INSTALL_EXAMPLES)
         install(TARGETS ${example} RUNTIME DESTINATION bin)

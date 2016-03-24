@@ -2,7 +2,7 @@
 include_directories(
     ${3rdparty_INCLUDES}
     ${TESTS_3rdparty_INCLUDES}
-    ${FFTW_INCLUDE_PATH}
+    ${FFTW3_INCLUDE_PATH}
     ${pfasst_INCLUDES}
 )
 
@@ -16,15 +16,10 @@ if(${pfasst_WITH_MPI})
     foreach(test ${MPI_TESTS})
         message(STATUS "  ${test}")
         add_executable(${test} ${test}.cpp)
-        if(NOT FFTW_FOUND)
-            add_dependencies(${test} fftw3)
-        endif()
-        if(${pfasst_NUM_DEPENDEND_TARGETS} GREATER 0)
-            add_dependencies(${test} ${pfasst_DEPENDEND_TARGETS})
-        endif()
-        if(${pfasst_TESTS_NUM_DEPENDEND_TARGETS} GREATER 0)
-            add_dependencies(${test} ${pfasst_TESTS_DEPENDEND_TARGETS})
-        endif()
+        add_dependencies(${test}
+            ${pfasst_DEPENDEND_TARGETS}
+            ${pfasst_TESTS_DEPENDEND_TARGETS}
+        )
         if(MPI_COMPILE_FLAGS)
             if(pfasst_WITH_GCC_PROF AND ${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
                 set_target_properties(${test}
@@ -36,7 +31,7 @@ if(${pfasst_WITH_MPI})
         target_link_libraries(${test}
             ${3rdparty_DEPENDEND_LIBS}
             ${TESTS_3rdparty_DEPENDEND_LIBS}
-            ${FFTW_LIBRARIES}
+            ${FFTW3_LIBRARIES}
             ${pfasst_DEPENDEND_LIBS}
         )
         add_test(NAME ${test}
@@ -53,19 +48,14 @@ set(TESTS
 foreach(test ${TESTS})
     message(STATUS "  ${test}")
     add_executable(${test} ${test}.cpp)
-    if(NOT FFTW_FOUND)
-        add_dependencies(${test} fftw3)
-    endif()
-    if(${pfasst_NUM_DEPENDEND_TARGETS} GREATER 0)
-        add_dependencies(${test} ${pfasst_DEPENDEND_TARGETS})
-    endif()
-    if(${pfasst_TESTS_NUM_DEPENDEND_TARGETS} GREATER 0)
-        add_dependencies(${test} ${pfasst_TESTS_DEPENDEND_TARGETS})
-    endif()
+    add_dependencies(${test}
+        ${pfasst_DEPENDEND_TARGETS}
+        ${pfasst_TESTS_DEPENDEND_TARGETS}
+    )
     target_link_libraries(${test}
         ${3rdparty_DEPENDEND_LIBS}
         ${TESTS_3rdparty_DEPENDEND_LIBS}
-        ${FFTW_LIBRARIES}
+        ${FFTW3_LIBRARIES}
         ${pfasst_DEPENDEND_LIBS}
     )
     if(pfasst_WITH_GCC_PROF AND ${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
