@@ -46,7 +46,6 @@ namespace pfasst
 
         sdc.add_level(sweeper);
         sdc.set_duration(0.0, 4*0.01, 0.01, 4);
-        sdc.set_options();
         sdc.setup();
 
         auto q0 = sweeper->get_start_state();

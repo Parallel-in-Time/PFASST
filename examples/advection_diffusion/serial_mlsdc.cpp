@@ -94,7 +94,6 @@ namespace pfasst
          * run mlsdc!
          */
         mlsdc.set_duration(0.0, nsteps*dt, dt, niters);
-        mlsdc.set_options();
         mlsdc.run();
 
         tuple<error_map, residual_map> rinfo;

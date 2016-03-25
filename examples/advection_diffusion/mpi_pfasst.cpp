@@ -87,7 +87,6 @@ namespace pfasst
         pf.set_duration(0.0, nsteps * dt, dt, niters);
         pf.set_nsweeps({2, 1});
         pf.get_finest<AdvectionDiffusionSweeper<>>()->set_residual_tolerances(abs_res_tol, rel_res_tol);
-        pf.set_options();
         pf.run();
 
         auto fine = pf.get_finest<AdvectionDiffusionSweeper<>>();

@@ -65,7 +65,6 @@ namespace pfasst
         controller.add_level(sweeper2, transfer2);
 
         controller.set_duration(0.0, nsteps*dt, dt, niters);
-        controller.set_options();
         controller.setup();
 
         shared_ptr<Particle<double>> center = make_shared<Particle<double>>();
