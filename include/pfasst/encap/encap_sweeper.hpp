@@ -129,11 +129,6 @@ namespace pfasst
 
         //! @{
         /**
-         * @copybrief ISweeper::set_options()
-         */
-        virtual void set_options() override;
-
-        /**
          * @copybrief ISweeper::setup()
          */
         virtual void setup(bool coarse) override;

@@ -39,25 +39,6 @@ namespace pfasst
 
     /**
      * @internals
-     * Sets EncapSweeper::abs_residual_tol and EncapSweeper::rel_residual_tol from command line or 
-     * config file.
-     * In case the parameters are not found, takes EncapSweeper::abs_residual_tol or 
-     * EncapSweeper::rel_residual_tol respectively as default values.
-     *
-     * @todo Consider using EncapSweeper::set_residual_tolerances() instead of direct member access
-     *   to allow for easy integration of future consistency checks on setting the residual
-     *   tolerances.
-     * @endinternals
-     */
-    template<typename time>
-    void EncapSweeper<time>::set_options()
-    {
-      this->abs_residual_tol = time(config::get_value<double>("abs_res_tol", this->abs_residual_tol));
-      this->rel_residual_tol = time(config::get_value<double>("rel_res_tol", this->rel_residual_tol));
-    }
-
-    /**
-     * @internals
      * Initializes members holding state information by repeating calls to EncapFactory::create()
      * for EncapSweeper::start_state, EncapSweeper::end_state, EncapSweeper::state,
      * EncapSweeper::saved_state and - if @p coarse is `true` - also for 

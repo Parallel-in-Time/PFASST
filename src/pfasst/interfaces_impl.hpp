@@ -117,15 +117,6 @@ namespace pfasst
     return this->controller;
   }
 
-  /**
-   * @internals
-   * @note Unless overwritten by implementations, this is a no-op.
-   * @endinternals
-   */
-  template<typename time>
-  void ISweeper<time>::set_options()
-  {}
-
   template<typename time>
   void ISweeper<time>::setup(bool coarse)
   {

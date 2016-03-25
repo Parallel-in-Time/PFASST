@@ -89,14 +89,6 @@ namespace pfasst
 
       //! @{
       /**
-       * Set options from command line etc.
-       *
-       * @param[in] all_sweepers if given also calls ISweeper::set_options for all already added
-       *   levels
-       */
-      virtual void set_options(bool all_sweepers = true);
-
-      /**
        * Basic setup routine for this controller.
        *
        * @pre It is expected (i.e. the user has to make that sure) that all levels and transfer
