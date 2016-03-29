@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.6)
+cmake_minimum_required(VERSION 3.0)
 project(pfasst)
 
 list(APPEND CMAKE_MODULE_PATH ${pfasst_SOURCE_DIR}/cmake)

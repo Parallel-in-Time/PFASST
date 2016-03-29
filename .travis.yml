@@ -13,8 +13,11 @@ addons:
       - boost-latest
       - ubuntu-toolchain-r-test
       - llvm-toolchain-precise-3.6
+      - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
     packages:
       - clang-3.6
+      - cmake
+      - cmake-data
       - doxygen
       - gcc-5
       - g++-5
