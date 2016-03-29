@@ -10,29 +10,25 @@ if(FFTW_INCLUDE_PATH)
     set(FFTW_FIND_QUIETLY TRUE)
 endif(FFTW_INCLUDE_PATH)
 
-find_path(FFTW_INCLUDE_PATH fftw3.h
-    HINTS ${FFTW3_INCLUDE}
-        ${FFTW3_INC}
-        ${FFTW3_ROOT}/include
+find_path(FFTW3_INCLUDE_PATH fftw3.h
+    HINTS ${FFTW3_ROOT}
+        ${FFTW3_INCLUDE}
+        $ENV{FFTW3_ROOT}
         $ENV{FFTW3_INCLUDE}
-        $ENV{FFTW3_INC}
-        $ENV{FFTW_INC} # Edison
-        $ENV{FFTW3_ROOT}/include
 )
 
-find_library(FFTW_LIBRARIES NAMES fftw3 fftw3l fftw3_mpi fftw3l_mpi fftw3_omp fftw3l_omp
-    HINTS ${FFTW3_LIB}
-        ${FFTW3_ROOT}/lib64
-        ${FFTW3_ROOT}/lib
+find_library(FFTW3_LIBRARIES NAMES fftw3
+    HINTS ${FFTW3_ROOT}
+        ${FFTW3_LIB}
+        ${FFTW3_LIBS}
+        $ENV{FFTW3_ROOT}
         $ENV{FFTW3_LIB}
-        $ENV{FFTW_DIR} # Edison
-        $ENV{FFTW3_ROOT}/lib64
-        $ENV{FFTW3_ROOT}/lib
+        $ENV{FFTW3_LIBS}
 )
 
 # handle the QUIETLY and REQUIRED arguments and set FFTW_FOUND to TRUE if
 # all listed variables are TRUE
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(FFTW DEFAULT_MSG FFTW_LIBRARIES FFTW_INCLUDE_PATH)
+find_package_handle_standard_args(FFTW DEFAULT_MSG FFTW3_LIBRARIES FFTW3_INCLUDE_PATH)
 
-mark_as_advanced(FFTW_LIBRARIES FFTW_INCLUDE_PATH)
+mark_as_advanced(FFTW3_LIBRARIES FFTW3_INCLUDE_PATH)

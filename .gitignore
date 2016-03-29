@@ -7,6 +7,14 @@
 travis_deploy_rsa
 d[0-9a-f]/
 search/
+cxx_wrapper.sh
+cc_wrapper.sh
+
+3rdparty/Boost
+3rdparty/Eigen3
+3rdparty/fftw3
+3rdparty/gtest
+3rdparty/gmock
 
 .python-version
 __pycache__
