@@ -10,14 +10,8 @@ using namespace std;
 
 namespace pfasst
 {
-  inline static void init(int argc, char** argv,
-                          std::function<void()> opts = nullptr,
-                          std::function<void()> logs = nullptr)
+  inline static void init(int argc, char** argv, std::function<void()> logs = nullptr)
   {
-    if (opts) {
-      opts();
-    }
-    config::init();
     config::read_commandline(argc, argv);
     log::start_log(argc, argv);
     if (logs) {

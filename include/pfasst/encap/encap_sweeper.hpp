@@ -99,8 +99,6 @@ namespace pfasst
         time rel_residual_tol;
         //! @}
 
-        string FORMAT_STR;
-
       public:
         EncapSweeper();
 

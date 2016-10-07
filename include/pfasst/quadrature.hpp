@@ -14,7 +14,7 @@ using namespace std;
 template<typename scalar>
 using Matrix = Eigen::Matrix<scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
-#include <boost/math/constants/constants.hpp>
+
 
 #include "pfasst/config.hpp"
 #include "pfasst/interfaces.hpp"

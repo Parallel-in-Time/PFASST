@@ -97,12 +97,12 @@ namespace pfasst
 }  // ::pfasst
 
 
+
 #ifndef PFASST_UNIT_TESTING
 int main(int argc, char** argv)
 {
   MPI_Init(&argc, &argv);
   pfasst::init(argc, argv,
-               pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_opts,
                pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_logs);
 
   const double tend        = pfasst::config::get_value<double>("tend", 0.04);

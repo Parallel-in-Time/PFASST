@@ -111,7 +111,6 @@ namespace pfasst
 int main(int argc, char** argv)
 {
   pfasst::init(argc, argv,
-               pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_opts,
                pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_logs);
   pfasst::examples::advection_diffusion::run_serial_mlsdc(3);
 }
