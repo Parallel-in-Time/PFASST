@@ -20,9 +20,8 @@ namespace pfasst
   {
     using namespace pfasst::quadrature;
 
-
     /**
-     * Host based encapsulated base sweeper.
+     * Base encapsulated sweeper.
      *
      * @tparam time time precision; defaults to pfasst::time_precision
      */
@@ -80,7 +79,6 @@ namespace pfasst
         //! @}
 
         //! @{
-        //! @todo Write documentation for this member.
         int residual_norm_order;
 
         /**

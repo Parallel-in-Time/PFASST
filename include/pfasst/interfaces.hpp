@@ -1,5 +1,5 @@
 /**
- * interfaces for SDC/MLSDC/PFASST algorithms.
+ * Interfaces for SDC/MLSDC/PFASST algorithms.
  *
  * @file pfasst/interfaces.hpp
  * @since v0.1.0
@@ -31,7 +31,7 @@ namespace pfasst
   {
     public:
       /**
-       * @param[in] msg component or algorithm the throwing function is required for
+       * @param[in] msg component or algorithm the throwing function is required for.
        */
       explicit NotImplementedYet(const string& msg);
       virtual const char* what() const throw();
@@ -44,8 +44,6 @@ namespace pfasst
    * Thrown when a PFASST routine is passed an invalid value.
    *
    * @since v0.1.0
-   *
-   * @todo Consider deprecating this in favour of std::invalid_argument.
    */
   class ValueError
     : public invalid_argument
@@ -56,16 +54,11 @@ namespace pfasst
   };
 
 
-  // forward declare for IStatus
   class IStatus;
 
 
   /**
    * Abstract interface for communicators.
-   *
-   * The interface ensures a communicator provides the notion of the total number of processors
-   * (i.e. `size()`) and and the ID of the _current_ processor (i.e. `rank()`) as well as the
-   * current @ref ICommunicator::status "status" of the algorithm.
    */
   class ICommunicator
   {
@@ -80,9 +73,6 @@ namespace pfasst
 
   /**
    * Abstract interface for the current status of the algorithm.
-   *
-   * The status requires a @ref ICommunicator "communicator" to enable sending and receiving stati
-   * of other processors.
    */
   class IStatus
   {
@@ -98,14 +88,14 @@ namespace pfasst
 
       //! @{
       /**
-       * Resetting status.
+       * Reset status.
        *
        * @note Logic is implementation defined.
        */
       virtual void clear() = 0;
 
       /**
-       * sets a new converged state.
+       * Set new converged state of current rank.
        */
       virtual void set_converged(bool converged) = 0;
 
@@ -122,7 +112,7 @@ namespace pfasst
 
       //! @{
       /**
-       * Set new communicator to use.
+       * Set communicator.
        */
       virtual void set_comm(ICommunicator* comm);
 
@@ -150,7 +140,6 @@ namespace pfasst
   };
 
 
-  // forward declare for ISweeper
   template<typename time>
   class Controller;
 

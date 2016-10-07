@@ -21,19 +21,17 @@ namespace pfasst
 {
   /**
    * Encapsulations (short _encaps_) are the central data type for all PFASST++ algorithms.
-   * Encaps are both representing the unknown variable as well as the result of evaluating the
-   * right hand side of the problem equation(s).
+   * Encaps can represent the unknown variable or the result of evaluating the right hand side of
+   * the problem equation(s).
    */
   namespace encap
   {
-    //! @todo document EncapType; especially its intention and expected usage
     typedef enum EncapType { solution, function } EncapType;
 
     /**
      * Data/solution encapsulation.
      *
-     * An Encapsulation provides basic functionality of the user data used by PFASST such as
-     * mathematical operation _axpy_ \\( y=ax+y \\) and packing/unpacking for message passing.
+     * An Encapsulation provides basic mathematical functionality for the user's data.
      *
      * @tparam time time precision; defaults to pfasst::time_precision
      */
@@ -46,7 +44,6 @@ namespace pfasst
         //! @}
 
         //! @{
-        // required for host based encap helpers
         /**
          * Zeroes out all values of this data structure.
          */
@@ -71,11 +68,11 @@ namespace pfasst
 
         //! @{
         /**
-         * Provides basic mathematical operation \\( y+=ax \\).
+         * Provides basic mathematical operation \\( y = ax + y \\).
          *
          * This is the main mathematical operation applied by PFASST on the data structures.
-         * Here, \\( a \\) is a time point and \\( x \\) another data structure (usually of the
-         * same type) and \\( y \\) is this data structure.
+         * Here, \\( a \\) is a constant and \\( x \\) another data structure (usually of the same
+         * type) and \\( y \\) is this data structure.
          *
          * @param[in] a time point to multiply
          * @param[in] x another data structure to scale-add onto this one
@@ -107,9 +104,8 @@ namespace pfasst
         //! @}
 
         //! @{
-        // required for time-parallel communications
         /**
-         * @todo Write documentation for this member function. How is it different to post/recv?
+         * Prepare to receive a solution (MPI_IRecv).
          *
          * @param[in] comm     communicator managing the processes to post ??? to/from ???
          * @param[in] tag      tag to distinguish overlapping communication
@@ -117,7 +113,7 @@ namespace pfasst
         virtual void post(ICommunicator* comm, int tag);
 
         /**
-         * Send values stored in this data structure.
+         * Send solution (MPI_Send).
          *
          * @param[in] comm     communicator managing the processes to send to
          * @param[in] tag      tag to distinguish overlapping communication
@@ -126,7 +122,7 @@ namespace pfasst
         virtual void send(ICommunicator* comm, int tag, bool blocking);
 
         /**
-         * Receive values to store in this data structure.
+         * Receive solution (MPI_Recv).
          *
          * @param[in] comm     communicator managing the processes to receive from
          * @param[in] tag      tag to distinguish overlapping communication
@@ -135,7 +131,7 @@ namespace pfasst
         virtual void recv(ICommunicator* comm, int tag, bool blocking);
 
         /**
-         * Broadcasting this data structure to all processes in @p comm.
+         * Broadcast this data structure to all processes in @p comm.
          *
          * @param[in] comm communicator managing the processes to send this data structure to
          */
@@ -147,13 +143,9 @@ namespace pfasst
     /**
      * Abstract interface of factory for creating Encapsulation objects.
      *
-     * This factory is intendet to be instantiated once to create multiple Encapsulation objects
+     * This factory is intended to be instantiated once to create multiple Encapsulation objects
      * of the same type and with the same parameters later on through calls to
      * EncapFactory::create().
-     *
-     * Implementations may add values and parameters to the constructor of the factory storing these
-     * values as an instance member and accessing them within their implementations of create().
-     * For an example see pfasst::encap::VectorFactory.
      *
      * @tparam time time precision; defaults to pfasst::time_precision
      */

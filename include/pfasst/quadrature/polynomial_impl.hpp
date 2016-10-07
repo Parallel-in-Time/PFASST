@@ -11,9 +11,6 @@ namespace pfasst
 {
   namespace quadrature
   {
-    /**
-     * @todo Consider issuing a warning/assertion when `n` is zero.
-     */
     template<typename CoeffT>
     Polynomial<CoeffT>::Polynomial(size_t n)
       : c(n, CoeffT(0.0))
@@ -61,11 +58,6 @@ namespace pfasst
       return p;
     }
 
-    /**
-     * @internals
-     * @note Asserts this polynomial has at least order 1 if `NDEBUG` is not defined.
-     * @endinternals
-     */
     template<typename CoeffT>
     vector<CoeffT> Polynomial<CoeffT>::roots(size_t num_iterations, CoeffT ztol) const
     {

@@ -85,16 +85,6 @@ namespace pfasst
       return (row_sums - nodes).maxCoeff();
     }
 
-    /**
-     * @internals
-     * Computing weights means computing \\( Q \\) and \\( S \\) matrices as well as the \\( q \\)
-     * vector.
-     * The \\( B \\) matrix is constructed from \\( q \\) vector.
-     *
-     * @note As long as the weight computation of the implemented quadrature is based on polynomial
-     *   interpolation, this function must not be overwritten.
-     * @endinternals
-     */
     template<typename precision>
     void IQuadrature<precision>::compute_weights()
     {

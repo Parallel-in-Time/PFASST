@@ -8,14 +8,6 @@ using namespace std;
 
 namespace pfasst
 {
-  /**
-   * One sweep is either a call to ISweeper::predict() if MLSDC::predict is `true` followed by
-   * triggering the ISweeper::post_predict() hook.
-   * In case MLSDC::predict is `false`, ISweeper::sweep() and subsequent ISweeper::post_sweep() are
-   * called.
-   *
-   * @note There is no check on convergence here.
-   */
   template<typename time>
   void MLSDC<time>::perform_sweeps(size_t level)
   {
@@ -33,14 +25,6 @@ namespace pfasst
     }
   }
 
-  /**
-   * @note To overwrite the default behaviour of a single sweep per level, the user must call
-   *   MLSDC::set_nsweeps() after MLSDC::setup().
-   *
-   * @internals
-   * On the finest level, ISweeper::setup() is called with `false`, on all other levels with `true`.
-   * @endinternals
-   */
   template<typename time>
   void MLSDC<time>::setup()
   {
@@ -148,12 +132,6 @@ namespace pfasst
     return level_iter + 1;
   }
 
-  /**
-   * @note This method is recursive with two exit points.
-   *   The two exit points:
-   *     1. if @p level_iter points to the coarsest level
-   *     2. if MLSDC::cycle_down() results in a converged state
-   */
   template<typename time>
   typename MLSDC<time>::LevelIter MLSDC<time>::cycle_v(typename MLSDC<time>::LevelIter level_iter)
   {

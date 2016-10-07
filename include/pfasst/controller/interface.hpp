@@ -66,7 +66,7 @@ namespace pfasst
       size_t max_iterations;
 
       /**
-       * \\( t_0 \\) of current time step.
+       * Initial time \\( t_0 \\) of current time step.
        */
       time t;
 
@@ -76,7 +76,7 @@ namespace pfasst
       time dt;
 
       /**
-       * \\( T_{end} \\) of last time step.
+       * Final time \\( T_{end} \\) of current time step.
        */
       time tend;
       //! @}
@@ -109,7 +109,7 @@ namespace pfasst
       virtual void set_duration(time t0, time tend, time dt, size_t niters);
 
       /**
-       * Adding a level to the controller.
+       * Add a level to the controller.
        *
        * @param[in] sweeper  sweeper representing the level
        * @param[in] transfer corresponding transfer operator for the level
@@ -133,7 +133,7 @@ namespace pfasst
        * @returns sweeper of type @p R for requested level
        *
        * @internals
-       * @note Asserts sweeper for level @p level can be interpreted as @p R if `NDEBUG` is not 
+       * @note Asserts sweeper for level @p level can be interpreted as @p R if `NDEBUG` is not
        *   defined.
        * @endinternals
        */
@@ -146,7 +146,7 @@ namespace pfasst
       }
 
       /**
-       * Get coarsest level.
+       * Get finest level.
        *
        * @tparam R type of the level sweeper
        * @see Controller::get_level() with `level=(Controller::nlevels() - 1)`
@@ -240,14 +240,14 @@ namespace pfasst
        *
        * @param[in] nsteps number of time steps to advance; `1` meaning the next step
        */
-      virtual void   advance_time(size_t nsteps = 1);
+      virtual void advance_time(size_t nsteps = 1);
 
       /**
        * Get end time point of last time step.
        *
        * @returns \\( T_{end} \\) of last time step.
        */
-      virtual time   get_end_time();
+      virtual time get_end_time();
 
       /**
        * Get current iteration index of current time step.
@@ -261,14 +261,14 @@ namespace pfasst
        *
        * @param[in] iter iteration index to set
        */
-      virtual void   set_iteration(size_t iter);
+      virtual void set_iteration(size_t iter);
 
       /**
        * Advance to the next iteration.
        *
        * This method may or may not trigger additional post-iteration procedures.
        */
-      virtual void   advance_iteration();
+      virtual void advance_iteration();
 
       /**
        * Get maximum number of allowed iterations per time step.
@@ -287,13 +287,6 @@ namespace pfasst
        * (`current-1`) sweepers.
        *
        * @since v0.1.0
-       *
-       * @internals
-       * Under the hood it satisfies the requirements of
-       * [std::random_access_iterator_tag](http://en.cppreference.com/w/cpp/iterator/iterator_tags),
-       * thus implementing a
-       * [RandomAccessIterator](http://en.cppreference.com/w/cpp/concept/RandomAccessIterator).
-       * @endinternals
        */
       class LevelIter
         : std::iterator<random_access_iterator_tag, shared_ptr<ISweeper<time>>, int,

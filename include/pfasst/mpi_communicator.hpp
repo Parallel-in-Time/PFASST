@@ -12,13 +12,13 @@ using namespace std;
 
 
 /**
- * creates and initializes a new _empty_ `MPI_Status` object
+ * Creates and initializes a new _empty_ `MPI_Status` object
  *
  * An _empty_ `MPI_Status` is defined as an `MPI_Status` object with `MPI_ERROR` as `MPI_SUCCESS`,
  * `MPI_SOURCE` as `MPI_ANY_SOURCE` and `MPI_TAG` as `MPI_ANY_TAG`
  * (cf. MPI Standard v3; section 3.7.3).
  *
- * rationale: some MPI implementations don't initialize the members of `MPI_Status` correctly
+ * Rationale: some MPI implementations don't initialize the members of `MPI_Status` correctly
  *
  * @returns _empty_ `MPI_Status` object
  *
@@ -50,7 +50,7 @@ namespace pfasst
     };
 
     /**
-     * checks MPI error code
+     * Check MPI error code
      *
      * In case @p err_code is not `MPI_SUCCESS` this throws MPIError with the error code looked up
      * to a descriptive string as defined by the MPI implementation.
@@ -69,7 +69,6 @@ namespace pfasst
     }
 
 
-    // forward declare for MPICommunicator
     class MPIStatus;
 
 

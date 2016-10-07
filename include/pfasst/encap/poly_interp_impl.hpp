@@ -165,7 +165,6 @@ namespace pfasst
 
       // compute 'node to node' tau correction
       EncapVecT tau(ncrse), rstr_and_crse(2 * ncrse);
-      // Attention: tau is getting filled with pointers to the crse's member
       for (size_t m = 0; m < ncrse; m++) { tau[m] = crse.get_tau(m); }
       for (size_t m = 0; m < ncrse; m++) { rstr_and_crse[m] = rstr_int[m]; }
       for (size_t m = 0; m < ncrse; m++) { rstr_and_crse[ncrse + m] = crse_int[m]; }

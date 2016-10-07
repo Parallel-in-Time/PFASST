@@ -44,7 +44,6 @@ namespace pfasst
     {
 #ifdef WITH_MPI
       int initialized = 0, rank = 0;
-      // if we're not running under "mpirun/mpiexec", just assume rank 0.
       MPI_Initialized(&initialized);
       if (initialized) {
         MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -146,8 +145,5 @@ namespace pfasst
 
   }  // ::pfasst::config
 }  // ::pfasst
-
-
-
 
 #endif  // _PFASST__CONFIG_HPP_
