@@ -33,8 +33,7 @@ namespace pfasst
 
         auto const nnodes = config::get_value<size_t>("num_nodes", 3);
         auto const ndofs  = config::get_value<size_t>("spatial_dofs", 64);
-        auto const quad_type = \
-          config::get_value<quadrature::QuadratureType>("nodes_type", quadrature::QuadratureType::GaussLegendre);
+        auto const quad_type = quadrature::QuadratureType::GaussLegendre;
 
         auto quad    = quadrature::quadrature_factory(nnodes, quad_type);
         auto factory = make_shared<encap::VectorFactory<double>>(ndofs);
@@ -46,7 +45,6 @@ namespace pfasst
 
         sdc.add_level(sweeper);
         sdc.set_duration(0.0, 4*0.01, 0.01, 4);
-        sdc.set_options();
         sdc.setup();
 
         auto q0 = sweeper->get_start_state();
@@ -65,7 +63,6 @@ namespace pfasst
 int main(int argc, char** argv)
 {
   pfasst::init(argc, argv,
-               pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_opts,
                pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_logs);
   pfasst::examples::advection_diffusion::run_vanilla_sdc(0.0);
 }

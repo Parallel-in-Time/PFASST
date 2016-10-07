@@ -19,35 +19,6 @@ namespace pfasst
   Controller<time>::~Controller()
   {}
 
-  /**
-   * @internals
-   * Sets @ref Controller::tend "tend", @ref Controller::dt "dt" and
-   * @ref Controller::max_iterations "max_iterations" from command line parameters (or config file).
-   * Uses current values of those values as defaults.
-   * @endinternals
-   */
-  template<typename time>
-  void Controller<time>::set_options(bool all_sweepers)
-  {
-    this->tend = config::get_value<double>("tend", this->tend);
-    this->dt = config::get_value<double>("dt", this->dt);
-    this->max_iterations = config::get_value<size_t>("num_iters", this->max_iterations);
-
-    // XXX: add some nice "nsteps" logic here
-
-    if (all_sweepers) {
-      for (auto l = coarsest(); l <= finest(); ++l) {
-        l.current()->set_options();
-      }
-    }
-  }
-
-  /**
-   * @internals
-   * This also sets the backreference in each sweeper to this controller by calling
-   * ISweeper::set_controller() before calling ISweeper::setup().
-   * @endinternals
-   */
   template<typename time>
   void Controller<time>::setup()
   {

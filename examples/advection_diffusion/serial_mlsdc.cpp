@@ -94,7 +94,6 @@ namespace pfasst
          * run mlsdc!
          */
         mlsdc.set_duration(0.0, nsteps*dt, dt, niters);
-        mlsdc.set_options();
         mlsdc.run();
 
         tuple<error_map, residual_map> rinfo;
@@ -112,7 +111,6 @@ namespace pfasst
 int main(int argc, char** argv)
 {
   pfasst::init(argc, argv,
-               pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_opts,
                pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_logs);
   pfasst::examples::advection_diffusion::run_serial_mlsdc(3);
 }

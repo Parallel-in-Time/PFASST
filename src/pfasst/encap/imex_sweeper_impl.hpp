@@ -40,15 +40,6 @@ namespace pfasst
       if (! this->quadrature->left_is_node()) {
         this->fs_expl_start = this->get_factory()->create(pfasst::encap::function);
       }
-
-      size_t nsteps = this->get_controller()->get_end_time() / this->get_controller()->get_step_size();
-      size_t digit_step = (this->get_controller()->get_step_size() > 0) ? 
-                            to_string(nsteps + 1).length() : 3;
-      size_t digit_iter = (this->get_controller()->get_max_iterations() > 0) ? 
-                            to_string(this->get_controller()->get_max_iterations() - 1).length() : 3;
-      this->FORMAT_STR = "step: %|" + to_string(digit_step) + "|      iter: %|" + to_string(digit_iter) + "|"
-                         + "      n1: %|2|      n2: %|3|"
-                         + "      residual: %10.4e" + "      err: %10.4e";
     }
 
     template<typename time>

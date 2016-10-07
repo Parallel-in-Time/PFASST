@@ -7,35 +7,6 @@ set(pfasst_TESTS_DEPENDEND_TARGETS ${pfasst_TESTS_DEPENDEND_TARGETS})
 set(3rdparty_DOWNLOAD_TIMEOUT "60")
 
 message(STATUS "--------------------------------------------------------------------------------")
-message(STATUS "Boost")
-
-set(Boost_USE_MULTITHREADED ON)
-if(${pfasst_BUILD_SHARED_LIBS})
-    set(Boost_USE_STATIC_LIBS OFF)
-else()
-    set(Boost_USE_STATIC_LIBS ON)
-endif()
-set(Boost_ADDITIONAL_VERSIONS "1.57" "1.57.0" ${Boost_ADDITIONAL_VERSIONS})
-
-if(${compiler_version_available} AND ${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
-    set(Boost_COMPILER "-clang${CMAKE_CXX_COMPILER_VERSION_MAJOR}${CMAKE_CXX_COMPILER_VERSION_MINOR}")
-endif()
-
-find_package(Boost 1.53.0 COMPONENTS program_options REQUIRED)
-set_package_properties(Boost
-    PROPERTIES
-      DESCRIPTION "C++ libraries"
-      URL "http://boost.org/"
-      TYPE REQUIRED
-      PURPOSE "command line parameter parsing"
-)
-message(STATUS "Boost include path: ${Boost_INCLUDE_DIRS}")
-message(STATUS "Boost library path: ${Boost_LIBRARY_DIRS}")
-list(APPEND 3rdparty_INCLUDES ${Boost_INCLUDE_DIRS})
-list(APPEND 3rdparty_DEPENDEND_LIBS ${Boost_LIBRARIES})
-
-
-message(STATUS "--------------------------------------------------------------------------------")
 message(STATUS "Eigen3")
 
 find_package(Eigen3)
@@ -155,14 +126,14 @@ if(pfasst_BUILD_TESTS)
     set_package_properties(GMock
         PROPERTIES
           DESCRIPTION "GMock"
-          URL "https://code.google.com/p/googlemock/"
+          URL "https://github.com/google/googletest"
           TYPE OPTIONAL
           PURPOSE "Google testing and mocking framework"
     )
 
     if(NOT GMOCK_FOUND)
-        set(GMOCK_SOURCE_URL "http://googlemock.googlecode.com/files/gmock-1.7.0.zip")
-        set(GMOCK_SOURCE_MD5 "073b984d8798ea1594f5e44d85b20d66")
+        set(GMOCK_SOURCE_URL "https://github.com/google/googletest/archive/release-1.8.0.zip")
+        set(GMOCK_SOURCE_MD5 "adfafc8512ab65fd3cf7955ef0100ff5")
 
         message(STATUS " going to download and compile it from sources retrieved from:")
         message(STATUS "   ${GMOCK_SOURCE_URL}")
@@ -192,12 +163,12 @@ if(pfasst_BUILD_TESTS)
 
         # Specify include dir
         ExternalProject_Get_Property(googlemock source_dir)
-        list(APPEND TESTS_3rdparty_INCLUDES ${source_dir}/include ${source_dir}/gtest/include)
+        list(APPEND TESTS_3rdparty_INCLUDES ${source_dir}/googlemock/include ${source_dir}/googletest/include)
 
         ExternalProject_Get_Property(googlemock binary_dir)
         set(Suffix ".a")
         set(Pthread "-pthread")
-        list(APPEND TESTS_3rdparty_DEPENDEND_LIBS ${binary_dir}/${CMAKE_FIND_LIBRARY_PREFIXES}gmock${Suffix})
+        list(APPEND TESTS_3rdparty_DEPENDEND_LIBS ${binary_dir}/googlemock/${CMAKE_FIND_LIBRARY_PREFIXES}gmock${Suffix})
         list(APPEND TESTS_3rdparty_DEPENDEND_LIBS ${Pthread})
         list(APPEND pfasst_TESTS_DEPENDEND_TARGETS googlemock)
     else()

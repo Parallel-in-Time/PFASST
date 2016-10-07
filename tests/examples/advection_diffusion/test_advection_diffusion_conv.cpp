@@ -151,7 +151,6 @@ int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
   pfasst::init(argc, argv,
-               pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_opts,
                pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_logs);
   return  RUN_ALL_TESTS();
 }

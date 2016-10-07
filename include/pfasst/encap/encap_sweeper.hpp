@@ -99,8 +99,6 @@ namespace pfasst
         time rel_residual_tol;
         //! @}
 
-        string FORMAT_STR;
-
       public:
         EncapSweeper();
 
@@ -128,11 +126,6 @@ namespace pfasst
         //! @}
 
         //! @{
-        /**
-         * @copybrief ISweeper::set_options()
-         */
-        virtual void set_options() override;
-
         /**
          * @copybrief ISweeper::setup()
          */

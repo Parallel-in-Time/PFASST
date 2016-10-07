@@ -1,7 +1,7 @@
 /**
  * @file pfasst/logging.hpp
  * @since v0.3.0
- * 
+ *
  * @section logging_macros Logging Macros
  *
  * The most important and most frequently used logging macros provided by easylogging++ are wrapped
@@ -104,7 +104,7 @@ const string OUT::reset = "\033[0m";
 #ifndef ML_NOLOG
   /**
    * same as `LOG(level, x)` from easylogging++
-   * 
+   *
    * @see @ref logging_macros
    */
   #define ML_LOG(level, x) LOG(level) << x
@@ -284,7 +284,7 @@ namespace pfasst
      */
     inline string get_log_file_name()
     {
-      string log_name = config::get_value<string>("log_prefix", "");
+      string log_name;// = config::get_value<string>("log_prefix", "");
 #ifdef WITH_MPI
       if (log_name.size() > 0) {
         log_name += "_";
@@ -318,8 +318,7 @@ namespace pfasst
                                          el::ConfigurationType::ToStandardOutput)->value();
       } else {
         milliseconds_width = PFASST_LOGGER_DEFAULT_GLOBAL_MILLISECOND_WIDTH;
-        to_stdout = (pfasst::config::options::get_instance().get_variables_map()
-                                                            .count("quiet")) ? "false" : "true";
+        to_stdout = pfasst::config::get_value<std::string>("stdout", "true");
       }
 
       conf->setGlobally(el::ConfigurationType::ToStandardOutput, to_stdout);
@@ -359,8 +358,7 @@ namespace pfasst
      */
     inline static void add_custom_logger(const string& id)
     {
-      bool colorize = pfasst::config::options::get_instance().get_variables_map()
-                                                             .count("nocolor") ? false : true;
+      bool colorize = pfasst::config::get_value<bool>("color", true);
 
       const string INFO_COLOR = (colorize) ? OUT::blue : "";
       const string DEBG_COLOR = (colorize) ? "" : "";

@@ -3,11 +3,11 @@
 #include <stdexcept>
 using namespace std;
 
-#include <boost/math/constants/constants.hpp>
-using namespace boost::math::constants;
-
 #include "pfasst/quadrature/polynomial.hpp"
 
+#ifndef PI
+#define PI 3.1415926535897932385
+#endif
 
 namespace pfasst
 {
@@ -43,7 +43,7 @@ namespace pfasst
       auto roots = Polynomial<precision>::legendre(this->num_nodes).roots();
 
       for (size_t j = 0; j < this->num_nodes; j++) {
-        this->nodes[j] = 0.5 * (1.0 - cos(j * pi<precision>() / (this->num_nodes - 1)));
+        this->nodes[j] = 0.5 * (1.0 - cos(j * PI / (this->num_nodes - 1)));
       }
     }
   }  // ::pfasst::quadrature

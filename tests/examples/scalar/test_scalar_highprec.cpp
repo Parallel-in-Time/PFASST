@@ -85,8 +85,7 @@ INSTANTIATE_TEST_CASE_P(ScalarSDC, HighPrecisionTest,
                                        pfasst::quadrature::QuadratureType::GaussLegendre,
                                        pfasst::quadrature::QuadratureType::GaussRadau,
                                        pfasst::quadrature::QuadratureType::ClenshawCurtis,
-                                       pfasst::quadrature::QuadratureType::Uniform)
-);
+                                       pfasst::quadrature::QuadratureType::Uniform));
 
 int main(int argc, char** argv)
 {

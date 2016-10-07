@@ -87,7 +87,6 @@ namespace pfasst
         pf.set_duration(0.0, nsteps * dt, dt, niters);
         pf.set_nsweeps({2, 1});
         pf.get_finest<AdvectionDiffusionSweeper<>>()->set_residual_tolerances(abs_res_tol, rel_res_tol);
-        pf.set_options();
         pf.run();
 
         auto fine = pf.get_finest<AdvectionDiffusionSweeper<>>();
@@ -98,12 +97,12 @@ namespace pfasst
 }  // ::pfasst
 
 
+
 #ifndef PFASST_UNIT_TESTING
 int main(int argc, char** argv)
 {
   MPI_Init(&argc, &argv);
   pfasst::init(argc, argv,
-               pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_opts,
                pfasst::examples::advection_diffusion::AdvectionDiffusionSweeper<>::init_logs);
 
   const double tend        = pfasst::config::get_value<double>("tend", 0.04);
