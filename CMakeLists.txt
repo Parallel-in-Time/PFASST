@@ -218,7 +218,6 @@ list(LENGTH pfasst_DEPENDEND_TARGETS pfasst_NUM_DEPENDEND_TARGETS)
 list(LENGTH pfasst_TESTS_DEPENDEND_TARGETS pfasst_TESTS_NUM_DEPENDEND_TARGETS)
 
 add_subdirectory(include)
-add_subdirectory(src)
 message(STATUS "")
 
 if(pfasst_BUILD_EXAMPLES)

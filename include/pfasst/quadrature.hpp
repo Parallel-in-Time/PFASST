@@ -87,7 +87,7 @@ namespace pfasst
     }
 
     /**
-     * @todo write documentation
+     * Compute weights to interpolate from @p src nodes to @p dst nodes.
      *
      * @tparam precision numerical type of the interpolation (e.g. `double`)
      */

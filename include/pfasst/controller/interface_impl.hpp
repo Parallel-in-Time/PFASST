@@ -109,11 +109,6 @@ namespace pfasst
     this->iteration = iter;
   }
 
-  /**
-   * @internals
-   * The default implementation just increments the current iteration counter.
-   * @endinternals
-   */
   template<typename time>
   void Controller<time>::advance_iteration()
   {

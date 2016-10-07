@@ -98,7 +98,6 @@ namespace pfasst
 
     void MPIStatus::post(int tag)
     {
-      // noop: send/recv for status info is blocking
       UNUSED(tag);
     }
 

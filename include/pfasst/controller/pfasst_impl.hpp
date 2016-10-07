@@ -21,11 +21,6 @@ namespace pfasst
     }
   }
 
-  /**
-   * @internals
-   * @note No consistency checks on validity of given communicator are done.
-   * @endinternals
-   */
   template<typename time>
   void PFASST<time>::set_comm(ICommunicator* comm)
   {
@@ -201,13 +196,6 @@ namespace pfasst
     this->get_finest()->broadcast(this->comm);
   }
 
-  /**
-   * @internals
-   * A simple formula is used with current level index \\( L \\) (provided by @p level_iter) and
-   * current iteration number \\( I \\):
-   * \\[ (L+1) * 10000 + I \\]
-   * @endinternals
-   */
   template<typename time>
   int PFASST<time>::tag(LevelIter level_iter)
   {
@@ -220,10 +208,6 @@ namespace pfasst
     return level_iter.level * 1000 + this->get_iteration();
   }
 
-  /**
-   * @see IStatus::post() for details and implementations of posting current status
-   * @see ISweeper::post() for details and implementations of posting current level
-   */
   template<typename time>
   void PFASST<time>::post()
   {

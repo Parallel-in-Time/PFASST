@@ -11,36 +11,24 @@ namespace pfasst
     Encapsulation<time>::~Encapsulation()
     {}
 
-    /**
-     * @throws NotImplementedYet This function is required by Encapsulation
-     */
     template<typename time>
     void Encapsulation<time>::zero()
     {
       throw NotImplementedYet("encap");
     }
 
-    /**
-     * @throws NotImplementedYet This function is required by Encapsulation
-     */
     template<typename time>
     void Encapsulation<time>::copy(shared_ptr<const Encapsulation<time>>)
     {
       throw NotImplementedYet("encap");
     }
 
-    /**
-     * @throws NotImplementedYet This function is required by Encapsulation
-     */
     template<typename time>
     time Encapsulation<time>::norm0() const
     {
       throw NotImplementedYet("encap");
     }
 
-    /**
-     * @throws NotImplementedYet This function is required by Encapsulation
-     */
     template<typename time>
     void Encapsulation<time>::saxpy(time a, shared_ptr<const Encapsulation<time>> x)
     {
@@ -48,14 +36,6 @@ namespace pfasst
       throw NotImplementedYet("encap");
     }
 
-    /**
-     * @internals
-     * The matrix-vector multiplication is implemented using Encapsulation::saxpy() for all non-zero
-     * entries of @p mat.
-     * @endinternals
-     *
-     * @todo Consider asserting size of matrix matches sizes of vectors.
-     */
     template<typename time>
     void Encapsulation<time>::mat_apply(vector<shared_ptr<Encapsulation<time>>> dst,
                                         time a, Matrix<time> mat,
@@ -85,9 +65,6 @@ namespace pfasst
       UNUSED(comm); UNUSED(tag);
     }
 
-    /**
-     * @throws NotImplementedYet This function is required by PFASST
-     */
     template<typename time>
     void Encapsulation<time>::send(ICommunicator* comm, int tag, bool blocking)
     {
@@ -95,9 +72,6 @@ namespace pfasst
       throw NotImplementedYet("pfasst");
     }
 
-    /**
-     * @throws NotImplementedYet This function is required by PFASST
-     */
     template<typename time>
     void Encapsulation<time>::recv(ICommunicator* comm, int tag, bool blocking)
     {
@@ -105,9 +79,6 @@ namespace pfasst
       throw NotImplementedYet("pfasst");
     }
 
-    /**
-     * @throws NotImplementedYet This function is required by PFASST
-     */
     template<typename time>
     void Encapsulation<time>::broadcast(ICommunicator* comm)
     {

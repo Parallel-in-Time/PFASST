@@ -15,11 +15,6 @@ namespace pfasst
     : runtime_error(msg)
   {}
 
-  /**
-   * @internals
-   * The message string is prepended by the string `Not implemented/supported yet, required for: `
-   * @endinternals
-   */
   const char* NotImplementedYet::what() const throw()
   {
     return (string("Not implemented/supported yet, required for: ") + string(runtime_error::what())).c_str();
@@ -30,11 +25,6 @@ namespace pfasst
     : invalid_argument(msg)
   {}
 
-  /**
-   * @internals
-   * The message string is prepended by the string `ValueError: `
-   * @endinternals
-   */
   const char* ValueError::what() const throw()
   {
     return (string("ValueError: ") + string(invalid_argument::what())).c_str();
@@ -48,13 +38,11 @@ namespace pfasst
   IStatus::~IStatus()
   {}
 
-  //! @todo Consider asserting validity of the given pointer to the communicator.
   void IStatus::set_comm(ICommunicator* comm)
   {
     this->comm = comm;
   }
 
-  //! @todo Consider asserting presence of valid communicator.
   bool IStatus::previous_is_iterating()
   {
     if (this->comm->rank() == 0) {
@@ -63,17 +51,6 @@ namespace pfasst
     return !this->get_converged(this->comm->rank() - 1);
   }
 
-  /**
-   * @internals
-   * Returning logic depends on current process' rank.
-   * In case it is not the master process, both the converged state of this and the previous rank
-   * are checked.
-   *
-   * @see `IStatus::get_converged()`
-   * @endinternals
-   *
-   * @todo Consider asserting presence of valid communicator.
-   */
   bool IStatus::keep_iterating()
   {
     if (this->comm->rank() == 0) {
@@ -96,20 +73,12 @@ namespace pfasst
   ISweeper<time>::~ISweeper()
   {}
 
-  /**
-   * @todo Consider asserting presence of the given pointer to the controller.
-   */
   template<typename time>
   void ISweeper<time>::set_controller(Controller<time>* ctrl)
   {
     this->controller = ctrl;
   }
 
-  /**
-   * @internals
-   * @note Asserts presense of a controller if `NDEBUG` is not defined.
-   * @endinternals
-   */
   template<typename time>
   Controller<time>* ISweeper<time>::get_controller()
   {
@@ -123,18 +92,12 @@ namespace pfasst
     UNUSED(coarse);
   }
 
-  /**
-   * @returns Unless overwritten by implementations, this will always return `false`.
-   */
   template<typename time>
   bool ISweeper<time>::converged()
   {
     return false;
   }
 
-  /**
-   * @throws NotImplementedYet This function is required by MLSDC and PFASST
-   */
   template<typename time>
   void ISweeper<time>::save(bool initial_only)
   {
@@ -142,9 +105,6 @@ namespace pfasst
     throw NotImplementedYet("mlsdc/pfasst");
   }
 
-  /**
-   * @throws NotImplementedYet This function is required by PFASST
-   */
   template<typename time>
   void ISweeper<time>::spread()
   {
@@ -169,9 +129,6 @@ namespace pfasst
     UNUSED(comm); UNUSED(tag);
   }
 
-  /**
-   * @throws NotImplementedYet This function is required by PFASST
-   */
   template<typename time>
   void ISweeper<time>::send(ICommunicator* comm, int tag, bool blocking)
   {
@@ -179,9 +136,6 @@ namespace pfasst
     throw NotImplementedYet("pfasst");
   }
 
-  /**
-   * @throws NotImplementedYet This function is required by PFASST
-   */
   template<typename time>
   void ISweeper<time>::recv(ICommunicator* comm, int tag, bool blocking)
   {
@@ -189,9 +143,6 @@ namespace pfasst
     throw NotImplementedYet("pfasst");
   }
 
-  /**
-   * @throws NotImplementedYet This function is required by PFASST
-   */
   template<typename time>
   void ISweeper<time>::broadcast(ICommunicator* comm)
   {
@@ -204,9 +155,6 @@ namespace pfasst
   ITransfer<time>::~ITransfer()
   {}
 
-  /**
-   * @throws NotImplementedYet This function is required by PFASST
-   */
   template<typename time>
   void ITransfer<time>::interpolate_initial(shared_ptr<ISweeper<time>> dst,
                                             shared_ptr<const ISweeper<time>> src)
@@ -215,9 +163,6 @@ namespace pfasst
     throw NotImplementedYet("pfasst");
   }
 
-  /**
-   * @throws NotImplementedYet This function is required by PFASST
-   */
   template<typename time>
   void ITransfer<time>::restrict_initial(shared_ptr<ISweeper<time>> dst,
                                          shared_ptr<const ISweeper<time>> src)
@@ -225,4 +170,5 @@ namespace pfasst
     UNUSED(dst); UNUSED(src);
     throw NotImplementedYet("pfasst");
   }
+
 }  // ::pfasst
