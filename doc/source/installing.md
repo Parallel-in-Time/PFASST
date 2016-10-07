@@ -1,21 +1,21 @@
 # Building and Installing                                                {#page_building_installing}
 
-## Prerequesites
+PFASST++ is a C++ header only library.  As such, users of the library
+simply need to download the required packages and tell their compiler
+where to find the PFASST++ include directory.
 
-If you use [CMake] to compile, most of the prerequesites are downloaded automatically if they aren't
-already found on your system.
+Developers may want further tools for testing etc.
 
-### Required
+## Required
 
 * A recent C++ compiler that supports (most of) the C++11 standard.  This implies either: GCC 4.7
   (we recommend 4.8 or later) or Clang 3.2 (we recommend 3.3 or later).
 
-* The [Boost] `boost::program_options` library (at least version 1.53.0).  The [Boost]
-  multiprecision component may also be of interest to \em PFASST++ users.
-
 * The [Eigen3] library.
 
-### Optional
+* An MPI implementation (not required for SDC/MLSDC).
+
+## Optional
 
 * The [CMake] build tool (at least version 2.8).  This is especially useful for developers.
 
@@ -23,9 +23,7 @@ already found on your system.
 
 * The [Google Testing] and [Google Mocking] are required for the unit tests.
 
-* An MPI implementation.
-
-### Using [HashDist] to obtain prerequesites
+## Using [HashDist] to obtain prerequesites
 
 The [HashDist] environment management system provides an easy, robust, and version controlled way
 for our developers (and users) to download and install all prerequesites *locally* (ie, you don't
@@ -81,16 +79,11 @@ latest release from [GitHub][github_releases].
        When compiling with _Clang_ this option is obsolete as profiling with _Clang_ is not supported.
 
      * Users on Linux systems with the _Clang_ compiler and a working installation of LLVM's
-       \em libc++ library may want to activate the usage of that by specifying 
+       \em libc++ library may want to activate the usage of that by specifying
        `-Dpfasst_DISABLE_LIBCXX=OFF`.
        As libc++ is highly experimental on non-Darwin systems, this is a very exotic option.
 
    * __Dependencies__
-
-     * __Boost__
-       To specify the root path to the Boost installation to be used, add `-DBOOST_ROOT=<PATH>`.
-       The root path should contain the directory `lib` or `lib64` with the compiled Boost libraries
-       as well as `include/boost` with the Boost header files.
 
      * __GMock__
        In case there is the Google Testing and Mocking framework installed on the system in a
@@ -169,7 +162,6 @@ A sample `Makefile` is included in the `advection_diffusion` example.  This may 
 interested to advanced users wishing to incorporate \em PFASST++ into their existing code bases.
 
 
-[Boost]: https://boost.org/
 [CMake]: http://cmake.org/
 [Eigen3]: http://eigen.tuxfamily.org/
 [Google Testing]: https://code.google.com/p/googletest/
