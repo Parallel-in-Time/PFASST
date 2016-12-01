@@ -18,6 +18,11 @@
 #include <pfasst/encap/imex_sweeper.hpp>
 #include <pfasst/encap/poly_interp.hpp>
 
+/*
+ * C prototypes for heat equation operators etc.
+ * These are taken from ex2 from the XBraid package.
+ */
+
 extern "C" {
   double exact(double t, double x);
   double forcing(double t, double x);
@@ -30,30 +35,29 @@ extern "C" {
                  double * matrix,
                  double * temp);
   void matvec_tridiag(double *x, double *g, int N, double* matrix);
-  void compute_stencil(double   deltaX, double   deltaT, double * matrix);
-
-  void interpolate_1D(const double * cvalues, double * fvalues, int      csize, int      fsize);
-  void coarsen_1D(double * cvalues, const double * fvalues, int      csize, int      fsize);
-
+  void compute_stencil(double deltaX, double deltaT, double * matrix);
+  void interpolate_1D(const double * cvalues, double * fvalues, int csize, int fsize);
+  void coarsen_1D(double * cvalues, const double * fvalues, int csize, int fsize);
 }
 
 using namespace std;
 using pfasst::encap::Encapsulation;
 
+/*
+ * Define the "heat equation sweeper" by extending the ImplicitSweeper in PFASST++.
+ */
 template<typename time = pfasst::time_precision>
 class ImplicitHeatSweeper
   : public pfasst::encap::IMEXSweeper<time>
-//  : public pfasst::encap::ImplicitSweeper<time>
 {
     double xstart = 0.0;
     double xstop = M_PI;
 
   public:
-    // ImplicitHeatSweeper(int nspace)
-    // {
-    //   this->nspace = nspace;
-    // }
 
+    /*
+     * Helper routines.
+     */
     void exact(pfasst::encap::VectorEncapsulation<double>& u, time t)
     {
       auto dx = (this->xstop - this->xstart) / (u.size() - 1.0);
@@ -109,6 +113,9 @@ class ImplicitHeatSweeper
       ML_CLOG(INFO, "User", "step: " << n << " iter: " << k << " res: " << rmax);
     }
 
+    /*
+     * Override the post_sweep hook and echo the error.
+     */
     void post_sweep() override
     {
       time t  = this->get_controller()->get_time();
@@ -117,6 +124,9 @@ class ImplicitHeatSweeper
       //this->echo_residual();
     }
 
+    /*
+     * MANDATORY: Compute u' = f(u).
+     */
     void f_impl_eval(shared_ptr<Encapsulation<time>> f_impl_encap,
                      shared_ptr<Encapsulation<time>> u_encap,
                      time t) override
@@ -126,26 +136,16 @@ class ImplicitHeatSweeper
 
       double dx = (xstop - xstart) / (u.size() - 1.0);
       double dx2 = dx*dx;
-      // double matrix[3];
 
-      // compute_stencil(dx, 1.0, matrix);
-      // matrix[1] -= 1.0;
-      // matvec_tridiag(u.data(), f_impl.data(), f_impl.size(), matrix);
-
+      /* second order finite difference for heat eqn */
       for (int i=1; i<f_impl.size()-1; i++) {
         f_impl[i] = (u[i-1] - 2*u[i] + u[i+1])/dx2 + forcing(t, i*dx);
       }
       f_impl[0] = 0.0; f_impl[f_impl.size()-1] = 0.0;
-
-      // cout << " YAR!!! " << endl;
-      // for (int i=0; i<f_impl.size(); i++) {
-      //   cout << i << " " << u[i] << " " << f_impl[i] << endl;
-      // }
-
     }
 
-    /**
-     * @copybrief pfasst::encap::IMEXSweeper::impl_solve()
+    /*
+     * MANDATORY: Perform a backward-Euler step: u - dt f(y) = rhs.
      */
     void impl_solve(shared_ptr<Encapsulation<time>> f_impl_encap,
                     shared_ptr<Encapsulation<time>> u_encap,
@@ -165,28 +165,18 @@ class ImplicitHeatSweeper
       double matrix[3];
       double temp[u.size()];
 
+      // backward-Euler step
       take_step(u.data(), u.size(), t+dt, 0.0, dx, dt, matrix, temp);
 
+      // compute u' = f(u)
       for (int i=0; i<u.size(); i++) {
         f_impl[i] = (u[i] - rhs[i]) / dt;
       }
-
-      // double dx2 = dx*dx;
-      // for (int i=1; i<f_impl.size()-1; i++) {
-      //   f_impl[i] = (u[i-1] - 2*u[i] + u[i+1])/dx2 + forcing(t, i*dx);
-      // }
-      // f_impl[0] = 0.0; f_impl[f_impl.size()-1] = 0.0;
-      // pfasst::encap::VectorEncapsulation<double> qex(u.size());
-      // this->exact(qex, t+1.5*dt);
-
-      // for (int i=0; i<f_impl.size(); i++) {
-      //   cout << dt << " " << i << " " << u[i] << " " << f_impl[i] << " " << rhs[i] << " " << qex[i] << " " << qex[i]/u[i] << endl;
-      // }
     }
 
     void f_expl_eval(shared_ptr<Encapsulation<time>> f_expl_encap,
                      shared_ptr<Encapsulation<time>> u_encap,
-                     time t) //override
+                     time t)
     {
       UNUSED(u_encap); UNUSED(t);
       auto& f_expl = pfasst::encap::as_vector<double, time>(f_expl_encap);
@@ -198,6 +188,9 @@ class ImplicitHeatSweeper
 };
 
 
+/*
+ * Interpolation and restriction routines.
+ */
 template<typename time = pfasst::time_precision>
 class BilinearTransfer1D
   : public pfasst::encap::PolyInterpMixin<time>
