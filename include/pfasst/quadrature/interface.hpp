@@ -91,7 +91,7 @@ namespace pfasst
         auto den = p.evaluate(from[m]);
         auto P = p.integrate();
         for (size_t j = 0; j < to_size; ++j) {
-          q_mat(j, m) = (P.evaluate(to[j]) - P.evaluate(0.0)) / den;
+          q_mat(j, m) = (P.evaluate(to[j]) - P.evaluate(scalar(0.0))) / den;
         }
       }
 
