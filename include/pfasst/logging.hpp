@@ -321,6 +321,7 @@ namespace pfasst
         to_stdout = pfasst::config::get_value<std::string>("stdout", "true");
       }
 
+      conf->set(el::Level::Debug, el::ConfigurationType::Enabled, "false");
       conf->setGlobally(el::ConfigurationType::ToStandardOutput, to_stdout);
       conf->setGlobally(el::ConfigurationType::Filename, get_log_file_name());
     }

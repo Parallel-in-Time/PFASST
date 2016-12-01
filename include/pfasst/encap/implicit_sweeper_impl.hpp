@@ -111,11 +111,11 @@ namespace pfasst
       auto U = get<1>(lu);
       this->q_tilde = U.transpose();
 
-      ML_CLOG(DEBUG, "Sweeper", "Q':" << endl << QT);
-      ML_CLOG(DEBUG, "Sweeper", "L:" << endl << L);
-      ML_CLOG(DEBUG, "Sweeper", "U:" << endl << U);
-      ML_CLOG(DEBUG, "Sweeper", "LU:" << endl << L * U);
-      ML_CLOG(DEBUG, "Sweeper", "q_tilde:" << endl << this->q_tilde);
+      // ML_CLOG(DEBUG, "Sweeper", "Q':" << endl << QT);
+      // ML_CLOG(DEBUG, "Sweeper", "L:" << endl << L);
+      // ML_CLOG(DEBUG, "Sweeper", "U:" << endl << U);
+      // ML_CLOG(DEBUG, "Sweeper", "LU:" << endl << L * U);
+      // ML_CLOG(DEBUG, "Sweeper", "q_tilde:" << endl << this->q_tilde);
     }
 
     template<typename time>
@@ -126,7 +126,7 @@ namespace pfasst
       auto const dt = this->get_controller()->get_step_size();
       auto const t  = this->get_controller()->get_time();
 
-      ML_CLOG(INFO, "Sweeper", "predicting step " << this->get_controller()->get_step() + 1
+      ML_CLOG(DEBUG, "Sweeper", "predicting step " << this->get_controller()->get_step() + 1
                                << " (t=" << t << ", dt=" << dt << ")");
 
       auto const anodes = augment(t, dt, this->quadrature->get_nodes());
@@ -144,7 +144,7 @@ namespace pfasst
       auto const dt = this->get_controller()->get_step_size();
       auto const t  = this->get_controller()->get_time();
 
-      ML_CLOG(INFO, "Sweeper", "sweeping on step " << this->get_controller()->get_step() + 1
+      ML_CLOG(DEBUG, "Sweeper", "sweeping on step " << this->get_controller()->get_step() + 1
                                << " in iteration " << this->get_controller()->get_iteration()
                                << " (dt=" << dt << ")");
 
