@@ -26,6 +26,7 @@
 #ifndef NDEBUG
   #include <iostream>  // used by pfasst::log::test_logging_levels()
 #endif
+#include <algorithm>
 #include <string>
 using namespace std;
 
@@ -33,8 +34,6 @@ using namespace std;
   #include <sstream>
   #include <mpi.h>
 #endif
-
-#include <boost/algorithm/string.hpp>
 
 #include "pfasst/config.hpp"
 
@@ -383,10 +382,7 @@ namespace pfasst
 
       const size_t id_length = id.size();
       string id2print = id.substr(0, LOGGER_ID_LENGTH);
-      boost::to_upper(id2print);
-      if (initialized) {
-        ML_CLOG(DEBUG, "default", "initializing custom logger '" << id << "' as '" << id2print << "'");
-      }
+      transform(id2print.begin(), id2print.end(), id2print.begin(), ::toupper);
       if (id_length < LOGGER_ID_LENGTH) {
         id2print.append(LOGGER_ID_LENGTH - id_length, ' ');
       }
