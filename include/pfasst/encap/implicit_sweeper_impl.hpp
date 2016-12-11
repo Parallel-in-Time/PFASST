@@ -51,7 +51,6 @@ namespace pfasst
         U.block(0, 1, 1, n-1) = U12;
         L.block(1, 1, n-1, n-1) = get<0>(LU22);
         U.block(1, 1, n-1, n-1) = get<1>(LU22);
-
       }
 
       return lu_pair<scalar>(L, U);
@@ -101,7 +100,7 @@ namespace pfasst
       }
 
       for (size_t m = 0; m < num_nodes; m++) {
-        this->s_integrals.push_back(this->get_factory()->create(pfasst::encap::solution));
+        this->integrals.push_back(this->get_factory()->create(pfasst::encap::solution));
         this->fs_impl.push_back(this->get_factory()->create(pfasst::encap::function));
       }
 
@@ -111,11 +110,11 @@ namespace pfasst
       auto U = get<1>(lu);
       this->q_tilde = U.transpose();
 
-      // ML_CLOG(DEBUG, "Sweeper", "Q':" << endl << QT);
-      // ML_CLOG(DEBUG, "Sweeper", "L:" << endl << L);
-      // ML_CLOG(DEBUG, "Sweeper", "U:" << endl << U);
-      // ML_CLOG(DEBUG, "Sweeper", "LU:" << endl << L * U);
-      // ML_CLOG(DEBUG, "Sweeper", "q_tilde:" << endl << this->q_tilde);
+      ML_CLOG(DEBUG, "Sweeper", "Q^T':" << endl << QT);
+      ML_CLOG(DEBUG, "Sweeper", "L:" << endl << L);
+      ML_CLOG(DEBUG, "Sweeper", "U:" << endl << U);
+      ML_CLOG(DEBUG, "Sweeper", "LU:" << endl << L * U);
+      ML_CLOG(DEBUG, "Sweeper", "q_tilde:" << endl << this->q_tilde);
     }
 
     template<typename time>
@@ -148,16 +147,18 @@ namespace pfasst
                                << " in iteration " << this->get_controller()->get_iteration()
                                << " (dt=" << dt << ")");
 
-      this->s_integrals[0]->mat_apply(this->s_integrals, dt, this->quadrature->get_s_mat(), this->fs_impl, true);
+      this->integrals[0]->mat_apply(this->integrals, dt, this->quadrature->get_s_mat(), this->fs_impl, true);
       if (this->fas_corrections.size() > 0) {
-        for (size_t m = 0; m < this->s_integrals.size(); m++) {
-          this->s_integrals[m]->saxpy(1.0, this->fas_corrections[m]);
+        for (size_t m = 0; m < this->integrals.size(); m++) {
+          for (size_t n = 0; n < m; n++) {
+            this->integrals[m]->saxpy(1.0, this->fas_corrections[n]);
+          }
         }
       }
 
-      for (size_t m = 0; m < this->s_integrals.size(); m++) {
+      for (size_t m = 0; m < this->integrals.size(); m++) {
         for (size_t n = 0; n < m; n++) {
-          this->s_integrals[m]->saxpy(-dt*this->q_tilde(m, n), this->fs_impl[n]);
+          this->integrals[m]->saxpy(-dt*this->q_tilde(m, n), this->fs_impl[n]);
         }
       }
 
@@ -167,7 +168,7 @@ namespace pfasst
       for (size_t m = 0; m < anodes.size() - 1; ++m) {
         auto const ds = anodes[m+1] - anodes[m];
         rhs->copy(m == 0 ? this->get_start_state() : this->state[m-1]);
-        rhs->saxpy(1.0, this->s_integrals[m]);
+        rhs->saxpy(1.0, this->integrals[m]);
         rhs->saxpy(-ds, this->fs_impl[m]);
         for (size_t n = 0; n < m; n++) {
           rhs->saxpy(dt*this->q_tilde(m, n), this->fs_impl[n]);

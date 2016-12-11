@@ -29,7 +29,7 @@ namespace pfasst
         /**
          * Node-to-node integrals of \\( F(t,u) \\) at all time nodes of the current iteration.
          */
-        vector<shared_ptr<Encapsulation<time>>> s_integrals;
+        vector<shared_ptr<Encapsulation<time>>> integrals;
 
         /**
          * Values of the implicit part of the right hand side \\( F_{impl}(t,u) \\) at all time nodes of the current
