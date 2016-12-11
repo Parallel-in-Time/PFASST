@@ -1,7 +1,6 @@
 PFASST   := $(abspath ../..)
-STACK    ?= $(PFASST)/stack
-CXX      := $(STACK)/bin/mpic++
-CXXFLAGS ?= -std=c++11 -g -I$(PFASST)/include -I$(PFASST)/src -I/usr/include/eigen3
+CXX      := mpic++
+CXXFLAGS ?= -std=c++11 -g -I$(PFASST)/include -I/usr/include/eigen3
 LDFLAGS  ?= -lfftw3
 
 all: vanilla_sdc mpi_pfasst serial_mlsdc
