@@ -27,13 +27,14 @@ namespace pfasst
    * @since v0.1.0
    */
   class NotImplementedYet
-    : public runtime_error
+      : public runtime_error
   {
+      string msg;
     public:
       /**
        * @param[in] msg component or algorithm the throwing function is required for.
        */
-      explicit NotImplementedYet(const string& msg);
+      explicit NotImplementedYet(const string& m);
       virtual const char* what() const throw();
   };
 
@@ -48,6 +49,7 @@ namespace pfasst
   class ValueError
     : public invalid_argument
   {
+      string msg;
     public:
       explicit ValueError(const string& msg);
       virtual const char* what() const throw();

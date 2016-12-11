@@ -11,23 +11,27 @@ using namespace std;
 
 namespace pfasst
 {
-  NotImplementedYet::NotImplementedYet(const string& msg)
-    : runtime_error(msg)
-  {}
+  NotImplementedYet::NotImplementedYet(const string& m)
+    : runtime_error(m)
+  {
+    this->msg = string("Not implemented/supported yet, required for: ") + string(runtime_error::what());
+  }
 
   const char* NotImplementedYet::what() const throw()
   {
-    return (string("Not implemented/supported yet, required for: ") + string(runtime_error::what())).c_str();
+    return this->msg.c_str();
   }
 
 
   ValueError::ValueError(const string& msg)
     : invalid_argument(msg)
-  {}
+  {
+    this->msg = string("ValueError: ") + string(invalid_argument::what());
+  }
 
   const char* ValueError::what() const throw()
   {
-    return (string("ValueError: ") + string(invalid_argument::what())).c_str();
+    return this->msg.c_str();
   }
 
 
