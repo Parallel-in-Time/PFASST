@@ -34,8 +34,6 @@ using namespace std;
   #include <mpi.h>
 #endif
 
-#include <boost/algorithm/string.hpp>
-
 #include "pfasst/config.hpp"
 
 
@@ -330,9 +328,8 @@ namespace pfasst
      * Provides convenient way of adding additional named loggers.
      *
      * With this function one can easily create additional named loggers distinctable by the `id`.
-     * The first @ref LOGGER_ID_LENGTH characters of the ID (as uppercase) will be included in
-     * every line of the log.
-     * The ID is used in the actual logging calls.
+     * The first @ref LOGGER_ID_LENGTH characters of the ID will be included in every line of the
+     * log.  The ID is used in the actual logging calls.
      *
      * @code{.cpp}
      * add_custom_logger("MyCustomLogger")
@@ -383,7 +380,6 @@ namespace pfasst
 
       const size_t id_length = id.size();
       string id2print = id.substr(0, LOGGER_ID_LENGTH);
-      boost::to_upper(id2print);
       if (initialized) {
         ML_CLOG(DEBUG, "default", "initializing custom logger '" << id << "' as '" << id2print << "'");
       }
