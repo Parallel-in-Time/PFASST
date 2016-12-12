@@ -40,9 +40,6 @@ packages:
   eigen:
   gtest:
   gmock:
-  boost:
-    toolset: gcc
-    address_model: 64
   cmake:
   blas:
     use: host-blas

@@ -9,9 +9,6 @@
 #  - fftw3/3.3.3
 #  - python3/3.4.2
 #
-# As well make sure you have built boost::program_options according to the instructions from the
-# PFASST++ documentation on JUQUEEN.
-#
 
 message(STATUS "Please make sure you have loaded at least gcc/4.8.1")
 
